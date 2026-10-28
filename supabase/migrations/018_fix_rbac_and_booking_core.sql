@@ -101,6 +101,42 @@ GRANT EXECUTE ON FUNCTION public.is_mentor()         TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.current_mentor_id() TO anon, authenticated;
 
 -- ═══════════════════════════════════════════════════════════════════════════
+-- 1b. Buat migration ini bisa dijalankan ulang
+-- ═══════════════════════════════════════════════════════════════════════════
+
+-- CREATE POLICY tidak punya bentuk IF NOT EXISTS. Tanpa blok ini, menjalankan
+-- migration dua kali gagal dengan "policy already exists" — dan menjalankannya
+-- dua kali itu lumrah: gagal di tengah karena satu hal, diperbaiki, lalu
+-- diulang. Semua policy baru dihapus dulu agar seluruh berkas aman diulang.
+DO $$
+DECLARE
+  p RECORD;
+BEGIN
+  FOR p IN
+    SELECT schemaname, tablename, policyname
+    FROM pg_policies
+    WHERE schemaname = 'public'
+      AND policyname IN (
+        'profiles_select_own', 'profiles_select_staff',
+        'profiles_update_own', 'profiles_update_staff',
+        'mentor_select_public', 'mentor_update_own', 'mentor_all_staff',
+        'slots_select_public', 'slots_all_staff', 'slots_all_own_mentor',
+        'bookings_select_staff', 'bookings_update_staff',
+        'bookings_select_mentor', 'bookings_update_mentor',
+        'bookings_insert_own', 'bookings_insert_staff', 'bookings_update_own',
+        'banners_all_staff', 'merchandise_all_staff', 'merch_orders_all_staff',
+        'merch_orders_insert_own', 'orders_insert_own',
+        'notifications_insert_staff',
+        'availability_select_public', 'availability_all_own_mentor',
+        'availability_all_staff'
+      )
+  LOOP
+    EXECUTE format('DROP POLICY IF EXISTS %I ON %I.%I',
+                   p.policyname, p.schemaname, p.tablename);
+  END LOOP;
+END $$;
+
+-- ═══════════════════════════════════════════════════════════════════════════
 -- 2. Tulis ulang policy profiles — menghapus rekursi
 -- ═══════════════════════════════════════════════════════════════════════════
 
