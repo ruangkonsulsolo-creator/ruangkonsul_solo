@@ -57,7 +57,7 @@ export function LayananConfigForm({ services: initial }: { services: Service[] }
         {services.map((service) => (
           <div
             key={service.id}
-            className={`rounded-2xl border bg-white shadow-card overflow-hidden ${
+            className={`rounded-2xl border bg-white shadow-lift overflow-hidden ${
               !service.is_active ? "opacity-60" : ""
             }`}
           >
@@ -65,13 +65,13 @@ export function LayananConfigForm({ services: initial }: { services: Service[] }
             <div className="flex items-center justify-between px-5 py-4 bg-slate-50 border-b border-slate-100">
               <div>
                 <p className="font-bold text-slate-900">{service.name}</p>
-                <p className="text-xs text-muted-foreground font-mono">{service.slug}</p>
+                <p className="text-xs text-ink-faint font-mono">{service.slug}</p>
               </div>
               <button
                 onClick={() => update(service.id, "is_active", !service.is_active)}
                 className={`flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-bold transition-colors ${
                   service.is_active
-                    ? "bg-brand-50 text-brand border border-brand-200"
+                    ? "bg-paper-raised text-koreksi-deep border border-paper-edge"
                     : "bg-slate-100 text-slate-400 border border-slate-200"
                 }`}
                 aria-label={service.is_active ? "Nonaktifkan layanan" : "Aktifkan layanan"}
@@ -93,7 +93,7 @@ export function LayananConfigForm({ services: initial }: { services: Service[] }
                   onChange={(e) => update(service.id, "price_idr", parseInt(e.target.value) || 0)}
                   min={0}
                 />
-                <p className="text-[10px] text-muted-foreground">
+                <p className="text-[10px] text-ink-faint">
                   = {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(service.price_idr)}
                 </p>
               </div>

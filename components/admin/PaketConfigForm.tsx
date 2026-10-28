@@ -120,15 +120,15 @@ export function PaketConfigForm({
         {services.map((svc) => (
           <div key={svc.id}>
             <div className="flex items-center gap-2 mb-4">
-              <span className="h-0.5 w-6 bg-brand rounded-full" />
-              <h3 className="text-sm font-extrabold uppercase tracking-widest text-brand">{svc.name}</h3>
+              <span className="h-0.5 w-6 bg-ink rounded-full" />
+              <h3 className="text-sm font-extrabold uppercase tracking-widest text-koreksi-deep">{svc.name}</h3>
             </div>
 
             <div className="space-y-3">
               {(byService[svc.id] ?? []).map((pkg) => (
                 <div
                   key={pkg.id}
-                  className={`rounded-2xl border bg-white shadow-card overflow-hidden ${!pkg.is_active ? "opacity-60" : ""}`}
+                  className={`rounded-2xl border bg-white shadow-lift overflow-hidden ${!pkg.is_active ? "opacity-60" : ""}`}
                 >
                   <div className="flex items-center justify-between px-5 py-3 bg-slate-50 border-b border-slate-100">
                     <div className="flex items-center gap-2">
@@ -142,14 +142,14 @@ export function PaketConfigForm({
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => updatePkg(pkg.id, "is_popular", !pkg.is_popular)}
-                        className={`rounded-lg p-1.5 transition-colors ${pkg.is_popular ? "text-brand bg-brand-50" : "text-slate-400 hover:text-brand"}`}
+                        className={`rounded-lg p-1.5 transition-colors ${pkg.is_popular ? "text-koreksi-deep bg-paper-raised" : "text-slate-400 hover:text-koreksi-deep"}`}
                         title="Toggle populer"
                       >
                         <Star className="h-4 w-4" />
                       </button>
                       <button
                         onClick={() => updatePkg(pkg.id, "is_active", !pkg.is_active)}
-                        className={`rounded-lg p-1.5 transition-colors ${pkg.is_active ? "text-brand" : "text-slate-400"}`}
+                        className={`rounded-lg p-1.5 transition-colors ${pkg.is_active ? "text-koreksi-deep" : "text-slate-400"}`}
                         title={pkg.is_active ? "Nonaktifkan" : "Aktifkan"}
                       >
                         {pkg.is_active ? <ToggleRight className="h-4 w-4" /> : <ToggleLeft className="h-4 w-4" />}
@@ -174,7 +174,7 @@ export function PaketConfigForm({
                       <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Harga (Rp)</Label>
                       <Input type="number" value={pkg.price_idr} min={0}
                         onChange={(e) => updatePkg(pkg.id, "price_idr", parseInt(e.target.value) || 0)} />
-                      <p className="text-[10px] text-muted-foreground">{fmt(pkg.price_idr)}</p>
+                      <p className="text-[10px] text-ink-faint">{fmt(pkg.price_idr)}</p>
                     </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Masa Aktif (hari)</Label>
@@ -183,7 +183,7 @@ export function PaketConfigForm({
                     </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Harga / Cek</Label>
-                      <div className="flex h-10 items-center rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-semibold text-brand">
+                      <div className="flex h-10 items-center rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-semibold text-koreksi-deep">
                         {pkg.quota_amount > 0 ? fmt(Math.round(pkg.price_idr / pkg.quota_amount)) : "—"}
                       </div>
                     </div>
@@ -205,8 +205,8 @@ export function PaketConfigForm({
 
         {/* Tambah paket baru */}
         {showAddForm ? (
-          <div className="rounded-2xl border-2 border-dashed border-brand bg-brand-50 p-5 space-y-4">
-            <h3 className="text-sm font-extrabold text-brand">Tambah Paket Baru</h3>
+          <div className="rounded-2xl border-2 border-dashed border-ink bg-paper-raised p-5 space-y-4">
+            <h3 className="text-sm font-extrabold text-koreksi-deep">Tambah Paket Baru</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               <div className="space-y-1">
                 <Label className="text-xs font-semibold">Nama Paket</Label>
@@ -217,7 +217,7 @@ export function PaketConfigForm({
                 <select
                   value={newPkg.service_id}
                   onChange={(e) => setNewPkg({ ...newPkg, service_id: e.target.value })}
-                  className="flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
+                  className="flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-koreksi"
                 >
                   {services.map((s) => (
                     <option key={s.id} value={s.id}>{s.name}</option>

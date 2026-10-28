@@ -1,14 +1,27 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans } from "next/font/google";
+import { Literata, Archivo } from "next/font/google";
 import "./globals.css";
 import { BRAND } from "@/lib/brand";
 
-// Plus Jakarta Sans — mirip font Cekat.ai, modern dan bersih
-const jakarta = Plus_Jakarta_Sans({
+/**
+ * Literata — serif untuk membaca panjang. Judul dan paragraf editorial.
+ * Dipakai lewat variabel CSS, bukan className, supaya Tailwind yang
+ * memutuskan di mana serif muncul dan di mana sans.
+ */
+const literata = Literata({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-jakarta",
-  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-literata",
+  weight: ["400", "500", "600"],
+  style: ["normal", "italic"],
+});
+
+/** Archivo — grotesk untuk semua teks fungsional: nav, tombol, tabel, kalender. */
+const archivo = Archivo({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-archivo",
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -17,12 +30,17 @@ export const metadata: Metadata = {
     template: `%s | ${BRAND.name}`,
   },
   description:
-    "Layanan bimbingan skripsi, tesis, cek plagiasi Turnitin, AI Detector, parafrase, dan jasa akademik terpercaya di Solo.",
+    "Bimbingan skripsi, tesis dan disertasi bersama mentor berpengalaman. " +
+    "Pilih mentor, pesan jadwal, dan kerjakan tulisanmu sendiri dengan arahan " +
+    "yang jelas. Melayani Solo, Jogja, Jakarta dan Bekasi.",
   metadataBase: new URL(`https://${BRAND.domain}`),
   keywords: [
-    "bimbingan skripsi solo", "bimbingan tesis",
-    "cek plagiasi turnitin", "parafrase skripsi",
-    "ruang konsul solo", "konsultasi akademik",
+    "bimbingan skripsi solo",
+    "bimbingan tesis jogja",
+    "mentor skripsi",
+    "konsultasi akademik",
+    "ruang konsul solo",
+    "bimbingan metodologi penelitian",
   ],
   openGraph: {
     title: BRAND.name,
@@ -34,10 +52,14 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="id" className={jakarta.variable}>
-      <body className={`${jakarta.className} antialiased`}>{children}</body>
+    <html lang="id" className={`${literata.variable} ${archivo.variable}`}>
+      <body>{children}</body>
     </html>
   );
 }

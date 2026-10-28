@@ -8,7 +8,7 @@ interface ServicePageShellProps {
   slaHours: number;
   formats: string;
   maxSizeMb: number;
-  colorClass: string;      // e.g. "bg-brand-50 text-brand"
+  colorClass: string;      // e.g. "bg-paper-raised text-koreksi-deep"
   notice?: React.ReactNode;
   children: React.ReactNode;
 }
@@ -33,7 +33,7 @@ export function ServicePageShell({
         </div>
         <div>
           <h2 className="text-2xl font-extrabold text-slate-900">{name}</h2>
-          <p className="text-sm text-muted-foreground mt-0.5 leading-relaxed">{description}</p>
+          <p className="text-sm text-ink-faint mt-0.5 leading-relaxed">{description}</p>
         </div>
       </div>
 
@@ -46,10 +46,10 @@ export function ServicePageShell({
         ].map((s) => {
           const SIcon = s.icon;
           return (
-            <div key={s.label} className="flex flex-col items-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-3 py-3 text-center shadow-card">
-              <SIcon className="h-4 w-4 text-brand" aria-hidden="true" />
+            <div key={s.label} className="flex flex-col items-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-3 py-3 text-center shadow-lift">
+              <SIcon className="h-4 w-4 text-koreksi-deep" aria-hidden="true" />
               <p className="text-sm font-semibold text-slate-800">{s.text}</p>
-              <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{s.label}</p>
+              <p className="text-[10px] font-medium uppercase tracking-wider text-ink-faint">{s.label}</p>
             </div>
           );
         })}

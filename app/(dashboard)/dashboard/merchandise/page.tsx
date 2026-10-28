@@ -25,7 +25,7 @@ export default async function MerchandisePage() {
     <div className="space-y-7 max-w-4xl">
       <div>
         <h2 className="text-xl font-extrabold text-slate-900">Merchandise {BRAND.shortName}</h2>
-        <p className="text-sm text-muted-foreground mt-0.5">Produk resmi Ruang Konsul Solo. Dukung kami sakin keren.</p>
+        <p className="text-sm text-ink-faint mt-0.5">Produk resmi Ruang Konsul Solo. Dukung kami sakin keren.</p>
       </div>
 
       {/* Category filter */}
@@ -49,7 +49,7 @@ export default async function MerchandisePage() {
         {PRODUCTS.map((p) => (
           <Card key={p.id} className="overflow-hidden group flex flex-col">
             {/* Product image placeholder */}
-            <div className="relative aspect-square bg-gradient-to-br from-brand-50 to-slate-100 flex items-center justify-center">
+            <div className="relative aspect-square bg-gradient-to-br from-paper-raised to-slate-100 flex items-center justify-center">
               <ShoppingBag className="h-12 w-12 text-slate-200 group-hover:scale-110 transition-transform" />
               {p.badge && (
                 <div className="absolute top-3 left-3">
@@ -59,16 +59,16 @@ export default async function MerchandisePage() {
             </div>
             {/* Product info */}
             <div className="p-4 flex-1 flex flex-col">
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground mb-1">{p.category}</p>
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-ink-faint mb-1">{p.category}</p>
               <h3 className="text-sm font-bold text-slate-900 mb-1">{p.name}</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed mb-3 line-clamp-2">{p.desc}</p>
+              <p className="text-xs text-ink-faint leading-relaxed mb-3 line-clamp-2">{p.desc}</p>
               <div className="flex items-center gap-1 mb-2 text-xs">
                 <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
                 <span className="font-semibold text-slate-700">{p.rating}</span>
-                <span className="text-muted-foreground">· {p.sold} terjual</span>
+                <span className="text-ink-faint">· {p.sold} terjual</span>
               </div>
               <div className="flex items-end justify-between mt-auto">
-                <span className="text-lg font-extrabold text-[#8B0000]">{formatRupiah(p.price)}</span>
+                <span className="text-lg font-extrabold text-koreksi-deep">{formatRupiah(p.price)}</span>
                 <Button size="sm" variant="outline" className="gap-1.5 px-3">
                   Beli
                 </Button>
@@ -81,25 +81,25 @@ export default async function MerchandisePage() {
       {/* Trust badges */}
       <div className="grid grid-cols-3 gap-4">
         <div className="flex flex-col items-center text-center gap-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50">
-            <Truck className="h-5 w-5 text-[#8B0000]" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-paper-raised">
+            <Truck className="h-5 w-5 text-koreksi-deep" />
           </div>
           <p className="text-xs font-semibold text-slate-700">Gratis Ongkir</p>
-          <p className="text-[10px] text-muted-foreground">Min. belanja Rp 100rb</p>
+          <p className="text-[10px] text-ink-faint">Min. belanja Rp 100rb</p>
         </div>
         <div className="flex flex-col items-center text-center gap-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50">
-            <ShieldCheck className="h-5 w-5 text-[#8B0000]" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-paper-raised">
+            <ShieldCheck className="h-5 w-5 text-koreksi-deep" />
           </div>
           <p className="text-xs font-semibold text-slate-700">Garansi Resmi</p>
-          <p className="text-[10px] text-muted-foreground">Produk asli RK Solo</p>
+          <p className="text-[10px] text-ink-faint">Produk asli RK Solo</p>
         </div>
         <div className="flex flex-col items-center text-center gap-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50">
-            <Star className="h-5 w-5 text-[#8B0000]" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-paper-raised">
+            <Star className="h-5 w-5 text-koreksi-deep" />
           </div>
           <p className="text-xs font-semibold text-slate-700">Rating 4.8</p>
-          <p className="text-[10px] text-muted-foreground">Dari 200+ pembeli</p>
+          <p className="text-[10px] text-ink-faint">Dari 200+ pembeli</p>
         </div>
       </div>
 
@@ -107,7 +107,7 @@ export default async function MerchandisePage() {
       <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-5">
         <div className="flex-1">
           <p className="text-sm font-semibold text-slate-900">Punya ide produk?</p>
-          <p className="text-xs text-muted-foreground mt-0.5">Kirim ide merchandise-mu ke tim kami!</p>
+          <p className="text-xs text-ink-faint mt-0.5">Kirim ide merchandise-mu ke tim kami!</p>
         </div>
         <Button asChild size="sm" variant="outline" className="gap-2 flex-shrink-0">
           <a href={`https://wa.me/${BRAND.whatsapp}?text=Halo,%20aku%20punya%20ide%20merchandise!`} target="_blank" rel="noopener noreferrer">

@@ -20,7 +20,7 @@ export function Toast({ message, type = "info", onClose }: ToastProps) {
       role="alert"
       className={cn(
         "fixed bottom-4 right-4 z-50 flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium shadow-lg",
-        type === "success" && "bg-brand text-white",
+        type === "success" && "bg-ink text-white",
         type === "error" && "bg-red-600 text-white",
         type === "info" && "bg-slate-800 text-white"
       )}

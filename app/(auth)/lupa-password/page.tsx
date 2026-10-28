@@ -39,12 +39,12 @@ export default function LupaPasswordPage() {
           <div className="mx-auto mb-2 text-2xl">📧</div>
           <CardTitle>Email terkirim!</CardTitle>
           <CardDescription>
-            Cek inbox <span className="font-medium text-foreground">{email}</span> untuk
+            Cek inbox <span className="font-medium text-ink">{email}</span> untuk
             link reset password.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Link href="/login" className="text-sm text-brand hover:underline">
+          <Link href="/login" className="text-sm text-koreksi-deep hover:underline">
             Kembali ke login
           </Link>
         </CardContent>
@@ -79,7 +79,7 @@ export default function LupaPasswordPage() {
               {loading ? "Mengirim..." : "Kirim Link Reset"}
             </Button>
             <div className="text-center">
-              <Link href="/login" className="text-sm text-muted-foreground hover:underline">
+              <Link href="/login" className="text-sm text-ink-faint hover:underline">
                 Kembali ke login
               </Link>
             </div>

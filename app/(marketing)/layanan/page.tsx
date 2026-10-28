@@ -11,10 +11,10 @@ export const metadata: Metadata = {
 };
 
 const layanan = [
-  { icon: FileSearch, name: "Cek Plagiasi", tagline: "Laporan Turnitin", desc: `${BRAND.name} hadir untuk mendukung setiap kebutuhan akademikmu. Dokumen diproses menggunakan tools yang sama dengan yang digunakan institusi pendidikan.`, harga: "Rp 35.000", satuan: "per file", sla: "24 jam", format: "PDF, DOCX, DOC", maxSize: "50 MB", href: "/cek-plagiasi", fitur: ["Laporan persentase kemiripan lengkap","Highlight sumber yang mirip","No repository — tidak masuk database","Akses laporan 24 jam via dashboard"], color: "bg-brand-50", iconColor: "text-[#8B0000]", accent: "border-[#8B0000]" },
-  { icon: Bot, name: "AI Detector", tagline: "GPT Zero Detector", desc: "Identifikasi seberapa besar proporsi teks dalam dokumenmu yang terdeteksi ditulis oleh AI. Laporan mencakup skor per paragraf.", harga: "Rp 25.000", satuan: "per file", sla: "12 jam", format: "PDF, DOCX, DOC", maxSize: "50 MB", href: "/cek-ai", fitur: ["Skor AI per paragraf","Overall AI percentage score","Rekomendasi bagian yang perlu direvisi","Laporan PDF terstruktur"], color: "bg-brand-50", iconColor: "text-[#8B0000]", accent: "border-[#8B0000]" },
-  { icon: BookOpenCheck, name: "Cek DrillBit", tagline: "Plagiasi + AI", desc: "DrillBit adalah platform deteksi plagiasi yang digunakan banyak universitas di Indonesia. Dapatkan laporan DrillBit resmi.", harga: "Rp 45.000", satuan: "per file", sla: "48 jam", format: "PDF, DOCX", maxSize: "20 MB", href: "/cek-drillbit", fitur: ["Laporan DrillBit resmi","Diakui oleh kampus-kampus Indonesia","Skor plagiasi + deteksi AI sekaligus","Certificate of originality tersedia"], color: "bg-brand-50", iconColor: "text-[#8B0000]", accent: "border-[#8B0000]" },
-  { icon: PenLine, name: "Jasa Parafrase", tagline: "Turunkan Plagiasi", desc: `Tim penulis profesional ${BRAND.name} akan memparafrase dokumenmu sehingga persentase kemiripan turun secara signifikan.`, harga: "Rp 75.000", satuan: "mulai / halaman", sla: "72 jam", format: "PDF, DOCX, DOC", maxSize: "50 MB", href: "/jasa-parafrase", fitur: ["Dikerjakan oleh tim penulis berpengalaman","Tidak mengubah substansi tulisan","Dapat menurunkan plagiasi hingga 80%","Revisi 1× gratis jika hasil tidak sesuai"], color: "bg-brand-50", iconColor: "text-[#8B0000]", accent: "border-[#8B0000]" },
+  { icon: FileSearch, name: "Cek Plagiasi", tagline: "Laporan Turnitin", desc: `${BRAND.name} hadir untuk mendukung setiap kebutuhan akademikmu. Dokumen diproses menggunakan tools yang sama dengan yang digunakan institusi pendidikan.`, harga: "Rp 35.000", satuan: "per file", sla: "24 jam", format: "PDF, DOCX, DOC", maxSize: "50 MB", href: "/cek-plagiasi", fitur: ["Laporan persentase kemiripan lengkap","Highlight sumber yang mirip","No repository — tidak masuk database","Akses laporan 24 jam via dashboard"], color: "bg-paper-raised", iconColor: "text-koreksi-deep", accent: "border-ink" },
+  { icon: Bot, name: "AI Detector", tagline: "GPT Zero Detector", desc: "Identifikasi seberapa besar proporsi teks dalam dokumenmu yang terdeteksi ditulis oleh AI. Laporan mencakup skor per paragraf.", harga: "Rp 25.000", satuan: "per file", sla: "12 jam", format: "PDF, DOCX, DOC", maxSize: "50 MB", href: "/cek-ai", fitur: ["Skor AI per paragraf","Overall AI percentage score","Rekomendasi bagian yang perlu direvisi","Laporan PDF terstruktur"], color: "bg-paper-raised", iconColor: "text-koreksi-deep", accent: "border-ink" },
+  { icon: BookOpenCheck, name: "Cek DrillBit", tagline: "Plagiasi + AI", desc: "DrillBit adalah platform deteksi plagiasi yang digunakan banyak universitas di Indonesia. Dapatkan laporan DrillBit resmi.", harga: "Rp 45.000", satuan: "per file", sla: "48 jam", format: "PDF, DOCX", maxSize: "20 MB", href: "/cek-drillbit", fitur: ["Laporan DrillBit resmi","Diakui oleh kampus-kampus Indonesia","Skor plagiasi + deteksi AI sekaligus","Certificate of originality tersedia"], color: "bg-paper-raised", iconColor: "text-koreksi-deep", accent: "border-ink" },
+  { icon: PenLine, name: "Jasa Parafrase", tagline: "Turunkan Plagiasi", desc: `Tim penulis profesional ${BRAND.name} akan memparafrase dokumenmu sehingga persentase kemiripan turun secara signifikan.`, harga: "Rp 75.000", satuan: "mulai / halaman", sla: "72 jam", format: "PDF, DOCX, DOC", maxSize: "50 MB", href: "/jasa-parafrase", fitur: ["Dikerjakan oleh tim penulis berpengalaman","Tidak mengubah substansi tulisan","Dapat menurunkan plagiasi hingga 80%","Revisi 1× gratis jika hasil tidak sesuai"], color: "bg-paper-raised", iconColor: "text-koreksi-deep", accent: "border-ink" },
 ];
 
 export default function LayananPage() {
@@ -24,13 +24,13 @@ export default function LayananPage() {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <Link href="/" className="flex items-center gap-2">
             <Image src={BRAND.logoPng} alt={BRAND.name} width={28} height={28} unoptimized className="object-contain" />
-            <span className="text-lg font-extrabold text-[#8B0000]">{BRAND.shortName}</span>
+            <span className="text-lg font-extrabold text-koreksi-deep">{BRAND.shortName}</span>
           </Link>
           <div className="hidden sm:flex items-center gap-5 text-sm font-medium text-slate-600">
-            <Link href="/layanan" className="text-[#8B0000] font-semibold">Layanan</Link>
-            <Link href="/paket-hemat" className="hover:text-[#8B0000] transition-colors">Paket Hemat</Link>
-            <Link href="/bimbingan" className="hover:text-[#8B0000] transition-colors">Bimbingan</Link>
-            <Link href="/blog" className="hover:text-[#8B0000] transition-colors">Blog</Link>
+            <Link href="/layanan" className="text-koreksi-deep font-semibold">Layanan</Link>
+            <Link href="/paket-hemat" className="hover:text-koreksi-deep transition-colors">Paket Hemat</Link>
+            <Link href="/bimbingan" className="hover:text-koreksi-deep transition-colors">Bimbingan</Link>
+            <Link href="/blog" className="hover:text-koreksi-deep transition-colors">Blog</Link>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" asChild><Link href="/daftar">Daftar</Link></Button>
@@ -42,8 +42,8 @@ export default function LayananPage() {
       <section className="hero-gradient px-4 py-16">
         <div className="mx-auto max-w-4xl">
           <div className="flex items-center gap-2 mb-4">
-            <span className="h-0.5 w-8 bg-[#8B0000] rounded-full" />
-            <span className="text-xs font-bold uppercase tracking-widest text-[#8B0000]">Layanan</span>
+            <span className="h-0.5 w-8 bg-ink rounded-full" />
+            <span className="text-xs font-bold uppercase tracking-widest text-koreksi-deep">Layanan</span>
           </div>
           <h1 className="text-3xl lg:text-4xl font-extrabold text-slate-900 mb-3">
             Layanan Cek Turnitin, Cek AI,<br className="hidden sm:block" /> Drillbit, dan Parafrase
@@ -59,18 +59,18 @@ export default function LayananPage() {
           {layanan.map((l) => {
             const Icon = l.icon;
             return (
-              <Link key={l.name} href={l.href} className="group flex flex-col gap-4 rounded-2xl border-2 border-brand-100 bg-brand-50 p-6 card-hover">
+              <Link key={l.name} href={l.href} className="group flex flex-col gap-4 rounded-2xl border-2 border-paper-edge bg-paper-raised p-6 card-hover">
                 <div className="flex items-start gap-4">
                   <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-white shadow-sm">
-                    <Icon className="h-5 w-5 text-[#8B0000]" />
+                    <Icon className="h-5 w-5 text-koreksi-deep" />
                   </div>
                   <div>
                     <h3 className="font-extrabold text-slate-900">{l.name}</h3>
                     <p className="text-xs text-slate-400">{l.tagline}</p>
                   </div>
                 </div>
-                <p className="text-sm font-bold text-[#8B0000]">{l.harga} <span className="text-xs font-normal text-slate-400">/ file</span></p>
-                <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#8B0000] group-hover:gap-2.5 transition-all">
+                <p className="text-sm font-bold text-koreksi-deep">{l.harga} <span className="text-xs font-normal text-slate-400">/ file</span></p>
+                <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-koreksi-deep group-hover:gap-2.5 transition-all">
                   Klik di sini <ArrowRight className="h-4 w-4" />
                 </span>
               </Link>
@@ -83,12 +83,12 @@ export default function LayananPage() {
         {layanan.map((l, i) => {
           const Icon = l.icon;
           return (
-            <div key={l.name} className={`mx-auto max-w-4xl rounded-3xl border border-slate-200 overflow-hidden shadow-card ${i % 2 === 1 ? "bg-slate-50" : "bg-white"}`}>
+            <div key={l.name} className={`mx-auto max-w-4xl rounded-3xl border border-slate-200 overflow-hidden shadow-lift ${i % 2 === 1 ? "bg-slate-50" : "bg-white"}`}>
               <div className="p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                 <div>
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-50">
-                      <Icon className="h-6 w-6 text-[#8B0000]" />
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-paper-raised">
+                      <Icon className="h-6 w-6 text-koreksi-deep" />
                     </div>
                     <div>
                       <h2 className="text-xl font-extrabold text-slate-900">{l.name}</h2>
@@ -104,10 +104,10 @@ export default function LayananPage() {
                     ].map((s) => {
                       const SIcon = s.icon;
                       return (
-                        <div key={s.label} className="rounded-xl border border-slate-200 bg-white p-3 text-center shadow-card">
-                          <SIcon className="h-4 w-4 text-[#8B0000] mx-auto mb-1" />
+                        <div key={s.label} className="rounded-xl border border-slate-200 bg-white p-3 text-center shadow-lift">
+                          <SIcon className="h-4 w-4 text-koreksi-deep mx-auto mb-1" />
                           <p className="text-xs font-semibold text-slate-700">{s.val}</p>
-                          <p className="text-[10px] text-muted-foreground">{s.label}</p>
+                          <p className="text-[10px] text-ink-faint">{s.label}</p>
                         </div>
                       );
                     })}
@@ -115,20 +115,20 @@ export default function LayananPage() {
                   <Button asChild className="gap-2"><Link href={l.href}>Mulai {l.name} <ArrowRight className="h-4 w-4" /></Link></Button>
                 </div>
                 <div className="space-y-4">
-                  <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
-                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">Yang kamu dapatkan</p>
+                  <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-lift">
+                    <p className="text-xs font-bold uppercase tracking-wider text-ink-faint mb-3">Yang kamu dapatkan</p>
                     <ul className="space-y-2.5">
                       {l.fitur.map((f) => (
                         <li key={f} className="flex items-start gap-2.5 text-sm">
-                          <CheckCircle2 className="h-4 w-4 flex-shrink-0 mt-0.5 text-[#8B0000]" />
+                          <CheckCircle2 className="h-4 w-4 flex-shrink-0 mt-0.5 text-koreksi-deep" />
                           <span className="text-slate-700">{f}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
-                  <div className="rounded-2xl bg-brand-50 border border-brand-100 p-5">
-                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">Harga</p>
-                    <p className="text-3xl font-extrabold text-[#8B0000]">{l.harga}</p>
+                  <div className="rounded-2xl bg-paper-raised border border-paper-edge p-5">
+                    <p className="text-xs font-bold uppercase tracking-wider text-ink-faint mb-1">Harga</p>
+                    <p className="text-3xl font-extrabold text-koreksi-deep">{l.harga}</p>
                     <p className="text-xs text-slate-400">{l.satuan}</p>
                   </div>
                 </div>

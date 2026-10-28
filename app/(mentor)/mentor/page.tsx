@@ -62,7 +62,7 @@ export default async function MentorDashboardPage() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-2xl font-extrabold text-slate-900">Halo, {nama}! 👋</h2>
-          <p className="text-sm text-muted-foreground mt-0.5">Dashboard Mentor — {BRAND.name}</p>
+          <p className="text-sm text-ink-faint mt-0.5">Dashboard Mentor — {BRAND.name}</p>
         </div>
         <div className={`flex items-center gap-2 rounded-2xl px-4 py-2 border ${isAvailable ? "bg-green-50 border-green-200" : "bg-slate-50 border-slate-200"}`}>
           <div className={`h-2 w-2 rounded-full ${isAvailable ? "bg-green-500" : "bg-slate-400"}`} />
@@ -74,12 +74,12 @@ export default async function MentorDashboardPage() {
         {statCards.map((s) => {
           const Icon = s.icon;
           return (
-            <div key={s.label} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-50 mb-3">
-                <Icon className="h-5 w-5 text-[#8B0000]" />
+            <div key={s.label} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-lift">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-paper-raised mb-3">
+                <Icon className="h-5 w-5 text-koreksi-deep" />
               </div>
               <p className="text-2xl font-extrabold text-slate-900">{s.value}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{s.label}</p>
+              <p className="text-xs text-ink-faint mt-0.5">{s.label}</p>
             </div>
           );
         })}
@@ -87,28 +87,28 @@ export default async function MentorDashboardPage() {
 
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Jadwal Hari Ini</h3>
-          <Link href="/mentor/jadwal" className="text-xs font-semibold text-[#8B0000] hover:underline flex items-center gap-1">
+          <h3 className="text-xs font-bold uppercase tracking-widest text-ink-faint">Jadwal Hari Ini</h3>
+          <Link href="/mentor/jadwal" className="text-xs font-semibold text-koreksi-deep hover:underline flex items-center gap-1">
             Kelola Jadwal <ArrowRight className="h-3 w-3" />
           </Link>
         </div>
         {todayBookings.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-slate-200 bg-white py-10 text-center">
             <CalendarDays className="h-8 w-8 text-slate-200 mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground">Tidak ada sesi hari ini</p>
-            <Link href="/mentor/jadwal" className="mt-2 inline-block text-xs text-[#8B0000] hover:underline">Atur slot tersedia →</Link>
+            <p className="text-sm text-ink-faint">Tidak ada sesi hari ini</p>
+            <Link href="/mentor/jadwal" className="mt-2 inline-block text-xs text-koreksi-deep hover:underline">Atur slot tersedia →</Link>
           </div>
         ) : (
-          <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-card">
+          <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-lift">
             <div className="divide-y divide-slate-100">
               {todayBookings.map((b: any) => (
                 <div key={b.id} className="flex items-center gap-4 px-5 py-4">
-                  <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-brand-50">
-                    <span className="text-xs font-bold text-[#8B0000]">{b.slot_start ?? "--"}</span>
+                  <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-paper-raised">
+                    <span className="text-xs font-bold text-koreksi-deep">{b.slot_start ?? "--"}</span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-slate-900">{b.customer}</p>
-                    <p className="text-xs text-muted-foreground">{b.slot_start} – {b.slot_end} WIB</p>
+                    <p className="text-xs text-ink-faint">{b.slot_start} – {b.slot_end} WIB</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge variant={b.status === "confirmed" ? "success" : "warning"}>
@@ -116,7 +116,7 @@ export default async function MentorDashboardPage() {
                     </Badge>
                     {b.whatsapp && (
                       <a href={`https://wa.me/${b.whatsapp}`} target="_blank" rel="noopener noreferrer"
-                        className="text-xs text-[#8B0000] hover:underline">Chat</a>
+                        className="text-xs text-koreksi-deep hover:underline">Chat</a>
                     )}
                   </div>
                 </div>
@@ -128,18 +128,18 @@ export default async function MentorDashboardPage() {
 
       {upcomingBookings.length > 0 && (
         <div>
-          <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">Upcoming</h3>
-          <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-card">
+          <h3 className="text-xs font-bold uppercase tracking-widest text-ink-faint mb-4">Upcoming</h3>
+          <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-lift">
             <div className="divide-y divide-slate-100">
               {upcomingBookings.map((b: any) => (
                 <div key={b.id} className="flex items-center gap-4 px-5 py-3.5 hover:bg-slate-50 transition-colors">
                   <div className="text-center flex-shrink-0 w-20">
-                    <p className="text-xs font-bold text-[#8B0000]">{b.date.split(",")[0]}</p>
+                    <p className="text-xs font-bold text-koreksi-deep">{b.date.split(",")[0]}</p>
                     <p className="text-xs text-slate-500">{b.time} WIB</p>
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-slate-900">{b.customer}</p>
-                    {b.topic && <p className="text-xs text-muted-foreground">{b.topic}</p>}
+                    {b.topic && <p className="text-xs text-ink-faint">{b.topic}</p>}
                   </div>
                   <Badge variant={b.status === "confirmed" ? "success" : "warning"} className="flex-shrink-0">
                     {b.status === "confirmed" ? "Terkonfirmasi" : "Menunggu"}

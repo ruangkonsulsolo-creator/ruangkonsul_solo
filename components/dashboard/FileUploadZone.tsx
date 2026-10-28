@@ -89,17 +89,17 @@ export function FileUploadZone({
 
   if (uploadedFile) {
     return (
-      <div className="flex items-center gap-3 rounded-2xl border border-brand-200 bg-brand-50 px-4 py-3.5">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-100 flex-shrink-0">
-          <CheckCircle2 className="h-5 w-5 text-brand" aria-hidden="true" />
+      <div className="flex items-center gap-3 rounded-2xl border border-paper-edge bg-paper-raised px-4 py-3.5">
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-paper-sunken flex-shrink-0">
+          <CheckCircle2 className="h-5 w-5 text-koreksi-deep" aria-hidden="true" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-brand-dark truncate">{uploadedFile.original_name}</p>
-          <p className="text-xs text-brand">{formatBytes(uploadedFile.file_size_bytes)} · Berhasil diupload</p>
+          <p className="text-sm font-semibold text-ink truncate">{uploadedFile.original_name}</p>
+          <p className="text-xs text-koreksi-deep">{formatBytes(uploadedFile.file_size_bytes)} · Berhasil diupload</p>
         </div>
         <button
           onClick={() => { setUploadedFile(null); setError(null); setProgress(0); }}
-          className="flex h-7 w-7 items-center justify-center rounded-lg text-brand hover:bg-brand-100 transition-colors"
+          className="flex h-7 w-7 items-center justify-center rounded-lg text-koreksi-deep hover:bg-paper-sunken transition-colors"
           aria-label="Ganti file"
         >
           <X className="h-4 w-4" />
@@ -118,37 +118,37 @@ export function FileUploadZone({
         className={cn(
           "flex flex-col items-center justify-center rounded-2xl border-2 border-dashed px-6 py-12 text-center cursor-pointer transition-all",
           isDragging
-            ? "border-brand bg-brand-50 scale-[1.01]"
-            : "border-slate-200 hover:border-brand hover:bg-brand-50/50",
+            ? "border-ink bg-paper-raised scale-[1.01]"
+            : "border-slate-200 hover:border-ink hover:bg-paper-raised/50",
           (disabled || uploading) && "cursor-not-allowed opacity-50 pointer-events-none"
         )}
       >
         {uploading ? (
           <div className="w-full max-w-xs space-y-4">
-            <div className="flex h-14 w-14 mx-auto items-center justify-center rounded-2xl bg-brand-50">
-              <File className="h-7 w-7 text-brand animate-pulse" aria-hidden="true" />
+            <div className="flex h-14 w-14 mx-auto items-center justify-center rounded-2xl bg-paper-raised">
+              <File className="h-7 w-7 text-koreksi-deep animate-pulse" aria-hidden="true" />
             </div>
             <p className="text-sm font-semibold text-slate-700">Mengunggah dokumen...</p>
             <div className="w-full rounded-full bg-slate-200 h-2 overflow-hidden">
               <div
-                className="h-2 rounded-full bg-brand transition-all duration-300"
+                className="h-2 rounded-full bg-ink transition-all duration-300"
                 style={{ width: `${progress}%` }}
               />
             </div>
-            <p className="text-xs text-muted-foreground">{progress}%</p>
+            <p className="text-xs text-ink-faint">{progress}%</p>
           </div>
         ) : (
           <>
             <div className={cn(
               "mb-4 flex h-14 w-14 items-center justify-center rounded-2xl transition-colors",
-              isDragging ? "bg-brand text-white" : "bg-slate-100 text-slate-400"
+              isDragging ? "bg-ink text-white" : "bg-slate-100 text-slate-400"
             )}>
               <Upload className="h-6 w-6" aria-hidden="true" />
             </div>
             <p className="text-sm font-semibold text-slate-700 mb-1">
               {isDragging ? "Lepaskan file di sini" : "Seret & lepas file, atau klik untuk memilih"}
             </p>
-            <p className="text-xs text-muted-foreground">PDF, DOCX, DOC · Maks. {maxSizeMb} MB</p>
+            <p className="text-xs text-ink-faint">PDF, DOCX, DOC · Maks. {maxSizeMb} MB</p>
           </>
         )}
 

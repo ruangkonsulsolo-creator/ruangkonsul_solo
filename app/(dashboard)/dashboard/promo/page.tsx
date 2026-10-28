@@ -39,14 +39,14 @@ export default async function PromoPage() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-xl font-extrabold text-slate-900">Promo & Bonus</h2>
-          <p className="text-sm text-muted-foreground mt-0.5">Penawaran eksklusif untuk member {BRAND.shortName}.</p>
+          <p className="text-sm text-ink-faint mt-0.5">Penawaran eksklusif untuk member {BRAND.shortName}.</p>
         </div>
         {credits > 0 && (
-          <div className="flex items-center gap-2 rounded-2xl border border-brand-200 bg-brand-50 px-4 py-2">
-            <Gift className="h-4 w-4 text-[#8B0000]" />
+          <div className="flex items-center gap-2 rounded-2xl border border-paper-edge bg-paper-raised px-4 py-2">
+            <Gift className="h-4 w-4 text-koreksi-deep" />
             <div>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Kredit Referral</p>
-              <p className="text-sm font-bold text-[#8B0000]">{formatRupiah(credits)}</p>
+              <p className="text-[10px] text-ink-faint uppercase tracking-wide">Kredit Referral</p>
+              <p className="text-sm font-bold text-koreksi-deep">{formatRupiah(credits)}</p>
             </div>
           </div>
         )}
@@ -72,12 +72,12 @@ export default async function PromoPage() {
             </div>
             <div className="p-4 space-y-2">
               <h3 className="font-bold text-slate-900">{p.title}</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">{p.desc}</p>
+              <p className="text-xs text-ink-faint leading-relaxed">{p.desc}</p>
               <div className="flex items-end gap-2 pt-1">
                 {p.oldPrice > 0 && (
-                  <span className="text-xs text-muted-foreground line-through">{formatRupiah(p.oldPrice)}</span>
+                  <span className="text-xs text-ink-faint line-through">{formatRupiah(p.oldPrice)}</span>
                 )}
-                <span className="text-lg font-extrabold text-[#8B0000]">
+                <span className="text-lg font-extrabold text-koreksi-deep">
                   {p.price === 0 ? "Gratis" : formatRupiah(p.price)}
                 </span>
               </div>
@@ -92,15 +92,15 @@ export default async function PromoPage() {
       </div>
 
       {/* Bonus section */}
-      <div className="rounded-2xl border border-brand-200 bg-brand-50 p-5">
+      <div className="rounded-2xl border border-paper-edge bg-paper-raised p-5">
         <div className="flex items-start gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white flex-shrink-0">
-            <Sparkles className="h-5 w-5 text-[#8B0000]" />
+            <Sparkles className="h-5 w-5 text-koreksi-deep" />
           </div>
           <div className="flex-1">
             <h3 className="font-bold text-slate-900">Bonus Referral</h3>
-            <p className="text-sm text-muted-foreground mt-1">
-              Ajak teman daftar dengan kode referral-mu. Kamu dapat <strong className="text-[#8B0000]">{formatRupiah(10000)}</strong> kredit
+            <p className="text-sm text-ink-faint mt-1">
+              Ajak teman daftar dengan kode referral-mu. Kamu dapat <strong className="text-koreksi-deep">{formatRupiah(10000)}</strong> kredit
               untuk setiap teman yang membuat pesanan pertama.
             </p>
             <Button asChild variant="outline" size="sm" className="mt-3 gap-2">

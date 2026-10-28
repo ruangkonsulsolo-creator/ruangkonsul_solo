@@ -30,25 +30,25 @@ function fmt(n: number) {
 
 function PaketCard({ name, sub, harga, perCek, quota, hari, popular }: typeof paketPlagiasi[0]) {
   return (
-    <div className={`relative flex flex-col rounded-3xl border p-6 transition-shadow hover:shadow-card-hover ${popular ? "border-[#8B0000] bg-[#8B0000] text-white shadow-brand" : "border-slate-200 bg-white"}`}>
+    <div className={`relative flex flex-col rounded-3xl border p-6 transition-shadow hover:shadow-lift ${popular ? "border-ink bg-ink text-white shadow-lift" : "border-slate-200 bg-white"}`}>
       {popular && (
-        <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-white px-4 py-1 text-[11px] font-bold text-[#8B0000] shadow-sm border border-brand-200">
+        <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-white px-4 py-1 text-[11px] font-bold text-koreksi-deep shadow-sm border border-paper-edge">
           ⭐ Terpopuler
         </span>
       )}
       <h3 className={`font-bold text-lg mb-0.5 ${popular ? "text-white" : "text-slate-900"}`}>{name}</h3>
       <p className={`text-xs mb-4 ${popular ? "text-white/70" : "text-slate-400"}`}>{sub}</p>
       <p className={`text-4xl font-extrabold mb-1 ${popular ? "text-white" : "text-slate-900"}`}>{fmt(harga)}</p>
-      <p className={`text-xs mb-5 ${popular ? "text-white/70" : "text-muted-foreground"}`}>{fmt(perCek)} / cek</p>
+      <p className={`text-xs mb-5 ${popular ? "text-white/70" : "text-ink-faint"}`}>{fmt(perCek)} / cek</p>
       <ul className="space-y-2 mb-6">
         {[`${quota}x cek tersedia`, `Masa aktif ${hari} hari`, ...fiturPaket].map((f) => (
           <li key={f} className="flex items-center gap-2 text-sm">
-            <CheckCircle2 className={`h-4 w-4 flex-shrink-0 ${popular ? "text-white/80" : "text-[#8B0000]"}`} />
+            <CheckCircle2 className={`h-4 w-4 flex-shrink-0 ${popular ? "text-white/80" : "text-koreksi-deep"}`} />
             <span className={popular ? "text-white/90" : "text-slate-600"}>{f}</span>
           </li>
         ))}
       </ul>
-      <Link href="/daftar" className={`flex w-full items-center justify-center rounded-2xl py-3 text-sm font-bold transition-all ${popular ? "bg-white text-[#8B0000] hover:bg-brand-50" : "bg-[#8B0000] text-white hover:bg-brand-light shadow-brand-sm"}`}>
+      <Link href="/daftar" className={`flex w-full items-center justify-center rounded-2xl py-3 text-sm font-bold transition-all ${popular ? "bg-white text-koreksi-deep hover:bg-paper-raised" : "bg-ink text-white hover:bg-koreksi shadow-lift"}`}>
         Beli sekarang
       </Link>
     </div>
@@ -62,7 +62,7 @@ export default function PaketHematPage() {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <Link href="/" className="flex items-center gap-2">
             <Image src={BRAND.logoPng} alt={BRAND.name} width={28} height={28} unoptimized className="object-contain" />
-            <span className="text-lg font-extrabold text-[#8B0000]">{BRAND.shortName}</span>
+            <span className="text-lg font-extrabold text-koreksi-deep">{BRAND.shortName}</span>
           </Link>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" asChild><Link href="/daftar">Daftar</Link></Button>
@@ -75,7 +75,7 @@ export default function PaketHematPage() {
         <div className="mx-auto max-w-2xl">
           <Badge variant="secondary" className="mb-4">💰 Hemat hingga 37% dibanding harga satuan</Badge>
           <h1 className="text-4xl font-extrabold text-slate-900 mb-3">
-            Paket Hemat <span className="text-[#8B0000]">{BRAND.name}</span>
+            Paket Hemat <span className="text-koreksi-deep">{BRAND.name}</span>
           </h1>
           <p className="text-slate-500 text-lg">Beli lebih banyak, bayar lebih murah. Pilih paket yang sesuai kebutuhanmu.</p>
           <div className="mt-8 flex flex-wrap justify-center gap-6 text-sm text-slate-500">
@@ -85,7 +85,7 @@ export default function PaketHematPage() {
               { icon: Clock,  text: "Notifikasi WhatsApp otomatis" },
             ].map((b) => (
               <span key={b.text} className="flex items-center gap-1.5">
-                <b.icon className="h-4 w-4 text-[#8B0000]" />
+                <b.icon className="h-4 w-4 text-koreksi-deep" />
                 {b.text}
               </span>
             ))}
@@ -95,8 +95,8 @@ export default function PaketHematPage() {
 
       <section className="mx-auto max-w-5xl px-4 py-16">
         <div className="flex items-center gap-2 mb-4">
-          <span className="h-0.5 w-8 bg-[#8B0000] rounded-full" />
-          <p className="text-xs font-bold uppercase tracking-widest text-[#8B0000]">Cek Plagiasi</p>
+          <span className="h-0.5 w-8 bg-ink rounded-full" />
+          <p className="text-xs font-bold uppercase tracking-widest text-koreksi-deep">Cek Plagiasi</p>
         </div>
         <h2 className="text-2xl font-extrabold text-slate-900 mb-2">Paket Cek Plagiasi</h2>
         <p className="text-slate-500 mb-8">Laporan Turnitin lengkap dengan persentase kemiripan.</p>
@@ -108,8 +108,8 @@ export default function PaketHematPage() {
       <section className="bg-slate-50 px-4 py-16">
         <div className="mx-auto max-w-4xl">
           <div className="flex items-center gap-2 mb-4">
-            <span className="h-0.5 w-8 bg-[#8B0000] rounded-full" />
-            <p className="text-xs font-bold uppercase tracking-widest text-[#8B0000]">AI Detector</p>
+            <span className="h-0.5 w-8 bg-ink rounded-full" />
+            <p className="text-xs font-bold uppercase tracking-widest text-koreksi-deep">AI Detector</p>
           </div>
           <h2 className="text-2xl font-extrabold text-slate-900 mb-2">Paket AI Detector</h2>
           <p className="text-slate-500 mb-8">Deteksi teks yang ditulis AI per paragraf.</p>
@@ -121,14 +121,14 @@ export default function PaketHematPage() {
 
       <section className="mx-auto max-w-3xl px-4 py-16">
         <h2 className="text-2xl font-extrabold text-slate-900 text-center mb-8">Satuan vs Paket Hemat</h2>
-        <div className="rounded-3xl border border-slate-200 overflow-hidden shadow-card">
+        <div className="rounded-3xl border border-slate-200 overflow-hidden shadow-lift">
           <table className="w-full text-sm" aria-label="Perbandingan harga satuan dan paket">
             <thead>
-              <tr className="bg-slate-50 text-left text-xs font-bold uppercase tracking-wide text-muted-foreground">
+              <tr className="bg-slate-50 text-left text-xs font-bold uppercase tracking-wide text-ink-faint">
                 <th className="px-5 py-3">Layanan</th>
                 <th className="px-5 py-3">Harga Satuan</th>
-                <th className="px-5 py-3 text-[#8B0000]">Paket Terbaik</th>
-                <th className="px-5 py-3 text-[#8B0000]">Hemat</th>
+                <th className="px-5 py-3 text-koreksi-deep">Paket Terbaik</th>
+                <th className="px-5 py-3 text-koreksi-deep">Hemat</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -141,9 +141,9 @@ export default function PaketHematPage() {
                   <tr key={r.l} className="hover:bg-slate-50">
                     <td className="px-5 py-3.5 font-medium text-slate-800">{r.l}</td>
                     <td className="px-5 py-3.5 text-slate-500 line-through">{fmt(r.satuan)}</td>
-                    <td className="px-5 py-3.5 font-bold text-[#8B0000]">{fmt(r.paket)}</td>
+                    <td className="px-5 py-3.5 font-bold text-koreksi-deep">{fmt(r.paket)}</td>
                     <td className="px-5 py-3.5">
-                      <span className="rounded-full bg-brand-50 text-[#8B0000] text-xs font-bold px-2.5 py-1 border border-brand-200">-{hemat}%</span>
+                      <span className="rounded-full bg-paper-raised text-koreksi-deep text-xs font-bold px-2.5 py-1 border border-paper-edge">-{hemat}%</span>
                     </td>
                   </tr>
                 );
@@ -154,10 +154,10 @@ export default function PaketHematPage() {
       </section>
 
       <section className="px-4 pb-20">
-        <div className="mx-auto max-w-3xl rounded-3xl bg-brand-gradient p-10 text-center shadow-brand">
+        <div className="mx-auto max-w-3xl rounded-3xl bg-ink p-10 text-center shadow-lift">
           <h2 className="text-2xl font-extrabold text-white mb-2">Mulai hemat hari ini 🎉</h2>
           <p className="text-white/75 text-sm mb-6">Daftar gratis dan langsung beli paket hemat pilihanmu.</p>
-          <Link href="/daftar" className="inline-flex items-center gap-2 rounded-xl bg-white text-[#8B0000] px-6 py-3 text-sm font-extrabold hover:bg-brand-50 transition-colors shadow-md">
+          <Link href="/daftar" className="inline-flex items-center gap-2 rounded-xl bg-white text-koreksi-deep px-6 py-3 text-sm font-extrabold hover:bg-paper-raised transition-colors shadow-md">
             Daftar &amp; Beli Paket <ArrowRight className="h-4 w-4" />
           </Link>
         </div>

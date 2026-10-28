@@ -37,12 +37,12 @@ export async function DashboardHeader({ title }: DashboardHeaderProps) {
         {/* Notifikasi */}
         <Link
           href="/dashboard/notifikasi"
-          className="relative flex h-9 w-9 items-center justify-center rounded-xl hover:bg-brand-50 transition-colors"
+          className="relative flex h-9 w-9 items-center justify-center rounded-xl hover:bg-paper-raised transition-colors"
           aria-label={`${unreadCount ?? 0} notifikasi belum dibaca`}
         >
           <Bell className="h-4.5 w-4.5 text-slate-500" />
           {(unreadCount ?? 0) > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-brand text-[9px] font-bold text-white ring-2 ring-white">
+            <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-ink text-[9px] font-bold text-white ring-2 ring-white">
               {(unreadCount ?? 0) > 9 ? "9+" : unreadCount}
             </span>
           )}
@@ -51,7 +51,7 @@ export async function DashboardHeader({ title }: DashboardHeaderProps) {
         {/* Avatar */}
         <Link
           href="/dashboard/profil"
-          className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-gradient text-xs font-bold text-white shadow-brand-sm hover:opacity-90 transition-opacity"
+          className="flex h-9 w-9 items-center justify-center rounded-xl bg-ink text-xs font-bold text-white shadow-lift hover:opacity-90 transition-opacity"
           aria-label="Profil saya"
         >
           {initials}

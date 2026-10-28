@@ -88,7 +88,7 @@ export default async function SubscriptionPage() {
     <div className="space-y-7 max-w-4xl">
       <div>
         <h2 className="text-xl font-extrabold text-slate-900">Subscription Bimbingan</h2>
-        <p className="text-sm text-muted-foreground mt-0.5">
+        <p className="text-sm text-ink-faint mt-0.5">
           Berlangganan bulanan dan dapatkan kuota layanan + bimbingan dengan harga lebih hemat.
         </p>
       </div>
@@ -119,7 +119,7 @@ export default async function SubscriptionPage() {
             <Card
               key={plan.name}
               className={`relative flex flex-col p-6 ${
-                plan.popular ? "border-2 border-[#8B0000] shadow-lg" : ""
+                plan.popular ? "border-2 border-ink shadow-lg" : ""
               }`}
             >
               {plan.popular && (
@@ -128,20 +128,20 @@ export default async function SubscriptionPage() {
                 </div>
               )}
               <div className="flex items-center gap-2 mb-3">
-                <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${plan.popular ? "bg-brand-gradient" : "bg-brand-50"}`}>
-                  <Icon className={`h-5 w-5 ${plan.popular ? "text-white" : "text-[#8B0000]"}`} />
+                <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${plan.popular ? "bg-ink" : "bg-paper-raised"}`}>
+                  <Icon className={`h-5 w-5 ${plan.popular ? "text-white" : "text-koreksi-deep"}`} />
                 </div>
                 <h3 className="text-lg font-extrabold text-slate-900">{plan.name}</h3>
               </div>
-              <p className="text-xs text-muted-foreground mb-4">{plan.desc}</p>
+              <p className="text-xs text-ink-faint mb-4">{plan.desc}</p>
               <div className="mb-5">
                 <span className="text-3xl font-extrabold text-slate-900">{formatRupiah(plan.price)}</span>
-                <span className="text-sm text-muted-foreground">{plan.period}</span>
+                <span className="text-sm text-ink-faint">{plan.period}</span>
               </div>
               <ul className="space-y-2.5 flex-1 mb-5">
                 {plan.features.map((f) => (
                   <li key={f} className="flex items-start gap-2 text-sm">
-                    <Check className="h-4 w-4 text-[#8B0000] flex-shrink-0 mt-0.5" />
+                    <Check className="h-4 w-4 text-koreksi-deep flex-shrink-0 mt-0.5" />
                     <span className="text-slate-700">{f}</span>
                   </li>
                 ))}
@@ -164,15 +164,15 @@ export default async function SubscriptionPage() {
         <div className="space-y-3">
           <div>
             <p className="text-sm font-semibold text-slate-700">Apakah kuota terpakai bisa diakumulasikan?</p>
-            <p className="text-xs text-muted-foreground mt-1">Ya, kuota yang tidak terpakai di bulan ini akan terbawa ke bulan berikutnya selama subscription aktif.</p>
+            <p className="text-xs text-ink-faint mt-1">Ya, kuota yang tidak terpakai di bulan ini akan terbawa ke bulan berikutnya selama subscription aktif.</p>
           </div>
           <div>
             <p className="text-sm font-semibold text-slate-700">Bagaimana cara pembatalan?</p>
-            <p className="text-xs text-muted-foreground mt-1">Kamu bisa batalkan kapan saja melalui menu Profil → Subscription. Tidak ada biaya pembatalan.</p>
+            <p className="text-xs text-ink-faint mt-1">Kamu bisa batalkan kapan saja melalui menu Profil → Subscription. Tidak ada biaya pembatalan.</p>
           </div>
           <div>
             <p className="text-sm font-semibold text-slate-700">Apakah bisa upgrade plan?</p>
-            <p className="text-xs text-muted-foreground mt-1">Ya, upgrade kapan saja. Selisih harga akan diprorata sesuai sisa hari di bulan berjalan.</p>
+            <p className="text-xs text-ink-faint mt-1">Ya, upgrade kapan saja. Selisih harga akan diprorata sesuai sisa hari di bulan berjalan.</p>
           </div>
         </div>
       </div>

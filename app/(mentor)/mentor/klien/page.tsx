@@ -32,13 +32,13 @@ export default async function KlienMentorPage() {
     <div className="space-y-5 max-w-4xl">
       <div>
         <h2 className="text-xl font-extrabold text-slate-900">Daftar Klien</h2>
-        <p className="text-sm text-muted-foreground mt-0.5">Semua klien yang pernah booking bimbingan denganmu.</p>
+        <p className="text-sm text-ink-faint mt-0.5">Semua klien yang pernah booking bimbingan denganmu.</p>
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-card">
+      <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-lift">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead><tr className="border-b bg-slate-50 text-left text-xs font-bold uppercase tracking-wide text-muted-foreground">
+            <thead><tr className="border-b bg-slate-50 text-left text-xs font-bold uppercase tracking-wide text-ink-faint">
               <th className="px-4 py-3">Klien</th>
               <th className="px-4 py-3">Jadwal</th>
               <th className="px-4 py-3">Topik</th>
@@ -47,7 +47,7 @@ export default async function KlienMentorPage() {
             </tr></thead>
             <tbody className="divide-y">
               {(bookings ?? []).length === 0 ? (
-                <tr><td colSpan={5} className="px-4 py-10 text-center text-muted-foreground">Belum ada klien.</td></tr>
+                <tr><td colSpan={5} className="px-4 py-10 text-center text-ink-faint">Belum ada klien.</td></tr>
               ) : (bookings ?? []).map((b) => {
                 const cust = b.profiles as any;
                 const slot = b.booking_slots as any;
@@ -56,7 +56,7 @@ export default async function KlienMentorPage() {
                   <tr key={b.id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-4 py-3">
                       <p className="font-semibold text-slate-900">{cust?.full_name ?? "-"}</p>
-                      <p className="text-xs text-muted-foreground">{cust?.whatsapp ?? ""}</p>
+                      <p className="text-xs text-ink-faint">{cust?.whatsapp ?? ""}</p>
                     </td>
                     <td className="px-4 py-3 text-xs text-slate-600">
                       {slot?.slot_date ? new Date(slot.slot_date + "T00:00:00").toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }) : "-"}
@@ -67,7 +67,7 @@ export default async function KlienMentorPage() {
                     <td className="px-4 py-3">
                       {cust?.whatsapp && (
                         <a href={`https://wa.me/${cust.whatsapp}`} target="_blank" rel="noopener noreferrer"
-                          className="text-xs font-semibold text-[#8B0000] hover:underline">Chat WA</a>
+                          className="text-xs font-semibold text-koreksi-deep hover:underline">Chat WA</a>
                       )}
                     </td>
                   </tr>

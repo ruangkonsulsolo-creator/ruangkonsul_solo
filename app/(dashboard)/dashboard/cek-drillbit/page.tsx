@@ -15,7 +15,7 @@ export default async function CekDrillbitPage() {
   const { data: service } = await supabase.from("services").select("id, price_idr, sla_hours").eq("slug", "drillbit").single();
   const { data: quota } = await supabase.from("user_quotas").select("id, quota_remaining, expires_at").eq("user_id", user?.id ?? PREVIEW_USER.id).eq("service_id", service?.id ?? "").eq("is_expired", false).gt("quota_remaining", 0).order("expires_at", { ascending: true }).limit(1).maybeSingle();
   return (
-    <ServicePageShell icon={BookOpenCheck} name="DrillBit Checker" description="Cek plagiasi menggunakan mesin DrillBit resmi yang digunakan oleh kampus-kampus di Indonesia." slaHours={service?.sla_hours ?? 48} formats="PDF, DOCX" maxSizeMb={20} colorClass="bg-brand-50 text-brand">
+    <ServicePageShell icon={BookOpenCheck} name="DrillBit Checker" description="Cek plagiasi menggunakan mesin DrillBit resmi yang digunakan oleh kampus-kampus di Indonesia." slaHours={service?.sla_hours ?? 48} formats="PDF, DOCX" maxSizeMb={20} colorClass="bg-paper-raised text-koreksi-deep">
       <OrderForm serviceSlug="drillbit" serviceName="DrillBit Checker" servicePrice={service?.price_idr ?? 45000} activeQuota={quota ?? null} maxFileSizeMb={20} />
     </ServicePageShell>
   );

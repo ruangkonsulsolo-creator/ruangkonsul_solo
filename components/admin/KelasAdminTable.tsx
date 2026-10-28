@@ -20,13 +20,13 @@ const TAB_OPTIONS = [
 ];
 
 const EMPTY_FORM = {
-  tab: "seminar", tag: "GRATIS", tag_color: "bg-brand text-white",
+  tab: "seminar", tag: "GRATIS", tag_color: "bg-ink text-white",
   title: "", subtitle: "", description: "",
   harga: 0, harga_coret: 0,
   jadwal: "", durasi: "", peserta: "",
   fitur: "", cta_label: "Daftar Sekarang",
   wa_message: "Halo%2C saya ingin tahu lebih lanjut",
-  require_login: false, badge: "", badge_color: "bg-brand text-white",
+  require_login: false, badge: "", badge_color: "bg-ink text-white",
   is_active: true, sort_order: 0,
 };
 
@@ -110,7 +110,7 @@ export function KelasAdminTable({ kelas: initial }: { kelas: Kelas[] }) {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label className="text-xs font-bold text-slate-600">Tab Kategori *</Label>
-                  <select value={form.tab} onChange={(e) => setForm({ ...form, tab: e.target.value })} className="flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm focus:ring-2 focus:ring-brand focus:outline-none">
+                  <select value={form.tab} onChange={(e) => setForm({ ...form, tab: e.target.value })} className="flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm focus:ring-2 focus:ring-koreksi focus:outline-none">
                     {TAB_OPTIONS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
                   </select>
                 </div>
@@ -129,12 +129,12 @@ export function KelasAdminTable({ kelas: initial }: { kelas: Kelas[] }) {
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs font-bold text-slate-600">Deskripsi</Label>
-                <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-brand focus:outline-none resize-none" placeholder="Deskripsi kelas..." />
+                <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-koreksi focus:outline-none resize-none" placeholder="Deskripsi kelas..." />
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs font-bold text-slate-600">Foto / Cover Kelas</Label>
                 <div className="flex items-center gap-3">
-                  <label className="flex items-center gap-2 cursor-pointer rounded-lg border border-dashed border-slate-300 px-4 py-2.5 text-sm text-slate-600 hover:border-brand hover:text-brand transition-colors">
+                  <label className="flex items-center gap-2 cursor-pointer rounded-lg border border-dashed border-slate-300 px-4 py-2.5 text-sm text-slate-600 hover:border-ink hover:text-koreksi-deep transition-colors">
                     <ImageIcon className="h-4 w-4" />
                     {imageFile ? imageFile.name : "Pilih Gambar"}
                     <input type="file" accept="image/*" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; if (f) { setImageFile(f); setImagePreview(URL.createObjectURL(f)); } }} />
@@ -168,7 +168,7 @@ export function KelasAdminTable({ kelas: initial }: { kelas: Kelas[] }) {
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs font-bold text-slate-600">Fitur (satu per baris)</Label>
-                <textarea value={form.fitur} onChange={(e) => setForm({ ...form, fitur: e.target.value })} rows={5} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-brand focus:outline-none resize-none font-mono" placeholder={"Fitur 1\nFitur 2\nFitur 3"} />
+                <textarea value={form.fitur} onChange={(e) => setForm({ ...form, fitur: e.target.value })} rows={5} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-koreksi focus:outline-none resize-none font-mono" placeholder={"Fitur 1\nFitur 2\nFitur 3"} />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
@@ -187,7 +187,7 @@ export function KelasAdminTable({ kelas: initial }: { kelas: Kelas[] }) {
                 </div>
                 <div className="space-y-1.5 flex flex-col justify-end">
                   <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" checked={form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} className="rounded border-slate-300 text-brand focus:ring-brand" />
+                    <input type="checkbox" checked={form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} className="rounded border-slate-300 text-koreksi-deep focus:ring-koreksi" />
                     <span className="text-sm font-medium text-slate-700">Tampilkan Kelas</span>
                   </label>
                 </div>
@@ -204,30 +204,30 @@ export function KelasAdminTable({ kelas: initial }: { kelas: Kelas[] }) {
         </div>
       )}
 
-      <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-card">
+      <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-lift">
         <div className="overflow-x-auto">
           <table className="w-full text-sm" aria-label="Daftar kelas bimbingan">
             <thead>
-              <tr className="border-b bg-slate-50 text-left text-xs font-bold uppercase tracking-wide text-muted-foreground">
+              <tr className="border-b bg-slate-50 text-left text-xs font-bold uppercase tracking-wide text-ink-faint">
                 <th className="px-4 py-3">Kelas</th><th className="px-4 py-3">Tab</th><th className="px-4 py-3">Harga</th><th className="px-4 py-3">Rating</th><th className="px-4 py-3">Status</th><th className="px-4 py-3">Urutan</th><th className="px-4 py-3">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {kelas.length === 0 ? (
-                <tr><td colSpan={7} className="px-4 py-10 text-center text-muted-foreground">Belum ada kelas. Klik "Tambah Kelas" untuk mulai.</td></tr>
+                <tr><td colSpan={7} className="px-4 py-10 text-center text-ink-faint">Belum ada kelas. Klik "Tambah Kelas" untuk mulai.</td></tr>
               ) : kelas.map((k) => (
                 <tr key={k.id} className="hover:bg-slate-50 transition-colors">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      {k.image_url ? <img src={k.image_url} alt="" className="h-10 w-14 rounded-lg object-cover border border-slate-100 flex-shrink-0" /> : <div className="h-10 w-14 rounded-lg bg-brand-50 flex items-center justify-center flex-shrink-0"><ImageIcon className="h-4 w-4 text-brand-200" /></div>}
-                      <div><p className="font-semibold text-slate-900 max-w-[200px] truncate">{k.title}</p><p className="text-xs text-muted-foreground">{k.subtitle ?? ""}</p></div>
+                      {k.image_url ? <img src={k.image_url} alt="" className="h-10 w-14 rounded-lg object-cover border border-slate-100 flex-shrink-0" /> : <div className="h-10 w-14 rounded-lg bg-paper-raised flex items-center justify-center flex-shrink-0"><ImageIcon className="h-4 w-4 text-ink-ghost" /></div>}
+                      <div><p className="font-semibold text-slate-900 max-w-[200px] truncate">{k.title}</p><p className="text-xs text-ink-faint">{k.subtitle ?? ""}</p></div>
                     </div>
                   </td>
                   <td className="px-4 py-3"><Badge variant="secondary" className="text-[10px] capitalize">{k.tab}</Badge></td>
-                  <td className="px-4 py-3 font-medium text-brand">{fmt(k.harga)}</td>
+                  <td className="px-4 py-3 font-medium text-koreksi-deep">{fmt(k.harga)}</td>
                   <td className="px-4 py-3 text-xs">⭐ {k.rating} ({k.review_count})</td>
                   <td className="px-4 py-3">
-                    <button onClick={() => handleToggle(k)} disabled={togglingId === k.id} className={`flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-bold transition-colors ${k.is_active ? "bg-brand-50 text-brand hover:bg-brand-100" : "bg-slate-100 text-slate-400 hover:bg-slate-200"}`}>
+                    <button onClick={() => handleToggle(k)} disabled={togglingId === k.id} className={`flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-bold transition-colors ${k.is_active ? "bg-paper-raised text-koreksi-deep hover:bg-paper-sunken" : "bg-slate-100 text-slate-400 hover:bg-slate-200"}`}>
                       {togglingId === k.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : k.is_active ? <ToggleRight className="h-3.5 w-3.5" /> : <ToggleLeft className="h-3.5 w-3.5" />}
                       {k.is_active ? "Aktif" : "Nonaktif"}
                     </button>
@@ -235,7 +235,7 @@ export function KelasAdminTable({ kelas: initial }: { kelas: Kelas[] }) {
                   <td className="px-4 py-3 text-slate-500 text-center">{k.sort_order}</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
-                      <button onClick={() => openEdit(k)} className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-500 hover:text-brand transition-colors" title="Edit kelas"><Pencil className="h-3.5 w-3.5" /></button>
+                      <button onClick={() => openEdit(k)} className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-500 hover:text-koreksi-deep transition-colors" title="Edit kelas"><Pencil className="h-3.5 w-3.5" /></button>
                       <button onClick={() => handleDelete(k)} disabled={deletingId === k.id} className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 hover:bg-red-50 text-slate-500 hover:text-red-500 transition-colors" title="Hapus kelas">
                         {deletingId === k.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
                       </button>

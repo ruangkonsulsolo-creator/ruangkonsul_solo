@@ -11,7 +11,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
 
       {/* ── Panel kiri — brand ── */}
       <div className="hidden lg:flex lg:w-1/2 flex-col items-center justify-center p-12 relative overflow-hidden"
-        style={{ background: "linear-gradient(135deg, #6B0000 0%, #8B0000 50%, #A31515 100%)" }}>
+        style={{ background: "linear-gradient(135deg, #141A17 0%, #141A17 50%, #141A17 100%)" }}>
 
         {/* Decorative circles */}
         <div className="absolute -top-20 -left-20 h-64 w-64 rounded-full bg-white/5" />
@@ -63,7 +63,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
         {/* Mobile header */}
         <div className="lg:hidden border-b px-6 py-4 flex items-center justify-between">
           <Logo size="md" />
-          <Link href="/" className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-[#8B0000] transition-colors">
+          <Link href="/" className="flex items-center gap-1.5 text-sm text-ink-faint hover:text-koreksi-deep transition-colors">
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             Beranda
           </Link>
@@ -77,13 +77,13 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
 
         {/* Tombol kembali desktop (di bawah form) */}
         <div className="px-6 pb-4 flex justify-center">
-          <Link href="/" className="hidden lg:flex items-center gap-1.5 text-sm text-muted-foreground hover:text-[#8B0000] transition-colors">
+          <Link href="/" className="hidden lg:flex items-center gap-1.5 text-sm text-ink-faint hover:text-koreksi-deep transition-colors">
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             Kembali ke Beranda
           </Link>
         </div>
 
-        <p className="pb-6 text-center text-xs text-muted-foreground">
+        <p className="pb-6 text-center text-xs text-ink-faint">
           © {BRAND.year} {BRAND.name}. Semua hak dilindungi.
         </p>
       </div>

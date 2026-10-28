@@ -29,21 +29,21 @@ export default async function WebinarPage() {
     <div className="space-y-7 max-w-4xl">
       <div>
         <h2 className="text-xl font-extrabold text-slate-900">Webinar & Seminar</h2>
-        <p className="text-sm text-muted-foreground mt-0.5">Ikuti webinar gratis dan提升 kualitas skripsi-mu.</p>
+        <p className="text-sm text-ink-faint mt-0.5">Ikuti webinar gratis dan提升 kualitas skripsi-mu.</p>
       </div>
 
       {/* Upcoming webinars */}
       <div>
-        <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">Webinar Mendatang</h3>
+        <h3 className="text-xs font-bold uppercase tracking-widest text-ink-faint mb-4">Webinar Mendatang</h3>
         <div className="space-y-4">
           {UPCOMING.map((w) => (
             <Card key={w.id} className="overflow-hidden">
               <div className="flex flex-col sm:flex-row">
                 {/* Date badge */}
-                <div className="flex sm:flex-col items-center justify-center gap-2 bg-brand-50 px-5 py-4 sm:w-28 flex-shrink-0">
+                <div className="flex sm:flex-col items-center justify-center gap-2 bg-paper-raised px-5 py-4 sm:w-28 flex-shrink-0">
                   <div className="text-center">
-                    <p className="text-2xl font-extrabold text-[#8B0000]">{new Date(w.date + "T00:00:00").getDate()}</p>
-                    <p className="text-xs font-semibold text-[#8B0000] uppercase">
+                    <p className="text-2xl font-extrabold text-koreksi-deep">{new Date(w.date + "T00:00:00").getDate()}</p>
+                    <p className="text-xs font-semibold text-koreksi-deep uppercase">
                       {new Date(w.date + "T00:00:00").toLocaleDateString("id-ID", { month: "short" })}
                     </p>
                   </div>
@@ -54,12 +54,12 @@ export default async function WebinarPage() {
                     <h4 className="font-bold text-slate-900">{w.title}</h4>
                     {w.isRegistered && <Badge variant="success">Terdaftar</Badge>}
                   </div>
-                  <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground mb-3">
+                  <div className="flex flex-wrap items-center gap-4 text-xs text-ink-faint mb-3">
                     <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" /> {formatDate(w.date)}</span>
                     <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> {w.time} WIB · {w.duration}</span>
                     <span className="flex items-center gap-1"><Users className="h-3.5 w-3.5" /> {w.registered}/{w.capacity}</span>
                   </div>
-                  <p className="text-xs text-muted-foreground mb-4">Host: <strong className="text-slate-700">{w.host}</strong></p>
+                  <p className="text-xs text-ink-faint mb-4">Host: <strong className="text-slate-700">{w.host}</strong></p>
                   <Button
                     size="sm"
                     variant={w.isRegistered ? "outline" : "default"}
@@ -81,31 +81,31 @@ export default async function WebinarPage() {
 
       {/* Past webinars */}
       <div>
-        <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">Webinar Sebelumnya</h3>
+        <h3 className="text-xs font-bold uppercase tracking-widest text-ink-faint mb-4">Webinar Sebelumnya</h3>
         <div className="space-y-3">
           {PAST.map((w) => (
-            <Card key={w.id} className="flex items-center gap-4 p-4 hover:border-brand-200 transition-colors group cursor-pointer">
+            <Card key={w.id} className="flex items-center gap-4 p-4 hover:border-paper-edge transition-colors group cursor-pointer">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 flex-shrink-0">
-                <PlayCircle className="h-5 w-5 text-slate-400 group-hover:text-[#8B0000] transition-colors" />
+                <PlayCircle className="h-5 w-5 text-slate-400 group-hover:text-koreksi-deep transition-colors" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-slate-900 truncate">{w.title}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">
+                <p className="text-xs text-ink-faint mt-0.5">
                   {formatDate(w.date)} · {w.duration} · {w.attendees} peserta
                 </p>
               </div>
-              <ArrowRight className="h-4 w-4 text-slate-300 group-hover:text-[#8B0000] transition-colors flex-shrink-0" />
+              <ArrowRight className="h-4 w-4 text-slate-300 group-hover:text-koreksi-deep transition-colors flex-shrink-0" />
             </Card>
           ))}
         </div>
       </div>
 
       {/* CTA */}
-      <div className="flex items-center gap-3 rounded-2xl border border-brand-200 bg-brand-50 p-5">
-        <Video className="h-5 w-5 text-[#8B0000] flex-shrink-0" />
+      <div className="flex items-center gap-3 rounded-2xl border border-paper-edge bg-paper-raised p-5">
+        <Video className="h-5 w-5 text-koreksi-deep flex-shrink-0" />
         <div className="flex-1">
           <p className="text-sm font-semibold text-slate-900">Mau jaga update webinar terbaru?</p>
-          <p className="text-xs text-muted-foreground mt-0.5">Ikuti Instagram kami untuk notifikasi webinar mendatang.</p>
+          <p className="text-xs text-ink-faint mt-0.5">Ikuti Instagram kami untuk notifikasi webinar mendatang.</p>
         </div>
         <Button asChild size="sm" variant="outline" className="gap-2 flex-shrink-0">
           <a href={BRAND.instagramUrl} target="_blank" rel="noopener noreferrer">

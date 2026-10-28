@@ -13,7 +13,7 @@ export default function DashboardLoading() {
       {/* Cards skeleton */}
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
+          <div key={i} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-lift">
             <div className="h-11 w-11 rounded-xl bg-slate-100 mb-4" />
             <div className="h-4 w-28 rounded bg-slate-100 mb-2" />
             <div className="h-3 w-20 rounded bg-slate-100 mb-3" />
@@ -23,7 +23,7 @@ export default function DashboardLoading() {
       </div>
 
       {/* Table skeleton */}
-      <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-card">
+      <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-lift">
         <div className="divide-y divide-slate-100">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="flex items-center justify-between px-5 py-3.5">

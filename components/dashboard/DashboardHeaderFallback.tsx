@@ -8,7 +8,7 @@ export function DashboardHeaderFallback() {
       <div className="flex items-center gap-2">
         <Link
           href="/login"
-          className="rounded-xl bg-brand px-4 py-1.5 text-xs font-bold text-white hover:bg-brand-light transition-colors shadow-brand-sm"
+          className="rounded-xl bg-ink px-4 py-1.5 text-xs font-bold text-white hover:bg-koreksi transition-colors shadow-lift"
         >
           Login
         </Link>

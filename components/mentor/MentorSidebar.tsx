@@ -41,7 +41,7 @@ export function MentorSidebar() {
     exact ? pathname === href : pathname.startsWith(href);
 
   const NavContent = () => (
-    <div className="flex h-full flex-col" style={{ background: "#6B0000" }}>
+    <div className="flex h-full flex-col" style={{ background: "#141A17" }}>
       <div className="flex items-center gap-3 px-5 py-4 border-b border-white/10">
         <Logo href="/mentor" size="sm" showText={false} />
         <div className="flex flex-col leading-tight min-w-0">
@@ -60,13 +60,13 @@ export function MentorSidebar() {
           return (
             <Link key={item.href} href={item.href!} onClick={() => setMobileOpen(false)}
               className={cn("flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium transition-all",
-                active ? "bg-white text-[#8B0000] shadow-sm" : "text-white/60 hover:bg-white/10 hover:text-white"
+                active ? "bg-white text-koreksi-deep shadow-sm" : "text-white/60 hover:bg-white/10 hover:text-white"
               )} aria-current={active ? "page" : undefined}>
               <span className="flex items-center gap-3">
-                <Icon className={cn("h-4 w-4 flex-shrink-0", active ? "text-[#8B0000]" : "text-white/40")} />
+                <Icon className={cn("h-4 w-4 flex-shrink-0", active ? "text-koreksi-deep" : "text-white/40")} />
                 {item.label}
               </span>
-              {active && <ChevronRight className="h-3.5 w-3.5 text-[#8B0000] opacity-60" />}
+              {active && <ChevronRight className="h-3.5 w-3.5 text-koreksi-deep opacity-60" />}
             </Link>
           );
         })}
@@ -84,10 +84,10 @@ export function MentorSidebar() {
 
   return (
     <>
-      <aside className="hidden lg:flex w-56 flex-shrink-0 flex-col" style={{ background: "#6B0000" }}>
+      <aside className="hidden lg:flex w-56 flex-shrink-0 flex-col" style={{ background: "#141A17" }}>
         <NavContent />
       </aside>
-      <button className="fixed top-3.5 left-4 z-40 lg:hidden flex h-9 w-9 items-center justify-center rounded-xl bg-[#8B0000] text-white shadow-brand-sm"
+      <button className="fixed top-3.5 left-4 z-40 lg:hidden flex h-9 w-9 items-center justify-center rounded-xl bg-ink text-white shadow-lift"
         onClick={() => setMobileOpen(true)} aria-label="Buka menu">
         <Menu className="h-4 w-4" />
       </button>

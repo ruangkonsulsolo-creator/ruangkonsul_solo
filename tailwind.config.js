@@ -1,110 +1,134 @@
 /** @type {import('tailwindcss').Config} */
+
+/**
+ * Sistem desain Ruang Konsul Solo.
+ *
+ * Konsep: draf skripsi yang sudah diberi tanda koreksi pembimbing.
+ * Halaman berperilaku seperti dokumen yang tertata — margin kiri membawa
+ * anotasi (status, harga, nomor sesi), badan halaman membawa isi.
+ *
+ * Aturan yang ditegakkan sistem ini:
+ *   - Merah koreksi dipakai sebagai TANDA, tidak pernah sebagai background
+ *     besar. Begitu dia jadi hamparan, dia berhenti berarti "perhatikan ini".
+ *   - Tidak ada gradient. Tiga preset gradient 135deg di versi lama adalah
+ *     penanda paling kentara halaman buatan generator.
+ *   - Radius kecil. Manuskrip tidak membulat.
+ */
 module.exports = {
   darkMode: ["class"],
   content: [
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
-    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
-  ],
-  safelist: [
-    "bg-background", "bg-card", "bg-popover", "bg-primary", "bg-secondary",
-    "bg-muted", "bg-accent", "bg-destructive",
-    "text-foreground", "text-card-foreground", "text-popover-foreground",
-    "text-primary-foreground", "text-secondary-foreground",
-    "text-muted-foreground", "text-accent-foreground",
-    "text-destructive", "text-destructive-foreground",
-    "border-border", "border-input", "ring-ring",
   ],
   theme: {
     extend: {
       colors: {
-        /* ── Brand Kalibri — Crimson Red ── */
-        brand: {
-          DEFAULT: "#8B0000",
-          light:   "#A31515",
-          dark:    "#6B0000",
-          50:      "#FFF5F5",
-          100:     "#FFE8E8",
-          200:     "#FFCCCC",
-          300:     "#FF9999",
-          600:     "#A31515",
-          700:     "#8B0000",
-          800:     "#3D0000",
-          900:     "#2A0000",
+        /* ── Netral: kertas fotokopi, bukan krem hangat ── */
+        paper: {
+          DEFAULT: "#EFF1F0",
+          raised:  "#F7F8F7", // kartu & panel yang naik dari kertas
+          sunken:  "#E4E7E5", // bidang yang masuk ke dalam
+          edge:    "#D3D8D5", // garis pembatas
         },
 
-        /* ── shadcn/ui semantic tokens (hsl CSS vars) ── */
-        background:  "hsl(var(--background))",
-        foreground:  "hsl(var(--foreground))",
-        card: {
-          DEFAULT:    "hsl(var(--card))",
-          foreground: "hsl(var(--card-foreground))",
+        /* ── Tinta: hitam kehijauan, bukan abu netral ── */
+        ink: {
+          DEFAULT: "#141A17",
+          soft:    "#3D4642", // teks sekunder
+          faint:   "#6B7571", // keterangan, placeholder
+          ghost:   "#9AA39F", // teks nonaktif
         },
-        popover: {
-          DEFAULT:    "hsl(var(--popover))",
-          foreground: "hsl(var(--popover-foreground))",
+
+        /* ── Merah koreksi: tanda, bukan hamparan ── */
+        koreksi: {
+          DEFAULT: "#C8322C",
+          deep:    "#9B2420", // teks di atas kertas, kontras AA
+          wash:    "#F6E3E1", // latar paling tipis, untuk highlight baris
         },
-        primary: {
-          DEFAULT:    "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
+
+        /* ── Hijau: slot tersedia, sesi selesai, pembayaran lunas ── */
+        setuju: {
+          DEFAULT: "#3F6B52",
+          deep:    "#2C4C3A",
+          wash:    "#E2EBE5",
         },
-        secondary: {
-          DEFAULT:    "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
+
+        /* ── Kuning tanda: menunggu konfirmasi, jadwal hampir tiba ── */
+        tunda: {
+          DEFAULT: "#A87417",
+          deep:    "#7A540F",
+          wash:    "#F4EBD6",
         },
-        muted: {
-          DEFAULT:    "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
-        },
-        accent: {
-          DEFAULT:    "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
-        },
-        destructive: {
-          DEFAULT:    "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
-        },
-        border: "hsl(var(--border))",
-        input:  "hsl(var(--input))",
-        ring:   "hsl(var(--ring))",
       },
+
+      fontFamily: {
+        /* Literata — dirancang untuk membaca panjang, punya karakter tanpa
+           jadi serif display yang genit. Judul dan paragraf editorial. */
+        serif: ["var(--font-literata)", "Georgia", "serif"],
+        /* Archivo — grotesk dengan lebar ketat; menolong untuk kata Indonesia
+           yang panjang seperti "Pembayaran" dan "Bimbingan" di kolom sempit. */
+        sans: ["var(--font-archivo)", "system-ui", "sans-serif"],
+      },
+
+      /**
+       * Skala tipe modular, rasio 1.25 (major third), basis 16px.
+       * line-height ditulis eksplisit agar tidak mengandalkan default Tailwind
+       * yang terlalu longgar untuk teks UI padat.
+       */
+      fontSize: {
+        "2xs":    ["0.6875rem", { lineHeight: "1rem",     letterSpacing: "0.01em" }],
+        xs:       ["0.75rem",   { lineHeight: "1.125rem", letterSpacing: "0.005em" }],
+        sm:       ["0.875rem",  { lineHeight: "1.375rem" }],
+        base:     ["1rem",      { lineHeight: "1.625rem" }],
+        lg:       ["1.125rem",  { lineHeight: "1.75rem" }],
+        xl:       ["1.375rem",  { lineHeight: "1.875rem", letterSpacing: "-0.01em" }],
+        "2xl":    ["1.75rem",   { lineHeight: "2.125rem", letterSpacing: "-0.015em" }],
+        "3xl":    ["2.1875rem", { lineHeight: "2.5rem",   letterSpacing: "-0.02em" }],
+        "4xl":    ["2.75rem",   { lineHeight: "3rem",     letterSpacing: "-0.025em" }],
+        "5xl":    ["3.4375rem", { lineHeight: "3.625rem", letterSpacing: "-0.03em" }],
+      },
+
       borderRadius: {
-        lg:    "var(--radius)",
-        md:    "calc(var(--radius) - 2px)",
-        sm:    "calc(var(--radius) - 4px)",
-        xl:    "0.75rem",
-        "2xl": "1rem",
-        "3xl": "1.5rem",
+        none: "0",
+        sm:   "2px",
+        DEFAULT: "3px",
+        md:   "4px",
+        lg:   "6px",
+        /* Hanya untuk avatar dan pil status. */
+        full: "9999px",
       },
+
+      spacing: {
+        /* Lebar rail margin kiri — perangkat struktural utama. */
+        rail: "4.5rem",
+        "rail-lg": "7rem",
+      },
+
+      maxWidth: {
+        /* Panjang baris di bawah 80 karakter untuk teks panjang. */
+        prose: "68ch",
+        measure: "58ch",
+      },
+
       boxShadow: {
-        brand:        "0 4px 24px -4px rgba(139,0,0,0.25)",
-        "brand-sm":   "0 2px 8px -2px rgba(139,0,0,0.20)",
-        card:         "0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)",
-        "card-hover": "0 8px 24px -4px rgba(0,0,0,0.10)",
+        /* Satu bayangan, dipakai hemat. Bukan shadow abu seragam di tiap
+           kartu — itu tampilan kit SaaS. */
+        lift: "0 1px 0 0 #D3D8D5, 0 2px 8px -4px rgba(20,26,23,0.12)",
+        none: "none",
       },
-      backgroundImage: {
-        "brand-gradient":
-          "linear-gradient(135deg, #8B0000 0%, #A31515 50%, #C41E3A 100%)",
-        "brand-gradient-subtle":
-          "linear-gradient(135deg, #FFF5F5 0%, #FFE8E8 100%)",
-        "hero-gradient":
-          "linear-gradient(160deg, #ffffff 0%, #FFF0F0 40%, #FFDDDD 100%)",
+
+      keyframes: {
+        /* Satu-satunya animasi non-interaksi: tanda koreksi yang tergores
+           masuk saat slot dipilih. Dipakai sekali, bukan di tiap bagian. */
+        strike: {
+          "0%":   { transform: "scaleX(0)", transformOrigin: "left" },
+          "100%": { transform: "scaleX(1)", transformOrigin: "left" },
+        },
       },
       animation: {
-        "fade-in":  "fadeIn 0.3s ease-out",
-        "slide-up": "slideUp 0.3s ease-out",
-      },
-      keyframes: {
-        fadeIn: {
-          "0%":   { opacity: "0" },
-          "100%": { opacity: "1" },
-        },
-        slideUp: {
-          "0%":   { opacity: "0", transform: "translateY(8px)" },
-          "100%": { opacity: "1", transform: "translateY(0)" },
-        },
+        strike: "strike 180ms cubic-bezier(0.22, 1, 0.36, 1)",
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [],
 };

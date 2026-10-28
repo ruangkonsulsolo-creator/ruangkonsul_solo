@@ -104,7 +104,7 @@ export default async function RiwayatPesananPage({
         <Card>
           <div className="flex flex-col items-center gap-3 py-16 text-center">
             <FileText className="h-10 w-10 text-slate-300" aria-hidden="true" />
-            <p className="text-sm text-muted-foreground">Belum ada pesanan.</p>
+            <p className="text-sm text-ink-faint">Belum ada pesanan.</p>
           </div>
         </Card>
       ) : (
@@ -112,7 +112,7 @@ export default async function RiwayatPesananPage({
           <div className="overflow-x-auto">
             <table className="w-full text-sm" aria-label="Daftar pesanan">
               <thead>
-                <tr className="border-b bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                <tr className="border-b bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-ink-faint">
                   <th className="px-4 py-3">No. Pesanan</th>
                   <th className="px-4 py-3">Layanan</th>
                   <th className="px-4 py-3">File</th>
@@ -149,7 +149,7 @@ export default async function RiwayatPesananPage({
                       <td className="px-4 py-3">
                         <Badge variant={st.variant}>{st.label}</Badge>
                       </td>
-                      <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
+                      <td className="px-4 py-3 text-xs text-ink-faint whitespace-nowrap">
                         {formatDate(order.created_at)}
                       </td>
                       <td className="px-4 py-3">
@@ -158,7 +158,7 @@ export default async function RiwayatPesananPage({
                         ) : order.status === "menunggu_pembayaran" ? (
                           <RebayarButton orderId={order.id} snapToken={(order as any).midtrans_snap_token ?? null} />
                         ) : (
-                          <span className="text-xs text-muted-foreground">—</span>
+                          <span className="text-xs text-ink-faint">—</span>
                         )}
                       </td>
                     </tr>
@@ -171,7 +171,7 @@ export default async function RiwayatPesananPage({
           {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex items-center justify-between border-t px-4 py-3">
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-ink-faint">
                 Halaman {page} dari {totalPages}
               </p>
               <div className="flex gap-2">

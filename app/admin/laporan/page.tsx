@@ -30,9 +30,9 @@ export default async function AdminLaporanPage() {
   const completedOrders = statusCount["selesai"] ?? 0;
   const completionRate = totalOrders > 0 ? Math.round((completedOrders / totalOrders) * 100) : 0;
   const stats = [
-    { label: "Revenue Hari Ini",  value: fmt(todayRevenue),  icon: TrendingUp, color: "text-brand bg-brand-50" },
-    { label: "Revenue Bulan Ini", value: fmt(monthRevenue),  icon: TrendingUp, color: "text-brand bg-brand-100" },
-    { label: "Revenue Total",     value: fmt(totalRevenue),  icon: TrendingUp, color: "text-brand-dark bg-brand-50" },
+    { label: "Revenue Hari Ini",  value: fmt(todayRevenue),  icon: TrendingUp, color: "text-koreksi-deep bg-paper-raised" },
+    { label: "Revenue Bulan Ini", value: fmt(monthRevenue),  icon: TrendingUp, color: "text-koreksi-deep bg-paper-sunken" },
+    { label: "Revenue Total",     value: fmt(totalRevenue),  icon: TrendingUp, color: "text-ink bg-paper-raised" },
     { label: "Tingkat Penyelesaian", value: `${completionRate}%`, icon: ShoppingCart, color: "text-amber-600 bg-amber-50" },
   ];
   return (
@@ -45,7 +45,7 @@ export default async function AdminLaporanPage() {
             <Card key={s.label}>
               <CardContent className="flex items-center gap-4 p-5">
                 <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${s.color}`}><Icon className="h-5 w-5" /></div>
-                <div><p className="text-xl font-bold text-slate-900">{s.value}</p><p className="text-xs text-muted-foreground">{s.label}</p></div>
+                <div><p className="text-xl font-bold text-slate-900">{s.value}</p><p className="text-xs text-ink-faint">{s.label}</p></div>
               </CardContent>
             </Card>
           );
@@ -55,13 +55,13 @@ export default async function AdminLaporanPage() {
         <Card>
           <CardHeader><CardTitle className="text-sm font-semibold flex items-center gap-2"><PackageOpen className="h-4 w-4" />Pesanan per Layanan (Bulan Ini)</CardTitle></CardHeader>
           <CardContent className="space-y-3">
-            {Object.entries(serviceCount).length === 0 ? <p className="text-sm text-muted-foreground">Belum ada data.</p> : Object.entries(serviceCount).sort(([, a], [, b]) => b - a).map(([name, count]) => {
+            {Object.entries(serviceCount).length === 0 ? <p className="text-sm text-ink-faint">Belum ada data.</p> : Object.entries(serviceCount).sort(([, a], [, b]) => b - a).map(([name, count]) => {
               const maxCount = Math.max(...Object.values(serviceCount));
               const pct = Math.round((count / maxCount) * 100);
               return (
                 <div key={name}>
                   <div className="flex justify-between text-sm mb-1"><span className="text-slate-700">{name}</span><span className="font-semibold">{count}x</span></div>
-                  <div className="h-2 w-full rounded-full bg-slate-100"><div className="h-2 rounded-full bg-brand transition-all" style={{ width: `${pct}%` }} /></div>
+                  <div className="h-2 w-full rounded-full bg-slate-100"><div className="h-2 rounded-full bg-ink transition-all" style={{ width: `${pct}%` }} /></div>
                 </div>
               );
             })}
@@ -71,8 +71,8 @@ export default async function AdminLaporanPage() {
           <CardHeader><CardTitle className="text-sm font-semibold flex items-center gap-2"><Users className="h-4 w-4" />Distribusi Status Pesanan</CardTitle></CardHeader>
           <CardContent className="space-y-2">
             {[
-              { key: "diproses",   label: "Sedang Diproses", color: "bg-brand" },
-              { key: "selesai",    label: "Selesai",         color: "bg-brand" },
+              { key: "diproses",   label: "Sedang Diproses", color: "bg-ink" },
+              { key: "selesai",    label: "Selesai",         color: "bg-ink" },
               { key: "menunggu_pembayaran", label: "Menunggu Bayar", color: "bg-yellow-400" },
               { key: "dibatalkan", label: "Dibatalkan",      color: "bg-red-400" },
             ].map(({ key, label, color }) => (

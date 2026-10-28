@@ -50,7 +50,7 @@ export default async function AdminBookingLeadsPage() {
   const scheduledCount = leads.filter((l: any) => l.status === "terjadwal").length;
 
   const summary = [
-    { label: "Total Leads",   value: totalCount,       icon: FileText,    color: "text-brand bg-brand-50" },
+    { label: "Total Leads",   value: totalCount,       icon: FileText,    color: "text-koreksi-deep bg-paper-raised" },
     { label: "Baru",          value: newCount,          icon: Clock,       color: "text-amber-600 bg-amber-50" },
     { label: "Dihubungi",     value: contactedCount,    icon: Phone,       color: "text-blue-600 bg-blue-50" },
     { label: "Terjadwal",     value: scheduledCount,    icon: Calendar,    color: "text-green-600 bg-green-50" },
@@ -61,7 +61,7 @@ export default async function AdminBookingLeadsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-extrabold text-slate-900">Booking Leads</h2>
-          <p className="text-sm text-muted-foreground mt-0.5">Permintaan booking dari pengunjung (native user).</p>
+          <p className="text-sm text-ink-faint mt-0.5">Permintaan booking dari pengunjung (native user).</p>
         </div>
       </div>
 
@@ -77,7 +77,7 @@ export default async function AdminBookingLeadsPage() {
                 </div>
                 <div>
                   <p className="text-xl font-extrabold text-slate-900">{s.value}</p>
-                  <p className="text-xs text-muted-foreground">{s.label}</p>
+                  <p className="text-xs text-ink-faint">{s.label}</p>
                 </div>
               </div>
             </Card>
@@ -90,7 +90,7 @@ export default async function AdminBookingLeadsPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b bg-slate-50 text-left text-xs font-bold uppercase tracking-wide text-muted-foreground">
+              <tr className="border-b bg-slate-50 text-left text-xs font-bold uppercase tracking-wide text-ink-faint">
                 <th className="px-4 py-3">Nama</th>
                 <th className="px-4 py-3">Prodi</th>
                 <th className="px-4 py-3">Sesi</th>
@@ -104,7 +104,7 @@ export default async function AdminBookingLeadsPage() {
             <tbody className="divide-y">
               {leads.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-10 text-center text-muted-foreground">
+                  <td colSpan={8} className="px-4 py-10 text-center text-ink-faint">
                     Belum ada booking leads.
                   </td>
                 </tr>
@@ -129,7 +129,7 @@ export default async function AdminBookingLeadsPage() {
                           href={`https://wa.me/${lead.whatsapp}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center gap-1 text-xs font-medium text-[#8B0000] hover:underline"
+                          className="flex items-center gap-1 text-xs font-medium text-koreksi-deep hover:underline"
                         >
                           <Phone className="h-3.5 w-3.5" />
                           {lead.whatsapp}
@@ -138,7 +138,7 @@ export default async function AdminBookingLeadsPage() {
                       <td className="px-4 py-3">
                         <Badge variant={st.variant}>{st.label}</Badge>
                       </td>
-                      <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
+                      <td className="px-4 py-3 text-xs text-ink-faint whitespace-nowrap">
                         {formatDate(lead.created_at)}
                       </td>
                       <td className="px-4 py-3">

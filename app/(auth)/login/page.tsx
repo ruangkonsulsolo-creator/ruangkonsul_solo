@@ -77,9 +77,9 @@ export default function LoginPage() {
       <div>
         <div className="mb-8">
           <h2 className="text-2xl font-extrabold text-slate-900">Selamat datang kembali! 👋</h2>
-          <p className="mt-1.5 text-sm text-muted-foreground">
+          <p className="mt-1.5 text-sm text-ink-faint">
             Belum punya akun?{" "}
-            <Link href="/daftar" className="font-semibold text-[#8B0000] hover:text-brand-light">
+            <Link href="/daftar" className="font-semibold text-koreksi-deep hover:text-koreksi">
               Daftar gratis
             </Link>
           </p>
@@ -87,7 +87,7 @@ export default function LoginPage() {
 
         {/* Google */}
         <button type="button" onClick={handleGoogleLogin} disabled={googleLoading}
-          className="flex w-full items-center justify-center gap-3 rounded-xl border-2 border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-[#8B0000] hover:bg-brand-50 transition-all disabled:opacity-60">
+          className="flex w-full items-center justify-center gap-3 rounded-xl border-2 border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-ink hover:bg-paper-raised transition-all disabled:opacity-60">
           {googleLoading ? (
             <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-slate-700" />
           ) : (
@@ -103,7 +103,7 @@ export default function LoginPage() {
 
         <div className="my-5 flex items-center gap-3">
           <span className="flex-1 h-px bg-slate-200" />
-          <span className="text-xs text-muted-foreground font-medium">atau masuk dengan email</span>
+          <span className="text-xs text-ink-faint font-medium">atau masuk dengan email</span>
           <span className="flex-1 h-px bg-slate-200" />
         </div>
 
@@ -120,7 +120,7 @@ export default function LoginPage() {
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <Label htmlFor="password" className="text-sm font-semibold text-slate-700">Password</Label>
-              <Link href="/lupa-password" className="text-xs text-[#8B0000] hover:underline">Lupa password?</Link>
+              <Link href="/lupa-password" className="text-xs text-koreksi-deep hover:underline">Lupa password?</Link>
             </div>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" aria-hidden="true" />
@@ -145,9 +145,9 @@ export default function LoginPage() {
           </Button>
         </form>
 
-        <p className="mt-6 text-center text-xs text-muted-foreground">
+        <p className="mt-6 text-center text-xs text-ink-faint">
           Dengan masuk, kamu setuju dengan{" "}
-          <Link href="/syarat" className="text-[#8B0000] hover:underline">Syarat &amp; Ketentuan</Link>{" "}
+          <Link href="/syarat" className="text-koreksi-deep hover:underline">Syarat &amp; Ketentuan</Link>{" "}
           {BRAND.name}.
         </p>
       </div>

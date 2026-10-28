@@ -16,13 +16,13 @@ interface DetectionResultCardProps {
 // ─── Helper ──────────────────────────────────────────────────────────────────
 
 function similarityColor(pct: number): string {
-  if (pct < 20) return "text-brand bg-brand-50 border-brand-200";
+  if (pct < 20) return "text-koreksi-deep bg-paper-raised border-paper-edge";
   if (pct < 40) return "text-amber-700 bg-amber-50 border-amber-200";
   return "text-red-700 bg-red-50 border-red-200";
 }
 
 function similarityBarColor(pct: number): string {
-  if (pct < 20) return "bg-brand";
+  if (pct < 20) return "bg-ink";
   if (pct < 40) return "bg-amber-500";
   return "bg-red-500";
 }
@@ -61,7 +61,7 @@ function SegmentRow({ seg, index }: { seg: TextSegment; index: number }) {
         <span className="mt-0.5 flex-shrink-0">
           {isPlagiarized
             ? <AlertTriangle className="h-4 w-4 text-red-500" aria-hidden="true" />
-            : <CheckCircle2 className="h-4 w-4 text-brand" aria-hidden="true" />
+            : <CheckCircle2 className="h-4 w-4 text-koreksi-deep" aria-hidden="true" />
           }
         </span>
 
@@ -90,7 +90,7 @@ function SegmentRow({ seg, index }: { seg: TextSegment; index: number }) {
       {/* Detail matches */}
       {open && seg.matches.length > 0 && (
         <div className="border-t border-slate-100 px-4 py-3 space-y-2">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-ink-faint mb-2">
             Sumber Yang Mirip
           </p>
           {seg.matches.slice(0, 3).map((m) => (
@@ -106,7 +106,7 @@ function SegmentRow({ seg, index }: { seg: TextSegment; index: number }) {
                   {pctDisplay(m.similarity * 100)}
                 </span>
               </div>
-              <div className="flex items-center gap-2 text-muted-foreground">
+              <div className="flex items-center gap-2 text-ink-faint">
                 <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium capitalize">
                   {m.source_name}
                 </span>
@@ -115,7 +115,7 @@ function SegmentRow({ seg, index }: { seg: TextSegment; index: number }) {
                     href={m.source_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-0.5 text-brand hover:underline"
+                    className="flex items-center gap-0.5 text-koreksi-deep hover:underline"
                   >
                     Lihat sumber
                     <ExternalLink className="h-3 w-3" aria-hidden="true" />
@@ -128,7 +128,7 @@ function SegmentRow({ seg, index }: { seg: TextSegment; index: number }) {
             </div>
           ))}
           {seg.matches.length > 3 && (
-            <p className="text-xs text-muted-foreground pl-1">
+            <p className="text-xs text-ink-faint pl-1">
               +{seg.matches.length - 3} sumber lainnya
             </p>
           )}
@@ -136,7 +136,7 @@ function SegmentRow({ seg, index }: { seg: TextSegment; index: number }) {
       )}
 
       {open && seg.matches.length === 0 && (
-        <div className="border-t border-slate-100 px-4 py-3 text-xs text-muted-foreground">
+        <div className="border-t border-slate-100 px-4 py-3 text-xs text-ink-faint">
           Tidak ada sumber yang terdeteksi mirip.
         </div>
       )}
@@ -208,9 +208,9 @@ export function DetectionResultCard({
 
       {/* ── Top sources ── */}
       {result.top_sources.length > 0 && (
-        <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-card">
+        <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-lift">
           <div className="px-4 py-3 bg-slate-50 border-b border-slate-100 flex items-center gap-2">
-            <FileSearch className="h-4 w-4 text-brand" aria-hidden="true" />
+            <FileSearch className="h-4 w-4 text-koreksi-deep" aria-hidden="true" />
             <p className="text-xs font-bold uppercase tracking-wider text-slate-600">
               Sumber Teratas
             </p>
@@ -221,7 +221,7 @@ export function DetectionResultCard({
                 key={`${src.source_name}-${i}`}
                 className="flex items-center gap-3 px-4 py-3"
               >
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-50 text-brand text-[11px] font-extrabold flex-shrink-0">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-paper-raised text-koreksi-deep text-[11px] font-extrabold flex-shrink-0">
                   {i + 1}
                 </span>
                 <div className="flex-1 min-w-0">
@@ -232,7 +232,7 @@ export function DetectionResultCard({
                     <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium capitalize text-slate-500">
                       {src.source_name}
                     </span>
-                    <span className="text-[11px] text-muted-foreground">
+                    <span className="text-[11px] text-ink-faint">
                       {src.match_count} segmen · maks {pctDisplay(src.max_similarity * 100)}
                     </span>
                   </div>
@@ -242,7 +242,7 @@ export function DetectionResultCard({
                     href={src.source_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-shrink-0 text-brand hover:text-brand-light"
+                    className="flex-shrink-0 text-koreksi-deep hover:text-koreksi"
                     aria-label={`Buka sumber: ${src.title}`}
                   >
                     <ExternalLink className="h-4 w-4" />
@@ -269,7 +269,7 @@ export function DetectionResultCard({
           {result.segments.length > 5 && (
             <button
               onClick={() => setShowAllSegments((s) => !s)}
-              className="mt-3 flex items-center gap-1.5 text-sm font-semibold text-brand hover:text-brand-light transition-colors"
+              className="mt-3 flex items-center gap-1.5 text-sm font-semibold text-koreksi-deep hover:text-koreksi transition-colors"
             >
               {showAllSegments ? (
                 <><ChevronUp className="h-4 w-4" /> Sembunyikan segmen</>
@@ -285,7 +285,7 @@ export function DetectionResultCard({
       <div className="rounded-xl border border-slate-200 overflow-hidden">
         <button
           onClick={() => setShowMeta((m) => !m)}
-          className="flex w-full items-center justify-between px-4 py-3 text-xs font-semibold text-muted-foreground hover:bg-slate-50 transition-colors"
+          className="flex w-full items-center justify-between px-4 py-3 text-xs font-semibold text-ink-faint hover:bg-slate-50 transition-colors"
         >
           <span className="flex items-center gap-1.5">
             <Info className="h-3.5 w-3.5" aria-hidden="true" />

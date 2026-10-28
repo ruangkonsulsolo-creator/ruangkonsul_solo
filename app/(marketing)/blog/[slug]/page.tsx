@@ -261,11 +261,11 @@ function renderMarkdown(md: string): string {
     .replace(/^## (.+)$/gm, '<h2 class="text-xl font-extrabold text-slate-900 mt-8 mb-3">$1</h2>')
     .replace(/^### (.+)$/gm, '<h3 class="text-base font-bold text-slate-800 mt-5 mb-2">$1</h3>')
     .replace(/\*\*(.+?)\*\*/g, '<strong class="font-bold text-slate-900">$1</strong>')
-    .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" class="font-semibold text-brand hover:underline">$1</a>')
+    .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" class="font-semibold text-koreksi-deep hover:underline">$1</a>')
     .replace(/^- \[ \] (.+)$/gm, '<li class="flex items-start gap-2 text-slate-700"><span class="mt-1 h-4 w-4 rounded border border-slate-300 flex-shrink-0 inline-block"></span><span>$1</span></li>')
-    .replace(/^✅ (.+)$/gm, '<li class="flex items-start gap-2 text-slate-700"><span class="text-brand mt-0.5">✓</span><span>$1</span></li>')
-    .replace(/^(\d+)\. (.+)$/gm, '<li class="flex items-start gap-2 text-slate-700"><span class="font-bold text-brand flex-shrink-0">$1.</span><span>$2</span></li>')
-    .replace(/^- (.+)$/gm, '<li class="flex items-start gap-2 text-slate-700"><span class="mt-2 h-1.5 w-1.5 rounded-full bg-brand flex-shrink-0 inline-block"></span><span>$1</span></li>')
+    .replace(/^✅ (.+)$/gm, '<li class="flex items-start gap-2 text-slate-700"><span class="text-koreksi-deep mt-0.5">✓</span><span>$1</span></li>')
+    .replace(/^(\d+)\. (.+)$/gm, '<li class="flex items-start gap-2 text-slate-700"><span class="font-bold text-koreksi-deep flex-shrink-0">$1.</span><span>$2</span></li>')
+    .replace(/^- (.+)$/gm, '<li class="flex items-start gap-2 text-slate-700"><span class="mt-2 h-1.5 w-1.5 rounded-full bg-ink flex-shrink-0 inline-block"></span><span>$1</span></li>')
     .replace(/(<li .+<\/li>\n?)+/g, (match) => `<ul class="space-y-2 my-4 pl-1">${match}</ul>`)
     .replace(/\n\n/g, '</p><p class="text-slate-600 leading-relaxed my-3">')
     .replace(/^(?!<[h|u|l])(.+)$/gm, (line) =>
@@ -288,31 +288,31 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <Link href="/" className="flex items-center gap-2">
             <Image src="/logo-rks.png" alt="Ruang Konsul Solo" width={28} height={28} />
-            <span className="text-lg font-extrabold text-brand">{BRAND.shortName}</span>
+            <span className="text-lg font-extrabold text-koreksi-deep">{BRAND.shortName}</span>
           </Link>
           <div className="flex gap-2">
-            <Link href="/daftar" className="rounded-lg border-2 border-brand px-3 py-1.5 text-sm font-semibold text-brand hover:bg-brand-50 transition-colors">Daftar</Link>
-            <Link href="/login" className="rounded-lg bg-brand px-3 py-1.5 text-sm font-semibold text-white hover:bg-brand-light transition-colors">Login</Link>
+            <Link href="/daftar" className="rounded-lg border-2 border-ink px-3 py-1.5 text-sm font-semibold text-koreksi-deep hover:bg-paper-raised transition-colors">Daftar</Link>
+            <Link href="/login" className="rounded-lg bg-ink px-3 py-1.5 text-sm font-semibold text-white hover:bg-koreksi transition-colors">Login</Link>
           </div>
         </div>
       </nav>
 
       <article className="mx-auto max-w-2xl px-4 py-12">
         {/* Breadcrumb */}
-        <Link href="/blog" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-brand mb-6 transition-colors">
+        <Link href="/blog" className="inline-flex items-center gap-1.5 text-sm text-ink-faint hover:text-koreksi-deep mb-6 transition-colors">
           <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
           Kembali ke Blog
         </Link>
 
         {/* Category + meta */}
         <div className="flex flex-wrap items-center gap-3 mb-4">
-          <span className="rounded-full bg-brand text-white text-xs font-bold px-3 py-1">
+          <span className="rounded-full bg-ink text-white text-xs font-bold px-3 py-1">
             {article.category}
           </span>
-          <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1.5 text-xs text-ink-faint">
             <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" /> {article.date}
           </span>
-          <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1.5 text-xs text-ink-faint">
             <Clock className="h-3.5 w-3.5" aria-hidden="true" /> {article.readTime}
           </span>
         </div>
@@ -324,14 +324,14 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
 
         {/* Author */}
         <div className="flex items-center gap-2 mb-6 pb-6 border-b border-slate-100">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand text-white text-xs font-bold">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-ink text-white text-xs font-bold">
             K
           </div>
           <span className="text-sm font-medium text-slate-700">{article.author}</span>
         </div>
 
         {/* Cover image */}
-        <div className="relative aspect-[16/9] rounded-2xl overflow-hidden mb-8 shadow-card">
+        <div className="relative aspect-[16/9] rounded-2xl overflow-hidden mb-8 shadow-lift">
           <Image
             src={article.cover}
             alt={article.title}
@@ -349,12 +349,12 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
         />
 
         {/* CTA in-article */}
-        <div className="mt-10 rounded-2xl bg-brand-gradient p-6 text-center shadow-brand">
+        <div className="mt-10 rounded-2xl bg-ink p-6 text-center shadow-lift">
           <p className="text-white font-extrabold text-lg mb-1">Siap cek dokumenmu sekarang?</p>
           <p className="text-white/75 text-sm mb-4">Laporan siap dalam hitungan jam. Mulai dari Rp 25.000.</p>
           <Link
             href="/daftar"
-            className="inline-flex items-center gap-2 rounded-xl bg-white text-brand text-sm font-extrabold px-5 py-2.5 hover:bg-brand-50 transition-colors shadow-md"
+            className="inline-flex items-center gap-2 rounded-xl bg-white text-koreksi-deep text-sm font-extrabold px-5 py-2.5 hover:bg-paper-raised transition-colors shadow-md"
           >
             Mulai Cek Sekarang <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </Link>
@@ -370,20 +370,20 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
               <Link
                 key={slug}
                 href={`/blog/${slug}`}
-                className="group flex flex-col rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-card card-hover"
+                className="group flex flex-col rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-lift card-hover"
               >
                 <div className="relative aspect-[16/9]">
                   <Image src={a.cover} alt={a.title} fill className="object-cover object-top" sizes="33vw" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-                  <span className="absolute bottom-2 left-2 rounded-full bg-brand text-white text-[10px] font-bold px-2 py-0.5">
+                  <span className="absolute bottom-2 left-2 rounded-full bg-ink text-white text-[10px] font-bold px-2 py-0.5">
                     {a.category}
                   </span>
                 </div>
                 <div className="p-4">
-                  <h3 className="text-sm font-bold text-slate-900 group-hover:text-brand transition-colors line-clamp-2 mb-1">
+                  <h3 className="text-sm font-bold text-slate-900 group-hover:text-koreksi-deep transition-colors line-clamp-2 mb-1">
                     {a.title}
                   </h3>
-                  <p className="text-[11px] text-muted-foreground">{a.date}</p>
+                  <p className="text-[11px] text-ink-faint">{a.date}</p>
                 </div>
               </Link>
             ))}

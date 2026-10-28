@@ -1,56 +1,124 @@
-import { BookingForm } from "@/components/landing/BookingForm";
-import { BRAND } from "@/lib/brand";
-import Link from "next/link";
-import Image from "next/image";
 import type { Metadata } from "next";
+import KalenderBooking from "@/components/booking/KalenderBooking";
+import { createClient } from "@/lib/supabase/server";
+import { BRAND } from "@/lib/brand";
 
 export const metadata: Metadata = {
-  title: `Book Bimbingan | ${BRAND.name}`,
-  description: `Booking sesi bimbingan skripsi, tesis, lomba, atau olah data dengan mentor ${BRAND.name}.`,
+  title: "Pesan jadwal bimbingan",
+  description:
+    "Pilih mentor dan jam yang cocok, lalu kerjakan tulisanmu dengan arahan yang jelas. " +
+    "Sesi daring maupun tatap muka di Solo.",
 };
 
+export const dynamic = "force-dynamic";
+
+type MentorRow = {
+  id: string;
+  display_name: string | null;
+  bio: string | null;
+  specializations: string[] | null;
+  price_per_hour: number;
+  experience_years: number;
+  session_count: number;
+};
+
+const rupiah = new Intl.NumberFormat("id-ID", {
+  style: "currency",
+  currency: "IDR",
+  maximumFractionDigits: 0,
+});
+
 export default async function BookingPage() {
-  // Ambil mentor yang tersedia (tanpa login)
-  let mentors: any[] = [];
-  try {
-    const { createClient } = await import("@/lib/supabase/server");
-    const supabase = createClient();
-    const { data } = await supabase
-      .from("mentor_profiles")
-      .select("id, bio, specializations, price_per_hour, rating_avg, session_count, profiles(full_name)")
-      .eq("is_active", true)
-      .eq("is_available", true);
-    mentors = data ?? [];
-  } catch { /* fallback empty */ }
+  const supabase = createClient();
+
+  // Versi sebelumnya memfilter .eq("is_active", true) pada mentor_profiles,
+  // kolom yang tidak ada di tabel itu. Error-nya ditelan try/catch kosong,
+  // jadi daftar mentor selalu kosong tanpa ada yang menyadari. Kolom yang
+  // benar adalah is_available, dan error sekarang dicatat.
+  const { data, error } = await supabase
+    .from("mentor_profiles")
+    .select(
+      "id, display_name, bio, specializations, price_per_hour, experience_years, session_count"
+    )
+    .eq("is_available", true)
+    .order("session_count", { ascending: false });
+
+  if (error) console.error("[booking] gagal memuat mentor:", error.message);
+
+  const mentors = (data ?? []) as MentorRow[];
 
   return (
-    <div className="min-h-screen bg-white">
-      <nav className="sticky top-0 z-30 border-b border-slate-100 bg-white/95 backdrop-blur-sm shadow-sm">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-          <Link href="/" className="flex items-center gap-2">
-            <Image src={BRAND.logoPng} alt={BRAND.name} width={28} height={28} unoptimized className="object-contain" />
-            <span className="text-lg font-extrabold text-[#8B0000]">{BRAND.shortName}</span>
-          </Link>
-          <div className="flex items-center gap-2">
-            <Link href="/daftar" className="rounded-lg border-2 border-[#8B0000] px-3 py-1.5 text-sm font-semibold text-[#8B0000] hover:bg-brand-50 transition-colors">Daftar</Link>
-            <Link href="/login" className="rounded-lg bg-[#8B0000] px-3 py-1.5 text-sm font-semibold text-white hover:bg-brand-light transition-colors">Login</Link>
-          </div>
-        </div>
-      </nav>
-
-      <div className="mx-auto max-w-2xl px-4 py-12">
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="h-0.5 w-8 bg-[#8B0000] rounded-full" />
-            <span className="text-xs font-bold uppercase tracking-widest text-[#8B0000]">Bimbingan</span>
-          </div>
-          <h1 className="text-2xl font-extrabold text-slate-900 mb-2">Book Sesi Bimbingan</h1>
-          <p className="text-sm text-slate-500 leading-relaxed">
-            Isi form di bawah untuk memesan sesi bimbingan. Tidak perlu login — tim kami akan konfirmasi via WhatsApp.
+    <main className="mx-auto max-w-5xl px-5 py-12 md:px-8 md:py-20">
+      <header className="rail-layout">
+        <p className="rail-note">Bimbingan</p>
+        <div>
+          <h1 className="max-w-prose text-3xl md:text-4xl">
+            Pilih mentor dan jam yang cocok
+          </h1>
+          <p className="mt-4 max-w-measure text-lg text-ink-soft">
+            Sesi satu jam, daring atau tatap muka di {BRAND.address.split(",")[0]}.
+            Kamu yang menulis; mentor yang menunjukkan jalan keluar saat kamu
+            buntu.
           </p>
         </div>
-        <BookingForm mentors={mentors} />
-      </div>
-    </div>
+      </header>
+
+      {mentors.length > 0 && (
+        <section className="mt-14" aria-labelledby="mentor">
+          <div className="rail-layout">
+            <p className="rail-note" id="mentor">
+              Mentor
+            </p>
+            <ul className="divide-y divide-paper-edge border-y border-paper-edge">
+              {mentors.map((m) => (
+                <li key={m.id} className="flex flex-wrap gap-x-6 gap-y-2 py-4">
+                  <div className="min-w-0 flex-1">
+                    <h2 className="text-lg font-semibold">
+                      {m.display_name ?? "Mentor Ruang Konsul"}
+                    </h2>
+                    {m.specializations && m.specializations.length > 0 && (
+                      <p className="mt-0.5 text-sm text-ink-faint">
+                        {m.specializations.join(" · ")}
+                      </p>
+                    )}
+                    {m.bio && (
+                      <p className="mt-2 max-w-measure text-sm text-ink-soft">
+                        {m.bio}
+                      </p>
+                    )}
+                  </div>
+                  <div className="text-sm">
+                    <p data-numeric className="font-semibold">
+                      {rupiah.format(m.price_per_hour)}
+                      <span className="font-normal text-ink-faint"> / jam</span>
+                    </p>
+                    <p data-numeric className="mt-0.5 text-ink-faint">
+                      {m.session_count} sesi selesai
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
+
+      <section className="mt-14" aria-labelledby="jadwal">
+        <h2 id="jadwal" className="sr-only">
+          Jadwal tersedia
+        </h2>
+        <KalenderBooking />
+      </section>
+
+      <aside className="rail-layout mt-16 border-t border-paper-edge pt-6">
+        <p className="rail-note">Catatan</p>
+        <p className="max-w-measure text-sm text-ink-soft">
+          Bimbingan di Ruang Konsul berarti kamu dibimbing mengerjakan
+          tulisanmu sendiri — mentor membantu menajamkan rumusan masalah,
+          memilih metode, membaca draf, dan menyiapkanmu menghadapi sidang.
+          Kalau yang kamu cari adalah naskah jadi, kami bukan tempatnya.
+        </p>
+      </aside>
+    </main>
   );
 }

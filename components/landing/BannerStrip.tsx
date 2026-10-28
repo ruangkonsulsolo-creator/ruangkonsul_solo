@@ -69,7 +69,7 @@ export function BannerStrip() {
   const banner = banners[current];
 
   const inner = (
-    <div className="relative w-full aspect-[4/1] sm:aspect-[6/1] lg:aspect-[8/1] overflow-hidden bg-brand-50">
+    <div className="relative w-full aspect-[4/1] sm:aspect-[6/1] lg:aspect-[8/1] overflow-hidden bg-paper-raised">
       {banners.map((b, i) => (
         <div
           key={b.id}

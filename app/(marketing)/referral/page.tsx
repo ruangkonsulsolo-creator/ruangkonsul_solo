@@ -31,7 +31,7 @@ export default function ReferralPage() {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <Link href="/" className="flex items-center gap-2">
             <Image src={BRAND.logoPng} alt={BRAND.name} width={28} height={28} unoptimized className="object-contain" />
-            <span className="text-lg font-extrabold text-[#8B0000]">{BRAND.shortName}</span>
+            <span className="text-lg font-extrabold text-koreksi-deep">{BRAND.shortName}</span>
           </Link>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" asChild><Link href="/daftar">Daftar</Link></Button>
@@ -40,7 +40,7 @@ export default function ReferralPage() {
         </div>
       </nav>
 
-      <section className="bg-brand-gradient px-4 py-20 text-center relative overflow-hidden">
+      <section className="bg-ink px-4 py-20 text-center relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-10 h-40 w-40 rounded-full bg-white" />
           <div className="absolute bottom-10 right-10 h-60 w-60 rounded-full bg-white" />
@@ -70,7 +70,7 @@ export default function ReferralPage() {
             { val: "24 jam", label: "Kredit masuk otomatis" },
           ].map((s) => (
             <div key={s.label}>
-              <p className="text-3xl lg:text-4xl font-extrabold text-[#8B0000] mb-1">{s.val}</p>
+              <p className="text-3xl lg:text-4xl font-extrabold text-koreksi-deep mb-1">{s.val}</p>
               <p className="text-sm text-slate-500">{s.label}</p>
             </div>
           ))}
@@ -80,8 +80,8 @@ export default function ReferralPage() {
       <section className="mx-auto max-w-4xl px-4 py-16">
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-2 mb-3">
-            <span className="h-0.5 w-8 bg-[#8B0000] rounded-full" />
-            <span className="text-xs font-bold uppercase tracking-widest text-[#8B0000]">Cara Kerja</span>
+            <span className="h-0.5 w-8 bg-ink rounded-full" />
+            <span className="text-xs font-bold uppercase tracking-widest text-koreksi-deep">Cara Kerja</span>
           </div>
           <h2 className="text-2xl font-extrabold text-slate-900">Simpel Banget — 3 Langkah</h2>
         </div>
@@ -91,10 +91,10 @@ export default function ReferralPage() {
             return (
               <div key={s.num} className="flex flex-col items-center text-center">
                 <div className="relative mb-5">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#8B0000] shadow-brand">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-ink shadow-lift">
                     <Icon className="h-7 w-7 text-white" />
                   </div>
-                  <span className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-brand-dark text-white text-[10px] font-extrabold">{s.num}</span>
+                  <span className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-ink text-white text-[10px] font-extrabold">{s.num}</span>
                 </div>
                 <h3 className="font-extrabold text-slate-900 mb-2">{s.title}</h3>
                 <p className="text-sm text-slate-500 leading-relaxed">{s.desc}</p>
@@ -104,15 +104,15 @@ export default function ReferralPage() {
         </div>
       </section>
 
-      <section className="bg-brand-50 px-4 py-16">
+      <section className="bg-paper-raised px-4 py-16">
         <div className="mx-auto max-w-3xl">
           <div className="text-center mb-10">
             <h2 className="text-2xl font-extrabold text-slate-900">Kenapa Program Referral {BRAND.shortName}?</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {["Komisi 10% langsung — tidak ada minimum payout","Link referral unik yang mudah dibagikan","Tidak perlu bayar untuk bergabung — gratis!","Kredit bisa langsung digunakan untuk order","Dashboard real-time untuk pantau komisi","Tidak ada batas waktu atau batas jumlah referral"].map((b) => (
-              <div key={b} className="flex items-start gap-3 rounded-2xl bg-white border border-brand-100 px-4 py-3.5 shadow-card">
-                <CheckCircle2 className="h-5 w-5 text-[#8B0000] flex-shrink-0 mt-0.5" />
+              <div key={b} className="flex items-start gap-3 rounded-2xl bg-white border border-paper-edge px-4 py-3.5 shadow-lift">
+                <CheckCircle2 className="h-5 w-5 text-koreksi-deep flex-shrink-0 mt-0.5" />
                 <span className="text-sm text-slate-700 font-medium">{b}</span>
               </div>
             ))}
@@ -125,9 +125,9 @@ export default function ReferralPage() {
         <div className="space-y-3">
           {faqs.map((f) => (
             <details key={f.q} className="group rounded-2xl border border-slate-200 bg-white overflow-hidden">
-              <summary className="flex cursor-pointer items-center justify-between px-5 py-4 text-sm font-semibold text-slate-800 list-none hover:bg-brand-50 transition-colors">
+              <summary className="flex cursor-pointer items-center justify-between px-5 py-4 text-sm font-semibold text-slate-800 list-none hover:bg-paper-raised transition-colors">
                 {f.q}
-                <span className="text-muted-foreground group-open:rotate-180 transition-transform duration-200 text-lg leading-none" aria-hidden="true">↓</span>
+                <span className="text-ink-faint group-open:rotate-180 transition-transform duration-200 text-lg leading-none" aria-hidden="true">↓</span>
               </summary>
               <div className="border-t border-slate-100 px-5 py-4">
                 <p className="text-sm text-slate-600 leading-relaxed">{f.a}</p>
@@ -138,10 +138,10 @@ export default function ReferralPage() {
       </section>
 
       <section className="px-4 pb-20">
-        <div className="mx-auto max-w-3xl rounded-3xl bg-brand-gradient p-10 text-center shadow-brand">
+        <div className="mx-auto max-w-3xl rounded-3xl bg-ink p-10 text-center shadow-lift">
           <h2 className="text-2xl font-extrabold text-white mb-2">Mulai Referral Sekarang 🚀</h2>
           <p className="text-white/75 text-sm mb-6">Daftar gratis dan langsung dapatkan link referral unikmu.</p>
-          <Link href="/daftar" className="inline-flex items-center gap-2 rounded-xl bg-white text-[#8B0000] px-6 py-3 text-sm font-extrabold hover:bg-brand-50 transition-colors shadow-md">
+          <Link href="/daftar" className="inline-flex items-center gap-2 rounded-xl bg-white text-koreksi-deep px-6 py-3 text-sm font-extrabold hover:bg-paper-raised transition-colors shadow-md">
             Daftar Gratis &amp; Mulai <ArrowRight className="h-4 w-4" />
           </Link>
         </div>

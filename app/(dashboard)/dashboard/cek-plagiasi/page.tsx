@@ -37,26 +37,26 @@ export default async function CekPlagiasiPage({ searchParams }: { searchParams: 
   const isDone = focusedOrder?.status === "selesai";
 
   return (
-    <ServicePageShell icon={FileSearch} name="Cek Plagiasi" description="Deteksi kemiripan teks dokumenmu dengan laporan persentase lengkap dan highlight sumber." slaHours={service?.sla_hours ?? 24} formats="PDF, DOCX, DOC" maxSizeMb={50} colorClass="bg-brand-50 text-brand">
+    <ServicePageShell icon={FileSearch} name="Cek Plagiasi" description="Deteksi kemiripan teks dokumenmu dengan laporan persentase lengkap dan highlight sumber." slaHours={service?.sla_hours ?? 24} formats="PDF, DOCX, DOC" maxSizeMb={50} colorClass="bg-paper-raised text-koreksi-deep">
       <div className="space-y-8">
         {isDone && focusedOrder?.result && (
           <section aria-label="Hasil analisis plagiasi">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-bold text-slate-700">Hasil Analisis — <span className="font-mono text-xs text-muted-foreground">{focusedOrder.order_number}</span></h3>
+              <h3 className="text-sm font-bold text-slate-700">Hasil Analisis — <span className="font-mono text-xs text-ink-faint">{focusedOrder.order_number}</span></h3>
             </div>
             <DetectionResultCard result={focusedOrder.result} orderNumber={focusedOrder.order_number} />
             <div className="mt-5 pt-5 border-t border-slate-100">
-              <a href="/cek-plagiasi" className="text-sm font-semibold text-brand hover:underline">+ Analisis dokumen baru</a>
+              <a href="/cek-plagiasi" className="text-sm font-semibold text-koreksi-deep hover:underline">+ Analisis dokumen baru</a>
             </div>
           </section>
         )}
         {isProcessing && focusedOrder && (
-          <section aria-live="polite" className="rounded-2xl border border-brand-200 bg-brand-50 p-5">
+          <section aria-live="polite" className="rounded-2xl border border-paper-edge bg-paper-raised p-5">
             <div className="flex items-start gap-3">
-              <RefreshCw className="h-5 w-5 text-brand flex-shrink-0 mt-0.5 animate-spin" />
+              <RefreshCw className="h-5 w-5 text-koreksi-deep flex-shrink-0 mt-0.5 animate-spin" />
               <div>
-                <p className="text-sm font-semibold text-brand-dark">Sedang dianalisis…</p>
-                <p className="text-xs text-brand mt-0.5">Pesanan <span className="font-mono font-bold">{focusedOrder.order_number}</span> sedang diproses.</p>
+                <p className="text-sm font-semibold text-ink">Sedang dianalisis…</p>
+                <p className="text-xs text-koreksi-deep mt-0.5">Pesanan <span className="font-mono font-bold">{focusedOrder.order_number}</span> sedang diproses.</p>
               </div>
             </div>
             <meta httpEquiv="refresh" content="5" />
@@ -75,7 +75,7 @@ export default async function CekPlagiasiPage({ searchParams }: { searchParams: 
         )}
         {(!focusedOrder || isDone || isFailed) && (
           <section>
-            {(isDone || isFailed) && <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">Upload Dokumen Baru</p>}
+            {(isDone || isFailed) && <p className="text-xs font-bold uppercase tracking-widest text-ink-faint mb-4">Upload Dokumen Baru</p>}
             <OrderForm serviceSlug="plagiasi" serviceName="Cek Plagiasi" servicePrice={service?.price_idr ?? 35000} activeQuota={quota ?? null} maxFileSizeMb={50} />
           </section>
         )}

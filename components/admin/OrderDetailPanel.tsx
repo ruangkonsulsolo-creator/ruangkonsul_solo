@@ -107,7 +107,7 @@ export function OrderDetailPanel({ order, documentDownloadUrl }: OrderDetailPane
           <div className="flex items-start justify-between">
             <div>
               <h3 className="text-lg font-bold text-slate-900">{order.order_number}</h3>
-              <p className="text-sm text-muted-foreground mt-0.5">
+              <p className="text-sm text-ink-faint mt-0.5">
                 {new Date(order.created_at).toLocaleString("id-ID", {
                   dateStyle: "long", timeStyle: "short",
                 })}
@@ -119,16 +119,16 @@ export function OrderDetailPanel({ order, documentDownloadUrl }: OrderDetailPane
           {/* Info grid */}
           <div className="grid grid-cols-2 gap-4 rounded-lg border p-4 text-sm">
             <div>
-              <p className="text-xs text-muted-foreground">User</p>
+              <p className="text-xs text-ink-faint">User</p>
               <p className="font-medium">{order.profiles?.full_name ?? "-"}</p>
-              <p className="text-xs text-muted-foreground">{order.profiles?.whatsapp ?? ""}</p>
+              <p className="text-xs text-ink-faint">{order.profiles?.whatsapp ?? ""}</p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">Layanan</p>
+              <p className="text-xs text-ink-faint">Layanan</p>
               <p className="font-medium">{order.services?.name ?? "-"}</p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">Pembayaran</p>
+              <p className="text-xs text-ink-faint">Pembayaran</p>
               <p className="font-medium">
                 {order.price_idr === 0
                   ? "Kuota"
@@ -136,7 +136,7 @@ export function OrderDetailPanel({ order, documentDownloadUrl }: OrderDetailPane
               </p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">Metode</p>
+              <p className="text-xs text-ink-faint">Metode</p>
               <p className="font-medium capitalize">{order.payment_method ?? "-"}</p>
             </div>
           </div>
@@ -156,7 +156,7 @@ export function OrderDetailPanel({ order, documentDownloadUrl }: OrderDetailPane
                 Unduh Dokumen
               </a>
             ) : (
-              <p className="text-xs text-muted-foreground">Link unduh tidak tersedia.</p>
+              <p className="text-xs text-ink-faint">Link unduh tidak tersedia.</p>
             )}
           </div>
 
@@ -164,7 +164,7 @@ export function OrderDetailPanel({ order, documentDownloadUrl }: OrderDetailPane
           <div className="rounded-lg border p-4">
             <p className="text-sm font-semibold text-slate-800 mb-2">Upload Laporan Hasil</p>
             {order.report_storage_path && (
-              <p className="mb-2 text-xs text-brand flex items-center gap-1">
+              <p className="mb-2 text-xs text-koreksi-deep flex items-center gap-1">
                 <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
                 Laporan sudah diupload
                 {order.report_uploaded_at && ` (${new Date(order.report_uploaded_at).toLocaleDateString("id-ID")})`}
@@ -212,7 +212,7 @@ export function OrderDetailPanel({ order, documentDownloadUrl }: OrderDetailPane
               value={adminNotes}
               onChange={(e) => setAdminNotes(e.target.value)}
               rows={3}
-              className="w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand resize-none"
+              className="w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-koreksi resize-none"
               placeholder="Catatan untuk referensi internal..."
             />
           </div>
@@ -240,7 +240,7 @@ export function OrderDetailPanel({ order, documentDownloadUrl }: OrderDetailPane
 
             {(order.status === "diproses" || order.status === "dibayar") && (
               <Button
-                className="w-full gap-2 bg-brand hover:bg-brand-light"
+                className="w-full gap-2 bg-ink hover:bg-koreksi"
                 onClick={() => updateStatus("selesai")}
                 disabled={!!submitting || !order.report_storage_path}
               >
@@ -292,7 +292,7 @@ export function OrderDetailPanel({ order, documentDownloadUrl }: OrderDetailPane
           {/* Status timeline ringkas */}
           <div className="rounded-lg border p-4">
             <p className="text-xs font-semibold text-slate-700 mb-3">Timeline</p>
-            <div className="space-y-1.5 text-xs text-muted-foreground">
+            <div className="space-y-1.5 text-xs text-ink-faint">
               <p>📥 Pesanan dibuat: {new Date(order.created_at).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })}</p>
               {order.completed_at && (
                 <p>✅ Selesai: {new Date(order.completed_at).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })}</p>

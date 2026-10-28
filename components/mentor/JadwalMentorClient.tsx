@@ -78,10 +78,10 @@ export function JadwalMentorClient({ mentorId, isAvailable: initAvail, slots: in
     <>
       <div className="space-y-5">
         {/* Toggle ketersediaan */}
-        <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-4 shadow-card">
+        <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-4 shadow-lift">
           <div>
             <p className="font-semibold text-slate-900">Status Ketersediaan</p>
-            <p className="text-xs text-muted-foreground">Aktifkan untuk bisa menerima booking dari klien</p>
+            <p className="text-xs text-ink-faint">Aktifkan untuk bisa menerima booking dari klien</p>
           </div>
           <button onClick={toggleAvailability} disabled={toggling}
             className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold transition-colors ${available ? "bg-green-100 text-green-700 hover:bg-green-200" : "bg-slate-100 text-slate-500 hover:bg-slate-200"}`}>
@@ -91,26 +91,26 @@ export function JadwalMentorClient({ mentorId, isAvailable: initAvail, slots: in
         </div>
 
         {/* Form tambah slot */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card space-y-3">
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-lift space-y-3">
           <p className="text-sm font-bold text-slate-800">Tambah Slot Waktu</p>
           <div className="grid grid-cols-3 gap-3">
             <div className="space-y-1">
               <label className="text-[10px] font-bold uppercase text-slate-500">Tanggal</label>
               <input type="date" value={form.date} min={new Date().toISOString().slice(0,10)}
                 onChange={(e) => setForm({ ...form, date: e.target.value })}
-                className="flex h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm focus:ring-2 focus:ring-brand focus:outline-none" />
+                className="flex h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm focus:ring-2 focus:ring-koreksi focus:outline-none" />
             </div>
             <div className="space-y-1">
               <label className="text-[10px] font-bold uppercase text-slate-500">Mulai</label>
               <select value={form.start} onChange={(e) => setForm({ ...form, start: e.target.value })}
-                className="flex h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm focus:ring-2 focus:ring-brand focus:outline-none">
+                className="flex h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm focus:ring-2 focus:ring-koreksi focus:outline-none">
                 {JAM_OPTIONS.map((j) => <option key={j} value={j}>{j} WIB</option>)}
               </select>
             </div>
             <div className="space-y-1">
               <label className="text-[10px] font-bold uppercase text-slate-500">Selesai</label>
               <select value={form.end} onChange={(e) => setForm({ ...form, end: e.target.value })}
-                className="flex h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm focus:ring-2 focus:ring-brand focus:outline-none">
+                className="flex h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm focus:ring-2 focus:ring-koreksi focus:outline-none">
                 {JAM_OPTIONS.filter((j) => j > form.start).map((j) => <option key={j} value={j}>{j} WIB</option>)}
               </select>
             </div>
@@ -125,15 +125,15 @@ export function JadwalMentorClient({ mentorId, isAvailable: initAvail, slots: in
         {Object.keys(byDate).length === 0 ? (
           <div className="rounded-2xl border border-dashed border-slate-200 bg-white py-12 text-center">
             <CalendarDays className="h-8 w-8 text-slate-200 mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground">Belum ada slot. Tambahkan slot waktu di atas.</p>
+            <p className="text-sm text-ink-faint">Belum ada slot. Tambahkan slot waktu di atas.</p>
           </div>
         ) : Object.entries(byDate).sort().map(([date, daySlots]) => (
-          <div key={date} className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-card">
+          <div key={date} className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-lift">
             <div className="flex items-center justify-between px-5 py-3 bg-slate-50 border-b border-slate-100">
               <p className="text-sm font-bold text-slate-800">
                 {new Date(date + "T00:00:00").toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long" })}
               </p>
-              <p className="text-xs text-muted-foreground">{daySlots.length} slot</p>
+              <p className="text-xs text-ink-faint">{daySlots.length} slot</p>
             </div>
             <div className="divide-y divide-slate-100">
               {daySlots.sort((a, b) => a.slot_start.localeCompare(b.slot_start)).map((slot) => {
