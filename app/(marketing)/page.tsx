@@ -17,11 +17,17 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: `${BRAND.name} — Bimbingan Skripsi & Tesis Solo`,
   description:
-    "Layanan bimbingan skripsi, tesis, cek plagiasi Turnitin, AI Detector, parafrase, dan jasa akademik terpercaya di Solo. Hubungi kami via WhatsApp.",
+    "Bimbingan skripsi dan tesis bersama mentor berpengalaman di Solo, Jogja, "
+    + "Jakarta dan Bekasi. Pilih mentor, pesan jadwal, kerjakan tulisanmu sendiri "
+    + "dengan arahan yang jelas.",
 };
 
 /* ─── data ──────────────────────────────────────────────────────────────────── */
 const LAYANAN = [
+  { icon: GraduationCap, name: "Bimbingan Skripsi",  sub: "Sesi 1-on-1 dengan mentor", harga: "Rp 150.000", satuan: "per sesi",         href: "/booking",  featured: true  },
+  { icon: BookOpenCheck, name: "Paket Bulanan",      sub: "4 sesi, mentor tetap",     harga: "Rp 500.000", satuan: "per bulan",        href: "/booking",  featured: false },
+  { icon: PenLine,       name: "Pendampingan Revisi", sub: "Bedah catatan pembimbing", harga: "Rp 150.000", satuan: "per sesi",         href: "/booking",  featured: false },
+  { icon: FileSearch,    name: "Publikasi Jurnal",   sub: "Pilih jurnal, siapkan naskah", harga: "Rp 350.000", satuan: "per pendampingan", href: "/layanan",  featured: false },
 ];
 
 const JASA = [
@@ -31,15 +37,15 @@ const JASA = [
 
 const TESTIMONIALS = [
   { name: "Rizky A.",    univ: "UNS",  text: "Bimbingan skripsinya sangat sabar dan detail. BAB 1-5 selesai 6 minggu, langsung ACC!",  init: "RA", star: 5 },
-  { name: "Dita S.",     univ: "UGM",  text: "Harga terjangkau, laporan Turnitin cepat dan akurat. Recommended banget!",               init: "DS", star: 5 },
+  { name: "Dita S.",     univ: "UGM",  text: "Rumusan masalahku diputar balik sampai akhirnya masuk akal. Proposal ACC sekali maju.", init: "DS", star: 5 },
   { name: "Budi W.",     univ: "ITS",  text: "Bimbingan SPSS beres 2 sesi, interpretasi BAB 4 jadi jauh lebih mudah dipahami.",        init: "BW", star: 5 },
 ];
 
 const FAQS = [
-  { q: "Berapa lama proses cek Turnitin?",        a: "Hasil cek Turnitin siap dalam 24 jam kerja setelah pembayaran dikonfirmasi." },
+  { q: "Satu sesi berapa lama?",                  a: "Enam puluh menit, daring atau tatap muka di Solo. Bisa diperpanjang kalau slot mentor berikutnya kosong." },
   { q: "Apakah bisa konsultasi dulu sebelum bayar?", a: "Bisa! Hubungi kami via WhatsApp untuk konsultasi gratis sebelum memutuskan layanan." },
-  { q: "Format file apa yang diterima?",           a: "PDF, DOCX, dan DOC dengan ukuran maksimum 50 MB." },
-  { q: "Apakah dokumen saya aman?",                a: "Ya. Dokumen disimpan di server terenkripsi dan hanya diakses oleh tim kami." },
+  { q: "Apakah skripsi saya dikerjakan tim kalian?", a: "Tidak. Kamu yang menulis; mentor membantu menajamkan arah, metode, dan argumenmu. Kami tidak menerima pesanan naskah jadi." },
+  { q: "Apakah draf saya aman?",                   a: "Draf hanya dibaca mentor yang menangani sesimu, disimpan di penyimpanan terenkripsi, dan tidak pernah dibagikan ke pihak lain." },
   { q: "Bagaimana cara booking bimbingan?",        a: "Daftar akun, pilih mentor, pilih slot jadwal, lakukan pembayaran — selesai." },
 ];
 
@@ -97,17 +103,16 @@ export default function LandingPage() {
               🎓 Dipercaya 1.000+ Mahasiswa di Solo & Seluruh Indonesia
             </Badge>
             <h1 className="text-4xl lg:text-5xl xl:text-6xl font-extrabold leading-tight text-slate-900">
-              Cek{" "}
-              <span className="text-koreksi-deep">Turnitin</span>
+              Skripsimu macet
               <br />
-              dan{" "}
-              <span className="text-koreksi-deep">AI Detector</span>
+              di bab yang sama
               <br />
-              <span className="text-slate-700">No Repository</span>
+              <span className="text-slate-700">sejak dua bulan lalu</span>
             </h1>
             <p className="mt-4 text-lg text-slate-500 max-w-lg mx-auto lg:mx-0 leading-relaxed">
-              Jasa Cek Turnitin, AI, Drillbit, dan Parafrase. Cuma upload dokumen dan
-              langsung terima laporan. Jaminan No Repository dan dapat diakses kapan saja!
+              Bukan karena kamu tidak mampu, tapi karena tidak ada yang menunjukkan
+              jalan keluarnya. Pilih mentor, pesan satu sesi, dan selesaikan bagian itu
+              minggu ini.
             </p>
 
             {/* Stats */}
@@ -152,11 +157,11 @@ export default function LandingPage() {
       <section id="layanan" className="mx-auto max-w-6xl px-4 py-20">
         <SectionLabel>Layanan Utama</SectionLabel>
         <h2 className="text-3xl lg:text-4xl font-extrabold text-slate-900 mb-2">
-          Layanan Cek Turnitin, Cek AI,<br className="hidden sm:block" /> Drillbit, dan Parafrase
+          Bimbingan yang membuatmu<br className="hidden sm:block" /> sanggup menulisnya sendiri
         </h2>
         <p className="text-slate-500 max-w-xl mb-10">
-          Ruang Konsul Solo hadir untuk mendukung setiap kebutuhan akademikmu — dari tugas kuliah,
-          skripsi, tesis, hingga artikel ilmiah.
+          Mentor membantumu melewati bagian yang macet — rumusan masalah, pemilihan metode,
+          olah data, persiapan sidang. Kamu tetap penulis karyamu.
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           {LAYANAN.map((l) => {
@@ -172,9 +177,9 @@ export default function LandingPage() {
                 </div>
                 <h3 className={`text-lg font-bold mb-0.5 ${l.featured ? "text-white" : "text-slate-900"}`}>{l.name}</h3>
                 <p className={`text-sm mb-3 ${l.featured ? "text-white/70" : "text-slate-400"}`}>{l.sub}</p>
-                <p className={`text-sm font-semibold mb-4 ${l.featured ? "text-white" : "text-koreksi-deep"}`}>{l.harga}<span className={`text-xs font-normal ${l.featured ? "text-white/60" : "text-slate-400"}`}> / file</span></p>
+                <p className={`text-sm font-semibold mb-4 ${l.featured ? "text-white" : "text-koreksi-deep"}`}>{l.harga}<span className={`text-xs font-normal ${l.featured ? "text-white/60" : "text-slate-400"}`}> {l.satuan}</span></p>
                 <Link href={l.href} className={`inline-flex items-center gap-1.5 text-sm font-semibold transition-colors ${l.featured ? "text-white hover:text-white/80" : "text-koreksi-deep hover:text-koreksi"}`}>
-                  Klik di sini <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                  Lihat jadwal <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </Link>
               </div>
             );
@@ -419,12 +424,12 @@ export default function LandingPage() {
       <section className="px-4 py-8 mb-0">
         <div className="mx-auto max-w-4xl rounded-3xl bg-ink p-10 lg:p-14 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-lift">
           <div className="text-center sm:text-left">
-            <h2 className="text-2xl lg:text-3xl font-extrabold text-white mb-2">Siap cek dokumenmu? 📚</h2>
-            <p className="text-white/75 text-sm">Upload sekarang, laporan bisa kamu unduh dalam hitungan jam.</p>
+            <h2 className="text-2xl lg:text-3xl font-extrabold text-white mb-2">Mulai dari satu sesi</h2>
+            <p className="text-white/75 text-sm">Pilih mentor dan jam yang cocok. Tidak ada pembayaran sebelum jadwalmu dikonfirmasi.</p>
           </div>
           <Button variant="dark" size="lg" asChild className="flex-shrink-0">
-            <Link href="/daftar" className="gap-2">
-              Cek Sekarang <ArrowRight className="h-4 w-4" />
+            <Link href="/booking" className="gap-2">
+              Lihat jadwal mentor <ArrowRight className="h-4 w-4" />
             </Link>
           </Button>
         </div>
