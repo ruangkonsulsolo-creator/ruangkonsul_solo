@@ -16,6 +16,7 @@ const navItems = [
   { label: "Pesanan",         href: "/admin/pesanan",      icon: ClipboardList },
   { label: "Booking Leads",   href: "/admin/booking-leads",icon: Phone },
   { label: "Users",           href: "/admin/users",        icon: Users },
+  { label: "Kinerja Mentor",  href: "/admin/mentor",       icon: GraduationCap },
   { label: "Laporan",         href: "/admin/laporan",      icon: BarChart3 },
   { type: "section" as const, label: "Konten" },
   { label: "Kelas Bimbingan", href: "/admin/bimbingan",    icon: GraduationCap },

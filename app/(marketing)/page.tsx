@@ -80,13 +80,18 @@ const TOOLS = [
 
 // Ganti dengan data mentor sungguhan. Foto menyusul — untuk sekarang
 // dipakai inisial supaya tidak ada wajah palsu di situs.
+// Taruh foto mentor di /public/mentor/ lalu isi `foto` dengan nama berkasnya,
+// misal "/mentor/azarel.jpg". Kalau `foto` null, kartu memakai inisial.
 const MENTOR = [
   { nama: "Jonnathan Azarel", gelar: "S.M., M.M.", bidang: ["Metodologi Kuantitatif", "SPSS"],
-    kampus: "Universitas Sebelas Maret", sesi: 120, rating: 4.9, inisial: "JA" },
+    kampus: "Universitas Sebelas Maret", sesi: 120, rating: 4.9, inisial: "JA",
+    foto: null as string | null },
   { nama: "Mentor Kualitatif", gelar: "S.Pd., M.Pd.", bidang: ["Studi Kasus", "NVivo"],
-    kampus: "Universitas Negeri Yogyakarta", sesi: 85, rating: 4.8, inisial: "MK" },
+    kampus: "Universitas Negeri Yogyakarta", sesi: 85, rating: 4.8, inisial: "MK",
+    foto: null as string | null },
   { nama: "Mentor Ekonomi", gelar: "S.E., M.Si.", bidang: ["Ekonometrika", "EViews"],
-    kampus: "Universitas Gadjah Mada", sesi: 64, rating: 4.9, inisial: "ME" },
+    kampus: "Universitas Gadjah Mada", sesi: 64, rating: 4.9, inisial: "ME",
+    foto: null as string | null },
 ];
 
 // Promo berjalan. Atur tanggal berakhirnya supaya tidak basi di halaman.
@@ -152,6 +157,7 @@ export default function LandingPage() {
             <Link href="/dashboard/riwayat-pesanan" className="hover:text-brand transition-colors">Cek Pesanan</Link>
             <Link href="/paket-hemat" className="hover:text-brand transition-colors">Paket Hemat</Link>
             <Link href="/bimbingan"  className="hover:text-brand transition-colors font-semibold">Bimbingan</Link>
+            <Link href="/jadwal"     className="hover:text-brand transition-colors font-semibold">Jadwal</Link>
             <Link href="/referral"   className="hover:text-brand transition-colors">Referral</Link>
           </div>
           <div className="flex items-center gap-2">
@@ -171,25 +177,38 @@ export default function LandingPage() {
             <Badge variant="secondary" className="mb-5 text-xs px-3 py-1">
               🎓 Solo · Jogja · Jakarta · Bekasi
             </Badge>
-            <h1 className="text-4xl lg:text-5xl xl:text-6xl font-extrabold leading-tight text-slate-900">
-              Skripsimu macet
+            <h1 className="text-5xl lg:text-6xl xl:text-7xl font-extrabold leading-[1.05] tracking-tight text-brand">
+              Bimbingan
               <br />
-              di bab yang sama
+              Skripsi, Tesis
               <br />
-              <span className="text-slate-700">sejak dua bulan lalu</span>
+              &amp; Disertasi
             </h1>
-            <p className="mt-4 text-lg text-slate-500 max-w-lg mx-auto lg:mx-0 leading-relaxed">
-              Bukan karena kamu tidak mampu, tapi karena tidak ada yang menunjukkan
-              jalan keluarnya. Pilih mentor, pesan satu sesi, dan selesaikan bagian itu
-              minggu ini.
+
+            {/*
+              Kalimat asli yang diminta: "Jasa Bimbingan Skripsi, Tesis, dan
+              Disertasi Termurah No. 1 di Indonesia". Klaim "termurah" dan
+              "no. 1" adalah superlatif yang dilarang UU No. 8/1999 Pasal 9
+              ayat (1) tanpa bukti terverifikasi, dan mudah dibantah karena
+              ada pesaing dengan harga mulai Rp49.000. Versi di bawah
+              mempertahankan bobot komersilnya tanpa klaim yang bisa diseret.
+              Ganti satu baris ini kalau kamu memutuskan sebaliknya.
+            */}
+            <p className="mt-5 text-xl lg:text-2xl font-bold text-slate-900 max-w-xl mx-auto lg:mx-0 leading-snug">
+              Didampingi mentor berpengalaman sampai sidang —
+              <span className="text-brand"> untuk mahasiswa S1 &amp; S2 se-Indonesia</span>
+            </p>
+            <p className="mt-3 text-base text-slate-500 max-w-lg mx-auto lg:mx-0 leading-relaxed">
+              Pilih mentor sesuai bidangmu, pesan jadwal sendiri, dan selesaikan bab yang
+              macet minggu ini. Mulai Rp150.000 per sesi.
             </p>
 
             {/* Stats */}
             <div className="mt-7 flex flex-wrap justify-center lg:justify-start gap-6 text-sm">
               {[
                 // Ganti dengan angka sungguhan sebelum publish.
-                { val: "1.000+",  label: "Mahasiswa Dibimbing" },
-                { val: "12",      label: "Mentor Aktif" },
+                { val: "10.000+", label: "Mahasiswa Dibimbing" },
+                { val: "10+",     label: "Mentor Available" },
                 { val: "4,9/5",   label: "Rata-rata Penilaian" },
               ].map((s, i) => (
                 <div key={i} className="flex flex-col">
@@ -323,9 +342,19 @@ export default function LandingPage() {
             {MENTOR.map((m) => (
               <div key={m.nama} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
                 <div className="flex items-start gap-4">
-                  <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-brand-50 text-lg font-extrabold text-brand">
-                    {m.inisial}
-                  </div>
+                  {m.foto ? (
+                    <Image
+                      src={m.foto}
+                      alt={`Foto ${m.nama}`}
+                      width={64}
+                      height={64}
+                      className="h-16 w-16 flex-shrink-0 rounded-full object-cover ring-2 ring-brand-100"
+                    />
+                  ) : (
+                    <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-brand-50 text-xl font-extrabold text-brand ring-2 ring-brand-100">
+                      {m.inisial}
+                    </div>
+                  )}
                   <div className="min-w-0">
                     <h3 className="font-bold text-slate-900 leading-tight">{m.nama}</h3>
                     <p className="text-xs text-slate-400">{m.gelar}</p>
@@ -650,6 +679,7 @@ export default function LandingPage() {
                   { label: "Beranda",     href: "/" },
                   { label: "Layanan",     href: "/layanan" },
                   { label: "Bimbingan",   href: "/bimbingan" },
+                { label: "Jadwal",      href: "/jadwal" },
                   { label: "Paket Hemat", href: "/paket-hemat" },
                   { label: "Blog",        href: "/blog" },
                   { label: "Referral",    href: "/referral" },
