@@ -285,7 +285,7 @@ export default function LandingPage() {
                   <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" aria-hidden="true" />
                 ))}
               </div>
-              <p className="text-sm text-slate-700 leading-relaxed mb-4">"{t.text}"</p>
+              <p className="text-sm text-slate-700 leading-relaxed mb-4">&ldquo;{t.text}&rdquo;</p>
               <div className="flex items-center gap-3">
                 <div className="flex h-9 w-9 items-center justify-center rounded-full bg-ink text-white text-xs font-bold">{t.init}</div>
                 <div>

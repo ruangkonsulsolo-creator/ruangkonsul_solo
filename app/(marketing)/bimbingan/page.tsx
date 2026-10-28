@@ -210,7 +210,7 @@ export default function BimbinganPage() {
             ].map((t) => (
               <div key={t.n} className="rounded-2xl bg-white border border-slate-200 p-5 shadow-lift">
                 <div className="flex gap-0.5 mb-3">{[1,2,3,4,5].map((i) => <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />)}</div>
-                <p className="text-sm text-slate-700 leading-relaxed mb-4">"{t.t}"</p>
+                <p className="text-sm text-slate-700 leading-relaxed mb-4">&ldquo;{t.t}&rdquo;</p>
                 <div className="flex items-center gap-2">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-ink text-white text-xs font-bold">{t.init}</div>
                   <div><p className="text-sm font-semibold">{t.n}</p><p className="text-xs text-ink-faint">{t.u}</p></div>

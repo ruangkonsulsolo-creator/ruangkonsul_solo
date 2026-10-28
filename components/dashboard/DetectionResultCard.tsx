@@ -123,7 +123,7 @@ function SegmentRow({ seg, index }: { seg: TextSegment; index: number }) {
                 )}
               </div>
               <p className="mt-1.5 text-slate-500 line-clamp-2 italic">
-                "{m.chunk_text}"
+                &ldquo;{m.chunk_text}&rdquo;
               </p>
             </div>
           ))}
