@@ -11,10 +11,6 @@ import {
 import { BRAND } from "@/lib/brand";
 
 const LAYANAN = [
-  { href: "/cek-plagiasi",  label: "Cek Turnitin",   desc: "Laporan similarity",   icon: FileSearch,   harga: 35000 },
-  { href: "/cek-ai",        label: "AI Detector",    desc: "Deteksi tulisan AI",   icon: Bot,          harga: 25000 },
-  { href: "/cek-drillbit",  label: "DrillBit",       desc: "Mesin DrillBit",       icon: BookOpenCheck,harga: 45000 },
-  { href: "/jasa-parafrase",label: "Parafrase",      desc: "Turunkan plagiasi",    icon: PenLine,      harga: 75000 },
   { href: "/bimbingan",     label: "Bimbingan",      desc: "Skripsi, lomba, data", icon: GraduationCap,harga: 0     },
 ];
 
@@ -163,7 +159,6 @@ export default async function CustomerDashboardPage() {
           <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-200 bg-white py-12 text-center">
             <Clock className="h-8 w-8 text-slate-200" />
             <p className="text-sm text-ink-faint">Belum ada pesanan. Mulai dari layanan di atas.</p>
-            <Button asChild size="sm"><Link href="/cek-plagiasi">Cek Sekarang</Link></Button>
           </div>
         ) : (
           <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-lift">

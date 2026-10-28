@@ -31,12 +31,6 @@ const STATIC_BANNERS: Banner[] = [
     image_url: "/promo-konsultasi.jpeg",
     link_url: "/bimbingan",
   },
-  {
-    id: "static-4",
-    title: "Jasa Parafrase Profesional",
-    image_url: "/promo-parafrase.jpeg",
-    link_url: "/jasa-parafrase",
-  },
 ];
 
 const INTERVAL = 4500;

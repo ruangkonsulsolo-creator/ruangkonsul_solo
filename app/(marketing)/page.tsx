@@ -22,10 +22,6 @@ export const metadata: Metadata = {
 
 /* ─── data ──────────────────────────────────────────────────────────────────── */
 const LAYANAN = [
-  { icon: FileSearch,    name: "Cek Turnitin",   sub: "Laporan Similarity",  harga: "Rp 35.000", href: "/cek-plagiasi",  featured: false },
-  { icon: Bot,           name: "AI Detector",    sub: "GPT Zero Detector",   harga: "Rp 25.000", href: "/cek-ai",        featured: true  },
-  { icon: BookOpenCheck, name: "Cek DrillBit",   sub: "Plagiasi + AI",       harga: "Rp 45.000", href: "/cek-drillbit",  featured: false },
-  { icon: PenLine,       name: "Jasa Parafrase", sub: "Turunkan Plagiasi",   harga: "Rp 75.000", href: "/jasa-parafrase",featured: false },
 ];
 
 const JASA = [
@@ -504,10 +500,6 @@ export default function LandingPage() {
               <p className="text-[11px] font-bold uppercase tracking-widest text-koreksi-deep mb-4">Produk &amp; Fitur</p>
               <ul className="space-y-2.5">
                 {[
-                  { label: "Cek Turnitin",       href: "/cek-plagiasi" },
-                  { label: "AI Detector",         href: "/cek-ai" },
-                  { label: "Cek DrillBit",        href: "/cek-drillbit" },
-                  { label: "Jasa Parafrase",      href: "/jasa-parafrase" },
                   { label: "Jasa Revisi",         href: "/layanan" },
                   { label: "Jasa PowerPoint",     href: "/layanan" },
                   { label: "Bimbingan Skripsi",   href: "/bimbingan" },

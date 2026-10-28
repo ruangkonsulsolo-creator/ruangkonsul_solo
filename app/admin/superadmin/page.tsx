@@ -61,7 +61,6 @@ async function getData() {
       { id: "bnr-1", title: "Kelas Bimbingan Private Skripsi",  image_url: "/promo-bimbingan.jpeg",  link_url: "/bimbingan",      sort_order: 0, is_active: true  },
       { id: "bnr-2", title: "Paket Bundling Hemat",             image_url: "/promo-bundling.jpeg",   link_url: "/paket-hemat",    sort_order: 1, is_active: true  },
       { id: "bnr-3", title: "Konsultasi Proposal & Skripsi",    image_url: "/promo-konsultasi.jpeg", link_url: "/bimbingan",      sort_order: 2, is_active: true  },
-      { id: "bnr-4", title: "Jasa Parafrase Profesional",       image_url: "/promo-parafrase.jpeg",  link_url: "/jasa-parafrase", sort_order: 3, is_active: false },
     ],
     kelas: [
       { id: "kls-1", tab: "seminar", title: "Seminar: Tips Lolos Sidang",         harga: 0,       is_active: true,  sort_order: 0 },

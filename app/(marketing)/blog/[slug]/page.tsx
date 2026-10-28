@@ -50,40 +50,6 @@ Ruang Konsul Solo menggunakan **No Repository** untuk semua layanan cek plagiasi
 Kalau kampusmu membutuhkan submit ke repository untuk sidang resmi, kamu tetap bisa melakukannya melalui portal kampus setelah revisi selesai.
     `,
   },
-  "apa-itu-cek-drillbit-pengertian-fungsi": {
-    title: "Apa Itu Cek DrillBit? Pengertian, Fungsi, dan Cara Kerjanya",
-    excerpt: "DrillBit adalah platform deteksi plagiasi yang banyak digunakan universitas di Indonesia.",
-    cover: "/promo-bundling.jpeg",
-    category: "Panduan Layanan",
-    readTime: "4 menit",
-    date: "5 Agustus 2026",
-    author: "Tim Ruang Konsul Solo",
-    content: `
-## Apa Itu DrillBit?
-
-DrillBit adalah platform deteksi plagiasi berbasis cloud yang dikembangkan khusus untuk institusi akademik di Asia Tenggara, termasuk Indonesia.
-
-## Mengapa Kampus Menggunakan DrillBit?
-
-Berbeda dengan Turnitin yang berbasis di AS, DrillBit:
-
-- Memiliki **database konten lokal** yang lebih relevan untuk karya ilmiah Indonesia
-- Mendukung **Bahasa Indonesia** lebih baik
-- Harga langganan yang lebih **terjangkau** untuk universitas
-- Laporan yang diakui oleh banyak kampus di Indonesia
-
-## Cara Kerja DrillBit
-
-1. Dokumen diupload ke sistem DrillBit
-2. Teks dipecah dan dianalisis menggunakan algoritma NLP
-3. Dibandingkan dengan database jurnal, artikel, dan karya ilmiah
-4. Laporan similarity dihasilkan dengan highlight sumber
-
-## Layanan Ruang Konsul Solo untuk DrillBit
-
-Ruang Konsul Solo menyediakan **Cek DrillBit** dengan akses ke sistem DrillBit institusi. Kamu mendapat laporan resmi yang sama dengan yang dihasilkan oleh portal kampus, sehingga bisa langsung digunakan untuk keperluan sidang.
-    `,
-  },
   "cara-membaca-laporan-turnitin-similarity": {
     title: "Cara Membaca Laporan Turnitin agar Tidak Salah Menilai Plagiarisme",
     excerpt: "Persentase similarity di Turnitin tidak selalu berarti plagiat.",
@@ -162,7 +128,7 @@ Identifikasi bab mana yang paling tinggi similaritynya dan fokus revisi di sana.
 
 ### 7. Gunakan Jasa Parafrase Profesional
 
-Kalau sudah maksimal tapi similarity masih tinggi, pertimbangkan [jasa parafrase Ruang Konsul Solo](/dashboard/jasa-parafrase) yang dikerjakan oleh tim berpengalaman.
+Kalau sudah maksimal tapi similarity masih tinggi, biasanya akar masalahnya ada di cara mengutip dan memposisikan sumber — bukan di pilihan katanya. Bawa draf dan daftar pustakamu ke [sesi bimbingan](/booking) untuk dibedah bersama mentor.
     `,
   },
   "ai-detector-tools-terbaik-mahasiswa": {

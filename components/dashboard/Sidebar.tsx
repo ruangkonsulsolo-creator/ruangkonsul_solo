@@ -17,7 +17,7 @@ import { useState } from "react";
  * Struktur navigasi Kalibri:
  *
  * Layanan (halaman PUBLIK — bisa diakses tanpa login):
- *   /cek-plagiasi, /cek-ai, /cek-drillbit, /jasa-parafrase, /bimbingan
+ *   /bimbingan, /booking
  *   → User upload file → diminta login hanya saat checkout
  *
  * Akun (halaman PRIVAT — wajib login):
@@ -33,11 +33,6 @@ const navItems = [
 
   { type: "section" as const, label: "Layanan" },
 
-  // Halaman publik — tidak butuh login untuk upload & lihat harga
-  { label: "Cek Plagiasi",     href: "/cek-plagiasi",   icon: FileSearch },
-  { label: "AI Detector",      href: "/cek-ai",          icon: Bot },
-  { label: "DrillBit Checker", href: "/cek-drillbit",    icon: BookOpenCheck },
-  { label: "Jasa Parafrase",   href: "/jasa-parafrase",  icon: PenLine },
   { label: "Bimbingan",        href: "/bimbingan",       icon: GraduationCap },
 
   { type: "section" as const, label: "Akun" },

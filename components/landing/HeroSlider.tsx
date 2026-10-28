@@ -30,14 +30,6 @@ const slides = [
     cta: "Mulai Konsultasi",
     href: "/daftar",
   },
-  {
-    src: "/promo-parafrase.jpeg",
-    alt: `Jasa Parafrase Profesional — ${BRAND.name}`,
-    badge: "✍️ Jasa Parafrase",
-    hook: "Turunkan Plagiasi!",
-    cta: "Order Parafrase",
-    href: "/jasa-parafrase",
-  },
 ];
 
 const INTERVAL = 3500;
