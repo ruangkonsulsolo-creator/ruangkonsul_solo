@@ -24,10 +24,79 @@ export const metadata: Metadata = {
 
 /* ─── data ──────────────────────────────────────────────────────────────────── */
 const LAYANAN = [
-  { icon: GraduationCap, name: "Bimbingan Skripsi",  sub: "Sesi 1-on-1 dengan mentor", harga: "Rp 150.000", satuan: "per sesi",         href: "/booking",  featured: true  },
-  { icon: BookOpenCheck, name: "Paket Bulanan",      sub: "4 sesi, mentor tetap",     harga: "Rp 500.000", satuan: "per bulan",        href: "/booking",  featured: false },
-  { icon: PenLine,       name: "Pendampingan Revisi", sub: "Bedah catatan pembimbing", harga: "Rp 150.000", satuan: "per sesi",         href: "/booking",  featured: false },
-  { icon: FileSearch,    name: "Publikasi Jurnal",   sub: "Pilih jurnal, siapkan naskah", harga: "Rp 350.000", satuan: "per pendampingan", href: "/layanan",  featured: false },
+  {
+    icon: GraduationCap, name: "Bimbingan Privat", sub: "1-on-1 dengan mentor",
+    harga: "Rp 150.000", satuan: "/ sesi 60 menit", href: "/booking", featured: true,
+    fitur: ["Mentor sesuai bidang & metodemu", "Daring atau tatap muka di Solo",
+            "Catatan & tindak lanjut tiap sesi", "Jadwal pilih sendiri di kalender"],
+  },
+  {
+    icon: BookOpenCheck, name: "Paket Bulanan", sub: "Dampingi sampai sidang",
+    harga: "Rp 500.000", satuan: "/ bulan · 4 sesi", href: "/booking", featured: false,
+    fitur: ["Mentor tetap selama paket", "Tanya jawab singkat antar sesi",
+            "Rekap progres tiap bulan", "Sisa kuota terlihat di dashboard"],
+  },
+  {
+    icon: PenLine, name: "Pendampingan Revisi", sub: "Bedah catatan pembimbing",
+    harga: "Rp 150.000", satuan: "/ sesi", href: "/booking", featured: false,
+    fitur: ["Draf dibaca sebelum sesi", "Prioritas revisi disusun bersama",
+            "Penjelasan alasan tiap catatan"],
+  },
+  {
+    icon: FileSearch, name: "Olah & Interpretasi Data", sub: "Bab 4 tidak lagi gelap",
+    harga: "Rp 200.000", satuan: "/ sesi", href: "/booking", featured: false,
+    fitur: ["Pilih uji statistik yang tepat", "Jalankan bersama, bukan dikerjakan",
+            "Latihan membaca output", "Siap ditanya penguji"],
+  },
+  {
+    icon: Bot, name: "Pendampingan Publikasi", sub: "Jurnal & prosiding",
+    harga: "Rp 350.000", satuan: "/ pendampingan", href: "/layanan", featured: false,
+    fitur: ["Menilai kecocokan jurnal tujuan", "Menghindari jurnal predator",
+            "Penyesuaian template & sitasi", "Latihan menanggapi reviewer"],
+  },
+  {
+    icon: MessageCircle, name: "Desain Presentasi Sidang", sub: "Slide yang menolongmu",
+    harga: "Rp 250.000", satuan: "/ deck", href: "/layanan", featured: false,
+    fitur: ["Alur cerita disusun ulang", "Grafik terbaca dari kursi belakang", "Dua kali revisi"],
+  },
+];
+
+// Perangkat yang dipakai mentor saat mendampingi. Bukan jasa pengerjaan —
+// kamu yang menjalankan, mentor yang mengajari.
+const TOOLS = [
+  { nama: "SPSS",        untuk: "Statistik kuantitatif" },
+  { nama: "SmartPLS",    untuk: "SEM-PLS" },
+  { nama: "AMOS",        untuk: "SEM berbasis kovarian" },
+  { nama: "STATA",       untuk: "Ekonometrika" },
+  { nama: "EViews",      untuk: "Data runtut waktu" },
+  { nama: "R",           untuk: "Analisis lanjutan" },
+  { nama: "NVivo",       untuk: "Analisis kualitatif" },
+  { nama: "ATLAS.ti",    untuk: "Koding data kualitatif" },
+  { nama: "Mendeley",    untuk: "Manajemen sitasi" },
+  { nama: "Zotero",      untuk: "Manajemen referensi" },
+  { nama: "VOSviewer",   untuk: "Analisis bibliometrik" },
+  { nama: "Python",      untuk: "Olah data & visualisasi" },
+];
+
+// Ganti dengan data mentor sungguhan. Foto menyusul — untuk sekarang
+// dipakai inisial supaya tidak ada wajah palsu di situs.
+const MENTOR = [
+  { nama: "Jonnathan Azarel", gelar: "S.M., M.M.", bidang: ["Metodologi Kuantitatif", "SPSS"],
+    kampus: "Universitas Sebelas Maret", sesi: 120, rating: 4.9, inisial: "JA" },
+  { nama: "Mentor Kualitatif", gelar: "S.Pd., M.Pd.", bidang: ["Studi Kasus", "NVivo"],
+    kampus: "Universitas Negeri Yogyakarta", sesi: 85, rating: 4.8, inisial: "MK" },
+  { nama: "Mentor Ekonomi", gelar: "S.E., M.Si.", bidang: ["Ekonometrika", "EViews"],
+    kampus: "Universitas Gadjah Mada", sesi: 64, rating: 4.9, inisial: "ME" },
+];
+
+// Promo berjalan. Atur tanggal berakhirnya supaya tidak basi di halaman.
+const PROMO = [
+  { judul: "Diskon 20% Sesi Pertama", syarat: "Untuk pendaftar baru, berlaku sekali",
+    kode: "MULAI20", sampai: "30 November 2026" },
+  { judul: "Paket Berdua Hemat 15%", syarat: "Daftar bersama satu teman seangkatan",
+    kode: "BARENG15", sampai: "31 Desember 2026" },
+  { judul: "Gratis 1 Sesi Revisi", syarat: "Pembelian paket bulanan pertama",
+    kode: "REVISIFREE", sampai: "31 Desember 2026" },
 ];
 
 const JASA = [
@@ -100,7 +169,7 @@ export default function LandingPage() {
           {/* Kiri */}
           <div className="flex-1 text-center lg:text-left">
             <Badge variant="secondary" className="mb-5 text-xs px-3 py-1">
-              🎓 Dipercaya 1.000+ Mahasiswa di Solo & Seluruh Indonesia
+              🎓 Solo · Jogja · Jakarta · Bekasi
             </Badge>
             <h1 className="text-4xl lg:text-5xl xl:text-6xl font-extrabold leading-tight text-slate-900">
               Skripsimu macet
@@ -118,9 +187,10 @@ export default function LandingPage() {
             {/* Stats */}
             <div className="mt-7 flex flex-wrap justify-center lg:justify-start gap-6 text-sm">
               {[
-                { val: "Rp 25.000", label: "Per Dokumen" },
-                { val: "24 Jam",    label: "Estimasi Selesai" },
-                { val: "24 Jam",    label: "Akses Laporan" },
+                // Ganti dengan angka sungguhan sebelum publish.
+                { val: "1.000+",  label: "Mahasiswa Dibimbing" },
+                { val: "12",      label: "Mentor Aktif" },
+                { val: "4,9/5",   label: "Rata-rata Penilaian" },
               ].map((s, i) => (
                 <div key={i} className="flex flex-col">
                   <span className="text-2xl font-extrabold text-brand">{s.val}</span>
@@ -131,15 +201,15 @@ export default function LandingPage() {
 
             <div className="mt-7 flex flex-wrap justify-center lg:justify-start gap-3">
               <Button size="lg" asChild className="shadow-card gap-2">
-                <Link href="/daftar">Mulai Cek Sekarang <ArrowRight className="h-4 w-4" /></Link>
+                <Link href="/booking">Pesan Jadwal Bimbingan <ArrowRight className="h-4 w-4" /></Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <Link href="#layanan">Lihat Layanan</Link>
+                <Link href="#mentor">Lihat Mentor</Link>
               </Button>
             </div>
 
             <div className="mt-6 flex flex-wrap justify-center lg:justify-start gap-4 text-xs text-slate-500">
-              {["📄 Laporan dalam hitungan jam", "🔒 Dokumen aman & privat", "✅ Hasil akurat & terpercaya"].map((t) => (
+              {["🗓️ Jadwal pilih sendiri", "🔒 Draf aman & privat", "💬 Konsultasi awal gratis"].map((t) => (
                 <span key={t}>{t}</span>
               ))}
             </div>
@@ -163,7 +233,7 @@ export default function LandingPage() {
           Mentor membantumu melewati bagian yang macet — rumusan masalah, pemilihan metode,
           olah data, persiapan sidang. Kamu tetap penulis karyamu.
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {LAYANAN.map((l) => {
             const Icon = l.icon;
             return (
@@ -178,8 +248,18 @@ export default function LandingPage() {
                 <h3 className={`text-lg font-bold mb-0.5 ${l.featured ? "text-white" : "text-slate-900"}`}>{l.name}</h3>
                 <p className={`text-sm mb-3 ${l.featured ? "text-white/70" : "text-slate-400"}`}>{l.sub}</p>
                 <p className={`text-sm font-semibold mb-4 ${l.featured ? "text-white" : "text-brand"}`}>{l.harga}<span className={`text-xs font-normal ${l.featured ? "text-white/60" : "text-slate-400"}`}> {l.satuan}</span></p>
-                <Link href={l.href} className={`inline-flex items-center gap-1.5 text-sm font-semibold transition-colors ${l.featured ? "text-white hover:text-white/80" : "text-brand hover:text-brand-light"}`}>
-                  Lihat jadwal <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                <ul className="mb-5 space-y-2">
+                  {l.fitur.map((f) => (
+                    <li key={f} className={`flex items-start gap-2 text-sm ${l.featured ? "text-white/90" : "text-slate-600"}`}>
+                      <CheckCircle2 className={`h-4 w-4 flex-shrink-0 mt-0.5 ${l.featured ? "text-white/80" : "text-brand"}`} aria-hidden="true" />
+                      <span>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link href={l.href} className={`inline-flex w-full items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-bold transition-colors ${
+                  l.featured ? "bg-white text-brand hover:bg-brand-50" : "bg-brand text-white hover:bg-brand-light"
+                }`}>
+                  {l.href === "/booking" ? "Lihat jadwal" : "Selengkapnya"} <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </Link>
               </div>
             );
@@ -205,6 +285,92 @@ export default function LandingPage() {
               Lihat semua layanan <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* ── Perangkat yang dipakai ── */}
+      <section className="mx-auto max-w-6xl px-4 py-16">
+        <SectionLabel>Perangkat</SectionLabel>
+        <h2 className="text-3xl lg:text-4xl font-extrabold text-slate-900 mb-2">
+          Mentor mengajarimu memakainya,<br className="hidden sm:block" /> bukan menjalankannya untukmu
+        </h2>
+        <p className="text-slate-500 max-w-xl mb-10">
+          Keluar dari sesi, kamu bisa mengulang analisisnya sendiri. Itu yang menyelamatkanmu
+          saat penguji bertanya &ldquo;ini bagaimana cara dapatnya?&rdquo;
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          {TOOLS.map((tool) => (
+            <div key={tool.nama} className="rounded-xl border border-slate-200 bg-white p-4 hover:border-brand-200 transition-colors">
+              <p className="font-bold text-slate-900">{tool.nama}</p>
+              <p className="text-xs text-slate-400 mt-0.5">{tool.untuk}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Mentor ── */}
+      <section id="mentor" className="bg-slate-50 px-4 py-16">
+        <div className="mx-auto max-w-6xl">
+          <SectionLabel>Mentor Kami</SectionLabel>
+          <h2 className="text-3xl lg:text-4xl font-extrabold text-slate-900 mb-2">
+            Yang akan duduk bersamamu
+          </h2>
+          <p className="text-slate-500 max-w-xl mb-10">
+            Semua mentor pernah melewati proses yang sedang kamu jalani, dan terbiasa
+            membaca draf yang belum rapi tanpa menghakimi.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {MENTOR.map((m) => (
+              <div key={m.nama} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
+                <div className="flex items-start gap-4">
+                  <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-brand-50 text-lg font-extrabold text-brand">
+                    {m.inisial}
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="font-bold text-slate-900 leading-tight">{m.nama}</h3>
+                    <p className="text-xs text-slate-400">{m.gelar}</p>
+                    <p className="text-xs text-slate-500 mt-1">{m.kampus}</p>
+                  </div>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-1.5">
+                  {m.bidang.map((b) => (
+                    <span key={b} className="rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand">{b}</span>
+                  ))}
+                </div>
+                <div className="mt-4 flex items-center gap-4 border-t border-slate-100 pt-3 text-sm">
+                  <span className="flex items-center gap-1 font-semibold text-slate-700">
+                    <Star className="h-4 w-4 fill-brand text-brand" aria-hidden="true" />{m.rating}
+                  </span>
+                  <span className="text-slate-400">{m.sesi} sesi selesai</span>
+                </div>
+                <Link href="/booking" className="mt-4 inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-brand py-2.5 text-sm font-bold text-white hover:bg-brand-light transition-colors">
+                  Pesan jadwal <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Promo ── */}
+      <section className="mx-auto max-w-6xl px-4 py-16">
+        <SectionLabel>Promo Berjalan</SectionLabel>
+        <h2 className="text-3xl lg:text-4xl font-extrabold text-slate-900 mb-10">
+          Tunjukkan kodenya saat konfirmasi
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          {PROMO.map((pr) => (
+            <div key={pr.kode} className="relative overflow-hidden rounded-2xl border-2 border-dashed border-brand-200 bg-brand-50 p-6">
+              <h3 className="text-lg font-extrabold text-slate-900">{pr.judul}</h3>
+              <p className="mt-1 text-sm text-slate-600">{pr.syarat}</p>
+              <div className="mt-4 inline-block rounded-lg border border-brand bg-white px-3 py-1.5">
+                <span className="font-mono text-sm font-bold tracking-wider text-brand">{pr.kode}</span>
+              </div>
+              <p className="mt-3 flex items-center gap-1.5 text-xs text-slate-500">
+                <Clock className="h-3.5 w-3.5" aria-hidden="true" /> Sampai {pr.sampai}
+              </p>
+            </div>
+          ))}
         </div>
       </section>
 
