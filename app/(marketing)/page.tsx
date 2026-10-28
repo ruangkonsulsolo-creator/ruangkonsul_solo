@@ -177,30 +177,27 @@ export default function LandingPage() {
             <Badge variant="secondary" className="mb-5 text-xs px-3 py-1">
               🎓 Solo · Jogja · Jakarta · Bekasi
             </Badge>
-            <h1 className="text-5xl lg:text-6xl xl:text-7xl font-extrabold leading-[1.05] tracking-tight text-brand">
-              Bimbingan
-              <br />
-              Skripsi, Tesis
-              <br />
-              &amp; Disertasi
+            {/*
+              Catatan: "no. 1 di Indonesia" adalah klaim superlatif. UU No. 8
+              Tahun 1999 tentang Perlindungan Konsumen Pasal 9 ayat (1)
+              melarang menyatakan suatu jasa sebagai yang nomor satu atau
+              paling unggul tanpa bukti yang bisa dipertanggungjawabkan, dan
+              Etika Pariwara Indonesia mengatur hal serupa. Pemilik sudah
+              diberi tahu risikonya dan memutuskan memakainya. Siapkan bukti
+              pendukung kalau suatu saat ditanya.
+            */}
+            <h1 className="text-3xl lg:text-4xl xl:text-5xl font-extrabold leading-[1.15] tracking-tight text-brand">
+              Jasa Bimbingan Skripsi, Tesis &amp; Disertasi no. 1 di Indonesia
             </h1>
 
-            {/*
-              Kalimat asli yang diminta: "Jasa Bimbingan Skripsi, Tesis, dan
-              Disertasi Termurah No. 1 di Indonesia". Klaim "termurah" dan
-              "no. 1" adalah superlatif yang dilarang UU No. 8/1999 Pasal 9
-              ayat (1) tanpa bukti terverifikasi, dan mudah dibantah karena
-              ada pesaing dengan harga mulai Rp49.000. Versi di bawah
-              mempertahankan bobot komersilnya tanpa klaim yang bisa diseret.
-              Ganti satu baris ini kalau kamu memutuskan sebaliknya.
-            */}
-            <p className="mt-5 text-xl lg:text-2xl font-bold text-slate-900 max-w-xl mx-auto lg:mx-0 leading-snug">
-              Didampingi mentor berpengalaman sampai sidang —
-              <span className="text-brand"> untuk mahasiswa S1 &amp; S2 se-Indonesia</span>
+            <p className="mt-4 text-lg lg:text-xl font-bold text-slate-900 max-w-xl mx-auto lg:mx-0 leading-snug">
+              Dibimbing Mentor Berpengalaman sampai Paham dan Lulus Tepat Waktu.{" "}
+              <span className="text-brand">No molor-molor!</span>
             </p>
+
             <p className="mt-3 text-base text-slate-500 max-w-lg mx-auto lg:mx-0 leading-relaxed">
-              Pilih mentor sesuai bidangmu, pesan jadwal sendiri, dan selesaikan bab yang
-              macet minggu ini. Mulai Rp150.000 per sesi.
+              Pilih mentor sesuai bidangmu, pesan jadwal sendiri, dan selesaikan bab
+              yang terkendala minggu ini. Mulai Rp50.000 per sesi.
             </p>
 
             {/* Stats */}
