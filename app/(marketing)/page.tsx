@@ -186,11 +186,11 @@ export default function LandingPage() {
               diberi tahu risikonya dan memutuskan memakainya. Siapkan bukti
               pendukung kalau suatu saat ditanya.
             */}
-            <h1 className="text-3xl lg:text-4xl xl:text-5xl font-extrabold leading-[1.15] tracking-tight text-brand">
+            <h1 className="text-4xl lg:text-5xl xl:text-6xl font-extrabold leading-[1.1] tracking-tight text-brand">
               Jasa Bimbingan Skripsi, Tesis &amp; Disertasi no. 1 di Indonesia
             </h1>
 
-            <p className="mt-4 text-lg lg:text-xl font-bold text-slate-900 max-w-xl mx-auto lg:mx-0 leading-snug">
+            <p className="mt-5 text-xl lg:text-2xl font-bold text-slate-900 max-w-xl mx-auto lg:mx-0 leading-snug">
               Dibimbing Mentor Berpengalaman sampai Paham dan Lulus Tepat Waktu.{" "}
               <span className="text-brand">No molor-molor!</span>
             </p>
