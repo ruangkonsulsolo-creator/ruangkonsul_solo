@@ -39,7 +39,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
               </span>
             )}
             <div className="flex items-center gap-2.5 rounded-xl bg-slate-50 border border-slate-200 px-3 py-1.5">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-ink text-white text-[11px] font-bold shadow-lift">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-gradient text-white text-[11px] font-bold shadow-brand-sm">
                 {initials}
               </div>
               <span className="text-sm font-semibold text-slate-700">{profile.full_name}</span>

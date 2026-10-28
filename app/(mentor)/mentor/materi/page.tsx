@@ -26,7 +26,7 @@ export default async function MateriPage() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-xl font-extrabold text-slate-900">Materi & Modul</h2>
-          <p className="text-sm text-ink-faint mt-0.5">Bagikan materi bimbingan ke klien-mu.</p>
+          <p className="text-sm text-muted-foreground mt-0.5">Bagikan materi bimbingan ke klien-mu.</p>
         </div>
         <Button className="gap-2">
           <Upload className="h-3.5 w-3.5" />
@@ -55,13 +55,13 @@ export default async function MateriPage() {
         {MODULES.map((m) => {
           const Icon = TYPE_ICONS[m.type] ?? FileText;
           return (
-            <Card key={m.id} className="flex items-center gap-4 p-4 group hover:border-paper-edge transition-colors">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-paper-raised flex-shrink-0">
-                <Icon className="h-5 w-5 text-koreksi-deep" />
+            <Card key={m.id} className="flex items-center gap-4 p-4 group hover:border-brand-200 transition-colors">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 flex-shrink-0">
+                <Icon className="h-5 w-5 text-[#8B0000]" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-slate-900 truncate">{m.title}</p>
-                <div className="flex items-center gap-3 mt-1 text-xs text-ink-faint">
+                <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <Download className="h-3 w-3" />
                     {m.downloads}x diunduh
@@ -83,7 +83,7 @@ export default async function MateriPage() {
       {/* Empty hint */}
       <div className="flex items-center gap-3 rounded-2xl border border-dashed border-slate-200 bg-white p-5 text-center">
         <BookOpen className="h-5 w-5 text-slate-300 flex-shrink-0" />
-        <p className="text-xs text-ink-faint">
+        <p className="text-xs text-muted-foreground">
           Upload materi bimbingan (PDF, DOCX, video) untuk dibagikan ke klien. Klien dapat mengunduh
           materi yang kamu bagikan dari dashboard mereka.
         </p>

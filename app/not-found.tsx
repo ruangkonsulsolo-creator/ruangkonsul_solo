@@ -8,7 +8,7 @@ export default function NotFound() {
   return (
     <div className="min-h-screen hero-gradient flex flex-col items-center justify-center px-4 text-center">
       <Image src={BRAND.logoPng} alt={BRAND.name} width={64} height={64} className="mb-6 opacity-80" unoptimized />
-      <p className="text-koreksi-deep font-extrabold text-7xl mb-2">404</p>
+      <p className="text-[#8B0000] font-extrabold text-7xl mb-2">404</p>
       <h1 className="text-2xl font-extrabold text-slate-900 mb-2">Halaman tidak ditemukan</h1>
       <p className="text-slate-500 text-sm mb-8 max-w-xs">
         Halaman yang kamu cari tidak ada atau sudah dipindahkan.

@@ -52,7 +52,7 @@ export default async function MentorChatPage() {
     <div className="max-w-4xl">
       <div className="mb-4">
         <h2 className="text-xl font-extrabold text-slate-900">Chat Klien</h2>
-        <p className="text-sm text-ink-faint mt-0.5">Komunikasi langsung dengan klien bimbinganmu.</p>
+        <p className="text-sm text-muted-foreground mt-0.5">Komunikasi langsung dengan klien bimbinganmu.</p>
       </div>
 
       <Card className="overflow-hidden">
@@ -76,21 +76,21 @@ export default async function MentorChatPage() {
                 <div
                   key={c.id}
                   className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors border-b border-slate-50 ${
-                    i === 0 ? "bg-paper-raised" : "hover:bg-slate-50"
+                    i === 0 ? "bg-brand-50" : "hover:bg-slate-50"
                   }`}
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-ink text-white text-xs font-bold flex-shrink-0">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-gradient text-white text-xs font-bold flex-shrink-0">
                     {c.initials}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
                       <p className="text-sm font-semibold text-slate-900 truncate">{c.name}</p>
-                      <span className="text-[10px] text-ink-faint flex-shrink-0">{c.time}</span>
+                      <span className="text-[10px] text-muted-foreground flex-shrink-0">{c.time}</span>
                     </div>
                     <div className="flex items-center justify-between gap-2 mt-0.5">
-                      <p className="text-xs text-ink-faint truncate">{c.lastMsg}</p>
+                      <p className="text-xs text-muted-foreground truncate">{c.lastMsg}</p>
                       {c.unread > 0 && (
-                        <span className="flex h-4 w-4 items-center justify-center rounded-full bg-ink text-[9px] font-bold text-white flex-shrink-0">
+                        <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[#8B0000] text-[9px] font-bold text-white flex-shrink-0">
                           {c.unread}
                         </span>
                       )}
@@ -111,7 +111,7 @@ export default async function MentorChatPage() {
                     <button className="sm:hidden flex h-8 w-8 items-center justify-center rounded-lg hover:bg-slate-100">
                       <ArrowLeft className="h-4 w-4 text-slate-500" />
                     </button>
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-ink text-white text-xs font-bold">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-gradient text-white text-xs font-bold">
                       {active.initials}
                     </div>
                     <div>
@@ -143,7 +143,7 @@ export default async function MentorChatPage() {
                 {/* Messages */}
                 <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/50">
                   <div className="text-center">
-                    <span className="text-[10px] text-ink-faint bg-white rounded-full px-3 py-1 border border-slate-100">
+                    <span className="text-[10px] text-muted-foreground bg-white rounded-full px-3 py-1 border border-slate-100">
                       Hari ini
                     </span>
                   </div>
@@ -151,12 +151,12 @@ export default async function MentorChatPage() {
                   <div className="flex justify-start">
                     <div className="max-w-[70%] rounded-2xl rounded-tl-sm bg-white border border-slate-100 px-4 py-2.5 shadow-sm">
                       <p className="text-sm text-slate-700">Selamat pagi mentor, saya mau tanya tentang BAB 3 skripsi saya</p>
-                      <p className="text-[10px] text-ink-faint mt-1 text-right">08:15</p>
+                      <p className="text-[10px] text-muted-foreground mt-1 text-right">08:15</p>
                     </div>
                   </div>
                   {/* Outgoing */}
                   <div className="flex justify-end">
-                    <div className="max-w-[70%] rounded-2xl rounded-tr-sm bg-ink text-white px-4 py-2.5 shadow-sm">
+                    <div className="max-w-[70%] rounded-2xl rounded-tr-sm bg-brand text-white px-4 py-2.5 shadow-sm">
                       <p className="text-sm">Pagi! Silakan kirim dokumen BAB 3-nya ya, nanti saya review</p>
                       <p className="text-[10px] text-white/60 mt-1 text-right">08:20 ✓✓</p>
                     </div>
@@ -165,12 +165,12 @@ export default async function MentorChatPage() {
                   <div className="flex justify-start">
                     <div className="max-w-[70%] rounded-2xl rounded-tl-sm bg-white border border-slate-100 px-4 py-2.5 shadow-sm">
                       <p className="text-sm text-slate-700">Sudah saya kirim dokumennya mentor</p>
-                      <p className="text-[10px] text-ink-faint mt-1 text-right">09:30</p>
+                      <p className="text-[10px] text-muted-foreground mt-1 text-right">09:30</p>
                     </div>
                   </div>
                   {/* Outgoing */}
                   <div className="flex justify-end">
-                    <div className="max-w-[70%] rounded-2xl rounded-tr-sm bg-ink text-white px-4 py-2.5 shadow-sm">
+                    <div className="max-w-[70%] rounded-2xl rounded-tr-sm bg-brand text-white px-4 py-2.5 shadow-sm">
                       <p className="text-sm">Baik, sudah saya terima. Nanti malam saya kirim feedback-nya ya</p>
                       <p className="text-[10px] text-white/60 mt-1 text-right">09:32 ✓✓</p>
                     </div>
@@ -179,7 +179,7 @@ export default async function MentorChatPage() {
                   <div className="flex justify-start">
                     <div className="max-w-[70%] rounded-2xl rounded-tl-sm bg-white border border-slate-100 px-4 py-2.5 shadow-sm">
                       <p className="text-sm text-slate-700">Makasih banyak mentor, sudah saya revisi</p>
-                      <p className="text-[10px] text-ink-faint mt-1 text-right">09:32</p>
+                      <p className="text-[10px] text-muted-foreground mt-1 text-right">09:32</p>
                     </div>
                   </div>
                 </div>
@@ -190,13 +190,13 @@ export default async function MentorChatPage() {
                     <input
                       type="text"
                       placeholder="Ketik pesan..."
-                      className="flex-1 rounded-xl bg-slate-50 px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-koreksi/20"
+                      className="flex-1 rounded-xl bg-slate-50 px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand/20"
                     />
                     <Button size="icon" className="rounded-xl h-10 w-10 flex-shrink-0">
                       <Send className="h-4 w-4" />
                     </Button>
                   </div>
-                  <p className="text-[10px] text-ink-faint mt-2 text-center">
+                  <p className="text-[10px] text-muted-foreground mt-2 text-center">
                     Chat terintegrasi dengan WhatsApp. Klik{" "}
                     <a href={`https://wa.me/${active.whatsapp}`} target="_blank" rel="noopener noreferrer" className="text-green-600 font-medium underline">di sini</a>{" "}
                     untuk lanjut di WhatsApp.
@@ -206,7 +206,7 @@ export default async function MentorChatPage() {
             ) : (
               <div className="flex flex-col items-center justify-center gap-3 text-center">
                 <MessageCircle className="h-12 w-12 text-slate-200" />
-                <p className="text-sm text-ink-faint">Belum ada percakapan.</p>
+                <p className="text-sm text-muted-foreground">Belum ada percakapan.</p>
               </div>
             )}
           </div>

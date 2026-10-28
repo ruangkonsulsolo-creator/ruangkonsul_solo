@@ -95,9 +95,9 @@ export function ProfilForm({ userId, email, initialData, referralCount }: Profil
       <div className="space-y-5">
 
         {/* Info profil */}
-        <div className="rounded-2xl border border-slate-200 bg-white shadow-lift overflow-hidden">
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-card overflow-hidden">
           <div className="px-5 py-4 bg-slate-50 border-b border-slate-100">
-            <p className="text-xs font-bold uppercase tracking-wider text-ink-faint">Informasi Akun</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Informasi Akun</p>
           </div>
           <form onSubmit={handleSaveProfil} className="p-5 space-y-4">
             {/* Email — readonly */}
@@ -107,7 +107,7 @@ export function ProfilForm({ userId, email, initialData, referralCount }: Profil
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" aria-hidden="true" />
                 <Input id="email" value={email} disabled className="pl-9 bg-slate-50 text-slate-500" />
               </div>
-              <p className="text-xs text-ink-faint">Email tidak dapat diubah.</p>
+              <p className="text-xs text-muted-foreground">Email tidak dapat diubah.</p>
             </div>
 
             {/* Nama lengkap */}
@@ -140,7 +140,7 @@ export function ProfilForm({ userId, email, initialData, referralCount }: Profil
                   disabled={saving}
                 />
               </div>
-              <p className="text-xs text-ink-faint">Format: 628xxx (tanpa + atau 0 di depan). Digunakan untuk notifikasi laporan.</p>
+              <p className="text-xs text-muted-foreground">Format: 628xxx (tanpa + atau 0 di depan). Digunakan untuk notifikasi laporan.</p>
             </div>
 
             <Button type="submit" disabled={saving} className="gap-2">
@@ -150,41 +150,41 @@ export function ProfilForm({ userId, email, initialData, referralCount }: Profil
         </div>
 
         {/* Referral */}
-        <div className="rounded-2xl border border-paper-edge bg-paper-raised shadow-lift overflow-hidden">
-          <div className="px-5 py-4 border-b border-paper-edge">
-            <p className="text-xs font-bold uppercase tracking-wider text-koreksi-deep">Program Referral</p>
+        <div className="rounded-2xl border border-brand-200 bg-brand-50 shadow-card overflow-hidden">
+          <div className="px-5 py-4 border-b border-brand-100">
+            <p className="text-xs font-bold uppercase tracking-wider text-brand">Program Referral</p>
           </div>
           <div className="p-5 space-y-4">
             <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-ink flex-shrink-0">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand flex-shrink-0">
                 <Gift className="h-5 w-5 text-white" aria-hidden="true" />
               </div>
               <div>
                 <p className="text-sm font-semibold text-slate-800">Ajak teman, kamu dapat komisi 10%!</p>
-                <p className="text-xs text-ink-faint mt-0.5">Setiap teman yang mendaftar dan melakukan pembelian pertama via link kamu.</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Setiap teman yang mendaftar dan melakukan pembelian pertama via link kamu.</p>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-xl bg-white border border-paper-edge p-3 text-center">
-                <p className="text-2xl font-extrabold text-koreksi-deep">{referralCount}</p>
-                <p className="text-xs text-ink-faint">Teman didaftarkan</p>
+              <div className="rounded-xl bg-white border border-brand-100 p-3 text-center">
+                <p className="text-2xl font-extrabold text-brand">{referralCount}</p>
+                <p className="text-xs text-muted-foreground">Teman didaftarkan</p>
               </div>
-              <div className="rounded-xl bg-white border border-paper-edge p-3 text-center">
-                <p className="text-2xl font-extrabold text-koreksi-deep">{fmt(initialData.credit_balance)}</p>
-                <p className="text-xs text-ink-faint">Kredit tersedia</p>
+              <div className="rounded-xl bg-white border border-brand-100 p-3 text-center">
+                <p className="text-2xl font-extrabold text-brand">{fmt(initialData.credit_balance)}</p>
+                <p className="text-xs text-muted-foreground">Kredit tersedia</p>
               </div>
             </div>
 
             <div className="space-y-1.5">
               <Label className="text-xs font-semibold text-slate-700">Kode Referral Kamu</Label>
               <div className="flex gap-2">
-                <div className="flex-1 flex items-center rounded-xl border border-paper-edge bg-white px-3 py-2">
-                  <span className="font-mono text-sm font-bold text-koreksi-deep flex-1">{initialData.referral_code}</span>
+                <div className="flex-1 flex items-center rounded-xl border border-brand-200 bg-white px-3 py-2">
+                  <span className="font-mono text-sm font-bold text-brand flex-1">{initialData.referral_code}</span>
                 </div>
                 <button
                   onClick={handleCopyReferral}
-                  className="flex items-center gap-1.5 rounded-xl bg-ink px-4 py-2 text-xs font-bold text-white hover:bg-koreksi transition-colors"
+                  className="flex items-center gap-1.5 rounded-xl bg-brand px-4 py-2 text-xs font-bold text-white hover:bg-brand-light transition-colors"
                   aria-label="Salin link referral"
                 >
                   {copied ? <CheckCircle2 className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
@@ -196,9 +196,9 @@ export function ProfilForm({ userId, email, initialData, referralCount }: Profil
         </div>
 
         {/* Ganti password */}
-        <div className="rounded-2xl border border-slate-200 bg-white shadow-lift overflow-hidden">
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-card overflow-hidden">
           <div className="px-5 py-4 bg-slate-50 border-b border-slate-100">
-            <p className="text-xs font-bold uppercase tracking-wider text-ink-faint">Keamanan Akun</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Keamanan Akun</p>
           </div>
           <form onSubmit={handleChangePassword} className="p-5 space-y-4">
             <div className="space-y-1.5">

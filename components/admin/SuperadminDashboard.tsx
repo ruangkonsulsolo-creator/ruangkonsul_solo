@@ -46,14 +46,14 @@ function Section({ icon: Icon, title, children }: {
 }) {
   const [open, setOpen] = useState(true);
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white shadow-lift overflow-hidden">
+    <div className="rounded-2xl border border-slate-200 bg-white shadow-card overflow-hidden">
       <button
         onClick={() => setOpen(o => !o)}
-        className="flex w-full items-center justify-between px-5 py-4 bg-slate-50 border-b border-slate-100 hover:bg-paper-raised transition-colors"
+        className="flex w-full items-center justify-between px-5 py-4 bg-slate-50 border-b border-slate-100 hover:bg-brand-50 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-paper-raised">
-            <Icon className="h-4 w-4 text-koreksi-deep" aria-hidden="true" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-50">
+            <Icon className="h-4 w-4 text-[#8B0000]" aria-hidden="true" />
           </div>
           <span className="text-sm font-extrabold text-slate-800">{title}</span>
         </div>
@@ -139,7 +139,7 @@ export function SuperadminDashboard({ services: initialServices, packages: initi
                   </div>
                   <button
                     onClick={() => updateService(svc.id, "is_active", !svc.is_active)}
-                    className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-bold transition-colors ${svc.is_active ? "bg-paper-raised text-koreksi-deep" : "bg-slate-100 text-slate-400"}`}
+                    className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-bold transition-colors ${svc.is_active ? "bg-brand-50 text-[#8B0000]" : "bg-slate-100 text-slate-400"}`}
                   >
                     {svc.is_active ? <ToggleRight className="h-3.5 w-3.5" /> : <ToggleLeft className="h-3.5 w-3.5" />}
                     {svc.is_active ? "Aktif" : "Nonaktif"}
@@ -183,7 +183,7 @@ export function SuperadminDashboard({ services: initialServices, packages: initi
                     <button onClick={() => updatePackage(pkg.id, "is_popular", !pkg.is_popular)} className={`text-[10px] font-bold px-2 py-1 rounded-lg ${pkg.is_popular ? "bg-amber-100 text-amber-700" : "bg-slate-100 text-slate-400"}`}>
                       {pkg.is_popular ? "⭐ Populer" : "Populer?"}
                     </button>
-                    <button onClick={() => updatePackage(pkg.id, "is_active", !pkg.is_active)} className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold ${pkg.is_active ? "bg-paper-raised text-koreksi-deep" : "bg-slate-100 text-slate-400"}`}>
+                    <button onClick={() => updatePackage(pkg.id, "is_active", !pkg.is_active)} className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold ${pkg.is_active ? "bg-brand-50 text-[#8B0000]" : "bg-slate-100 text-slate-400"}`}>
                       {pkg.is_active ? <ToggleRight className="h-3.5 w-3.5" /> : <ToggleLeft className="h-3.5 w-3.5" />}
                       {pkg.is_active ? "Aktif" : "Nonaktif"}
                     </button>
@@ -225,7 +225,7 @@ export function SuperadminDashboard({ services: initialServices, packages: initi
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <Input value={b.title} onChange={e => updateBanner(b.id, "title", e.target.value)} className="h-8 text-sm font-bold border-0 bg-transparent p-0 focus-visible:ring-0 w-48" placeholder="Judul banner" />
-                    <button onClick={() => updateBanner(b.id, "is_active", !b.is_active)} className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold ${b.is_active ? "bg-paper-raised text-koreksi-deep" : "bg-slate-100 text-slate-400"}`}>
+                    <button onClick={() => updateBanner(b.id, "is_active", !b.is_active)} className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold ${b.is_active ? "bg-brand-50 text-[#8B0000]" : "bg-slate-100 text-slate-400"}`}>
                       {b.is_active ? <ToggleRight className="h-3.5 w-3.5" /> : <ToggleLeft className="h-3.5 w-3.5" />}
                       {b.is_active ? "Aktif" : "Nonaktif"}
                     </button>
@@ -272,7 +272,7 @@ export function SuperadminDashboard({ services: initialServices, packages: initi
                     <p className="font-bold text-slate-900 text-sm">{k.title}</p>
                     <Badge variant="secondary" className="text-[10px] capitalize mt-0.5">{k.tab}</Badge>
                   </div>
-                  <button onClick={() => updateKelas(k.id, "is_active", !k.is_active)} className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold ${k.is_active ? "bg-paper-raised text-koreksi-deep" : "bg-slate-100 text-slate-400"}`}>
+                  <button onClick={() => updateKelas(k.id, "is_active", !k.is_active)} className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold ${k.is_active ? "bg-brand-50 text-[#8B0000]" : "bg-slate-100 text-slate-400"}`}>
                     {k.is_active ? <ToggleRight className="h-3.5 w-3.5" /> : <ToggleLeft className="h-3.5 w-3.5" />}
                     {k.is_active ? "Aktif" : "Nonaktif"}
                   </button>

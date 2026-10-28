@@ -44,7 +44,7 @@ export function RebayarButton({ orderId, snapToken }: { orderId: string; snapTok
         variant="outline"
         onClick={handleRebayar}
         disabled={loading}
-        className="gap-1.5 border-ink text-koreksi-deep hover:bg-paper-raised"
+        className="gap-1.5 border-brand text-brand hover:bg-brand-50"
       >
         {loading
           ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />

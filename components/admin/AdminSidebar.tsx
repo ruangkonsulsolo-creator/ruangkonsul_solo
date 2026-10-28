@@ -41,7 +41,7 @@ export function AdminSidebar() {
     exact ? pathname === href : pathname.startsWith(href);
 
   return (
-    <aside className="hidden lg:flex w-60 flex-shrink-0 flex-col" style={{ background: "#141A17" }}>
+    <aside className="hidden lg:flex w-60 flex-shrink-0 flex-col" style={{ background: "#6B0000" }}>
       {/* Logo */}
       <div className="flex items-center gap-3 px-5 py-4 border-b border-white/10">
         <Logo href="/admin" size="sm" showText={false} />
@@ -72,16 +72,16 @@ export function AdminSidebar() {
               className={cn(
                 "flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium transition-all",
                 active
-                  ? "bg-white text-koreksi-deep shadow-sm font-semibold"
+                  ? "bg-white text-[#8B0000] shadow-sm font-semibold"
                   : "text-white/60 hover:bg-white/10 hover:text-white"
               )}
               aria-current={active ? "page" : undefined}
             >
               <span className="flex items-center gap-3">
-                <Icon className={cn("h-4 w-4 flex-shrink-0", active ? "text-koreksi-deep" : "text-white/40")} aria-hidden="true" />
+                <Icon className={cn("h-4 w-4 flex-shrink-0", active ? "text-[#8B0000]" : "text-white/40")} aria-hidden="true" />
                 {item.label}
               </span>
-              {active && <ChevronRight className="h-3.5 w-3.5 text-koreksi-deep opacity-60" aria-hidden="true" />}
+              {active && <ChevronRight className="h-3.5 w-3.5 text-[#8B0000] opacity-60" aria-hidden="true" />}
             </Link>
           );
         })}

@@ -61,14 +61,14 @@ export default function DaftarPage() {
   if (emailSent) {
     return (
       <div className="flex flex-col items-center text-center py-8">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-paper-raised mb-4">
-          <CheckCircle2 className="h-8 w-8 text-koreksi-deep" />
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-50 mb-4">
+          <CheckCircle2 className="h-8 w-8 text-[#8B0000]" />
         </div>
         <h2 className="text-xl font-extrabold text-slate-900 mb-2">Cek email kamu!</h2>
-        <p className="text-sm text-ink-faint mb-1">Link verifikasi dikirim ke</p>
+        <p className="text-sm text-muted-foreground mb-1">Link verifikasi dikirim ke</p>
         <p className="font-semibold text-slate-800 mb-6">{email}</p>
-        <p className="text-xs text-ink-faint mb-4">Tidak menerima email? Cek folder spam.</p>
-        <Link href="/login" className="text-sm font-semibold text-koreksi-deep hover:underline">
+        <p className="text-xs text-muted-foreground mb-4">Tidak menerima email? Cek folder spam.</p>
+        <Link href="/login" className="text-sm font-semibold text-[#8B0000] hover:underline">
           Kembali ke login
         </Link>
       </div>
@@ -80,9 +80,9 @@ export default function DaftarPage() {
       <div>
         <div className="mb-8">
           <h2 className="text-2xl font-extrabold text-slate-900">Buat akun gratis 🎓</h2>
-          <p className="mt-1.5 text-sm text-ink-faint">
+          <p className="mt-1.5 text-sm text-muted-foreground">
             Sudah punya akun?{" "}
-            <Link href="/login" className="font-semibold text-koreksi-deep hover:text-koreksi">
+            <Link href="/login" className="font-semibold text-[#8B0000] hover:text-brand-light">
               Masuk di sini
             </Link>
           </p>
@@ -90,7 +90,7 @@ export default function DaftarPage() {
 
         {/* Google */}
         <button type="button" onClick={handleGoogleLogin} disabled={googleLoading}
-          className="flex w-full items-center justify-center gap-3 rounded-xl border-2 border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-ink hover:bg-paper-raised transition-all disabled:opacity-60">
+          className="flex w-full items-center justify-center gap-3 rounded-xl border-2 border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-[#8B0000] hover:bg-brand-50 transition-all disabled:opacity-60">
           {googleLoading ? (
             <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-slate-700" />
           ) : (
@@ -106,7 +106,7 @@ export default function DaftarPage() {
 
         <div className="my-5 flex items-center gap-3">
           <span className="flex-1 h-px bg-slate-200" />
-          <span className="text-xs text-ink-faint font-medium">atau daftar dengan email</span>
+          <span className="text-xs text-muted-foreground font-medium">atau daftar dengan email</span>
           <span className="flex-1 h-px bg-slate-200" />
         </div>
 
@@ -149,7 +149,7 @@ export default function DaftarPage() {
                     <div key={i} className={`h-1 flex-1 rounded-full transition-all ${i <= passwordStrength ? strengthColor[passwordStrength] : "bg-slate-200"}`} />
                   ))}
                 </div>
-                <span className="text-xs text-ink-faint">{strengthLabel[passwordStrength]}</span>
+                <span className="text-xs text-muted-foreground">{strengthLabel[passwordStrength]}</span>
               </div>
             )}
           </div>
@@ -164,9 +164,9 @@ export default function DaftarPage() {
           </Button>
         </form>
 
-        <p className="mt-6 text-center text-xs text-ink-faint">
+        <p className="mt-6 text-center text-xs text-muted-foreground">
           Dengan mendaftar, kamu setuju dengan{" "}
-          <Link href="/syarat" className="text-koreksi-deep hover:underline">Syarat &amp; Ketentuan</Link>{" "}
+          <Link href="/syarat" className="text-[#8B0000] hover:underline">Syarat &amp; Ketentuan</Link>{" "}
           {BRAND.name}.
         </p>
       </div>

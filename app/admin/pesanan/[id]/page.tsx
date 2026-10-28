@@ -36,12 +36,12 @@ export default async function AdminPesananDetailPage({
       return (
         <div className="space-y-5">
           <div className="flex items-center gap-2">
-            <Link href="/admin/pesanan" className="flex items-center gap-1 text-sm text-ink-faint hover:text-slate-800">
+            <Link href="/admin/pesanan" className="flex items-center gap-1 text-sm text-muted-foreground hover:text-slate-800">
               <ChevronLeft className="h-4 w-4" aria-hidden="true" />
               Kembali ke Pesanan
             </Link>
           </div>
-          <p className="text-sm text-ink-faint">Preview mode — data pesanan tidak tersedia tanpa database.</p>
+          <p className="text-sm text-muted-foreground">Preview mode — data pesanan tidak tersedia tanpa database.</p>
         </div>
       );
     }
@@ -63,7 +63,7 @@ export default async function AdminPesananDetailPage({
       <div className="flex items-center gap-2">
         <Link
           href="/admin/pesanan"
-          className="flex items-center gap-1 text-sm text-ink-faint hover:text-slate-800"
+          className="flex items-center gap-1 text-sm text-muted-foreground hover:text-slate-800"
         >
           <ChevronLeft className="h-4 w-4" aria-hidden="true" />
           Kembali ke Pesanan

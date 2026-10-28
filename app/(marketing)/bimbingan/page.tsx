@@ -21,13 +21,13 @@ const TABS = [
 ];
 
 const STATIC_CLASSES = [
-  { id: "seminar-1", tab: "seminar", tag: "GRATIS", tag_color: "bg-ink text-white", title: "Seminar Online: Tips Lolos Sidang Skripsi", subtitle: `by ${BRAND.name}`, description: "Seminar intensif 3 jam bersama mentor berpengalaman. Pelajari strategi lolos sidang, cara menurunkan plagiasi, dan persiapan mental.", image_url: null, harga: 0, harga_coret: null, diskon_pct: null, jadwal: "Setiap bulan", durasi: "3 jam", peserta: "Terbuka umum", fitur: ["Materi eksklusif mentor", "Sesi tanya jawab live", "Rekaman acara", "Sertifikat digital"], cta_label: "Daftar Gratis", wa_message: `Halo%20${encodeURIComponent(BRAND.shortName)}%2C%20saya%20ingin%20daftar%20seminar%20gratis`, require_login: false, badge: "Populer", badge_color: "bg-amber-500 text-white", rating: 4.9, review_count: 120, is_active: true },
-  { id: "skripsi-weekdays", tab: "skripsi", tag: "WEEKDAYS", tag_color: "bg-ink text-white", title: "Bimbingan Skripsi & Thesis — Paket Weekdays", subtitle: "Pendampingan BAB 1–5 sampai ACC Sidang", description: "Bimbingan intensif step by step dari judul, BAB 1–5, analisis data, hingga simulasi sidang. Aktif Senin–Jumat.", image_url: "/promo-bimbingan.jpeg", harga: 3750000, harga_coret: 7500000, diskon_pct: 50, jadwal: "Senin–Jumat", durasi: "1–3 bulan", peserta: "Maks. 5 orang / mentor", fitur: ["Pendampingan judul + 5 literatur","Bimbingan BAB 1–3","Bimbingan BAB 4–5","8–20× Zoom","WA Coaching 09.00–20.30","Unlimited Revisi","Cek Turnitin 3×","PPTx Sidang + Script"], cta_label: "Daftar Sekarang", wa_message: `Halo%20${encodeURIComponent(BRAND.shortName)}%2C%20saya%20ingin%20bimbingan%20skripsi%20weekdays`, require_login: true, badge: "Best Seller", badge_color: "bg-ink text-white", rating: 4.9, review_count: 234, is_active: true },
+  { id: "seminar-1", tab: "seminar", tag: "GRATIS", tag_color: "bg-[#8B0000] text-white", title: "Seminar Online: Tips Lolos Sidang Skripsi", subtitle: `by ${BRAND.name}`, description: "Seminar intensif 3 jam bersama mentor berpengalaman. Pelajari strategi lolos sidang, cara menurunkan plagiasi, dan persiapan mental.", image_url: null, harga: 0, harga_coret: null, diskon_pct: null, jadwal: "Setiap bulan", durasi: "3 jam", peserta: "Terbuka umum", fitur: ["Materi eksklusif mentor", "Sesi tanya jawab live", "Rekaman acara", "Sertifikat digital"], cta_label: "Daftar Gratis", wa_message: `Halo%20${encodeURIComponent(BRAND.shortName)}%2C%20saya%20ingin%20daftar%20seminar%20gratis`, require_login: false, badge: "Populer", badge_color: "bg-amber-500 text-white", rating: 4.9, review_count: 120, is_active: true },
+  { id: "skripsi-weekdays", tab: "skripsi", tag: "WEEKDAYS", tag_color: "bg-[#8B0000] text-white", title: "Bimbingan Skripsi & Thesis — Paket Weekdays", subtitle: "Pendampingan BAB 1–5 sampai ACC Sidang", description: "Bimbingan intensif step by step dari judul, BAB 1–5, analisis data, hingga simulasi sidang. Aktif Senin–Jumat.", image_url: "/promo-bimbingan.jpeg", harga: 3750000, harga_coret: 7500000, diskon_pct: 50, jadwal: "Senin–Jumat", durasi: "1–3 bulan", peserta: "Maks. 5 orang / mentor", fitur: ["Pendampingan judul + 5 literatur","Bimbingan BAB 1–3","Bimbingan BAB 4–5","8–20× Zoom","WA Coaching 09.00–20.30","Unlimited Revisi","Cek Turnitin 3×","PPTx Sidang + Script"], cta_label: "Daftar Sekarang", wa_message: `Halo%20${encodeURIComponent(BRAND.shortName)}%2C%20saya%20ingin%20bimbingan%20skripsi%20weekdays`, require_login: true, badge: "Best Seller", badge_color: "bg-[#8B0000] text-white", rating: 4.9, review_count: 234, is_active: true },
   { id: "skripsi-weekend", tab: "skripsi", tag: "WEEKEND", tag_color: "bg-slate-700 text-white", title: "Bimbingan Skripsi & Thesis — Paket Weekend", subtitle: "Pendampingan BAB 1–5 sampai ACC Sidang", description: "Sama lengkapnya dengan paket Weekdays namun sesi bimbingan aktif di akhir pekan (Sabtu–Minggu).", image_url: "/promo-bimbingan.jpeg", harga: 4499000, harga_coret: null, diskon_pct: null, jadwal: "Sabtu–Minggu", durasi: "1–3 bulan", peserta: "Maks. 5 orang / mentor", fitur: ["Semua fitur Paket Weekdays","Rekaman Zoom setiap sesi","Cek Turnitin 3×","PPTx Sidang + Script"], cta_label: "Daftar Sekarang", wa_message: `Halo%20${encodeURIComponent(BRAND.shortName)}%2C%20saya%20ingin%20bimbingan%20skripsi%20weekend`, require_login: true, badge: null, badge_color: "", rating: 4.8, review_count: 156, is_active: true },
   { id: "lomba-bpc", tab: "lomba", tag: "KOMPETISI", tag_color: "bg-amber-600 text-white", title: "Bimbingan Lomba BPC & BCC", subtitle: "Business Plan & Business Case Competition", description: "Bimbingan intensif untuk memenangkan lomba BPC dan BCC. Dibimbing mentor berpengalaman juara kompetisi bisnis.", image_url: null, harga: 1500000, harga_coret: null, diskon_pct: null, jadwal: "Sesuai timeline lomba", durasi: "2–6 minggu", peserta: "Tim 2–5 mahasiswa", fitur: ["Analisis brief dan strategi","Penyusunan business plan","Review feedback intensif","Latihan presentasi & pitch"], cta_label: "Daftar Bimbingan", wa_message: `Halo%20${encodeURIComponent(BRAND.shortName)}%2C%20saya%20ingin%20bimbingan%20BPC`, require_login: true, badge: null, badge_color: "", rating: 4.9, review_count: 67, is_active: true },
-  { id: "lomba-kti", tab: "lomba", tag: "AKADEMIK", tag_color: "bg-ink text-white", title: "Bimbingan Lomba KTI, Essay & Paper", subtitle: "Karya Tulis Ilmiah · Essay Kompetisi · Paper Jurnal", description: "Bimbingan untuk lomba KTI, essay kompetisi, dan penulisan paper. Dari pemilihan topik hingga presentasi oral.", image_url: null, harga: 999000, harga_coret: null, diskon_pct: null, jadwal: "Sesuai deadline lomba", durasi: "1–4 minggu", peserta: "Individu atau Tim", fitur: ["Konsultasi topik dan outline","Bimbingan penulisan per bab","Review tata bahasa","Cek plagiasi + Turnitin","Persiapan presentasi"], cta_label: "Daftar Bimbingan", wa_message: `Halo%20${encodeURIComponent(BRAND.shortName)}%2C%20saya%20ingin%20bimbingan%20KTI`, require_login: true, badge: null, badge_color: "", rating: 4.8, review_count: 45, is_active: true },
-  { id: "data-spss", tab: "data", tag: "TEKNIS", tag_color: "bg-ink text-white", title: "Bimbingan SPSS & SmartPLS", subtitle: "Analisis Statistik untuk Skripsi & Tesis", description: "Kuasai SPSS dan SmartPLS untuk analisis regresi, SEM, path analysis. Interpretasi hasil dan penulisan BAB 4 termasuk.", image_url: null, harga: 750000, harga_coret: null, diskon_pct: null, jadwal: "Fleksibel", durasi: "2–4 sesi (2 jam/sesi)", peserta: "Individu", fitur: ["SPSS: uji asumsi, regresi, korelasi","SmartPLS: SEM & path analysis","Interpretasi output","Penulisan BAB 4 & 5","Recording sesi"], cta_label: "Daftar Bimbingan", wa_message: `Halo%20${encodeURIComponent(BRAND.shortName)}%2C%20saya%20ingin%20bimbingan%20SPSS`, require_login: true, badge: "Terlaris", badge_color: "bg-ink text-white", rating: 4.9, review_count: 112, is_active: true },
-  { id: "data-python", tab: "data", tag: "TEKNIS", tag_color: "bg-ink text-white", title: "Bimbingan Python & R Studio", subtitle: "Data Processing, Visualisasi & Machine Learning", description: "Bimbingan penggunaan Python dan R untuk penelitian akademik, analisis data lanjutan, dan visualisasi ilmiah.", image_url: null, harga: 850000, harga_coret: null, diskon_pct: null, jadwal: "Fleksibel", durasi: "2–6 sesi (2 jam/sesi)", peserta: "Individu", fitur: ["Python: pandas, numpy, matplotlib","R Studio: ggplot2, dplyr","Analisis data skripsi","Visualisasi & interpretasi","Recording sesi"], cta_label: "Daftar Bimbingan", wa_message: `Halo%20${encodeURIComponent(BRAND.shortName)}%2C%20saya%20ingin%20bimbingan%20Python`, require_login: true, badge: null, badge_color: "", rating: 4.7, review_count: 78, is_active: true },
+  { id: "lomba-kti", tab: "lomba", tag: "AKADEMIK", tag_color: "bg-[#8B0000] text-white", title: "Bimbingan Lomba KTI, Essay & Paper", subtitle: "Karya Tulis Ilmiah · Essay Kompetisi · Paper Jurnal", description: "Bimbingan untuk lomba KTI, essay kompetisi, dan penulisan paper. Dari pemilihan topik hingga presentasi oral.", image_url: null, harga: 999000, harga_coret: null, diskon_pct: null, jadwal: "Sesuai deadline lomba", durasi: "1–4 minggu", peserta: "Individu atau Tim", fitur: ["Konsultasi topik dan outline","Bimbingan penulisan per bab","Review tata bahasa","Cek plagiasi + Turnitin","Persiapan presentasi"], cta_label: "Daftar Bimbingan", wa_message: `Halo%20${encodeURIComponent(BRAND.shortName)}%2C%20saya%20ingin%20bimbingan%20KTI`, require_login: true, badge: null, badge_color: "", rating: 4.8, review_count: 45, is_active: true },
+  { id: "data-spss", tab: "data", tag: "TEKNIS", tag_color: "bg-[#8B0000] text-white", title: "Bimbingan SPSS & SmartPLS", subtitle: "Analisis Statistik untuk Skripsi & Tesis", description: "Kuasai SPSS dan SmartPLS untuk analisis regresi, SEM, path analysis. Interpretasi hasil dan penulisan BAB 4 termasuk.", image_url: null, harga: 750000, harga_coret: null, diskon_pct: null, jadwal: "Fleksibel", durasi: "2–4 sesi (2 jam/sesi)", peserta: "Individu", fitur: ["SPSS: uji asumsi, regresi, korelasi","SmartPLS: SEM & path analysis","Interpretasi output","Penulisan BAB 4 & 5","Recording sesi"], cta_label: "Daftar Bimbingan", wa_message: `Halo%20${encodeURIComponent(BRAND.shortName)}%2C%20saya%20ingin%20bimbingan%20SPSS`, require_login: true, badge: "Terlaris", badge_color: "bg-[#8B0000] text-white", rating: 4.9, review_count: 112, is_active: true },
+  { id: "data-python", tab: "data", tag: "TEKNIS", tag_color: "bg-[#8B0000] text-white", title: "Bimbingan Python & R Studio", subtitle: "Data Processing, Visualisasi & Machine Learning", description: "Bimbingan penggunaan Python dan R untuk penelitian akademik, analisis data lanjutan, dan visualisasi ilmiah.", image_url: null, harga: 850000, harga_coret: null, diskon_pct: null, jadwal: "Fleksibel", durasi: "2–6 sesi (2 jam/sesi)", peserta: "Individu", fitur: ["Python: pandas, numpy, matplotlib","R Studio: ggplot2, dplyr","Analisis data skripsi","Visualisasi & interpretasi","Recording sesi"], cta_label: "Daftar Bimbingan", wa_message: `Halo%20${encodeURIComponent(BRAND.shortName)}%2C%20saya%20ingin%20bimbingan%20Python`, require_login: true, badge: null, badge_color: "", rating: 4.7, review_count: 78, is_active: true },
 ];
 
 type KelasItem = typeof STATIC_CLASSES[0];
@@ -38,12 +38,12 @@ function ClassCard({ cls }: { cls: KelasItem }) {
   const iconMap: Record<string, React.ElementType> = { seminar: Sparkles, skripsi: BookOpen, lomba: Trophy, data: BarChart2 };
   const Icon = iconMap[cls.tab] ?? GraduationCap;
   return (
-    <div className="flex flex-col rounded-2xl border border-slate-200 bg-white shadow-lift overflow-hidden card-hover group">
-      <div className="relative aspect-[16/9] bg-gradient-to-br from-paper-raised to-paper-sunken overflow-hidden">
+    <div className="flex flex-col rounded-2xl border border-slate-200 bg-white shadow-card overflow-hidden card-hover group">
+      <div className="relative aspect-[16/9] bg-gradient-to-br from-brand-50 to-brand-100 overflow-hidden">
         {cls.image_url ? (
           <Image src={cls.image_url} alt={cls.title} fill className="object-cover object-top group-hover:scale-105 transition-transform duration-500" sizes="33vw" />
         ) : (
-          <div className="flex h-full items-center justify-center"><Icon className="h-16 w-16 text-ink-ghost" /></div>
+          <div className="flex h-full items-center justify-center"><Icon className="h-16 w-16 text-brand-200" /></div>
         )}
         <div className="absolute top-3 left-3 flex gap-1.5">
           <span className={`rounded-md px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wide ${cls.tag_color}`}>{cls.tag}</span>
@@ -52,30 +52,30 @@ function ClassCard({ cls }: { cls: KelasItem }) {
         {cls.diskon_pct && <div className="absolute top-3 right-3 flex h-10 w-10 items-center justify-center rounded-full bg-red-500 text-white text-xs font-extrabold shadow">-{cls.diskon_pct}%</div>}
       </div>
       <div className="flex flex-col flex-1 p-5">
-        <h3 className="font-extrabold text-slate-900 text-base leading-snug mb-0.5 group-hover:text-koreksi-deep transition-colors">{cls.title}</h3>
-        <p className="text-xs text-ink-faint mb-3">{cls.subtitle}</p>
+        <h3 className="font-extrabold text-slate-900 text-base leading-snug mb-0.5 group-hover:text-[#8B0000] transition-colors">{cls.title}</h3>
+        <p className="text-xs text-muted-foreground mb-3">{cls.subtitle}</p>
         <p className="text-sm text-slate-600 leading-relaxed mb-4 flex-1 line-clamp-3">{cls.description}</p>
         <ul className="space-y-1 mb-4">
           {cls.fitur.slice(0, 3).map((f) => (
-            <li key={f} className="flex items-start gap-2 text-xs text-slate-600"><CheckCircle2 className="h-3.5 w-3.5 flex-shrink-0 mt-0.5 text-koreksi-deep" />{f}</li>
+            <li key={f} className="flex items-start gap-2 text-xs text-slate-600"><CheckCircle2 className="h-3.5 w-3.5 flex-shrink-0 mt-0.5 text-[#8B0000]" />{f}</li>
           ))}
-          {cls.fitur.length > 3 && <li className="text-xs text-koreksi-deep font-medium pl-5">+{cls.fitur.length - 3} fitur lainnya</li>}
+          {cls.fitur.length > 3 && <li className="text-xs text-[#8B0000] font-medium pl-5">+{cls.fitur.length - 3} fitur lainnya</li>}
         </ul>
-        <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-ink-faint mb-4 border-t border-slate-100 pt-3">
-          <span className="flex items-center gap-1"><CalendarDays className="h-3 w-3 text-koreksi-deep" />{cls.jadwal}</span>
-          <span className="flex items-center gap-1"><Clock className="h-3 w-3 text-koreksi-deep" />{cls.durasi}</span>
-          <span className="flex items-center gap-1"><Users className="h-3 w-3 text-koreksi-deep" />{cls.peserta}</span>
+        <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted-foreground mb-4 border-t border-slate-100 pt-3">
+          <span className="flex items-center gap-1"><CalendarDays className="h-3 w-3 text-[#8B0000]" />{cls.jadwal}</span>
+          <span className="flex items-center gap-1"><Clock className="h-3 w-3 text-[#8B0000]" />{cls.durasi}</span>
+          <span className="flex items-center gap-1"><Users className="h-3 w-3 text-[#8B0000]" />{cls.peserta}</span>
         </div>
         <div className="flex items-center gap-1.5 mb-4 text-xs">
           <div className="flex gap-0.5">{[1,2,3,4,5].map((i) => <Star key={i} className={`h-3.5 w-3.5 ${i <= Math.round(cls.rating) ? "fill-amber-400 text-amber-400" : "text-slate-200"}`} />)}</div>
           <span className="font-bold text-slate-700">{cls.rating}</span>
-          <span className="text-ink-faint">({cls.review_count} ulasan)</span>
+          <span className="text-muted-foreground">({cls.review_count} ulasan)</span>
         </div>
         <div className="mb-4">
-          {cls.harga === 0 ? <p className="text-2xl font-extrabold text-koreksi-deep">GRATIS</p> : (
+          {cls.harga === 0 ? <p className="text-2xl font-extrabold text-[#8B0000]">GRATIS</p> : (
             <div>
               {cls.harga_coret && <p className="text-sm text-slate-400 line-through">{fmt(cls.harga_coret)}</p>}
-              <p className="text-2xl font-extrabold text-koreksi-deep">{fmt(cls.harga)}</p>
+              <p className="text-2xl font-extrabold text-[#8B0000]">{fmt(cls.harga)}</p>
             </div>
           )}
         </div>
@@ -83,7 +83,7 @@ function ClassCard({ cls }: { cls: KelasItem }) {
           href={cls.require_login ? `/daftar?next=/bimbingan` : `https://wa.me/${BRAND.whatsapp}?text=${cls.wa_message}`}
           target={cls.require_login ? undefined : "_blank"}
           rel={cls.require_login ? undefined : "noopener noreferrer"}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-ink text-white text-sm font-extrabold px-4 py-2.5 hover:bg-koreksi transition-colors shadow-lift"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#8B0000] text-white text-sm font-extrabold px-4 py-2.5 hover:bg-brand-light transition-colors shadow-brand-sm"
         >
           {cls.cta_label} <ArrowRight className="h-4 w-4" />
         </a>
@@ -114,14 +114,14 @@ export default function BimbinganPage() {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <Link href="/" className="flex items-center gap-2">
             <Image src={BRAND.logoPng} alt={BRAND.name} width={28} height={28} unoptimized className="object-contain" />
-            <span className="text-lg font-extrabold text-koreksi-deep">{BRAND.shortName}</span>
+            <span className="text-lg font-extrabold text-[#8B0000]">{BRAND.shortName}</span>
           </Link>
           <div className="hidden md:flex items-center gap-5 text-sm font-medium text-slate-600">
-            <Link href="/layanan"    className="hover:text-koreksi-deep transition-colors">Layanan</Link>
-            <Link href="/blog"       className="hover:text-koreksi-deep transition-colors">Blog</Link>
-            <Link href="/paket-hemat" className="hover:text-koreksi-deep transition-colors">Paket Hemat</Link>
-            <Link href="/bimbingan" className="text-koreksi-deep font-bold border-b-2 border-ink pb-0.5">Bimbingan</Link>
-            <Link href="/referral"   className="hover:text-koreksi-deep transition-colors">Referral</Link>
+            <Link href="/layanan"    className="hover:text-[#8B0000] transition-colors">Layanan</Link>
+            <Link href="/blog"       className="hover:text-[#8B0000] transition-colors">Blog</Link>
+            <Link href="/paket-hemat" className="hover:text-[#8B0000] transition-colors">Paket Hemat</Link>
+            <Link href="/bimbingan" className="text-[#8B0000] font-bold border-b-2 border-[#8B0000] pb-0.5">Bimbingan</Link>
+            <Link href="/referral"   className="hover:text-[#8B0000] transition-colors">Referral</Link>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" asChild><Link href="/daftar">Daftar</Link></Button>
@@ -131,10 +131,10 @@ export default function BimbinganPage() {
       </nav>
 
       {/* Promo banner */}
-      <div className="bg-ink text-white text-sm py-2.5 px-4 text-center font-medium flex flex-wrap items-center justify-center gap-3">
+      <div className="bg-[#8B0000] text-white text-sm py-2.5 px-4 text-center font-medium flex flex-wrap items-center justify-center gap-3">
         <span>🎓 Konsultasi awal <strong>GRATIS!</strong> Hubungi kami sekarang</span>
         <a href={waLink("Halo, saya ingin konsultasi program bimbingan")} target="_blank" rel="noopener noreferrer"
-          className="rounded-full border border-white/60 px-3 py-0.5 text-xs font-bold hover:bg-white hover:text-koreksi-deep transition-colors">
+          className="rounded-full border border-white/60 px-3 py-0.5 text-xs font-bold hover:bg-white hover:text-[#8B0000] transition-colors">
           Chat WhatsApp →
         </a>
       </div>
@@ -144,7 +144,7 @@ export default function BimbinganPage() {
         <div className="mx-auto max-w-4xl text-center">
           <Badge variant="secondary" className="mb-4">by {BRAND.name}</Badge>
           <h1 className="text-3xl lg:text-4xl font-extrabold text-slate-900 mb-3">
-            Program <span className="text-koreksi-deep">Bimbingan</span> Akademik &amp; Kompetisi
+            Program <span className="text-[#8B0000]">Bimbingan</span> Akademik &amp; Kompetisi
           </h1>
           <p className="text-slate-500 max-w-xl mx-auto leading-relaxed">
             Bimbingan intensif dari mentor berpengalaman. Skripsi, lomba, dan olah data — semua tersedia di sini.
@@ -152,7 +152,7 @@ export default function BimbinganPage() {
           <div className="mt-8 flex flex-wrap justify-center gap-8">
             {[{ val: "500+", label: "Mahasiswa Dibimbing" }, { val: "50+", label: "Kampus" }, { val: "95%", label: "Lulus Sidang" }, { val: "4.9★", label: "Rating" }].map((s) => (
               <div key={s.label} className="text-center">
-                <p className="text-2xl font-extrabold text-koreksi-deep">{s.val}</p>
+                <p className="text-2xl font-extrabold text-[#8B0000]">{s.val}</p>
                 <p className="text-xs text-slate-500">{s.label}</p>
               </div>
             ))}
@@ -166,7 +166,7 @@ export default function BimbinganPage() {
           <div className="flex gap-0 overflow-x-auto" role="tablist">
             {TABS.map((tab) => (
               <button key={tab.id} role="tab" aria-selected={activeTab === tab.id} onClick={() => setActiveTab(tab.id)}
-                className={`flex-shrink-0 px-5 py-4 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === tab.id ? "border-ink text-koreksi-deep" : "border-transparent text-slate-500 hover:text-slate-800"}`}>
+                className={`flex-shrink-0 px-5 py-4 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === tab.id ? "border-[#8B0000] text-[#8B0000]" : "border-transparent text-slate-500 hover:text-slate-800"}`}>
                 {tab.label}
               </button>
             ))}
@@ -190,7 +190,7 @@ export default function BimbinganPage() {
             ))}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="py-20 text-center text-ink-faint">Tidak ada kelas di kategori ini.</div>
+          <div className="py-20 text-center text-muted-foreground">Tidak ada kelas di kategori ini.</div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
             {filtered.map((cls) => <ClassCard key={cls.id} cls={cls} />)}
@@ -208,12 +208,12 @@ export default function BimbinganPage() {
               { n: "Siti M.",  u: "UGM", t: "Menang BPC berkat bimbingan di sini. Mentor sangat berpengalaman!", init: "SM" },
               { n: "Budi S.",  u: "ITS", t: "Bimbingan SPSS jadi mudah. Analisis BAB 4 beres 2 sesi.", init: "BS" },
             ].map((t) => (
-              <div key={t.n} className="rounded-2xl bg-white border border-slate-200 p-5 shadow-lift">
+              <div key={t.n} className="rounded-2xl bg-white border border-slate-200 p-5 shadow-card">
                 <div className="flex gap-0.5 mb-3">{[1,2,3,4,5].map((i) => <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />)}</div>
-                <p className="text-sm text-slate-700 leading-relaxed mb-4">&ldquo;{t.t}&rdquo;</p>
+                <p className="text-sm text-slate-700 leading-relaxed mb-4">"{t.t}"</p>
                 <div className="flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-ink text-white text-xs font-bold">{t.init}</div>
-                  <div><p className="text-sm font-semibold">{t.n}</p><p className="text-xs text-ink-faint">{t.u}</p></div>
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#8B0000] text-white text-xs font-bold">{t.init}</div>
+                  <div><p className="text-sm font-semibold">{t.n}</p><p className="text-xs text-muted-foreground">{t.u}</p></div>
                 </div>
               </div>
             ))}
@@ -223,26 +223,26 @@ export default function BimbinganPage() {
 
       {/* CTA */}
       <section className="px-4 py-14">
-        <div className="mx-auto max-w-3xl rounded-3xl bg-ink p-10 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-lift">
+        <div className="mx-auto max-w-3xl rounded-3xl bg-brand-gradient p-10 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-brand">
           <div>
             <h2 className="text-xl font-extrabold text-white mb-1">Masih bingung pilih program? 🎓</h2>
             <p className="text-white/75 text-sm">Konsultasi gratis langsung dengan tim kami via WhatsApp.</p>
           </div>
           <a href={waLink("Halo, saya ingin konsultasi program bimbingan")} target="_blank" rel="noopener noreferrer"
-            className="flex-shrink-0 flex items-center gap-2 rounded-xl bg-white text-koreksi-deep font-extrabold text-sm px-5 py-2.5 hover:bg-paper-raised transition-colors shadow-md">
+            className="flex-shrink-0 flex items-center gap-2 rounded-xl bg-white text-[#8B0000] font-extrabold text-sm px-5 py-2.5 hover:bg-brand-50 transition-colors shadow-md">
             <MessageCircle className="h-4 w-4" />
             Chat Sekarang
           </a>
         </div>
       </section>
 
-      <footer className="border-t py-6 text-center text-xs text-ink-faint">
+      <footer className="border-t py-6 text-center text-xs text-muted-foreground">
         © {BRAND.year} {BRAND.name} ·{" "}
-        <Link href="/" className="hover:text-koreksi-deep">Beranda</Link>
+        <Link href="/" className="hover:text-[#8B0000]">Beranda</Link>
         {" · "}
-        <Link href="/layanan" className="hover:text-koreksi-deep">Layanan</Link>
+        <Link href="/layanan" className="hover:text-[#8B0000]">Layanan</Link>
         {" · "}
-        <Link href="/paket-hemat" className="hover:text-koreksi-deep">Paket Hemat</Link>
+        <Link href="/paket-hemat" className="hover:text-[#8B0000]">Paket Hemat</Link>
       </footer>
 
       <a href={waLink()} target="_blank" rel="noopener noreferrer"

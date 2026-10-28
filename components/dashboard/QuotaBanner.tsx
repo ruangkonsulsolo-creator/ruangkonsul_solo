@@ -52,7 +52,7 @@ export function QuotaBanner({ quotas }: QuotaBannerProps) {
       <div className="flex items-center gap-2 flex-shrink-0">
         <Link
           href="/paket-hemat"
-          className="flex items-center gap-1 rounded-lg bg-ink px-3 py-1.5 text-xs font-bold text-white hover:bg-koreksi transition-colors"
+          className="flex items-center gap-1 rounded-lg bg-brand px-3 py-1.5 text-xs font-bold text-white hover:bg-brand-light transition-colors"
         >
           <PackageOpen className="h-3.5 w-3.5" aria-hidden="true" />
           Beli Lagi

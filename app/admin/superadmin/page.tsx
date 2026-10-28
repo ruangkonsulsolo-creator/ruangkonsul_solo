@@ -85,7 +85,7 @@ export default async function SuperadminPage() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-xl font-extrabold text-slate-900">Superadmin Panel</h2>
-          <p className="text-sm text-ink-faint mt-0.5">
+          <p className="text-sm text-muted-foreground mt-0.5">
             Kontrol penuh semua konten, harga, dan konfigurasi {BRAND.name}.
           </p>
         </div>
@@ -98,7 +98,7 @@ export default async function SuperadminPage() {
             <span className={`h-1.5 w-1.5 rounded-full ${data.isLive ? "bg-green-500" : "bg-amber-400"}`} />
             {data.isLive ? "Live — DB Aktif" : "Preview — Data Dummy"}
           </span>
-          <span className="rounded-full bg-ink text-white px-3 py-1 text-xs font-extrabold">
+          <span className="rounded-full bg-brand text-white px-3 py-1 text-xs font-extrabold">
             ⚡ Superadmin
           </span>
         </div>

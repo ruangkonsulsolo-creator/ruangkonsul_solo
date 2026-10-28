@@ -83,8 +83,8 @@ export function BookingForm({ mentors }: Props) {
   if (submitted) {
     return (
       <div className="flex flex-col items-center text-center py-10 space-y-4">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-paper-raised">
-          <CheckCircle2 className="h-8 w-8 text-koreksi-deep" />
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-50">
+          <CheckCircle2 className="h-8 w-8 text-[#8B0000]" />
         </div>
         <h3 className="text-xl font-extrabold text-slate-900">Booking Terkirim! 🎉</h3>
         <p className="text-sm text-slate-500 max-w-xs leading-relaxed">
@@ -92,10 +92,10 @@ export function BookingForm({ mentors }: Props) {
         </p>
         <a href={waLink(`Halo, saya ${form.nama} baru saja booking bimbingan untuk ${form.kebutuhan.join(", ")}`)}
           target="_blank" rel="noopener noreferrer"
-          className="flex items-center gap-2 rounded-xl bg-ink text-white px-5 py-2.5 text-sm font-extrabold hover:bg-koreksi transition-colors shadow-lift">
+          className="flex items-center gap-2 rounded-xl bg-[#8B0000] text-white px-5 py-2.5 text-sm font-extrabold hover:bg-brand-light transition-colors shadow-brand-sm">
           Chat WhatsApp Sekarang <ArrowRight className="h-4 w-4" />
         </a>
-        <button onClick={() => setSubmitted(false)} className="text-xs text-ink-faint hover:text-koreksi-deep">
+        <button onClick={() => setSubmitted(false)} className="text-xs text-muted-foreground hover:text-[#8B0000]">
           Buat booking lain
         </button>
       </div>
@@ -107,7 +107,7 @@ export function BookingForm({ mentors }: Props) {
       <form onSubmit={handleSubmit} className="space-y-5">
 
         {/* Data diri */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 space-y-4 shadow-lift">
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 space-y-4 shadow-card">
           <p className="text-sm font-bold text-slate-800">Data Diri</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
@@ -124,25 +124,25 @@ export function BookingForm({ mentors }: Props) {
               <Label className="text-xs font-semibold text-slate-600">Nomor WhatsApp *</Label>
               <Input value={form.whatsapp} onChange={(e) => setForm({ ...form, whatsapp: e.target.value })}
                 placeholder="08xxxxxxxxxx" type="tel" required />
-              <p className="text-[10px] text-ink-faint">Untuk konfirmasi jadwal dari tim kami</p>
+              <p className="text-[10px] text-muted-foreground">Untuk konfirmasi jadwal dari tim kami</p>
             </div>
           </div>
         </div>
 
         {/* Pilih mentor (opsional) */}
         {mentors.length > 0 && (
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 space-y-3 shadow-lift">
-            <p className="text-sm font-bold text-slate-800">Pilih Mentor <span className="text-ink-faint font-normal">(opsional)</span></p>
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 space-y-3 shadow-card">
+            <p className="text-sm font-bold text-slate-800">Pilih Mentor <span className="text-muted-foreground font-normal">(opsional)</span></p>
             <div className="space-y-2">
-              <label className={`flex items-center gap-3 rounded-xl border p-3 cursor-pointer transition-colors ${!form.mentor_id ? "border-ink bg-paper-raised" : "border-slate-200 hover:bg-slate-50"}`}>
+              <label className={`flex items-center gap-3 rounded-xl border p-3 cursor-pointer transition-colors ${!form.mentor_id ? "border-[#8B0000] bg-brand-50" : "border-slate-200 hover:bg-slate-50"}`}>
                 <input type="radio" name="mentor" value="" checked={!form.mentor_id}
-                  onChange={() => setForm({ ...form, mentor_id: "" })} className="text-koreksi-deep focus:ring-koreksi" />
+                  onChange={() => setForm({ ...form, mentor_id: "" })} className="text-brand focus:ring-brand" />
                 <span className="text-sm font-medium text-slate-700">Assign oleh Tim (Rekomendasi)</span>
               </label>
               {mentors.map((m) => (
-                <label key={m.id} className={`flex items-center gap-3 rounded-xl border p-3 cursor-pointer transition-colors ${form.mentor_id === m.id ? "border-ink bg-paper-raised" : "border-slate-200 hover:bg-slate-50"}`}>
+                <label key={m.id} className={`flex items-center gap-3 rounded-xl border p-3 cursor-pointer transition-colors ${form.mentor_id === m.id ? "border-[#8B0000] bg-brand-50" : "border-slate-200 hover:bg-slate-50"}`}>
                   <input type="radio" name="mentor" value={m.id} checked={form.mentor_id === m.id}
-                    onChange={() => setForm({ ...form, mentor_id: m.id })} className="text-koreksi-deep focus:ring-koreksi" />
+                    onChange={() => setForm({ ...form, mentor_id: m.id })} className="text-brand focus:ring-brand" />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-slate-900">{(m.profiles as any)?.full_name ?? "Mentor"}</p>
                     <div className="flex flex-wrap gap-1 mt-0.5">
@@ -152,7 +152,7 @@ export function BookingForm({ mentors }: Props) {
                     </div>
                   </div>
                   <div className="text-right flex-shrink-0">
-                    <p className="text-xs font-bold text-koreksi-deep">⭐ {m.rating_avg}</p>
+                    <p className="text-xs font-bold text-[#8B0000]">⭐ {m.rating_avg}</p>
                     <p className="text-[10px] text-slate-400">{m.session_count} sesi</p>
                   </div>
                 </label>
@@ -162,19 +162,19 @@ export function BookingForm({ mentors }: Props) {
         )}
 
         {/* Jadwal */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 space-y-4 shadow-lift">
-          <p className="text-sm font-bold text-slate-800">Preferensi Jadwal <span className="text-ink-faint font-normal">(opsional)</span></p>
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 space-y-4 shadow-card">
+          <p className="text-sm font-bold text-slate-800">Preferensi Jadwal <span className="text-muted-foreground font-normal">(opsional)</span></p>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label className="text-xs font-semibold text-slate-600">Tanggal</Label>
               <input type="date" value={form.tanggal} min={new Date().toISOString().slice(0,10)}
                 onChange={(e) => setForm({ ...form, tanggal: e.target.value })}
-                className="flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm focus:ring-2 focus:ring-koreksi focus:outline-none" />
+                className="flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm focus:ring-2 focus:ring-brand focus:outline-none" />
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs font-semibold text-slate-600">Sesi (09.00–21.00 WIB)</Label>
               <select value={form.jam} onChange={(e) => setForm({ ...form, jam: e.target.value })}
-                className="flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm focus:ring-2 focus:ring-koreksi focus:outline-none">
+                className="flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm focus:ring-2 focus:ring-brand focus:outline-none">
                 {JAM_OPTIONS.map((j) => <option key={j} value={j}>{j} WIB</option>)}
               </select>
             </div>
@@ -182,14 +182,14 @@ export function BookingForm({ mentors }: Props) {
         </div>
 
         {/* Kebutuhan konsultasi */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 space-y-3 shadow-lift">
-          <p className="text-sm font-bold text-slate-800">Kebutuhan Konsultasi * <span className="text-ink-faint font-normal">(bisa pilih lebih dari satu)</span></p>
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 space-y-3 shadow-card">
+          <p className="text-sm font-bold text-slate-800">Kebutuhan Konsultasi * <span className="text-muted-foreground font-normal">(bisa pilih lebih dari satu)</span></p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {KEBUTUHAN_OPTIONS.map((opt) => {
               const checked = form.kebutuhan.includes(opt);
               return (
                 <button key={opt} type="button" onClick={() => toggleKebutuhan(opt)}
-                  className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 text-left text-xs font-medium transition-colors ${checked ? "border-ink bg-paper-raised text-koreksi-deep" : "border-slate-200 bg-white text-slate-600 hover:border-paper-edge hover:bg-slate-50"}`}>
+                  className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 text-left text-xs font-medium transition-colors ${checked ? "border-[#8B0000] bg-brand-50 text-[#8B0000]" : "border-slate-200 bg-white text-slate-600 hover:border-brand-200 hover:bg-slate-50"}`}>
                   {checked && <CheckCircle2 className="h-3.5 w-3.5 flex-shrink-0" />}
                   <span className={checked ? "" : "pl-[19px]"}>{opt}</span>
                 </button>
@@ -197,16 +197,16 @@ export function BookingForm({ mentors }: Props) {
             })}
           </div>
           {form.kebutuhan.length > 0 && (
-            <p className="text-xs text-koreksi-deep font-medium">Dipilih: {form.kebutuhan.join(", ")}</p>
+            <p className="text-xs text-[#8B0000] font-medium">Dipilih: {form.kebutuhan.join(", ")}</p>
           )}
         </div>
 
         {/* Catatan */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 space-y-2 shadow-lift">
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 space-y-2 shadow-card">
           <Label className="text-xs font-semibold text-slate-600">Catatan Tambahan</Label>
           <textarea value={form.catatan} onChange={(e) => setForm({ ...form, catatan: e.target.value })}
             rows={3} placeholder="Ceritakan sedikit tentang kebutuhanmu..."
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-koreksi focus:outline-none resize-none" />
+            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-brand focus:outline-none resize-none" />
         </div>
 
         <Button type="submit" size="lg" className="w-full gap-2" disabled={submitting}>
@@ -217,9 +217,9 @@ export function BookingForm({ mentors }: Props) {
           )}
         </Button>
 
-        <p className="text-xs text-center text-ink-faint">
+        <p className="text-xs text-center text-muted-foreground">
           Dengan mengirim form ini, kamu setuju dengan{" "}
-          <a href="/syarat" className="text-koreksi-deep hover:underline">Syarat &amp; Ketentuan</a> {BRAND.name}.
+          <a href="/syarat" className="text-[#8B0000] hover:underline">Syarat &amp; Ketentuan</a> {BRAND.name}.
         </p>
       </form>
 

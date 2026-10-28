@@ -2,9 +2,9 @@
 
 const statusConfig: Record<string, { label: string; className: string }> = {
   menunggu_pembayaran: { label: "Menunggu Pembayaran", className: "bg-yellow-100 text-yellow-800" },
-  dibayar:            { label: "Dibayar",              className: "bg-paper-raised text-koreksi-deep" },
+  dibayar:            { label: "Dibayar",              className: "bg-brand-50 text-brand" },
   diproses:           { label: "Diproses",             className: "bg-indigo-100 text-indigo-800" },
-  selesai:            { label: "Selesai",              className: "bg-paper-raised text-koreksi-deep" },
+  selesai:            { label: "Selesai",              className: "bg-brand-50 text-brand" },
   dibatalkan:         { label: "Dibatalkan",           className: "bg-red-100 text-red-800" },
 };
 

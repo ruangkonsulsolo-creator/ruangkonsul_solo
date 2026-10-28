@@ -56,17 +56,17 @@ export default async function BlogPage({ searchParams }: { searchParams: { cat?:
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <Link href="/" className="flex items-center gap-2">
             <Image src={BRAND.logoPng} alt={BRAND.name} width={28} height={28} unoptimized className="object-contain" />
-            <span className="text-lg font-extrabold text-koreksi-deep">{BRAND.shortName}</span>
+            <span className="text-lg font-extrabold text-brand">{BRAND.shortName}</span>
           </Link>
           <div className="hidden sm:flex items-center gap-5 text-sm font-medium text-slate-600">
-            <Link href="/layanan" className="hover:text-koreksi-deep transition-colors">Layanan</Link>
-            <Link href="/blog" className="text-koreksi-deep font-semibold">Blog</Link>
-            <Link href="/paket-hemat" className="hover:text-koreksi-deep transition-colors">Paket Hemat</Link>
-            <Link href="/bimbingan" className="hover:text-koreksi-deep transition-colors">Bimbingan</Link>
+            <Link href="/layanan" className="hover:text-brand transition-colors">Layanan</Link>
+            <Link href="/blog" className="text-brand font-semibold">Blog</Link>
+            <Link href="/paket-hemat" className="hover:text-brand transition-colors">Paket Hemat</Link>
+            <Link href="/bimbingan" className="hover:text-brand transition-colors">Bimbingan</Link>
           </div>
           <div className="flex gap-2">
-            <Link href="/daftar" className="rounded-lg border-2 border-ink px-3 py-1.5 text-sm font-semibold text-koreksi-deep hover:bg-paper-raised transition-colors">Daftar</Link>
-            <Link href="/login" className="rounded-lg bg-ink px-3 py-1.5 text-sm font-semibold text-white hover:bg-koreksi transition-colors">Login</Link>
+            <Link href="/daftar" className="rounded-lg border-2 border-brand px-3 py-1.5 text-sm font-semibold text-brand hover:bg-brand-50 transition-colors">Daftar</Link>
+            <Link href="/login" className="rounded-lg bg-brand px-3 py-1.5 text-sm font-semibold text-white hover:bg-brand transition-colors">Login</Link>
           </div>
         </div>
       </nav>
@@ -74,8 +74,8 @@ export default async function BlogPage({ searchParams }: { searchParams: { cat?:
       <section className="hero-gradient px-4 py-14 text-center">
         <div className="mx-auto max-w-xl">
           <div className="flex items-center justify-center gap-2 mb-3">
-            <span className="h-0.5 w-8 bg-ink rounded-full" />
-            <span className="text-xs font-bold uppercase tracking-widest text-koreksi-deep">Blog</span>
+            <span className="h-0.5 w-8 bg-brand rounded-full" />
+            <span className="text-xs font-bold uppercase tracking-widest text-brand">Blog</span>
           </div>
           <h1 className="text-3xl font-extrabold text-slate-900 mb-2">Blog Kami</h1>
           <p className="text-slate-500">Tempat bagi-bagi ilmu untuk mahasiswa, tips tugas dan skripsi.</p>
@@ -87,8 +87,8 @@ export default async function BlogPage({ searchParams }: { searchParams: { cat?:
           <Link key={cat} href={`/blog?cat=${cat}`}
             className={`rounded-full px-4 py-1.5 text-sm font-medium border transition-colors ${
               activeCat === cat
-                ? "bg-ink text-white border-ink shadow-lift"
-                : "bg-white text-slate-600 border-slate-200 hover:border-ink hover:text-koreksi-deep"
+                ? "bg-brand text-white border-brand shadow-card"
+                : "bg-white text-slate-600 border-slate-200 hover:border-brand hover:text-brand"
             }`}>
             {cat}
           </Link>
@@ -98,20 +98,20 @@ export default async function BlogPage({ searchParams }: { searchParams: { cat?:
       <div className="mx-auto max-w-5xl px-4 pb-20 space-y-10">
         {featured && (
           <Link href={`/blog/${featured.slug}`} className="group block">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 rounded-3xl overflow-hidden border border-slate-200 shadow-lift card-hover">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 rounded-3xl overflow-hidden border border-slate-200 shadow-card card-hover">
               <div className="relative aspect-[16/9] lg:aspect-auto">
                 <Image src={featured.cover} alt={featured.title} fill className="object-cover object-top" sizes="50vw" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-                <span className="absolute top-4 left-4 rounded-full bg-ink text-white text-xs font-bold px-3 py-1">{featured.category}</span>
+                <span className="absolute top-4 left-4 rounded-full bg-brand text-white text-xs font-bold px-3 py-1">{featured.category}</span>
               </div>
               <div className="flex flex-col justify-center p-8 bg-white">
-                <h2 className="text-xl font-extrabold text-slate-900 group-hover:text-koreksi-deep transition-colors mb-3 leading-snug">{featured.title}</h2>
+                <h2 className="text-xl font-extrabold text-slate-900 group-hover:text-brand transition-colors mb-3 leading-snug">{featured.title}</h2>
                 <p className="text-sm text-slate-500 leading-relaxed mb-5">{featured.excerpt}</p>
-                <div className="flex items-center gap-4 text-xs text-ink-faint mb-5">
+                <div className="flex items-center gap-4 text-xs text-muted-foreground mb-5">
                   <span className="flex items-center gap-1.5"><CalendarDays className="h-3.5 w-3.5" />{featured.date}</span>
                   <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" />{featured.readTime}</span>
                 </div>
-                <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-koreksi-deep group-hover:gap-2.5 transition-all">
+                <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand group-hover:gap-2.5 transition-all">
                   Baca selengkapnya <ArrowRight className="h-4 w-4" />
                 </span>
               </div>
@@ -123,16 +123,16 @@ export default async function BlogPage({ searchParams }: { searchParams: { cat?:
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {rest.map((article) => (
               <Link key={article.slug} href={`/blog/${article.slug}`}
-                className="group flex flex-col rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-lift card-hover">
+                className="group flex flex-col rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-card card-hover">
                 <div className="relative aspect-[16/9] overflow-hidden">
                   <Image src={article.cover} alt={article.title} fill className="object-cover object-top group-hover:scale-105 transition-transform duration-500" sizes="33vw" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                  <span className="absolute bottom-3 left-3 rounded-full bg-ink text-white text-[11px] font-bold px-2.5 py-0.5">{article.category}</span>
+                  <span className="absolute bottom-3 left-3 rounded-full bg-brand text-white text-[11px] font-bold px-2.5 py-0.5">{article.category}</span>
                 </div>
                 <div className="flex flex-col flex-1 p-5">
-                  <h3 className="font-bold text-slate-900 text-sm leading-snug mb-2 group-hover:text-koreksi-deep transition-colors line-clamp-2">{article.title}</h3>
+                  <h3 className="font-bold text-slate-900 text-sm leading-snug mb-2 group-hover:text-brand transition-colors line-clamp-2">{article.title}</h3>
                   <p className="text-xs text-slate-500 leading-relaxed mb-4 line-clamp-2 flex-1">{article.excerpt}</p>
-                  <div className="flex items-center justify-between text-[11px] text-ink-faint">
+                  <div className="flex items-center justify-between text-[11px] text-muted-foreground">
                     <span className="flex items-center gap-1"><CalendarDays className="h-3 w-3" />{article.date}</span>
                     <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{article.readTime}</span>
                   </div>
@@ -143,13 +143,13 @@ export default async function BlogPage({ searchParams }: { searchParams: { cat?:
         )}
 
         {articles.length === 0 && (
-          <div className="py-20 text-center text-ink-faint">Belum ada artikel di kategori ini.</div>
+          <div className="py-20 text-center text-muted-foreground">Belum ada artikel di kategori ini.</div>
         )}
 
-        <div className="rounded-3xl bg-ink p-10 text-center shadow-lift">
+        <div className="rounded-3xl bg-brand p-10 text-center shadow-card">
           <h2 className="text-xl font-extrabold text-white mb-2">Siap cek dokumenmu? 🐦</h2>
           <p className="text-white/75 text-sm mb-5">Upload sekarang, laporan bisa kamu unduh dalam hitungan jam.</p>
-          <Link href="/daftar" className="inline-flex items-center gap-2 rounded-xl bg-white text-koreksi-deep px-6 py-2.5 text-sm font-extrabold hover:bg-paper-raised transition-colors shadow-md">
+          <Link href="/daftar" className="inline-flex items-center gap-2 rounded-xl bg-white text-brand px-6 py-2.5 text-sm font-extrabold hover:bg-brand-50 transition-colors shadow-md">
             Cek Plagiasi Sekarang <ArrowRight className="h-4 w-4" />
           </Link>
         </div>

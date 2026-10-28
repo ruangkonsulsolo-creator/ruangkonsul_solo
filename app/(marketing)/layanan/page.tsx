@@ -135,13 +135,13 @@ const LAYANAN: Layanan[] = [
 export default function LayananPage() {
   return (
     <main className="mx-auto max-w-5xl px-5 py-12 md:px-8 md:py-20">
-      <header className="rail-layout">
-        <p className="rail-note">Layanan</p>
+      <header className="grid gap-4">
+        <p className="text-xs text-muted-foreground">Layanan</p>
         <div>
-          <h1 className="max-w-prose text-3xl md:text-4xl">
+          <h1 className="max-w-2xl text-3xl md:text-4xl">
             Pendampingan untuk tulisan yang kamu kerjakan sendiri
           </h1>
-          <p className="mt-4 max-w-measure text-lg text-ink-soft">
+          <p className="mt-4 max-w-xl text-lg text-slate-600">
             Semua layanan di bawah bertumpu pada hal yang sama: kamu tetap penulis
             karyamu. Mentor membantu kamu melewati bagian yang macet, bukan
             menggantikanmu mengerjakannya.
@@ -154,28 +154,28 @@ export default function LayananPage() {
           Daftar layanan
         </h2>
 
-        <ul className="border-t border-paper-edge">
+        <ul className="border-t border-brand-200">
           {LAYANAN.map((l) => (
-            <li key={l.nama} className="rail-layout border-b border-paper-edge py-8">
-              <div className="rail-note">
-                <span data-numeric className="block font-medium text-ink">
+            <li key={l.nama} className="grid gap-4 border-b border-brand-200 py-8">
+              <div className="text-xs text-muted-foreground">
+                <span data-numeric className="block font-medium text-slate-900">
                   {l.harga}
                 </span>
                 <span className="block">{l.satuan}</span>
                 {l.utama && (
-                  <span className="mt-1 block text-koreksi-deep">Produk utama</span>
+                  <span className="mt-1 block text-brand">Produk utama</span>
                 )}
               </div>
 
               <div>
                 <h3 className="text-xl md:text-2xl">{l.nama}</h3>
-                <p className="mt-1 text-ink-faint">{l.ringkas}</p>
-                <p className="mt-3 max-w-measure text-ink-soft">{l.deskripsi}</p>
+                <p className="mt-1 text-muted-foreground">{l.ringkas}</p>
+                <p className="mt-3 max-w-xl text-slate-600">{l.deskripsi}</p>
 
-                <ul className="mt-4 max-w-measure space-y-1.5 text-sm text-ink-soft">
+                <ul className="mt-4 max-w-xl space-y-1.5 text-sm text-slate-600">
                   {l.isi.map((i) => (
                     <li key={i} className="flex gap-2.5">
-                      <span aria-hidden="true" className="text-ink-ghost">
+                      <span aria-hidden="true" className="text-slate-400">
                         —
                       </span>
                       <span>{i}</span>
@@ -185,7 +185,7 @@ export default function LayananPage() {
 
                 <Link
                   href={l.href}
-                  className="mt-5 inline-block border-b-2 border-koreksi pb-0.5 font-medium"
+                  className="mt-5 inline-block border-b-2 border-brand pb-0.5 font-medium"
                 >
                   {l.cta}
                 </Link>
@@ -195,20 +195,20 @@ export default function LayananPage() {
         </ul>
       </section>
 
-      <aside className="rail-layout mt-14">
-        <p className="rail-note">Catatan</p>
-        <div className="max-w-measure">
-          <p className="text-ink-soft">
+      <aside className="grid gap-4 mt-14">
+        <p className="text-xs text-muted-foreground">Catatan</p>
+        <div className="max-w-xl">
+          <p className="text-slate-600">
             Ruang Konsul tidak mengerjakan skripsi, tesis, atau disertasi untuk
             diserahkan atas namamu, dan tidak menyediakan jasa untuk meloloskan
             tulisan dari pemeriksaan kemiripan. Kalau itu yang kamu cari, kami
             bukan tempatnya.
           </p>
-          <p className="mt-4 text-sm text-ink-faint">
+          <p className="mt-4 text-sm text-muted-foreground">
             Ada kebutuhan yang belum tercakup di atas? Hubungi kami di{" "}
             <a
               href={waLink("Halo, saya ingin bertanya soal layanan Ruang Konsul.")}
-              className="border-b border-ink-ghost"
+              className="border-b border-slate-400"
             >
               WhatsApp {BRAND.whatsappDisplay}
             </a>

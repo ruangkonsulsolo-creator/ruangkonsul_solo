@@ -148,18 +148,18 @@ export default function KalenderBooking({
 
   if (berhasil) {
     return (
-      <div className="rail-layout border border-paper-edge bg-paper-raised p-6">
-        <p className="rail-note text-setuju-deep">Tersimpan</p>
+      <div className="grid gap-4 border border-brand-200 bg-brand-50 p-6">
+        <p className="text-xs text-muted-foreground text-green-700">Tersimpan</p>
         <div>
           <h3 className="text-xl">Jadwalmu sudah masuk</h3>
-          <p className="mt-2 max-w-measure text-ink-soft">
-            Nomor pesanan <span data-numeric className="font-medium text-ink">{berhasil}</span>.
+          <p className="mt-2 max-w-xl text-slate-600">
+            Nomor pesanan <span data-numeric className="font-medium text-slate-900">{berhasil}</span>.
             Admin akan mengonfirmasi lewat WhatsApp sebelum sesi dimulai, dan
             kamu akan diingatkan sehari sebelumnya.
           </p>
           <a
             href="/dashboard/sesi-saya"
-            className="mt-4 inline-block border-b-2 border-koreksi pb-0.5 font-medium"
+            className="mt-4 inline-block border-b-2 border-brand pb-0.5 font-medium"
           >
             Lihat sesi saya
           </a>
@@ -172,15 +172,15 @@ export default function KalenderBooking({
     <div className="space-y-8">
       {/* ── Pemilih tanggal ─────────────────────────────────────────── */}
       <section aria-labelledby="pilih-tanggal">
-        <div className="rail-layout">
-          <p className="rail-note" id="pilih-tanggal">
+        <div className="grid gap-4">
+          <p className="text-xs text-muted-foreground" id="pilih-tanggal">
             Tanggal
           </p>
           <div>
             {memuat ? (
-              <p className="text-ink-faint">Memuat jadwal…</p>
+              <p className="text-muted-foreground">Memuat jadwal…</p>
             ) : hari.length === 0 ? (
-              <p className="max-w-measure text-ink-soft">
+              <p className="max-w-xl text-slate-600">
                 Belum ada jadwal terbuka dua minggu ke depan. Hubungi admin lewat
                 WhatsApp untuk mencari waktu lain.
               </p>
@@ -206,8 +206,8 @@ export default function KalenderBooking({
                         className={[
                           "flex w-16 flex-col items-center gap-0.5 border px-2 py-2.5 transition-colors",
                           aktif
-                            ? "border-ink bg-ink text-paper"
-                            : "border-paper-edge bg-paper-raised hover:border-ink-ghost",
+                            ? "border-brand bg-brand text-white"
+                            : "border-brand-200 bg-brand-50 hover:border-slate-400",
                         ].join(" ")}
                       >
                         <span className="text-2xs uppercase tracking-wide opacity-70">
@@ -219,7 +219,7 @@ export default function KalenderBooking({
                         <span
                           className={[
                             "text-2xs",
-                            aktif ? "opacity-70" : "text-ink-faint",
+                            aktif ? "opacity-70" : "text-muted-foreground",
                           ].join(" ")}
                         >
                           {h.slots.length} slot
@@ -237,10 +237,10 @@ export default function KalenderBooking({
       {/* ── Pemilih jam ─────────────────────────────────────────────── */}
       {tanggalAktif && slotHariIni.length > 0 && (
         <section aria-labelledby="pilih-jam">
-          <div className="rail-layout">
-            <p className="rail-note" id="pilih-jam">
+          <div className="grid gap-4">
+            <p className="text-xs text-muted-foreground" id="pilih-jam">
               Jam
-              <span className="mt-0.5 block text-2xs text-ink-ghost">WIB</span>
+              <span className="mt-0.5 block text-2xs text-slate-400">WIB</span>
             </p>
             <div>
               <h3 className="sr-only">
@@ -256,10 +256,10 @@ export default function KalenderBooking({
                         aria-pressed={dipilih}
                         onClick={() => setSlotTerpilih(dipilih ? null : s)}
                         className={[
-                          "tanda-koreksi relative border px-3 py-2 text-sm transition-colors",
+                          "relative border px-3 py-2 text-sm transition-colors",
                           dipilih
-                            ? "border-ink bg-paper-raised font-medium"
-                            : "border-paper-edge bg-paper-raised hover:border-ink-ghost after:hidden",
+                            ? "border-brand bg-brand-50 font-medium"
+                            : "border-brand-200 bg-brand-50 hover:border-slate-400",
                         ].join(" ")}
                       >
                         <span data-numeric>
@@ -277,13 +277,13 @@ export default function KalenderBooking({
 
       {/* ── Konfirmasi ──────────────────────────────────────────────── */}
       {slotTerpilih && (
-        <form onSubmit={kirim} className="rail-layout border-t border-paper-edge pt-6">
-          <p className="rail-note">Topik</p>
-          <div className="max-w-measure">
+        <form onSubmit={kirim} className="grid gap-4 border-t border-brand-200 pt-6">
+          <p className="text-xs text-muted-foreground">Topik</p>
+          <div className="max-w-xl">
             <label htmlFor="topik" className="block font-medium">
               Yang ingin dibahas
             </label>
-            <p className="mt-1 text-sm text-ink-faint">
+            <p className="mt-1 text-sm text-muted-foreground">
               Tulis sedetail mungkin supaya mentor bisa menyiapkan bahan.
               Misalnya: &ldquo;Bab 3, bingung menentukan teknik sampling untuk
               populasi 2.400 mahasiswa.&rdquo;
@@ -296,23 +296,23 @@ export default function KalenderBooking({
               rows={3}
               value={topik}
               onChange={(e) => setTopik(e.target.value)}
-              className="mt-2 w-full border border-paper-edge bg-paper-raised px-3 py-2 text-base"
+              className="mt-2 w-full border border-brand-200 bg-brand-50 px-3 py-2 text-base"
             />
 
             <dl className="mt-4 space-y-1 text-sm">
               <div className="flex justify-between gap-4">
-                <dt className="text-ink-faint">Mentor</dt>
+                <dt className="text-muted-foreground">Mentor</dt>
                 <dd>{slotTerpilih.mentor_name ?? "—"}</dd>
               </div>
               <div className="flex justify-between gap-4">
-                <dt className="text-ink-faint">Waktu</dt>
+                <dt className="text-muted-foreground">Waktu</dt>
                 <dd data-numeric>
                   {tanggalPanjang.format(parseTanggal(slotTerpilih.slot_date))},{" "}
                   {jam(slotTerpilih.slot_start)} WIB
                 </dd>
               </div>
-              <div className="flex justify-between gap-4 border-t border-paper-edge pt-1">
-                <dt className="text-ink-faint">Biaya</dt>
+              <div className="flex justify-between gap-4 border-t border-brand-200 pt-1">
+                <dt className="text-muted-foreground">Biaya</dt>
                 <dd data-numeric className="font-semibold">
                   {rupiah.format(slotTerpilih.price_per_hour)}
                 </dd>
@@ -322,7 +322,7 @@ export default function KalenderBooking({
             {galat && (
               <p
                 role="alert"
-                className="mt-4 border-l-2 border-koreksi bg-koreksi-wash px-3 py-2 text-sm text-koreksi-deep"
+                className="mt-4 border-l-2 border-brand bg-brand-50 px-3 py-2 text-sm text-brand"
               >
                 {galat}
               </p>
@@ -331,11 +331,11 @@ export default function KalenderBooking({
             <button
               type="submit"
               disabled={mengirim}
-              className="mt-4 w-full bg-ink px-5 py-3 font-medium text-paper transition-opacity hover:opacity-90 disabled:opacity-50 sm:w-auto"
+              className="mt-4 w-full bg-brand px-5 py-3 font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50 sm:w-auto"
             >
               {mengirim ? "Menyimpan…" : "Pesan jadwal ini"}
             </button>
-            <p className="mt-2 text-sm text-ink-faint">
+            <p className="mt-2 text-sm text-muted-foreground">
               Belum ada pembayaran di langkah ini. Admin mengonfirmasi dulu lewat
               WhatsApp.
             </p>
@@ -346,7 +346,7 @@ export default function KalenderBooking({
       {galat && !slotTerpilih && (
         <p
           role="alert"
-          className="border-l-2 border-koreksi bg-koreksi-wash px-3 py-2 text-sm text-koreksi-deep"
+          className="border-l-2 border-brand bg-brand-50 px-3 py-2 text-sm text-brand"
         >
           {galat}
         </p>

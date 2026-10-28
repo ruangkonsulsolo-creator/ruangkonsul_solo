@@ -12,7 +12,7 @@ export default async function AdminPaketPage() {
   ]);
   return (
     <div className="space-y-6 max-w-4xl">
-      <div><h2 className="text-xl font-extrabold text-slate-900">Konfigurasi Paket Hemat</h2><p className="text-sm text-ink-faint mt-1">Kelola paket kuota yang ditawarkan kepada pengguna.</p></div>
+      <div><h2 className="text-xl font-extrabold text-slate-900">Konfigurasi Paket Hemat</h2><p className="text-sm text-muted-foreground mt-1">Kelola paket kuota yang ditawarkan kepada pengguna.</p></div>
       <PaketConfigForm packages={packages ?? []} services={services ?? []} />
     </div>
   );

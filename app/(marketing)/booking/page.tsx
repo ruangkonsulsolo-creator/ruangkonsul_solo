@@ -49,13 +49,13 @@ export default async function BookingPage() {
 
   return (
     <main className="mx-auto max-w-5xl px-5 py-12 md:px-8 md:py-20">
-      <header className="rail-layout">
-        <p className="rail-note">Bimbingan</p>
+      <header className="grid gap-4">
+        <p className="text-xs text-muted-foreground">Bimbingan</p>
         <div>
-          <h1 className="max-w-prose text-3xl md:text-4xl">
+          <h1 className="max-w-2xl text-3xl md:text-4xl">
             Pilih mentor dan jam yang cocok
           </h1>
-          <p className="mt-4 max-w-measure text-lg text-ink-soft">
+          <p className="mt-4 max-w-xl text-lg text-slate-600">
             Sesi satu jam, daring atau tatap muka di {BRAND.address.split(",")[0]}.
             Kamu yang menulis; mentor yang menunjukkan jalan keluar saat kamu
             buntu.
@@ -65,11 +65,11 @@ export default async function BookingPage() {
 
       {mentors.length > 0 && (
         <section className="mt-14" aria-labelledby="mentor">
-          <div className="rail-layout">
-            <p className="rail-note" id="mentor">
+          <div className="grid gap-4">
+            <p className="text-xs text-muted-foreground" id="mentor">
               Mentor
             </p>
-            <ul className="divide-y divide-paper-edge border-y border-paper-edge">
+            <ul className="divide-y divide-slate-200 border-y border-brand-200">
               {mentors.map((m) => (
                 <li key={m.id} className="flex flex-wrap gap-x-6 gap-y-2 py-4">
                   <div className="min-w-0 flex-1">
@@ -77,12 +77,12 @@ export default async function BookingPage() {
                       {m.display_name ?? "Mentor Ruang Konsul"}
                     </h2>
                     {m.specializations && m.specializations.length > 0 && (
-                      <p className="mt-0.5 text-sm text-ink-faint">
+                      <p className="mt-0.5 text-sm text-muted-foreground">
                         {m.specializations.join(" · ")}
                       </p>
                     )}
                     {m.bio && (
-                      <p className="mt-2 max-w-measure text-sm text-ink-soft">
+                      <p className="mt-2 max-w-xl text-sm text-slate-600">
                         {m.bio}
                       </p>
                     )}
@@ -90,9 +90,9 @@ export default async function BookingPage() {
                   <div className="text-sm">
                     <p data-numeric className="font-semibold">
                       {rupiah.format(m.price_per_hour)}
-                      <span className="font-normal text-ink-faint"> / jam</span>
+                      <span className="font-normal text-muted-foreground"> / jam</span>
                     </p>
-                    <p data-numeric className="mt-0.5 text-ink-faint">
+                    <p data-numeric className="mt-0.5 text-muted-foreground">
                       {m.session_count} sesi selesai
                     </p>
                   </div>
@@ -110,9 +110,9 @@ export default async function BookingPage() {
         <KalenderBooking />
       </section>
 
-      <aside className="rail-layout mt-16 border-t border-paper-edge pt-6">
-        <p className="rail-note">Catatan</p>
-        <p className="max-w-measure text-sm text-ink-soft">
+      <aside className="grid gap-4 mt-16 border-t border-brand-200 pt-6">
+        <p className="text-xs text-muted-foreground">Catatan</p>
+        <p className="max-w-xl text-sm text-slate-600">
           Bimbingan di Ruang Konsul berarti kamu dibimbing mengerjakan
           tulisanmu sendiri — mentor membantu menajamkan rumusan masalah,
           memilih metode, membaca draf, dan menyiapkanmu menghadapi sidang.

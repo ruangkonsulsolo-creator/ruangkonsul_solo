@@ -64,7 +64,7 @@ export default async function MentorProfilPage() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-xl font-extrabold text-slate-900">Profil Mentor</h2>
-          <p className="text-sm text-ink-faint mt-0.5">Kelola informasi profil yang ditampilkan ke klien.</p>
+          <p className="text-sm text-muted-foreground mt-0.5">Kelola informasi profil yang ditampilkan ke klien.</p>
         </div>
         <Button className="gap-2">
           <Edit3 className="h-3.5 w-3.5" />
@@ -75,12 +75,12 @@ export default async function MentorProfilPage() {
       {/* Profile header */}
       <Card className="p-6">
         <div className="flex items-start gap-4">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-ink text-white text-xl font-extrabold flex-shrink-0">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-gradient text-white text-xl font-extrabold flex-shrink-0">
             {data.full_name.split(" ").map((n: string) => n[0]).slice(0, 2).join("").toUpperCase()}
           </div>
           <div className="flex-1">
             <h3 className="text-lg font-bold text-slate-900">{data.full_name}</h3>
-            <p className="text-sm text-ink-faint">{data.email}</p>
+            <p className="text-sm text-muted-foreground">{data.email}</p>
             <div className="flex items-center gap-2 mt-2">
               <Badge variant={data.is_available ? "success" : "muted"}>
                 {data.is_available ? "Tersedia" : "Tidak Aktif"}
@@ -97,11 +97,11 @@ export default async function MentorProfilPage() {
           const Icon = s.icon;
           return (
             <Card key={s.label} className="p-5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-paper-raised mb-3">
-                <Icon className="h-5 w-5 text-koreksi-deep" />
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-50 mb-3">
+                <Icon className="h-5 w-5 text-[#8B0000]" />
               </div>
               <p className="text-lg font-extrabold text-slate-900">{s.value}</p>
-              <p className="text-xs text-ink-faint mt-0.5">{s.label}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{s.label}</p>
             </Card>
           );
         })}
@@ -127,18 +127,18 @@ export default async function MentorProfilPage() {
               </Badge>
             ))
           ) : (
-            <p className="text-sm text-ink-faint">Belum ada spesialisasi dipilih.</p>
+            <p className="text-sm text-muted-foreground">Belum ada spesialisasi dipilih.</p>
           )}
         </div>
         <div className="mt-4 pt-4 border-t border-slate-100">
-          <p className="text-xs text-ink-faint mb-2">Pilihan spesialisasi:</p>
+          <p className="text-xs text-muted-foreground mb-2">Pilihan spesialisasi:</p>
           <div className="flex flex-wrap gap-2">
             {SPECIALIZATIONS.map((s) => (
               <span
                 key={s}
                 className={`rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors ${
                   data.specializations.includes(s)
-                    ? "border-ink bg-paper-raised text-koreksi-deep"
+                    ? "border-brand bg-brand-50 text-[#8B0000]"
                     : "border-slate-200 text-slate-500"
                 }`}
               >
@@ -157,10 +157,10 @@ export default async function MentorProfilPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-semibold text-slate-700">Tarif per Jam</p>
-              <p className="text-xs text-ink-faint">Harga sesi bimbingan 1 jam</p>
+              <p className="text-xs text-muted-foreground">Harga sesi bimbingan 1 jam</p>
             </div>
             <div className="text-right">
-              <p className="text-lg font-extrabold text-koreksi-deep">
+              <p className="text-lg font-extrabold text-[#8B0000]">
                 {data.price_per_hour > 0 ? formatRupiah(data.price_per_hour) : "Belum diatur"}
               </p>
             </div>
@@ -168,7 +168,7 @@ export default async function MentorProfilPage() {
           <div className="border-t border-slate-100 pt-4 flex items-center justify-between">
             <div>
               <p className="text-sm font-semibold text-slate-700">Status Ketersediaan</p>
-              <p className="text-xs text-ink-faint">Klien hanya bisa booking saat kamu tersedia</p>
+              <p className="text-xs text-muted-foreground">Klien hanya bisa booking saat kamu tersedia</p>
             </div>
             <div className="flex items-center gap-2">
               <div className={`h-2.5 w-2.5 rounded-full ${data.is_available ? "bg-green-500" : "bg-slate-400"}`} />

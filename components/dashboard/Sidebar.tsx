@@ -66,7 +66,7 @@ export function Sidebar() {
   const NavContent = () => (
     <div className="flex h-full flex-col">
       {/* Logo */}
-      <div className="flex items-center gap-3 px-5 py-4 border-b border-ink">
+      <div className="flex items-center gap-3 px-5 py-4 border-b border-brand">
         <Logo href="/dashboard" size="sm" showText={false} />
         <div className="flex flex-col leading-tight min-w-0">
           <span className="text-sm font-extrabold text-white truncate">Ruang Konsul</span>
@@ -84,7 +84,7 @@ export function Sidebar() {
             return (
               <p
                 key={i}
-                className="px-3 pt-5 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-ink-ghost"
+                className="px-3 pt-5 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400"
               >
                 {item.label}
               </p>
@@ -102,8 +102,8 @@ export function Sidebar() {
               className={cn(
                 "flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium transition-all",
                 active
-                  ? "bg-white text-koreksi-deep shadow-sm"
-                  : "text-white/70 hover:bg-ink hover:text-white"
+                  ? "bg-white text-brand shadow-sm"
+                  : "text-white/70 hover:bg-brand hover:text-white"
               )}
               aria-current={active ? "page" : undefined}
             >
@@ -111,7 +111,7 @@ export function Sidebar() {
                 <Icon
                   className={cn(
                     "h-4 w-4 flex-shrink-0",
-                    active ? "text-koreksi-deep" : "text-white/60"
+                    active ? "text-brand" : "text-white/60"
                   )}
                   aria-hidden="true"
                 />
@@ -119,7 +119,7 @@ export function Sidebar() {
               </span>
               {active && (
                 <ChevronRight
-                  className="h-3.5 w-3.5 text-koreksi-deep opacity-60"
+                  className="h-3.5 w-3.5 text-brand opacity-60"
                   aria-hidden="true"
                 />
               )}
@@ -129,7 +129,7 @@ export function Sidebar() {
       </nav>
 
       {/* Logout */}
-      <div className="border-t border-ink p-3">
+      <div className="border-t border-brand p-3">
         <button
           onClick={handleLogout}
           className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white/60 hover:bg-red-900/40 hover:text-red-300 transition-all"
@@ -145,13 +145,13 @@ export function Sidebar() {
   return (
     <>
       {/* Desktop */}
-      <aside className="hidden lg:flex w-60 flex-shrink-0 flex-col bg-ink">
+      <aside className="hidden lg:flex w-60 flex-shrink-0 flex-col bg-brand">
         <NavContent />
       </aside>
 
       {/* Mobile hamburger */}
       <button
-        className="fixed top-3.5 left-4 z-40 lg:hidden flex h-9 w-9 items-center justify-center rounded-xl bg-ink text-white shadow-lift"
+        className="fixed top-3.5 left-4 z-40 lg:hidden flex h-9 w-9 items-center justify-center rounded-xl bg-brand text-white shadow-card"
         onClick={() => setMobileOpen(true)}
         aria-label="Buka menu navigasi"
       >
@@ -166,9 +166,9 @@ export function Sidebar() {
             onClick={() => setMobileOpen(false)}
             aria-hidden="true"
           />
-          <aside className="fixed left-0 top-0 z-50 h-full w-64 flex flex-col bg-ink lg:hidden shadow-2xl">
+          <aside className="fixed left-0 top-0 z-50 h-full w-64 flex flex-col bg-brand lg:hidden shadow-2xl">
             <button
-              className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-lg bg-ink text-white/70 hover:text-white"
+              className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-lg bg-brand text-white/70 hover:text-white"
               onClick={() => setMobileOpen(false)}
               aria-label="Tutup menu"
             >

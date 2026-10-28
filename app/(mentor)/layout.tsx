@@ -32,11 +32,11 @@ export default async function MentorLayout({ children }: { children: ReactNode }
           <div className="pl-12 lg:pl-0" />
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-2 rounded-xl bg-slate-50 border border-slate-200 px-3 py-1.5">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-ink text-white text-[11px] font-bold">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-gradient text-white text-[11px] font-bold">
                 {initials}
               </div>
               <span className="text-sm font-semibold text-slate-700 hidden sm:block">{profile.full_name}</span>
-              <span className="text-[10px] font-bold text-koreksi-deep bg-paper-raised px-1.5 py-0.5 rounded">Mentor</span>
+              <span className="text-[10px] font-bold text-[#8B0000] bg-brand-50 px-1.5 py-0.5 rounded">Mentor</span>
             </div>
           </div>
         </header>

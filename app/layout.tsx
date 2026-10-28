@@ -1,27 +1,13 @@
 import type { Metadata } from "next";
-import { Literata, Archivo } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { BRAND } from "@/lib/brand";
 
-/**
- * Literata — serif untuk membaca panjang. Judul dan paragraf editorial.
- * Dipakai lewat variabel CSS, bukan className, supaya Tailwind yang
- * memutuskan di mana serif muncul dan di mana sans.
- */
-const literata = Literata({
+const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-literata",
-  weight: ["400", "500", "600"],
-  style: ["normal", "italic"],
-});
-
-/** Archivo — grotesk untuk semua teks fungsional: nav, tombol, tabel, kalender. */
-const archivo = Archivo({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-archivo",
-  weight: ["400", "500", "600", "700"],
+  variable: "--font-jakarta",
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 export const metadata: Metadata = {
@@ -58,8 +44,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="id" className={`${literata.variable} ${archivo.variable}`}>
-      <body>{children}</body>
+    <html lang="id" className={jakarta.variable}>
+      <body className={`${jakarta.className} antialiased`}>{children}</body>
     </html>
   );
 }

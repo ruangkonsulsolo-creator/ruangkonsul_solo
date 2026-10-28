@@ -30,9 +30,9 @@ export default function SyaratPage() {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <Link href="/" className="flex items-center gap-2">
             <Image src={BRAND.logoPng} alt={BRAND.name} width={28} height={28} unoptimized className="object-contain" />
-            <span className="text-lg font-extrabold text-koreksi-deep">{BRAND.shortName}</span>
+            <span className="text-lg font-extrabold text-[#8B0000]">{BRAND.shortName}</span>
           </Link>
-          <Link href="/" className="text-sm text-ink-faint hover:text-koreksi-deep transition-colors flex items-center gap-1.5">
+          <Link href="/" className="text-sm text-muted-foreground hover:text-[#8B0000] transition-colors flex items-center gap-1.5">
             ← Kembali ke Beranda
           </Link>
         </div>
@@ -40,7 +40,7 @@ export default function SyaratPage() {
       <div className="mx-auto max-w-2xl px-4 py-14">
         <div className="mb-8">
           <h1 className="text-3xl font-extrabold text-slate-900 mb-2">Syarat &amp; Ketentuan</h1>
-          <p className="text-sm text-ink-faint">
+          <p className="text-sm text-muted-foreground">
             Terakhir diperbarui: 15 Agustus {BRAND.year} · Berlaku untuk semua pengguna {BRAND.domain}
           </p>
         </div>
@@ -52,7 +52,7 @@ export default function SyaratPage() {
             </div>
           ))}
         </div>
-        <div className="mt-10 rounded-2xl border border-paper-edge bg-paper-raised p-5 text-sm text-koreksi-deep">
+        <div className="mt-10 rounded-2xl border border-brand-200 bg-brand-50 p-5 text-sm text-[#8B0000]">
           <p className="font-semibold mb-1">Ada pertanyaan tentang Syarat &amp; Ketentuan ini?</p>
           <p>
             Hubungi kami di{" "}
@@ -61,11 +61,11 @@ export default function SyaratPage() {
           </p>
         </div>
       </div>
-      <footer className="border-t py-6 text-center text-xs text-ink-faint">
+      <footer className="border-t py-6 text-center text-xs text-muted-foreground">
         © {BRAND.year} {BRAND.name} ·{" "}
-        <Link href="/syarat" className="text-koreksi-deep">Syarat &amp; Ketentuan</Link>
+        <Link href="/syarat" className="text-[#8B0000]">Syarat &amp; Ketentuan</Link>
         {" · "}
-        <Link href="/kebijakan-privasi" className="hover:text-koreksi-deep">Kebijakan Privasi</Link>
+        <Link href="/kebijakan-privasi" className="hover:text-[#8B0000]">Kebijakan Privasi</Link>
       </footer>
     </div>
   );

@@ -11,15 +11,15 @@ export function HeroBackground() {
       aria-hidden="true"
     >
       {/* ── Subtle radial glow kiri ── */}
-      <div className="absolute -left-32 top-1/4 h-96 w-96 rounded-full bg-ink/5 blur-3xl" />
-      <div className="absolute -left-16 bottom-0 h-64 w-64 rounded-full bg-ink/4 blur-2xl" />
+      <div className="absolute -left-32 top-1/4 h-96 w-96 rounded-full bg-brand/5 blur-3xl" />
+      <div className="absolute -left-16 bottom-0 h-64 w-64 rounded-full bg-brand/4 blur-2xl" />
 
       {/* ── Silhouette 1 — besar, latar (lambat, transparan) ── */}
       <svg
         className="absolute left-[2%] top-[8%] w-52 lg:w-72 opacity-[0.06] animate-bird-drift-1"
         viewBox="0 0 200 200"
         fill="currentColor"
-        style={{ color: "#141A17" }}
+        style={{ color: "#8B0000" }}
       >
         <KolibriPath />
       </svg>
@@ -29,7 +29,7 @@ export function HeroBackground() {
         className="absolute left-[8%] top-[45%] w-28 lg:w-40 opacity-[0.09] animate-bird-drift-2"
         viewBox="0 0 200 200"
         fill="currentColor"
-        style={{ color: "#141A17", transform: "scaleX(-1)" }}
+        style={{ color: "#8B0000", transform: "scaleX(-1)" }}
       >
         <KolibriPath />
       </svg>
@@ -39,7 +39,7 @@ export function HeroBackground() {
         className="absolute left-[18%] bottom-[10%] w-16 lg:w-24 opacity-[0.07] animate-bird-drift-3"
         viewBox="0 0 200 200"
         fill="currentColor"
-        style={{ color: "#141A17" }}
+        style={{ color: "#8B0000" }}
       >
         <KolibriPath />
       </svg>
@@ -49,7 +49,7 @@ export function HeroBackground() {
         className="absolute left-[35%] top-[5%] w-10 lg:w-14 opacity-[0.05] animate-bird-drift-4"
         viewBox="0 0 200 200"
         fill="currentColor"
-        style={{ color: "#141A17", transform: "scaleX(-1) rotate(-15deg)" }}
+        style={{ color: "#8B0000", transform: "scaleX(-1) rotate(-15deg)" }}
       >
         <KolibriPath />
       </svg>
@@ -59,7 +59,7 @@ export function HeroBackground() {
         className="absolute right-[5%] top-[12%] w-20 lg:w-28 opacity-[0.04] animate-bird-drift-2"
         viewBox="0 0 200 200"
         fill="currentColor"
-        style={{ color: "#141A17", transform: "rotate(10deg)" }}
+        style={{ color: "#8B0000", transform: "rotate(10deg)" }}
       >
         <KolibriPath />
       </svg>
@@ -68,7 +68,7 @@ export function HeroBackground() {
       <div
         className="absolute inset-0 opacity-[0.03]"
         style={{
-          backgroundImage: "radial-gradient(circle, #141A17 1px, transparent 1px)",
+          backgroundImage: "radial-gradient(circle, #8B0000 1px, transparent 1px)",
           backgroundSize: "32px 32px",
         }}
       />

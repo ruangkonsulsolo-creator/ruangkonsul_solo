@@ -2,159 +2,90 @@
 @tailwind components;
 @tailwind utilities;
 
-/*
-  Ruang Konsul Solo — lapisan dasar.
-
-  Token warna ditulis sebagai hex langsung di tailwind.config.js, bukan sebagai
-  CSS variable HSL ala shadcn. Alasannya: versi lama menyimpan satu set token
-  semantik (--primary, --accent, --muted) yang tidak pernah benar-benar
-  dipakai dengan maksud, sehingga setiap komponen akhirnya memilih warna
-  sendiri dan hasilnya tidak konsisten. Palet di sini kecil dan punya nama
-  yang menjelaskan tugasnya.
-*/
-
-@layer base {
-  *,
-  *::before,
-  *::after {
-    box-sizing: border-box;
-    border-width: 0;
-    border-style: solid;
-    border-color: theme("colors.paper.edge");
-  }
-
-  html {
-    -webkit-text-size-adjust: 100%;
-    /* scroll-behavior: smooth dihapus — mengganggu pengguna yang memakai
-       pembaca layar dan navigasi papan ketik. Lihat blok prefers-reduced-
-       motion di bawah untuk sikap umum terhadap gerak. */
-  }
-
-  body {
-    background-color: theme("colors.paper.DEFAULT");
-    color: theme("colors.ink.DEFAULT");
-    font-family: theme("fontFamily.sans");
-    font-size: 1rem;
-    line-height: 1.625;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    font-feature-settings: "cv05" 1, "ss01" 1;
-  }
-
-  h1, h2, h3 {
-    font-family: theme("fontFamily.serif");
-    font-weight: 600;
-    color: theme("colors.ink.DEFAULT");
-    text-wrap: balance;
-  }
-
-  h4, h5, h6 {
-    font-family: theme("fontFamily.sans");
-    font-weight: 600;
-  }
-
-  p {
-    text-wrap: pretty;
-  }
-
-  /* Angka sejajar di tabel harga, laporan keuangan dan kalender. Tanpa ini
-     kolom rupiah bergoyang dan sulit dibandingkan sekilas. */
-  table, .tabular, time, [data-numeric] {
-    font-variant-numeric: tabular-nums;
-    font-feature-settings: "tnum" 1;
-  }
-
-  /* Fokus papan ketik harus selalu terlihat. Jangan diganti outline:none. */
-  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
-    outline: 2px solid theme("colors.koreksi.DEFAULT");
-    outline-offset: 2px;
-    border-radius: 2px;
-  }
-
-  ::selection {
-    background-color: theme("colors.koreksi.wash");
-    color: theme("colors.koreksi.deep");
-  }
-
-  ::-webkit-scrollbar { width: 10px; height: 10px; }
-  ::-webkit-scrollbar-track { background: theme("colors.paper.sunken"); }
-  ::-webkit-scrollbar-thumb {
-    background: theme("colors.paper.edge");
-    border: 2px solid theme("colors.paper.sunken");
-    border-radius: 9999px;
-  }
-  ::-webkit-scrollbar-thumb:hover { background: theme("colors.ink.ghost"); }
+/* ── CSS Variables ── */
+:root {
+  --background:         0 0% 100%;
+  --foreground:         220 20% 10%;
+  --card:               0 0% 100%;
+  --card-foreground:    220 20% 10%;
+  --popover:            0 0% 100%;
+  --popover-foreground: 220 20% 10%;
+  --primary:            0 100% 27%;
+  --primary-foreground: 0 0% 100%;
+  --secondary:          0 25% 96%;
+  --secondary-foreground: 0 60% 20%;
+  --muted:              0 15% 95%;
+  --muted-foreground:   220 10% 46%;
+  --accent:             348 74% 43%;
+  --accent-foreground:  0 0% 100%;
+  --destructive:        0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border:             220 13% 91%;
+  --input:              220 13% 91%;
+  --ring:               0 100% 27%;
+  --radius:             0.5rem;
 }
 
-@layer components {
-  /*
-    Rail margin — perangkat struktural utama.
+/* ── Base resets (tanpa @apply semantic token) ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  border-width: 0;
+  border-style: solid;
+  border-color: hsl(220 13% 91%);
+}
 
-    Kolom sempit di kiri tempat anotasi hidup: status sesi, nomor bab, harga,
-    penanda slot. Ini membawa informasi, bukan menghias. Di layar sempit rail
-    runtuh menjadi baris di atas isinya, bukan dipaksa tetap berdampingan.
-  */
-  .rail-layout {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 0.5rem 1.5rem;
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background-color: #ffffff;
+  color: hsl(220 20% 10%);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+  font-family: var(--font-jakarta), system-ui, sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  letter-spacing: -0.025em;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar        { width: 6px; height: 6px; }
+::-webkit-scrollbar-track  { background: transparent; }
+::-webkit-scrollbar-thumb  { background: #e5e7eb; border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: #8B0000; }
+
+/* ── Custom utilities ── */
+@layer utilities {
+  .text-brand     { color: #8B0000; }
+  .bg-brand       { background-color: #8B0000; }
+  .bg-brand-light { background-color: #A31515; }
+  .bg-brand-dark  { background-color: #6B0000; }
+  .border-brand   { border-color: #8B0000; }
+
+  .hero-gradient {
+    background: linear-gradient(160deg, #ffffff 0%, #FFF0F0 40%, #FFDDDD 100%);
   }
 
-  @media (min-width: 768px) {
-    .rail-layout {
-      grid-template-columns: theme("spacing.rail") minmax(0, 1fr);
-    }
+  .card-hover {
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
   }
-
-  .rail-note {
-    font-size: theme("fontSize.xs[0]");
-    line-height: 1.125rem;
-    color: theme("colors.ink.faint");
-    padding-top: 0.25rem;
-  }
-
-  /*
-    Tanda koreksi: garis bawah merah yang menandai sesuatu yang perlu
-    diperhatikan. Dipakai pada tautan aktif dan slot terpilih.
-  */
-  .tanda-koreksi {
-    position: relative;
-  }
-  .tanda-koreksi::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: -2px;
-    height: 2px;
-    background-color: theme("colors.koreksi.DEFAULT");
-  }
-
-  /* Garis pemisah setipis rambut, sebagai pengganti kartu bershadow. */
-  .rule {
-    border-top: 1px solid theme("colors.paper.edge");
+  .card-hover:hover {
+    box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.10);
+    transform: translateY(-1px);
   }
 }
 
-/*
-  Hormati preferensi sistem untuk mengurangi gerak. Satu-satunya animasi
-  non-interaksi di sistem ini adalah .animate-strike; sisanya adalah respons
-  atas tindakan pengguna.
-*/
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
+/* ── Hero Slider transitions ── */
+@layer utilities {
+  .slide-enter {
+    animation: slideIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   }
-}
-
-/* Saat dicetak — jadwal sesi dan invoice sering dicetak mahasiswa. */
-@media print {
-  body { background: #fff; color: #000; }
-  nav, footer, .no-print { display: none !important; }
-  .rail-layout { grid-template-columns: theme("spacing.rail") 1fr; }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(40px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
 }

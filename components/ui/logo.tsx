@@ -44,7 +44,7 @@ export function Logo({
         <span className={cn("flex flex-col leading-tight", textClassName)}>
           <span className={cn(
             s.text, "font-extrabold tracking-tight",
-            light ? "text-white" : "text-koreksi-deep"
+            light ? "text-white" : "text-[#8B0000]"
           )}>
             {BRAND.name}
           </span>

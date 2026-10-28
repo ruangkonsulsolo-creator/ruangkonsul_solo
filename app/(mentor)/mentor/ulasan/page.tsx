@@ -32,17 +32,17 @@ export default async function UlasanPage() {
     <div className="space-y-6 max-w-4xl">
       <div>
         <h2 className="text-xl font-extrabold text-slate-900">Ulasan Klien</h2>
-        <p className="text-sm text-ink-faint mt-0.5">Feedback dari klien yang pernah bimbingan denganmu.</p>
+        <p className="text-sm text-muted-foreground mt-0.5">Feedback dari klien yang pernah bimbingan denganmu.</p>
       </div>
 
       {/* Summary */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card className="p-5 text-center">
-          <p className="text-4xl font-extrabold text-koreksi-deep">{avgRating.toFixed(1)}</p>
+          <p className="text-4xl font-extrabold text-[#8B0000]">{avgRating.toFixed(1)}</p>
           <div className="flex items-center justify-center gap-0.5 mt-2">
             {renderStars(Math.round(avgRating))}
           </div>
-          <p className="text-xs text-ink-faint mt-2">{totalReviews} ulasan</p>
+          <p className="text-xs text-muted-foreground mt-2">{totalReviews} ulasan</p>
         </Card>
         <Card className="p-5 col-span-2">
           <div className="space-y-2">
@@ -55,7 +55,7 @@ export default async function UlasanPage() {
                 <div className="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
                   <div className="h-2 rounded-full bg-amber-400" style={{ width: `${r.pct}%` }} />
                 </div>
-                <span className="text-xs text-ink-faint w-8 text-right flex-shrink-0">{r.count}</span>
+                <span className="text-xs text-muted-foreground w-8 text-right flex-shrink-0">{r.count}</span>
               </div>
             ))}
           </div>
@@ -67,13 +67,13 @@ export default async function UlasanPage() {
         {REVIEWS.map((r) => (
           <Card key={r.id} className="p-5">
             <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-ink text-white text-xs font-bold flex-shrink-0">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-gradient text-white text-xs font-bold flex-shrink-0">
                 {r.initials}
               </div>
               <div className="flex-1">
                 <div className="flex items-center justify-between gap-2 mb-1">
                   <p className="text-sm font-semibold text-slate-900">{r.name}</p>
-                  <span className="text-xs text-ink-faint flex-shrink-0">{r.date}</span>
+                  <span className="text-xs text-muted-foreground flex-shrink-0">{r.date}</span>
                 </div>
                 <div className="flex items-center gap-2 mb-2">
                   <div className="flex items-center gap-0.5">{renderStars(r.rating)}</div>
@@ -87,11 +87,11 @@ export default async function UlasanPage() {
       </div>
 
       {/* CTA */}
-      <div className="flex items-center gap-3 rounded-2xl border border-paper-edge bg-paper-raised p-5">
-        <TrendingUp className="h-5 w-5 text-koreksi-deep flex-shrink-0" />
+      <div className="flex items-center gap-3 rounded-2xl border border-brand-200 bg-brand-50 p-5">
+        <TrendingUp className="h-5 w-5 text-[#8B0000] flex-shrink-0" />
         <div className="flex-1">
           <p className="text-sm font-semibold text-slate-900">Mau tingkatkan rating?</p>
-          <p className="text-xs text-ink-faint mt-0.5">Minta ulasan dari klien setelah sesi bimbingan selesai untuk meningkatkan visibilitas-mu.</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Minta ulasan dari klien setelah sesi bimbingan selesai untuk meningkatkan visibilitas-mu.</p>
         </div>
       </div>
     </div>

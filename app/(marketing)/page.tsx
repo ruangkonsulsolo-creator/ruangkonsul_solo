@@ -52,8 +52,8 @@ const FAQS = [
 function SectionLabel({ children }: { children: string }) {
   return (
     <div className="flex items-center gap-2 mb-3">
-      <span className="h-0.5 w-8 bg-ink rounded-full" />
-      <span className="text-xs font-bold uppercase tracking-widest text-koreksi-deep">{children}</span>
+      <span className="h-0.5 w-8 bg-brand rounded-full" />
+      <span className="text-xs font-bold uppercase tracking-widest text-brand">{children}</span>
     </div>
   );
 }
@@ -64,11 +64,11 @@ export default function LandingPage() {
     <div className="min-h-screen bg-white text-slate-900">
 
       {/* ── WA Banner ── */}
-      <div className="bg-ink text-white text-sm py-2.5 px-4 text-center flex flex-wrap items-center justify-center gap-3">
+      <div className="bg-brand text-white text-sm py-2.5 px-4 text-center flex flex-wrap items-center justify-center gap-3">
         <Image src={BRAND.iconWhatsapp} alt="WhatsApp" width={20} height={20} unoptimized className="rounded flex-shrink-0" />
         <span>Gabung saluran WhatsApp untuk update layanan, promo, dan info terbaru dari {BRAND.name}!</span>
         <a href={waLink("Halo, saya ingin info layanan Ruang Konsul Solo")} target="_blank" rel="noopener noreferrer"
-          className="rounded-full border border-white/60 px-3 py-0.5 text-xs font-semibold hover:bg-white hover:text-koreksi-deep transition-colors">
+          className="rounded-full border border-white/60 px-3 py-0.5 text-xs font-semibold hover:bg-white hover:text-brand transition-colors">
           Gabung Disini
         </a>
       </div>
@@ -78,12 +78,12 @@ export default function LandingPage() {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <Logo size="md" />
           <div className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-600">
-            <Link href="/layanan"    className="hover:text-koreksi-deep transition-colors">Layanan</Link>
-            <Link href="/blog"       className="hover:text-koreksi-deep transition-colors">Blog</Link>
-            <Link href="/dashboard/riwayat-pesanan" className="hover:text-koreksi-deep transition-colors">Cek Pesanan</Link>
-            <Link href="/paket-hemat" className="hover:text-koreksi-deep transition-colors">Paket Hemat</Link>
-            <Link href="/bimbingan"  className="hover:text-koreksi-deep transition-colors font-semibold">Bimbingan</Link>
-            <Link href="/referral"   className="hover:text-koreksi-deep transition-colors">Referral</Link>
+            <Link href="/layanan"    className="hover:text-brand transition-colors">Layanan</Link>
+            <Link href="/blog"       className="hover:text-brand transition-colors">Blog</Link>
+            <Link href="/dashboard/riwayat-pesanan" className="hover:text-brand transition-colors">Cek Pesanan</Link>
+            <Link href="/paket-hemat" className="hover:text-brand transition-colors">Paket Hemat</Link>
+            <Link href="/bimbingan"  className="hover:text-brand transition-colors font-semibold">Bimbingan</Link>
+            <Link href="/referral"   className="hover:text-brand transition-colors">Referral</Link>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" asChild><Link href="/daftar">Daftar</Link></Button>
@@ -123,14 +123,14 @@ export default function LandingPage() {
                 { val: "24 Jam",    label: "Akses Laporan" },
               ].map((s, i) => (
                 <div key={i} className="flex flex-col">
-                  <span className="text-2xl font-extrabold text-koreksi-deep">{s.val}</span>
+                  <span className="text-2xl font-extrabold text-brand">{s.val}</span>
                   <span className="text-xs text-slate-400 uppercase tracking-wide">{s.label}</span>
                 </div>
               ))}
             </div>
 
             <div className="mt-7 flex flex-wrap justify-center lg:justify-start gap-3">
-              <Button size="lg" asChild className="shadow-lift gap-2">
+              <Button size="lg" asChild className="shadow-card gap-2">
                 <Link href="/daftar">Mulai Cek Sekarang <ArrowRight className="h-4 w-4" /></Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
@@ -169,16 +169,16 @@ export default function LandingPage() {
             return (
               <div key={l.name} className={`group relative rounded-2xl border p-6 card-hover cursor-pointer transition-all ${
                 l.featured
-                  ? "border-ink bg-ink text-white shadow-lift"
-                  : "border-slate-200 bg-white hover:border-paper-edge"
+                  ? "border-brand bg-brand text-white shadow-card"
+                  : "border-slate-200 bg-white hover:border-brand-200"
               }`}>
-                <div className={`inline-flex h-10 w-10 items-center justify-center rounded-xl mb-4 ${l.featured ? "bg-white/20" : "bg-paper-raised"}`}>
-                  <Icon className={`h-5 w-5 ${l.featured ? "text-white" : "text-koreksi-deep"}`} aria-hidden="true" />
+                <div className={`inline-flex h-10 w-10 items-center justify-center rounded-xl mb-4 ${l.featured ? "bg-white/20" : "bg-brand-50"}`}>
+                  <Icon className={`h-5 w-5 ${l.featured ? "text-white" : "text-brand"}`} aria-hidden="true" />
                 </div>
                 <h3 className={`text-lg font-bold mb-0.5 ${l.featured ? "text-white" : "text-slate-900"}`}>{l.name}</h3>
                 <p className={`text-sm mb-3 ${l.featured ? "text-white/70" : "text-slate-400"}`}>{l.sub}</p>
-                <p className={`text-sm font-semibold mb-4 ${l.featured ? "text-white" : "text-koreksi-deep"}`}>{l.harga}<span className={`text-xs font-normal ${l.featured ? "text-white/60" : "text-slate-400"}`}> {l.satuan}</span></p>
-                <Link href={l.href} className={`inline-flex items-center gap-1.5 text-sm font-semibold transition-colors ${l.featured ? "text-white hover:text-white/80" : "text-koreksi-deep hover:text-koreksi"}`}>
+                <p className={`text-sm font-semibold mb-4 ${l.featured ? "text-white" : "text-brand"}`}>{l.harga}<span className={`text-xs font-normal ${l.featured ? "text-white/60" : "text-slate-400"}`}> {l.satuan}</span></p>
+                <Link href={l.href} className={`inline-flex items-center gap-1.5 text-sm font-semibold transition-colors ${l.featured ? "text-white hover:text-white/80" : "text-brand hover:text-brand-light"}`}>
                   Lihat jadwal <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </Link>
               </div>
@@ -188,20 +188,20 @@ export default function LandingPage() {
       </section>
 
       {/* ── Jasa Akademik ── */}
-      <section className="bg-paper-raised px-4 py-16">
+      <section className="bg-brand-50 px-4 py-16">
         <div className="mx-auto max-w-5xl">
           <SectionLabel>Jasa Akademik</SectionLabel>
           <h2 className="text-2xl font-extrabold text-slate-900 mb-8">Semua Kebutuhan Akademik Tersedia</h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {JASA.map((j) => (
-              <Link key={j} href="/layanan" className="flex items-center gap-2 rounded-xl border border-paper-edge bg-white px-4 py-3 text-sm font-medium text-slate-700 hover:border-ink hover:text-koreksi-deep transition-colors card-hover">
-                <CheckCircle2 className="h-4 w-4 text-koreksi-deep flex-shrink-0" aria-hidden="true" />
+              <Link key={j} href="/layanan" className="flex items-center gap-2 rounded-xl border border-brand-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 hover:border-brand hover:text-brand transition-colors card-hover">
+                <CheckCircle2 className="h-4 w-4 text-brand flex-shrink-0" aria-hidden="true" />
                 {j}
               </Link>
             ))}
           </div>
           <div className="mt-6 text-center">
-            <Link href="/layanan" className="inline-flex items-center gap-1.5 text-sm font-semibold text-koreksi-deep hover:underline">
+            <Link href="/layanan" className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand hover:underline">
               Lihat semua layanan <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
@@ -210,7 +210,7 @@ export default function LandingPage() {
 
       {/* ── Bimbingan CTA ── */}
       <section className="mx-auto max-w-5xl px-4 py-20">
-        <div className="rounded-3xl bg-ink overflow-hidden shadow-lift">
+        <div className="rounded-3xl bg-brand overflow-hidden shadow-card">
           <div className="flex flex-col lg:flex-row items-center gap-8 p-8 lg:p-12">
             <div className="flex-1 text-center lg:text-left">
               <SectionLabel>Program Bimbingan</SectionLabel>
@@ -262,10 +262,10 @@ export default function LandingPage() {
               { num: "03", emoji: "✅", title: "Terima Laporan", desc: "Tim kami proses dan laporan dikirim ke dashboardmu + notifikasi WA!" },
             ].map((s) => (
               <div key={s.num} className="flex flex-col items-center text-center">
-                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-ink shadow-lift text-2xl">
+                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-brand shadow-card text-2xl">
                   {s.emoji}
                 </div>
-                <span className="text-xs font-bold text-koreksi-deep mb-1">{s.num}</span>
+                <span className="text-xs font-bold text-brand mb-1">{s.num}</span>
                 <h3 className="text-base font-bold text-slate-900 mb-2">{s.title}</h3>
                 <p className="text-sm text-slate-500 leading-relaxed">{s.desc}</p>
               </div>
@@ -280,7 +280,7 @@ export default function LandingPage() {
         <h2 className="text-2xl font-extrabold text-slate-900 mb-8">Kata Mereka yang Sudah Pakai</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
           {TESTIMONIALS.map((t) => (
-            <div key={t.name} className="rounded-2xl bg-white border border-slate-200 p-6 card-hover shadow-lift">
+            <div key={t.name} className="rounded-2xl bg-white border border-slate-200 p-6 card-hover shadow-card">
               <div className="flex gap-0.5 mb-3" aria-label={`${t.star} bintang`}>
                 {Array.from({ length: t.star }).map((_, i) => (
                   <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" aria-hidden="true" />
@@ -288,10 +288,10 @@ export default function LandingPage() {
               </div>
               <p className="text-sm text-slate-700 leading-relaxed mb-4">&ldquo;{t.text}&rdquo;</p>
               <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-ink text-white text-xs font-bold">{t.init}</div>
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand text-white text-xs font-bold">{t.init}</div>
                 <div>
                   <p className="text-sm font-semibold">{t.name}</p>
-                  <p className="text-xs text-ink-faint">{t.univ}</p>
+                  <p className="text-xs text-muted-foreground">{t.univ}</p>
                 </div>
               </div>
             </div>
@@ -309,7 +309,7 @@ export default function LandingPage() {
           <div className="space-y-3">
             {FAQS.map((f) => (
               <details key={f.q} className="group rounded-2xl border border-slate-200 bg-white overflow-hidden">
-                <summary className="flex cursor-pointer items-center justify-between px-5 py-4 text-sm font-semibold text-slate-800 list-none hover:bg-paper-raised transition-colors">
+                <summary className="flex cursor-pointer items-center justify-between px-5 py-4 text-sm font-semibold text-slate-800 list-none hover:bg-brand-50 transition-colors">
                   {f.q}
                   <ChevronDown className="h-4 w-4 flex-shrink-0 text-slate-400 group-open:rotate-180 transition-transform duration-200" aria-hidden="true" />
                 </summary>
@@ -333,39 +333,39 @@ export default function LandingPage() {
 
             {/* WhatsApp */}
             <a href={waLink()} target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-lift hover:border-ink hover:shadow-lift transition-all group">
+              className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-card hover:border-brand hover:shadow-card transition-all group">
               <Image src={BRAND.iconWhatsapp} alt="WhatsApp" width={36} height={36} className="flex-shrink-0 rounded-xl" unoptimized />
               <div className="flex-1 min-w-0">
                 <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">WhatsApp</p>
-                <p className="text-base font-bold text-koreksi-deep group-hover:underline">{BRAND.whatsappDisplay}</p>
+                <p className="text-base font-bold text-brand group-hover:underline">{BRAND.whatsappDisplay}</p>
               </div>
             </a>
 
             {/* Instagram */}
             <a href={BRAND.instagramUrl} target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-lift hover:border-ink hover:shadow-lift transition-all group">
+              className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-card hover:border-brand hover:shadow-card transition-all group">
               <Image src={BRAND.iconInstagram} alt="Instagram" width={36} height={36} className="flex-shrink-0 rounded-xl" unoptimized />
               <div className="flex-1 min-w-0">
                 <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Instagram</p>
-                <p className="text-base font-bold text-koreksi-deep group-hover:underline">{BRAND.instagram}</p>
+                <p className="text-base font-bold text-brand group-hover:underline">{BRAND.instagram}</p>
               </div>
             </a>
 
             {/* TikTok */}
             <a href={BRAND.tiktokUrl} target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-lift hover:border-ink hover:shadow-lift transition-all group">
+              className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-card hover:border-brand hover:shadow-card transition-all group">
               <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-black overflow-hidden">
                 <Image src={BRAND.iconTiktok} alt="TikTok" width={36} height={36} className="object-contain" unoptimized />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">TikTok</p>
-                <p className="text-base font-bold text-koreksi-deep group-hover:underline">{BRAND.tiktok}</p>
+                <p className="text-base font-bold text-brand group-hover:underline">{BRAND.tiktok}</p>
               </div>
             </a>
 
             {/* Gmail */}
             <a href={`mailto:${BRAND.email}`}
-              className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-lift hover:border-ink hover:shadow-lift transition-all group">
+              className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-card hover:border-brand hover:shadow-card transition-all group">
               <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-red-50">
                 {/* Gmail icon SVG */}
                 <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none">
@@ -376,26 +376,26 @@ export default function LandingPage() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Gmail</p>
-                <p className="text-base font-bold text-koreksi-deep group-hover:underline truncate">{BRAND.email}</p>
+                <p className="text-base font-bold text-brand group-hover:underline truncate">{BRAND.email}</p>
               </div>
             </a>
 
             {/* Alamat */}
             <a href={BRAND.mapsUrl} target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-lift hover:border-ink hover:shadow-lift transition-all group">
-              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-paper-raised">
-                <MapPin className="h-5 w-5 text-koreksi-deep" aria-hidden="true" />
+              className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-card hover:border-brand hover:shadow-card transition-all group">
+              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-brand-50">
+                <MapPin className="h-5 w-5 text-brand" aria-hidden="true" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Alamat</p>
-                <p className="text-sm font-medium text-slate-700 group-hover:text-koreksi-deep leading-snug">{BRAND.address}</p>
+                <p className="text-sm font-medium text-slate-700 group-hover:text-brand leading-snug">{BRAND.address}</p>
               </div>
             </a>
 
             {/* Jam operasional */}
-            <div className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-lift">
-              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-paper-raised">
-                <Clock className="h-5 w-5 text-koreksi-deep" aria-hidden="true" />
+            <div className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-card">
+              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-brand-50">
+                <Clock className="h-5 w-5 text-brand" aria-hidden="true" />
               </div>
               <div>
                 <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Jam Operasional</p>
@@ -405,7 +405,7 @@ export default function LandingPage() {
           </div>
 
           {/* Google Maps embed — link share resmi */}
-          <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-lift" style={{ minHeight: "360px" }}>
+          <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-card" style={{ minHeight: "360px" }}>
             <iframe
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3955.5!2d110.8588!3d-7.5377!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zSmwuIFNpYmVsYSBCYXJhdCBObyAyMSBNb2pvc29uZ28gSmVicmVzIFN1cmFrYXJ0YQ!5e0!3m2!1sid!2sid!4v1700000000000!5m2!1sid!2sid"
               width="100%"
@@ -422,7 +422,7 @@ export default function LandingPage() {
 
       {/* ── CTA Final ── */}
       <section className="px-4 py-8 mb-0">
-        <div className="mx-auto max-w-4xl rounded-3xl bg-ink p-10 lg:p-14 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-lift">
+        <div className="mx-auto max-w-4xl rounded-3xl bg-brand p-10 lg:p-14 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-card">
           <div className="text-center sm:text-left">
             <h2 className="text-2xl lg:text-3xl font-extrabold text-white mb-2">Mulai dari satu sesi</h2>
             <p className="text-white/75 text-sm">Pilih mentor dan jam yang cocok. Tidak ada pembayaran sebelum jadwalmu dikonfirmasi.</p>
@@ -448,7 +448,7 @@ export default function LandingPage() {
               <Link href="/" className="flex items-center gap-2.5 mb-4">
                 <Image src={BRAND.logoPng} alt={BRAND.name} width={38} height={38} unoptimized className="object-contain flex-shrink-0" />
                 <div className="flex flex-col leading-tight">
-                  <span className="text-base font-extrabold text-koreksi-deep">{BRAND.name}</span>
+                  <span className="text-base font-extrabold text-brand">{BRAND.name}</span>
                   <span className="text-[10px] font-medium text-slate-400">{BRAND.taglineShort}</span>
                 </div>
               </Link>
@@ -456,12 +456,12 @@ export default function LandingPage() {
               <p className="text-xs text-slate-500 leading-relaxed mb-5">{BRAND.tagline}</p>
 
               {/* Call center / Hubungi bantuan */}
-              <div className="rounded-2xl border border-paper-edge bg-paper-raised px-4 py-3.5 space-y-2.5">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-koreksi-deep">Hubungi Bantuan</p>
+              <div className="rounded-2xl border border-brand-200 bg-brand-50 px-4 py-3.5 space-y-2.5">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-brand">Hubungi Bantuan</p>
                 <a href={waLink("Halo, saya butuh bantuan")} target="_blank" rel="noopener noreferrer"
                   className="flex items-center gap-2.5 group">
                   <Image src={BRAND.iconWhatsapp} alt="WA" width={24} height={24} unoptimized className="rounded-lg flex-shrink-0" />
-                  <span className="text-sm font-bold text-koreksi-deep group-hover:underline">{BRAND.whatsappDisplay}</span>
+                  <span className="text-sm font-bold text-brand group-hover:underline">{BRAND.whatsappDisplay}</span>
                 </a>
                 <a href={`mailto:${BRAND.email}`}
                   className="flex items-center gap-2.5 group">
@@ -471,14 +471,14 @@ export default function LandingPage() {
                       <path d="M1 6l9 6 9-6" stroke="#EA4335" strokeWidth="1.5" strokeLinecap="round"/>
                     </svg>
                   </div>
-                  <span className="text-xs font-semibold text-slate-600 group-hover:text-koreksi-deep truncate">{BRAND.email}</span>
+                  <span className="text-xs font-semibold text-slate-600 group-hover:text-brand truncate">{BRAND.email}</span>
                 </a>
               </div>
             </div>
 
             {/* Kolom 2 — Navigasi */}
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-widest text-koreksi-deep mb-4">Navigasi</p>
+              <p className="text-[11px] font-bold uppercase tracking-widest text-brand mb-4">Navigasi</p>
               <ul className="space-y-2.5">
                 {[
                   { label: "Beranda",     href: "/" },
@@ -491,8 +491,8 @@ export default function LandingPage() {
                 ].map((m) => (
                   <li key={m.label}>
                     <Link href={m.href}
-                      className="text-sm text-slate-600 hover:text-koreksi-deep hover:font-semibold transition-all flex items-center gap-1.5 group">
-                      <span className="h-1 w-1 rounded-full bg-paper-sunken group-hover:bg-ink transition-colors" />
+                      className="text-sm text-slate-600 hover:text-brand hover:font-semibold transition-all flex items-center gap-1.5 group">
+                      <span className="h-1 w-1 rounded-full bg-brand-100 group-hover:bg-brand transition-colors" />
                       {m.label}
                     </Link>
                   </li>
@@ -502,7 +502,7 @@ export default function LandingPage() {
 
             {/* Kolom 3 — Produk & Fitur */}
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-widest text-koreksi-deep mb-4">Produk &amp; Fitur</p>
+              <p className="text-[11px] font-bold uppercase tracking-widest text-brand mb-4">Produk &amp; Fitur</p>
               <ul className="space-y-2.5">
                 {[
                   { label: "Jasa Revisi",         href: "/layanan" },
@@ -515,8 +515,8 @@ export default function LandingPage() {
                 ].map((l) => (
                   <li key={l.label}>
                     <Link href={l.href}
-                      className="text-sm text-slate-600 hover:text-koreksi-deep hover:font-semibold transition-all flex items-center gap-1.5 group">
-                      <span className="h-1 w-1 rounded-full bg-paper-sunken group-hover:bg-ink transition-colors" />
+                      className="text-sm text-slate-600 hover:text-brand hover:font-semibold transition-all flex items-center gap-1.5 group">
+                      <span className="h-1 w-1 rounded-full bg-brand-100 group-hover:bg-brand transition-colors" />
                       {l.label}
                     </Link>
                   </li>
@@ -526,7 +526,7 @@ export default function LandingPage() {
 
             {/* Kolom 4 — Informasi + Lokasi */}
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-widest text-koreksi-deep mb-4">Informasi</p>
+              <p className="text-[11px] font-bold uppercase tracking-widest text-brand mb-4">Informasi</p>
               <ul className="space-y-2.5 mb-5">
                 {[
                   { label: "Syarat & Ketentuan",  href: "/syarat" },
@@ -536,8 +536,8 @@ export default function LandingPage() {
                 ].map((l) => (
                   <li key={l.label}>
                     <Link href={l.href}
-                      className="text-sm text-slate-600 hover:text-koreksi-deep hover:font-semibold transition-all flex items-center gap-1.5 group">
-                      <span className="h-1 w-1 rounded-full bg-paper-sunken group-hover:bg-ink transition-colors" />
+                      className="text-sm text-slate-600 hover:text-brand hover:font-semibold transition-all flex items-center gap-1.5 group">
+                      <span className="h-1 w-1 rounded-full bg-brand-100 group-hover:bg-brand transition-colors" />
                       {l.label}
                     </Link>
                   </li>
@@ -546,8 +546,8 @@ export default function LandingPage() {
 
               {/* Alamat */}
               <a href={BRAND.mapsUrl} target="_blank" rel="noopener noreferrer"
-                className="flex items-start gap-2 text-xs text-slate-500 hover:text-koreksi-deep transition-colors leading-relaxed group">
-                <MapPin className="h-3.5 w-3.5 text-koreksi-deep flex-shrink-0 mt-0.5" aria-hidden="true" />
+                className="flex items-start gap-2 text-xs text-slate-500 hover:text-brand transition-colors leading-relaxed group">
+                <MapPin className="h-3.5 w-3.5 text-brand flex-shrink-0 mt-0.5" aria-hidden="true" />
                 <span>{BRAND.address}</span>
               </a>
             </div>
@@ -556,11 +556,11 @@ export default function LandingPage() {
           {/* Row bawah — copyright */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-6">
             <p className="text-xs text-slate-400">
-              © {BRAND.year} <span className="font-semibold text-koreksi-deep">{BRAND.name}</span>. Semua hak dilindungi.
+              © {BRAND.year} <span className="font-semibold text-brand">{BRAND.name}</span>. Semua hak dilindungi.
             </p>
             <div className="flex items-center gap-5 text-xs text-slate-400">
-              <Link href="/syarat" className="hover:text-koreksi-deep transition-colors">Syarat &amp; Ketentuan</Link>
-              <Link href="/kebijakan-privasi" className="hover:text-koreksi-deep transition-colors">Kebijakan Privasi</Link>
+              <Link href="/syarat" className="hover:text-brand transition-colors">Syarat &amp; Ketentuan</Link>
+              <Link href="/kebijakan-privasi" className="hover:text-brand transition-colors">Kebijakan Privasi</Link>
             </div>
           </div>
         </div>
