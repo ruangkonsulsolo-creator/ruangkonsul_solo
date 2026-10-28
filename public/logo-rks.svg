@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <!-- Tiga lingkaran (kepala / orang) -->
+  <circle cx="60" cy="14" r="9" fill="#8B0000"/>
+  <circle cx="38" cy="20" r="6" fill="#8B0000"/>
+  <circle cx="82" cy="20" r="6" fill="#8B0000"/>
+
+  <!-- Buku terbuka -->
+  <!-- Halaman kiri -->
+  <path d="M18 40 C18 38 20 36 22 36 L56 36 L56 86 L22 86 C20 86 18 84 18 82 Z"
+        stroke="#8B0000" stroke-width="3.5" fill="none" stroke-linejoin="round"/>
+  <!-- Halaman kanan -->
+  <path d="M64 36 L98 36 C100 36 102 38 102 40 L102 82 C102 84 100 86 98 86 L64 86 Z"
+        stroke="#8B0000" stroke-width="3.5" fill="none" stroke-linejoin="round"/>
+  <!-- Lipatan tengah atas -->
+  <path d="M56 36 C57 30 63 30 64 36" stroke="#8B0000" stroke-width="3" fill="none"/>
+  <!-- Lipatan tengah bawah -->
+  <path d="M56 86 C57 92 63 92 64 86" stroke="#8B0000" stroke-width="3" fill="none"/>
+  <!-- Garis halaman kiri -->
+  <line x1="28" y1="50" x2="50" y2="50" stroke="#8B0000" stroke-width="2" stroke-linecap="round"/>
+  <line x1="28" y1="58" x2="50" y2="58" stroke="#8B0000" stroke-width="2" stroke-linecap="round"/>
+  <line x1="28" y1="66" x2="50" y2="66" stroke="#8B0000" stroke-width="2" stroke-linecap="round"/>
+  <line x1="28" y1="74" x2="50" y2="74" stroke="#8B0000" stroke-width="2" stroke-linecap="round"/>
+  <!-- Garis halaman kanan -->
+  <line x1="70" y1="50" x2="92" y2="50" stroke="#8B0000" stroke-width="2" stroke-linecap="round"/>
+  <line x1="70" y1="58" x2="92" y2="58" stroke="#8B0000" stroke-width="2" stroke-linecap="round"/>
+  <line x1="70" y1="66" x2="92" y2="66" stroke="#8B0000" stroke-width="2" stroke-linecap="round"/>
+  <line x1="70" y1="74" x2="92" y2="74" stroke="#8B0000" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Alas / clipboard bawah -->
+  <rect x="42" y="88" width="36" height="6" rx="3" fill="#8B0000"/>
+
+  <!-- Ikon tambah (pojok kanan atas) -->
+  <rect x="88" y="30" width="5" height="14" rx="2" fill="#8B0000"/>
+  <rect x="83" y="35" width="14" height="5" rx="2" fill="#8B0000"/>
+</svg>
