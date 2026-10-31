@@ -13,6 +13,7 @@ import { HeroBackground } from "@/components/landing/HeroBackground";
 import { BannerStrip } from "@/components/landing/BannerStrip";
 import { LogoKampus } from "@/components/landing/LogoKampus";
 import { KartuTool, TOOLS } from "@/components/landing/KartuTool";
+import { KotakPeriksa } from "@/components/periksa/KotakPeriksa";
 import { TestimoniWhatsApp } from "@/components/landing/TestimoniWhatsApp";
 import { BRAND, waLink } from "@/lib/brand";
 import type { Metadata } from "next";
@@ -307,6 +308,29 @@ export default function LandingPage() {
             <KartuTool key={tool.slug} t={tool} />
           ))}
         </ul>
+      </section>
+
+      {/* ── Periksa naskah ── */}
+      <section id="periksa" className="bg-slate-50 px-4 py-16">
+        <div className="mx-auto max-w-4xl">
+          <div className="mb-3 flex items-center justify-center gap-2">
+            <span className="h-0.5 w-8 rounded-full bg-brand" />
+            <span className="text-xs font-bold uppercase tracking-widest text-brand">
+              Periksa Naskah
+            </span>
+            <span className="h-0.5 w-8 rounded-full bg-brand" />
+          </div>
+          <h2 className="text-center text-2xl font-extrabold text-slate-900 lg:text-3xl">
+            Cek tulisanmu sebelum diserahkan
+          </h2>
+          <p className="mx-auto mt-3 mb-10 max-w-2xl text-center font-medium text-slate-600">
+            Tempel naskahmu, lihat bagian mana yang perlu sitasi atau perlu
+            ditulis ulang dengan kalimatmu sendiri. Tujuannya memperbaiki cara
+            mengutip — bukan mengakali pemeriksaan kampus.
+          </p>
+
+          <KotakPeriksa />
+        </div>
       </section>
 
       {/* ── Mentor ── */}
