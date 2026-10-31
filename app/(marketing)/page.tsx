@@ -12,6 +12,7 @@ import { HeroSlider } from "@/components/landing/HeroSlider";
 import { HeroBackground } from "@/components/landing/HeroBackground";
 import { BannerStrip } from "@/components/landing/BannerStrip";
 import { LogoKampus } from "@/components/landing/LogoKampus";
+import { KartuTool, TOOLS } from "@/components/landing/KartuTool";
 import { TestimoniWhatsApp } from "@/components/landing/TestimoniWhatsApp";
 import { BRAND, waLink } from "@/lib/brand";
 import type { Metadata } from "next";
@@ -63,22 +64,6 @@ const LAYANAN = [
   },
 ];
 
-// Perangkat yang dipakai mentor saat mendampingi. Bukan jasa pengerjaan —
-// kamu yang menjalankan, mentor yang mengajari.
-const TOOLS = [
-  { nama: "SPSS",        untuk: "Statistik kuantitatif" },
-  { nama: "SmartPLS",    untuk: "SEM-PLS" },
-  { nama: "AMOS",        untuk: "SEM berbasis kovarian" },
-  { nama: "STATA",       untuk: "Ekonometrika" },
-  { nama: "EViews",      untuk: "Data runtut waktu" },
-  { nama: "R",           untuk: "Analisis lanjutan" },
-  { nama: "NVivo",       untuk: "Analisis kualitatif" },
-  { nama: "ATLAS.ti",    untuk: "Koding data kualitatif" },
-  { nama: "Mendeley",    untuk: "Manajemen sitasi" },
-  { nama: "Zotero",      untuk: "Manajemen referensi" },
-  { nama: "VOSviewer",   untuk: "Analisis bibliometrik" },
-  { nama: "Python",      untuk: "Olah data & visualisasi" },
-];
 
 // Ganti dengan data mentor sungguhan. Foto menyusul — untuk sekarang
 // dipakai inisial supaya tidak ada wajah palsu di situs.
@@ -227,22 +212,15 @@ export default function LandingPage() {
               </Button>
             </div>
 
-            <div className="mt-6 flex flex-wrap justify-center lg:justify-start gap-4 text-xs text-slate-500">
-              {["🗓️ Jadwal pilih sendiri", "🔒 Draf aman & privat", "💬 Konsultasi awal gratis"].map((t) => (
-                <span key={t}>{t}</span>
-              ))}
+            {/* Bukti sosial menggantikan baris emoji: logo kampus asal peserta
+                lebih meyakinkan daripada tiga janji tanpa bukti. */}
+            <div className="mt-7 flex justify-center lg:justify-start">
+              <LogoKampus jumlahPeserta="10.000++" rating="4,9" />
             </div>
           </div>
 
           {/* Kanan — slider */}
           <HeroSlider />
-        </div>
-      </section>
-
-      {/* ── Bukti sosial: asal kampus peserta ── */}
-      <section className="border-y border-slate-100 bg-white px-4 py-8">
-        <div className="mx-auto flex max-w-6xl justify-center lg:justify-start">
-          <LogoKampus jumlahPeserta="10.000+" rating="4,9" />
         </div>
       </section>
 
@@ -324,14 +302,11 @@ export default function LandingPage() {
           Keluar dari sesi, kamu bisa mengulang analisisnya sendiri. Itu yang menyelamatkanmu
           saat penguji bertanya &ldquo;ini bagaimana cara dapatnya?&rdquo;
         </p>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {TOOLS.map((tool) => (
-            <div key={tool.nama} className="rounded-xl border border-slate-200 bg-white p-4 hover:border-brand-200 transition-colors">
-              <p className="font-bold text-slate-900">{tool.nama}</p>
-              <p className="text-xs text-slate-400 mt-0.5">{tool.untuk}</p>
-            </div>
+            <KartuTool key={tool.slug} t={tool} />
           ))}
-        </div>
+        </ul>
       </section>
 
       {/* ── Mentor ── */}

@@ -62,7 +62,7 @@ export function LogoKampus({
           </span>
         </div>
         <p className="mt-0.5 text-sm font-semibold text-slate-500">
-          Dipercaya {jumlahPeserta} mahasiswa
+          Dipercaya {jumlahPeserta} Peserta
         </p>
         <p className="text-xs text-slate-400">
           Peserta kami berasal dari berbagai kampus di Indonesia

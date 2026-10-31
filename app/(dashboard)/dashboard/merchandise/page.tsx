@@ -10,11 +10,11 @@ import type { Metadata } from "next";
 export const metadata: Metadata = { title: `Merchandise | ${BRAND.name}` };
 
 const PRODUCTS = [
-  { id: "m1", name: "Tumbler RK Solo",        category: "Aksesoris", price: 45000,  rating: 4.8, sold: 67,  badge: "Best Seller", desc: "Tumbler stainless 500ml dengan logo RK Solo. Bikin mabar makin semangat." },
+  { id: "m1", name: "Tumbler Ruang Konsul Solo",        category: "Aksesoris", price: 45000,  rating: 4.8, sold: 67,  badge: "Best Seller", desc: "Tumbler stainless 500ml dengan logo Ruang Konsul Solo. Bikin mabar makin semangat." },
   { id: "m2", name: "Hoodie Skripsi Survivor",  category: "Pakaian",  price: 125000, rating: 4.9, sold: 34,  badge: "New",        desc: "Hoodie premium dengan tulisan 'Skripsi Survivor'. Perfect buatPull all-nighter." },
   { id: "m3", name: "Notebook Bimbingan",      category: "Stationery",price: 35000,  rating: 4.7, sold: 89,  badge: null,         desc: "Notebook A5 120 pages dengan template bimbingan. Catat progress skripsi-mu." },
   { id: "m4", name: "Sticker Pack Akademik",   category: "Sticker",  price: 20000,  rating: 4.6, sold: 112, badge: null,         desc: "10 sheet sticker akademik lucu. Pas untuk laptop dan botol minum." },
-  { id: "m5", name: "Tote Bag RK Solo",        category: "Aksesoris", price: 38000,  rating: 4.8, sold: 56,  badge: null,         desc: "Tote bag kanvas tebal. Bawa buku skripsi tanpa takut robek." },
+  { id: "m5", name: "Tote Bag Ruang Konsul Solo",        category: "Aksesoris", price: 38000,  rating: 4.8, sold: 56,  badge: null,         desc: "Tote bag kanvas tebal. Bawa buku skripsi tanpa takut robek." },
   { id: "m6", name: "Mug 'Dosen Happy'",       category: "Aksesoris", price: 30000,  rating: 4.5, sold: 43,  badge: null,         desc: "Mug keramik dengan tulisan 'Bikin Dosen Happy'. Hadiah perfect buat dosen pembimbing." },
 ];
 
@@ -92,7 +92,7 @@ export default async function MerchandisePage() {
             <ShieldCheck className="h-5 w-5 text-[#8B0000]" />
           </div>
           <p className="text-xs font-semibold text-slate-700">Garansi Resmi</p>
-          <p className="text-[10px] text-muted-foreground">Produk asli RK Solo</p>
+          <p className="text-[10px] text-muted-foreground">Produk asli Ruang Konsul Solo</p>
         </div>
         <div className="flex flex-col items-center text-center gap-2">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50">

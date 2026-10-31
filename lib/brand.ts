@@ -4,7 +4,7 @@
  */
 export const BRAND = {
   name:             "Ruang Konsul Solo",
-  shortName:        "RK Solo",
+  shortName:        "Ruang Konsul Solo",
   tagline:          "Konsultasi & Bimbingan Skripsi/Tesis (S1 & S2)",
   taglineShort:     "Bimbingan Akademik Terpercaya",
   domain:           "ruangkonsulsolo.id",

@@ -22,7 +22,7 @@ const FITUR_CUSTOMER = [
   { icon: Gift,        label: "Promo & Bonus",    desc: "Diskon eksklusif member",    href: "/dashboard/promo" },
   { icon: Star,        label: "Subscription",     desc: "Paket bimbingan bulanan",    href: "/dashboard/subscription" },
   { icon: Video,       label: "Webinar",           desc: "Ikut seminar online gratis", href: "/dashboard/webinar" },
-  { icon: ShoppingBag, label: "Merchandise",       desc: "Produk resmi RK Solo",       href: "/dashboard/merchandise" },
+  { icon: ShoppingBag, label: "Merchandise",       desc: "Produk resmi Ruang Konsul Solo",       href: "/dashboard/merchandise" },
   { icon: Megaphone,   label: "Referral",          desc: "Ajak teman, dapat komisi",   href: "/referral" },
   { icon: PackageOpen, label: "Paket Saya",        desc: "Kelola kuota aktif",          href: "/dashboard/paket-saya" },
 ];
