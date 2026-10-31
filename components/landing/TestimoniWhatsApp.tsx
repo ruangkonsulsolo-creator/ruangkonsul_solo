@@ -112,13 +112,13 @@ export function TestimoniWhatsApp() {
   return (
     <section className="bg-white px-4 py-16">
       <div className="mx-auto max-w-6xl">
-        <div className="mb-3 flex items-center gap-2">
+        <div className="mb-3 flex items-center justify-center gap-2">
           <span className="h-0.5 w-8 rounded-full bg-brand" />
           <span className="text-xs font-bold uppercase tracking-widest text-brand">
             Kata Mereka
           </span>
         </div>
-        <h2 className="mb-2 flex flex-wrap items-center gap-3 text-3xl font-extrabold text-slate-900 lg:text-4xl">
+        <h2 className="mb-2 flex flex-wrap items-center justify-center gap-3 text-3xl font-extrabold text-slate-900 lg:text-4xl">
           Testimoni Sobat Konsul
           <Image
             src="/icon-whatsapp.webp"
@@ -128,12 +128,12 @@ export function TestimoniWhatsApp() {
             className="h-8 w-8 lg:h-10 lg:w-10"
           />
         </h2>
-        <p className="mb-10 max-w-xl font-medium text-slate-600">
+        <p className="mx-auto mb-12 max-w-xl text-center font-medium text-slate-600">
           Dikirim langsung oleh mahasiswa yang sudah selesai bimbingan, dimuat
           atas izin mereka.
         </p>
 
-        <ul className="flex flex-wrap justify-center gap-8 lg:justify-start">
+        <ul className="flex flex-wrap items-start justify-center gap-8">
           {daftar.map((s) => (
             <li key={s.file} className="flex flex-col items-center">
               <BingkaiPonsel>
@@ -162,7 +162,7 @@ export function TestimoniWhatsApp() {
         </ul>
 
         {siap.length > 0 && (
-          <p className="mt-8 text-center text-xs font-medium text-slate-500 lg:text-left">
+          <p className="mt-8 text-center text-xs font-medium text-slate-500">
             Nomor dan foto profil disamarkan.
           </p>
         )}

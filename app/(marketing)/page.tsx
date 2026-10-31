@@ -429,24 +429,84 @@ export default function LandingPage() {
 
       {/* ── Cara Kerja ── */}
       <section className="bg-slate-50 px-4 py-16">
-        <div className="mx-auto max-w-4xl text-center">
+        <div className="mx-auto max-w-5xl text-center">
           <SectionLabel>Cara Kerja</SectionLabel>
-          <h2 className="text-2xl font-extrabold text-slate-900 mb-10">Cuma 3 Langkah Mudah</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+          <h2 className="text-2xl lg:text-3xl font-extrabold text-slate-900 mb-3">
+            Cuma 3 Langkah Mudah
+          </h2>
+          <p className="text-slate-600 font-medium max-w-xl mx-auto mb-12">
+            Dari kirim kendala sampai selesai sesi, semuanya bisa kamu urus
+            sendiri lewat dashboard.
+          </p>
+
+          <div className="relative grid grid-cols-1 sm:grid-cols-3 gap-8">
+            {/* Garis penghubung antarlangkah, hanya di layar lebar. */}
+            <div
+              aria-hidden="true"
+              className="hidden sm:block absolute top-11 left-[16.67%] right-[16.67%] h-0.5 bg-brand-200"
+            />
             {[
-              { num: "01", emoji: "📤", title: "Upload Dokumen", desc: "Upload file PDF, DOCX, atau DOC ke dashboard Ruang Konsul Solo." },
-              { num: "02", emoji: "💳", title: "Pilih & Bayar",  desc: "Pilih layanan dan bayar via transfer, QRIS, atau e-wallet favorit." },
-              { num: "03", emoji: "✅", title: "Terima Laporan", desc: "Tim kami proses dan laporan dikirim ke dashboardmu + notifikasi WA!" },
+              {
+                num: "01", logo: "/alur/upload.png", title: "Kirim Kebutuhanmu",
+                desc: "Pilih mentor dan jadwal, lalu ceritakan bab mana yang sedang macet. Bisa sekalian unggah drafmu.",
+              },
+              {
+                num: "02", logo: "/alur/payment.png", title: "Bayar",
+                desc: "Transfer bank, QRIS, atau e-wallet. Jadwalmu terkunci begitu pembayaran dikonfirmasi.",
+              },
+              {
+                num: "03", logo: "/alur/result.png", title: "Sesi Bimbingan",
+                desc: "Mentor mendampingi sesuai kebutuhanmu. Catatan dan tindak lanjut masuk ke dashboard, plus pengingat lewat WhatsApp.",
+              },
             ].map((s) => (
-              <div key={s.num} className="flex flex-col items-center text-center">
-                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-brand shadow-card text-2xl">
-                  {s.emoji}
+              <div key={s.num} className="relative flex flex-col items-center text-center">
+                <div className="mb-4 flex h-24 w-24 items-center justify-center rounded-2xl border-2 border-brand-100 bg-white p-4 shadow-card">
+                  <Image
+                    src={s.logo}
+                    alt=""
+                    width={160}
+                    height={160}
+                    className="h-14 w-14 object-contain"
+                  />
                 </div>
-                <span className="text-xs font-bold text-brand mb-1">{s.num}</span>
-                <h3 className="text-base font-bold text-slate-900 mb-2">{s.title}</h3>
-                <p className="text-sm text-slate-600 leading-relaxed">{s.desc}</p>
+                <span className="mb-1 text-xs font-extrabold tracking-widest text-brand">
+                  {s.num}
+                </span>
+                <h3 className="mb-2 text-lg font-extrabold text-slate-900">{s.title}</h3>
+                <p className="max-w-xs text-sm leading-relaxed text-slate-600">{s.desc}</p>
               </div>
             ))}
+          </div>
+
+          {/* ── Metode pembayaran ── */}
+          <div className="mt-14 rounded-2xl border border-slate-200 bg-white px-6 py-7">
+            <p className="mb-5 text-xs font-bold uppercase tracking-widest text-slate-500">
+              Metode Pembayaran
+            </p>
+            <ul className="flex flex-wrap items-center justify-center gap-x-8 gap-y-5">
+              {[
+                { nama: "ShopeePay", file: "/bayar/shopeepay.png" },
+                { nama: "GoPay",     file: "/bayar/gopay.png" },
+                { nama: "OVO",       file: "/bayar/ovo.png" },
+                { nama: "BCA",       file: "/bayar/bca.png" },
+                { nama: "BRI",       file: "/bayar/bri.png" },
+                { nama: "QRIS",      file: "/bayar/qris.png" },
+              ].map((m) => (
+                <li key={m.nama}>
+                  <Image
+                    src={m.file}
+                    alt={m.nama}
+                    width={160}
+                    height={80}
+                    className="h-7 w-auto object-contain"
+                  />
+                </li>
+              ))}
+            </ul>
+            <p className="mt-5 text-xs font-medium text-slate-500">
+              Pembayaran diproses lewat Midtrans. Kami tidak menyimpan data
+              kartu atau rekeningmu.
+            </p>
           </div>
         </div>
       </section>
