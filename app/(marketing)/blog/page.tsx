@@ -267,7 +267,7 @@ export default async function BlogPage({
                 <p className="mt-3 leading-relaxed text-slate-600">
                   {utama.excerpt}
                 </p>
-                <div className="mt-5 flex flex-wrap items-center gap-4 text-xs text-slate-400">
+                <div className="mt-5 flex flex-wrap items-center gap-4 text-xs font-medium text-slate-500">
                   <span className="flex items-center gap-1.5">
                     <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" />
                     {utama.date}
@@ -318,7 +318,7 @@ export default async function BlogPage({
                       <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-500">
                         {a.excerpt}
                       </p>
-                      <div className="mt-4 flex items-center gap-3 border-t border-slate-100 pt-3 text-xs text-slate-400">
+                      <div className="mt-4 flex items-center gap-3 border-t border-slate-100 pt-3 text-xs font-medium text-slate-500">
                         <span className="flex items-center gap-1">
                           <CalendarDays className="h-3 w-3" aria-hidden="true" />
                           {a.date}

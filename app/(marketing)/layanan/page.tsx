@@ -292,7 +292,7 @@ export default function LayananPage({
                 <h2 className="text-xl font-extrabold leading-snug text-slate-900">
                   {l.nama}
                 </h2>
-                <p className="mt-0.5 text-sm text-slate-400">{l.ringkas}</p>
+                <p className="mt-0.5 text-sm font-medium text-slate-500">{l.ringkas}</p>
 
                 <p className="mt-3 text-sm leading-relaxed text-slate-600">
                   {l.deskripsi}
@@ -310,7 +310,7 @@ export default function LayananPage({
                 <div className="mt-5 border-t border-slate-100 pt-4">
                   <p className="mb-3">
                     <span className="text-2xl font-extrabold text-brand">{l.harga}</span>{" "}
-                    <span className="text-xs text-slate-400">{l.satuan}</span>
+                    <span className="text-xs font-medium text-slate-500">{l.satuan}</span>
                   </p>
                   <Link
                     href={l.href}

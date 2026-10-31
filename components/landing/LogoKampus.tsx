@@ -61,10 +61,10 @@ export function LogoKampus({
             {rating}/5
           </span>
         </div>
-        <p className="mt-0.5 text-sm font-semibold text-slate-500">
+        <p className="mt-0.5 text-sm font-bold text-slate-700">
           Dipercaya {jumlahPeserta} Peserta
         </p>
-        <p className="text-xs text-slate-400">
+        <p className="text-xs font-medium text-slate-500">
           Peserta kami berasal dari berbagai kampus di Indonesia
         </p>
       </div>

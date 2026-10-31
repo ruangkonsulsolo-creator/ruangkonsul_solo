@@ -296,13 +296,13 @@ export default async function JadwalPage() {
                           <span className="font-semibold text-slate-900">
                             {jam(s.slot_start)}
                           </span>
-                          <span className="ml-2 text-xs text-slate-400 group-hover:text-brand">
+                          <span className="ml-2 text-xs font-medium text-slate-500 group-hover:text-brand">
                             {(s.mentor_name ?? "Mentor").split(" ")[0]}
                           </span>
                         </Link>
                       ))}
                       {isi.length > 24 && (
-                        <span className="self-center text-xs text-slate-400">
+                        <span className="self-center text-xs font-medium text-slate-500">
                           +{isi.length - 24} jam lainnya
                         </span>
                       )}

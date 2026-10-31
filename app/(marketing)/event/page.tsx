@@ -197,7 +197,7 @@ function KartuEvent({ e }: { e: Event }) {
             </li>
           ))}
           {e.materi.length > 3 && (
-            <li className="pl-5.5 text-xs text-slate-400">
+            <li className="pl-5.5 text-xs font-medium text-slate-500">
               +{e.materi.length - 3} materi lainnya
             </li>
           )}

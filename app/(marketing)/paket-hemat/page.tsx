@@ -162,11 +162,11 @@ function KartuPaket({ p }: { p: Paket }) {
       )}
 
       <h3 className="text-xl font-extrabold text-slate-900">Paket {p.nama}</h3>
-      <p className="mt-0.5 text-sm text-slate-400">{p.untuk}</p>
+      <p className="mt-0.5 text-sm font-medium text-slate-500">{p.untuk}</p>
 
       <div className="mt-5">
         {p.hargaNormal && (
-          <p className="text-sm text-slate-400 line-through">
+          <p className="text-sm font-medium text-slate-500 line-through">
             {rupiah(p.hargaNormal)}
           </p>
         )}
@@ -174,7 +174,7 @@ function KartuPaket({ p }: { p: Paket }) {
           <span className="text-4xl font-extrabold text-brand">
             {rupiah(p.harga)}
           </span>
-          <span className="text-sm text-slate-400">{p.periode}</span>
+          <span className="text-sm font-medium text-slate-500">{p.periode}</span>
         </p>
         <p className="mt-1 text-xs font-semibold text-slate-500">{p.perSesi}</p>
       </div>

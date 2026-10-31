@@ -183,7 +183,7 @@ export default function LandingPage() {
               <span className="text-brand">No molor-molor!</span>
             </p>
 
-            <p className="mt-3 text-base text-slate-500 max-w-lg mx-auto lg:mx-0 leading-relaxed">
+            <p className="mt-3 text-base font-medium text-slate-600 max-w-lg mx-auto lg:mx-0 leading-relaxed">
               Pilih mentor sesuai bidangmu, pesan jadwal sendiri, dan selesaikan bab
               yang terkendala minggu ini. Mulai Rp50.000 per sesi.
             </p>
@@ -198,7 +198,7 @@ export default function LandingPage() {
               ].map((s, i) => (
                 <div key={i} className="flex flex-col">
                   <span className="text-2xl font-extrabold text-brand">{s.val}</span>
-                  <span className="text-xs text-slate-400 uppercase tracking-wide">{s.label}</span>
+                  <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wide">{s.label}</span>
                 </div>
               ))}
             </div>
@@ -233,7 +233,7 @@ export default function LandingPage() {
         <h2 className="text-3xl lg:text-4xl font-extrabold text-slate-900 mb-2">
           Bimbingan yang membuatmu<br className="hidden sm:block" /> sanggup menulisnya sendiri
         </h2>
-        <p className="text-slate-500 max-w-xl mb-10">
+        <p className="text-slate-600 font-medium max-w-xl mb-10">
           Mentor membantumu melewati bagian yang macet — rumusan masalah, pemilihan metode,
           olah data, persiapan sidang. Kamu tetap penulis karyamu.
         </p>
@@ -250,8 +250,8 @@ export default function LandingPage() {
                   <Icon className={`h-5 w-5 ${l.featured ? "text-white" : "text-brand"}`} aria-hidden="true" />
                 </div>
                 <h3 className={`text-lg font-bold mb-0.5 ${l.featured ? "text-white" : "text-slate-900"}`}>{l.name}</h3>
-                <p className={`text-sm mb-3 ${l.featured ? "text-white/70" : "text-slate-400"}`}>{l.sub}</p>
-                <p className={`text-sm font-semibold mb-4 ${l.featured ? "text-white" : "text-brand"}`}>{l.harga}<span className={`text-xs font-normal ${l.featured ? "text-white/60" : "text-slate-400"}`}> {l.satuan}</span></p>
+                <p className={`text-sm mb-3 ${l.featured ? "text-white/80" : "text-slate-500"}`}>{l.sub}</p>
+                <p className={`text-sm font-semibold mb-4 ${l.featured ? "text-white" : "text-brand"}`}>{l.harga}<span className={`text-xs font-medium ${l.featured ? "text-white/75" : "text-slate-500"}`}> {l.satuan}</span></p>
                 <ul className="mb-5 space-y-2">
                   {l.fitur.map((f) => (
                     <li key={f} className={`flex items-start gap-2 text-sm ${l.featured ? "text-white/90" : "text-slate-600"}`}>
@@ -298,7 +298,7 @@ export default function LandingPage() {
         <h2 className="text-3xl lg:text-4xl font-extrabold text-slate-900 mb-2">
           Mentor mengajarimu memakainya,<br className="hidden sm:block" /> bukan menjalankannya untukmu
         </h2>
-        <p className="text-slate-500 max-w-xl mb-10">
+        <p className="text-slate-600 font-medium max-w-xl mb-10">
           Keluar dari sesi, kamu bisa mengulang analisisnya sendiri. Itu yang menyelamatkanmu
           saat penguji bertanya &ldquo;ini bagaimana cara dapatnya?&rdquo;
         </p>
@@ -316,7 +316,7 @@ export default function LandingPage() {
           <h2 className="text-3xl lg:text-4xl font-extrabold text-slate-900 mb-2">
             Yang akan duduk bersamamu
           </h2>
-          <p className="text-slate-500 max-w-xl mb-10">
+          <p className="text-slate-600 font-medium max-w-xl mb-10">
             Semua mentor pernah melewati proses yang sedang kamu jalani, dan terbiasa
             membaca draf yang belum rapi tanpa menghakimi.
           </p>
@@ -339,7 +339,7 @@ export default function LandingPage() {
                   )}
                   <div className="min-w-0">
                     <h3 className="font-bold text-slate-900 leading-tight">{m.nama}</h3>
-                    <p className="text-xs text-slate-400">{m.gelar}</p>
+                    <p className="text-xs font-medium text-slate-500">{m.gelar}</p>
                     <p className="text-xs text-slate-500 mt-1">{m.kampus}</p>
                   </div>
                 </div>
@@ -352,7 +352,7 @@ export default function LandingPage() {
                   <span className="flex items-center gap-1 font-semibold text-slate-700">
                     <Star className="h-4 w-4 fill-brand text-brand" aria-hidden="true" />{m.rating}
                   </span>
-                  <span className="text-slate-400">{m.sesi} sesi selesai</span>
+                  <span className="font-medium text-slate-500">{m.sesi} sesi selesai</span>
                 </div>
                 <Link href="/booking" className="mt-4 inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-brand py-2.5 text-sm font-bold text-white hover:bg-brand-light transition-colors">
                   Pesan jadwal <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -444,7 +444,7 @@ export default function LandingPage() {
                 </div>
                 <span className="text-xs font-bold text-brand mb-1">{s.num}</span>
                 <h3 className="text-base font-bold text-slate-900 mb-2">{s.title}</h3>
-                <p className="text-sm text-slate-500 leading-relaxed">{s.desc}</p>
+                <p className="text-sm text-slate-600 leading-relaxed">{s.desc}</p>
               </div>
             ))}
           </div>
@@ -516,7 +516,7 @@ export default function LandingPage() {
               className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-card hover:border-brand hover:shadow-card transition-all group">
               <Image src={BRAND.iconWhatsapp} alt="WhatsApp" width={36} height={36} className="flex-shrink-0 rounded-xl" unoptimized />
               <div className="flex-1 min-w-0">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">WhatsApp</p>
+                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">WhatsApp</p>
                 <p className="text-base font-bold text-brand group-hover:underline">{BRAND.whatsappDisplay}</p>
               </div>
             </a>
@@ -526,7 +526,7 @@ export default function LandingPage() {
               className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-card hover:border-brand hover:shadow-card transition-all group">
               <Image src={BRAND.iconInstagram} alt="Instagram" width={36} height={36} className="flex-shrink-0 rounded-xl" unoptimized />
               <div className="flex-1 min-w-0">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Instagram</p>
+                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Instagram</p>
                 <p className="text-base font-bold text-brand group-hover:underline">{BRAND.instagram}</p>
               </div>
             </a>
@@ -538,7 +538,7 @@ export default function LandingPage() {
                 <Image src={BRAND.iconTiktok} alt="TikTok" width={36} height={36} className="object-contain" unoptimized />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">TikTok</p>
+                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">TikTok</p>
                 <p className="text-base font-bold text-brand group-hover:underline">{BRAND.tiktok}</p>
               </div>
             </a>
@@ -555,7 +555,7 @@ export default function LandingPage() {
                 </svg>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Gmail</p>
+                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Gmail</p>
                 <p className="text-base font-bold text-brand group-hover:underline truncate">{BRAND.email}</p>
               </div>
             </a>
@@ -567,7 +567,7 @@ export default function LandingPage() {
                 <MapPin className="h-5 w-5 text-brand" aria-hidden="true" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Alamat</p>
+                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Alamat</p>
                 <p className="text-sm font-medium text-slate-700 group-hover:text-brand leading-snug">{BRAND.address}</p>
               </div>
             </a>
@@ -578,7 +578,7 @@ export default function LandingPage() {
                 <Clock className="h-5 w-5 text-brand" aria-hidden="true" />
               </div>
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Jam Operasional</p>
+                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Jam Operasional</p>
                 <p className="text-sm font-medium text-slate-700">Senin–Minggu, 09.00–21.00 WIB</p>
               </div>
             </div>

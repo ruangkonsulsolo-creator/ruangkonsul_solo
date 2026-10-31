@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { MessageCircle, ImagePlus } from "lucide-react";
+import { ImagePlus } from "lucide-react";
 
 /**
  * Tangkapan layar percakapan WhatsApp dari klien, di dalam bingkai ponsel.
@@ -118,10 +118,17 @@ export function TestimoniWhatsApp() {
             Kata Mereka
           </span>
         </div>
-        <h2 className="mb-2 text-3xl font-extrabold text-slate-900 lg:text-4xl">
-          Pesan yang masuk ke WhatsApp kami
+        <h2 className="mb-2 flex flex-wrap items-center gap-3 text-3xl font-extrabold text-slate-900 lg:text-4xl">
+          Testimoni Sobat Konsul
+          <Image
+            src="/icon-whatsapp.webp"
+            alt="WhatsApp"
+            width={40}
+            height={40}
+            className="h-8 w-8 lg:h-10 lg:w-10"
+          />
         </h2>
-        <p className="mb-10 max-w-xl text-slate-500">
+        <p className="mb-10 max-w-xl font-medium text-slate-600">
           Dikirim langsung oleh mahasiswa yang sudah selesai bimbingan, dimuat
           atas izin mereka.
         </p>
@@ -155,8 +162,7 @@ export function TestimoniWhatsApp() {
         </ul>
 
         {siap.length > 0 && (
-          <p className="mt-8 flex items-center justify-center gap-1.5 text-xs text-slate-400 lg:justify-start">
-            <MessageCircle className="h-3.5 w-3.5" aria-hidden="true" />
+          <p className="mt-8 text-center text-xs font-medium text-slate-500 lg:text-left">
             Nomor dan foto profil disamarkan.
           </p>
         )}

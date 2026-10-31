@@ -125,7 +125,7 @@ export default async function BookingPage({
               </>
             )}
           </h1>
-          <p className="max-w-xl leading-relaxed text-slate-500">
+          <p className="max-w-xl leading-relaxed text-slate-600">
             Sesi satu jam, daring atau tatap muka di{" "}
             {BRAND.address.split(",")[0]}. Kamu yang menulis; mentor yang
             menunjukkan jalan keluar saat kamu buntu.
@@ -179,10 +179,10 @@ export default async function BookingPage({
                     />
                     {terpilih.rating_avg > 0 ? terpilih.rating_avg : "Baru"}
                   </span>
-                  <span className="text-slate-500">
+                  <span className="font-medium text-slate-600">
                     {terpilih.session_count} sesi selesai
                   </span>
-                  <span className="text-slate-500">
+                  <span className="font-medium text-slate-600">
                     {terpilih.experience_years} tahun pengalaman
                   </span>
                   <span className="ml-auto text-lg font-extrabold text-brand">
@@ -239,7 +239,7 @@ export default async function BookingPage({
                       </span>
                     </p>
                     {m.specializations && m.specializations.length > 0 && (
-                      <p className="mt-1 truncate text-xs text-slate-400">
+                      <p className="mt-1 truncate text-xs font-medium text-slate-500">
                         {m.specializations.join(" · ")}
                       </p>
                     )}
@@ -247,7 +247,7 @@ export default async function BookingPage({
                 </Link>
               ))}
             </div>
-            <p className="mt-4 text-sm text-slate-400">
+            <p className="mt-4 text-sm font-medium text-slate-500">
               Atau lihat{" "}
               <Link
                 href="/jadwal"
