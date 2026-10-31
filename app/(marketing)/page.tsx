@@ -11,6 +11,8 @@ import { Logo } from "@/components/ui/logo";
 import { HeroSlider } from "@/components/landing/HeroSlider";
 import { HeroBackground } from "@/components/landing/HeroBackground";
 import { BannerStrip } from "@/components/landing/BannerStrip";
+import { LogoKampus } from "@/components/landing/LogoKampus";
+import { TestimoniWhatsApp } from "@/components/landing/TestimoniWhatsApp";
 import { BRAND, waLink } from "@/lib/brand";
 import type { Metadata } from "next";
 
@@ -158,6 +160,7 @@ export default function LandingPage() {
             <Link href="/paket-hemat" className="hover:text-brand transition-colors">Paket Hemat</Link>
             <Link href="/bimbingan"  className="hover:text-brand transition-colors font-semibold">Bimbingan</Link>
             <Link href="/jadwal"     className="hover:text-brand transition-colors font-semibold">Jadwal</Link>
+            <Link href="/event"      className="hover:text-brand transition-colors">Event</Link>
             <Link href="/referral"   className="hover:text-brand transition-colors">Referral</Link>
           </div>
           <div className="flex items-center gap-2">
@@ -233,6 +236,13 @@ export default function LandingPage() {
 
           {/* Kanan — slider */}
           <HeroSlider />
+        </div>
+      </section>
+
+      {/* ── Bukti sosial: asal kampus peserta ── */}
+      <section className="border-y border-slate-100 bg-white px-4 py-8">
+        <div className="mx-auto flex max-w-6xl justify-center lg:justify-start">
+          <LogoKampus jumlahPeserta="10.000+" rating="4,9" />
         </div>
       </section>
 
@@ -465,6 +475,9 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* ── Testimoni WhatsApp ── */}
+      <TestimoniWhatsApp />
 
       {/* ── Testimoni ── */}
       <section className="mx-auto max-w-5xl px-4 py-16">

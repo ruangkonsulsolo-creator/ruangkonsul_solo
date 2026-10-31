@@ -4,14 +4,18 @@ import { Button } from "@/components/ui/button";
 import { formatRupiah } from "@/lib/utils/format-currency";
 import { PREVIEW_MODE, PREVIEW_PROFILE } from "@/lib/utils/preview-mode";
 import {
-  FileSearch, Bot, BookOpenCheck, PenLine, GraduationCap,
+  BookOpenCheck, GraduationCap, CalendarDays,
   ArrowRight, Clock, PackageOpen, Gift, Star, Megaphone,
   ShoppingBag, Video,
 } from "lucide-react";
 import { BRAND } from "@/lib/brand";
 
 const LAYANAN = [
-  { href: "/bimbingan",     label: "Bimbingan",      desc: "Skripsi, lomba, data", icon: GraduationCap,harga: 0     },
+  { href: "/booking",       label: "Pesan Sesi",     desc: "Pilih mentor & jam",     icon: GraduationCap },
+  { href: "/jadwal",        label: "Lihat Jadwal",   desc: "Semua mentor",           icon: CalendarDays },
+  { href: "/paket-hemat",   label: "Paket Langganan",desc: "Hemat per sesi",         icon: PackageOpen },
+  { href: "/event",         label: "Event",          desc: "Webinar & bootcamp",     icon: Video },
+  { href: "/layanan",       label: "Semua Layanan",  desc: "Katalog lengkap",        icon: BookOpenCheck },
 ];
 
 const FITUR_CUSTOMER = [
@@ -78,7 +82,11 @@ export default async function CustomerDashboardPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-extrabold text-slate-900">Halo, {nama}! 👋</h2>
-          <p className="text-sm text-muted-foreground mt-0.5">Selamat datang di dashboard kamu.</p>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            {orders.length === 0
+              ? "Belum ada sesi. Mulai dari memilih mentor yang cocok dengan bidangmu."
+              : "Lanjutkan dari sesi terakhirmu, atau pesan jadwal berikutnya."}
+          </p>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
           {credits > 0 && (
@@ -115,10 +123,9 @@ export default async function CustomerDashboardPage() {
                 </div>
                 <p className="font-bold text-slate-900 text-sm group-hover:text-brand transition-colors">{l.label}</p>
                 <p className="text-xs text-muted-foreground mt-0.5 mb-2">{l.desc}</p>
-                {l.harga > 0
-                  ? <p className="text-xs font-semibold text-brand mt-auto">{formatRupiah(l.harga)}<span className="font-normal text-muted-foreground">/file</span></p>
-                  : <p className="text-xs font-semibold text-brand mt-auto flex items-center gap-1">Lihat <ArrowRight className="h-3 w-3" /></p>
-                }
+                <p className="text-xs font-semibold text-brand mt-auto flex items-center gap-1">
+                  Buka <ArrowRight className="h-3 w-3" />
+                </p>
               </Link>
             );
           })}

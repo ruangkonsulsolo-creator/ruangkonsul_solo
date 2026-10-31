@@ -10,204 +10,380 @@ const articles: Record<string, {
   title: string; excerpt: string; cover: string; category: string;
   readTime: string; date: string; author: string; content: string;
 }> = {
-  "perbedaan-turnitin-repository-no-repository": {
-    title: "Perbedaan Turnitin Repository dan No Repository, Mana yang Harus Dipilih?",
-    excerpt: "Banyak mahasiswa bingung soal perbedaan Turnitin Repository vs No Repository.",
-    cover: "/promo-bimbingan.jpeg",
-    category: "Panduan Akademik",
-    readTime: "5 menit",
-    date: "10 Agustus 2026",
-    author: "Tim Ruang Konsul Solo",
-    content: `
-## Apa Itu Turnitin Repository?
-
-Turnitin Repository adalah fitur di mana dokumen yang kamu submit akan **disimpan secara permanen** di database Turnitin. Artinya, karya tulismu bisa menjadi referensi pembanding untuk cek plagiasi mahasiswa lain di masa depan.
-
-### Kapan Menggunakan Repository?
-
-- Saat kampusmu **mewajibkan** submit ke repository untuk sidang
-- Untuk karya ilmiah yang sudah **final dan dipublikasikan**
-- Saat kamu ingin karya tulismu terdaftar sebagai referensi
-
-## Apa Itu No Repository?
-
-**No Repository** berarti dokumenmu dicek similaritynya **tanpa disimpan** ke database Turnitin. Hasilnya tetap akurat, tapi tidak meninggalkan jejak di sistem.
-
-### Kapan Menggunakan No Repository?
-
-- Saat kamu masih dalam **tahap revisi** dan tidak ingin dokumenmu tersimpan
-- Untuk **cek awal** sebelum submit resmi ke kampus
-- Jika kampusmu tidak mewajibkan repository
-
-## Mana yang Harus Dipilih?
-
-Ruang Konsul Solo menggunakan **No Repository** untuk semua layanan cek plagiasi. Ini berarti:
-
-✅ Dokumenmu tidak tersimpan di database  
-✅ Bisa dicek berkali-kali tanpa khawatir terdeteksi self-plagiarism  
-✅ Tetap mendapat laporan similarity yang akurat dan detail  
-
-Kalau kampusmu membutuhkan submit ke repository untuk sidang resmi, kamu tetap bisa melakukannya melalui portal kampus setelah revisi selesai.
-    `,
-  },
-  "cara-membaca-laporan-turnitin-similarity": {
-    title: "Cara Membaca Laporan Turnitin agar Tidak Salah Menilai Plagiarisme",
-    excerpt: "Persentase similarity di Turnitin tidak selalu berarti plagiat.",
+  "menyusun-rumusan-masalah-yang-tidak-ditolak": {
+    title: "Menyusun Rumusan Masalah yang Tidak Ditolak Pembimbing",
+    excerpt: "Kebanyakan proposal ditolak bukan karena topiknya buruk, tapi karena rumusan masalahnya belum menunjukkan ada yang benar-benar perlu dijawab.",
     cover: "/promo-konsultasi.jpeg",
-    category: "Tips Skripsi",
-    readTime: "6 menit",
-    date: "1 Agustus 2026",
-    author: "Tim Ruang Konsul Solo",
-    content: `
-## Similarity Score ≠ Plagiat
-
-Ini kesalahpahaman paling umum. Turnitin hanya mengukur **kemiripan teks** (similarity), bukan plagiarisme. Perbedaannya:
-
-- **Similarity tinggi** bisa karena kutipan resmi, terminologi baku, atau referensi daftar pustaka
-- **Plagiarisme** adalah mengambil karya orang lain tanpa atribusi yang tepat
-
-## Warna di Laporan Turnitin
-
-Turnitin menggunakan sistem warna untuk menunjukkan similarity:
-
-- 🔵 **Biru (0%)** — Tidak ada similarity
-- 🟢 **Hijau (1–24%)** — Similarity rendah, umumnya aman
-- 🟡 **Kuning (25–49%)** — Perlu diperiksa lebih lanjut
-- 🟠 **Oranye (50–74%)** — Perhatikan sumber kutipan
-- 🔴 **Merah (75–100%)** — Perlu revisi serius
-
-## Berapa Batas Aman Similarity?
-
-Setiap kampus punya kebijakan berbeda, tapi umumnya:
-- **S1 (Skripsi):** ≤ 25–30%
-- **S2 (Tesis):** ≤ 20–25%  
-- **Jurnal ilmiah:** ≤ 15–20%
-
-## Tips Menurunkan Similarity
-
-1. **Parafrase** kutipan langsung menggunakan kata-katamu sendiri
-2. **Hapus atau kurangi** daftar pustaka yang panjang berulang
-3. **Gunakan kutipan tidak langsung** daripada kutipan langsung
-4. **Exclude bibliography** saat submit ke Turnitin
-    `,
-  },
-  "tips-menurunkan-plagiasi-skripsi": {
-    title: "7 Tips Efektif Menurunkan Persentase Plagiasi Skripsimu",
-    excerpt: "Nilai similarity masih tinggi? Berikut 7 cara praktis yang bisa kamu lakukan sendiri.",
-    cover: "/promo-parafrase.jpeg",
-    category: "Tips Skripsi",
+    category: "Metodologi",
     readTime: "7 menit",
-    date: "28 Juli 2026",
+    date: "20 Oktober 2026",
     author: "Tim Ruang Konsul Solo",
     content: `
-## 7 Tips Menurunkan Plagiasi Skripsi
+## Kenapa proposal ditolak
 
-### 1. Parafrase Setiap Kutipan
+Pembimbing jarang menolak topik. Yang ditolak biasanya rumusan masalah yang
+belum menunjukkan adanya persoalan nyata — hanya menyebut sebuah tema.
 
-Alih-alih menyalin langsung, tulis ulang dengan gaya bahasamu sendiri sambil mempertahankan makna aslinya.
+"Pengaruh media sosial terhadap perilaku konsumen" itu tema, bukan masalah.
+Tidak ada ketegangan di dalamnya, tidak ada yang mengganjal, tidak ada yang
+perlu dijawab.
 
-### 2. Gunakan Kutipan Tidak Langsung
+## Tiga bahan yang harus ada
 
-Ubah kutipan langsung menjadi kutipan tidak langsung dengan menambahkan interpretasimu.
+**Kesenjangan.** Ada yang belum diketahui, atau ada temuan yang saling
+bertentangan. Dari mana tahu? Dari membaca bagian "saran penelitian
+selanjutnya" di lima sampai sepuluh skripsi dan jurnal terbaru di bidangmu.
+Penulis sebelumnya sudah menunjukkan lubangnya.
 
-### 3. Exclude Daftar Pustaka
+**Alasan kenapa penting.** Kalau pertanyaanmu terjawab, siapa yang terbantu
+dan apa yang berubah? Kalau tidak ada jawaban untuk ini, pertanyaannya
+mungkin memang belum layak diteliti.
 
-Saat submit ke Turnitin, aktifkan opsi "Exclude Bibliography" agar daftar pustaka tidak dihitung.
+**Kemungkinan dikerjakan.** Datanya bisa kamu ambil, dalam waktu yang kamu
+punya, dengan biaya yang kamu sanggupi. Rumusan masalah paling bagus pun
+tidak berguna kalau datanya mustahil diperoleh.
 
-### 4. Exclude Kutipan Langsung
+## Pola yang bisa dipakai
 
-Aktifkan "Exclude Quoted" untuk mengecualikan teks yang sudah menggunakan tanda kutip.
+Satu kalimat: "Meskipun [yang sudah diketahui], belum diketahui [yang belum
+terjawab], padahal [kenapa itu penting]."
 
-### 5. Perhatikan Terminologi Teknis
+Contoh: "Meskipun banyak penelitian menunjukkan media sosial meningkatkan
+minat beli, belum diketahui apakah pola yang sama berlaku pada produk dengan
+nilai transaksi tinggi, padahal justru di segmen itu keputusan konsumen
+paling sulit diprediksi."
 
-Terminologi baku tidak perlu diparafrase. Tapi pastikan tidak mengulangnya terlalu sering.
+Perhatikan bedanya dengan tema tadi: ada yang menggantung, dan terasa perlu
+dijawab.
 
-### 6. Cek Per Bab
+## Uji sendiri sebelum maju
 
-Identifikasi bab mana yang paling tinggi similaritynya dan fokus revisi di sana.
+Bacakan rumusan masalahmu ke teman yang bukan satu jurusan. Kalau dia bisa
+mengulanginya dengan kalimatnya sendiri, rumusannya sudah jelas. Kalau dia
+bingung, pembimbingmu juga akan bingung.
 
-### 7. Gunakan Jasa Parafrase Profesional
-
-Kalau sudah maksimal tapi similarity masih tinggi, biasanya akar masalahnya ada di cara mengutip dan memposisikan sumber — bukan di pilihan katanya. Bawa draf dan daftar pustakamu ke [sesi bimbingan](/booking) untuk dibedah bersama mentor.
-    `,
+Satu pertanyaan terakhir: apakah jawabannya sudah bisa kamu tebak sekarang?
+Kalau ya, itu bukan pertanyaan penelitian — itu pernyataan yang tinggal
+dibuktikan.
+`,
   },
-  "ai-detector-tools-terbaik-mahasiswa": {
-    title: "Rekomendasi AI Detector Terbaik untuk Mahasiswa 2026",
-    excerpt: "Kenali tool AI detector terbaik yang bisa mendeteksi teks buatan AI dalam karya ilmiahmu.",
+
+  "memilih-uji-statistik-sesuai-data": {
+    title: "Memilih Uji Statistik yang Sesuai dengan Datamu",
+    excerpt: "Pohon keputusan sederhana: dari jenis variabel dan jumlah kelompok, sampai ke uji yang tepat — lengkap dengan syarat yang sering terlewat.",
     cover: "/promo-bimbingan.jpeg",
-    category: "Teknologi",
-    readTime: "5 menit",
-    date: "22 Juli 2026",
+    category: "Olah Data",
+    readTime: "9 menit",
+    date: "14 Oktober 2026",
     author: "Tim Ruang Konsul Solo",
     content: `
-## Kenapa AI Detector Makin Penting?
+## Mulai dari pertanyaanmu, bukan dari ujinya
 
-Sejak ChatGPT dan AI writing tools meledak, banyak dosen dan institusi akademik mulai menggunakan AI detector untuk memastikan keaslian karya mahasiswa.
+Kesalahan paling umum: memilih uji lebih dulu karena pernah dipakai senior,
+baru memaksa data menyesuaikan. Urutannya terbalik.
 
-## AI Detector Terpopuler 2026
+Mulailah dari pertanyaan: kamu ingin **membandingkan kelompok**, melihat
+**hubungan antarvariabel**, atau **memprediksi** sesuatu?
 
-### GPTZero
-Tool paling populer untuk deteksi teks AI. Memberikan skor "perplexity" dan "burstiness" yang mengindikasikan apakah teks ditulis manusia atau AI.
+## Kalau membandingkan kelompok
 
-### Turnitin AI Detection
-Turnitin kini memiliki modul AI detection bawaan yang terintegrasi langsung dengan laporan similarity.
+Dua kelompok yang tidak berhubungan, data numerik dan sebarannya normal:
+**uji t sampel bebas**. Sebarannya tidak normal: **Mann-Whitney**.
 
-### Originality.ai
-Cocok untuk blogger dan akademisi. Memberikan persentase teks AI per paragraf.
+Dua pengukuran pada orang yang sama, misalnya sebelum dan sesudah perlakuan:
+**uji t berpasangan**, atau **Wilcoxon** kalau tidak normal.
 
-## Layanan AI Detector Ruang Konsul Solo
+Tiga kelompok atau lebih: **ANOVA satu arah**, atau **Kruskal-Wallis** untuk
+data yang tidak normal. Kalau ANOVA-mu signifikan, lanjutkan dengan uji
+lanjutan seperti Tukey untuk tahu kelompok mana yang sebenarnya berbeda —
+ANOVA sendiri hanya bilang "ada beda", bukan "di mana bedanya".
 
-Ruang Konsul Solo menggunakan mesin AI detector yang setara dengan GPTZero untuk memberikan laporan lengkap:
+## Kalau melihat hubungan
 
-✅ Skor AI per paragraf  
-✅ Overall AI percentage  
-✅ Laporan PDF siap pakai  
-✅ Harga mulai Rp 25.000/file  
-    `,
+Dua variabel numerik: **korelasi Pearson** bila keduanya normal, **Spearman**
+bila tidak atau bila datanya berupa peringkat.
+
+Dua variabel kategorik: **chi-square**. Syaratnya frekuensi harapan minimal 5
+di sebagian besar sel; kalau tidak terpenuhi, pakai **Fisher exact**.
+
+## Kalau memprediksi
+
+Variabel terikat numerik: **regresi linear**. Variabel terikat berupa dua
+kategori, misalnya lulus dan tidak lulus: **regresi logistik**.
+
+Model dengan variabel laten dan banyak jalur: **SEM**. Pakai **SmartPLS**
+untuk sampel kecil dan tujuan prediksi, **AMOS** atau **Lisrel** untuk sampel
+besar dan pengujian teori.
+
+## Syarat yang sering dilewati
+
+Uji normalitas dilakukan pada **residual**, bukan pada data mentah — ini
+kekeliruan yang sangat sering muncul di bab 4.
+
+Untuk regresi, periksa juga multikolinearitas lewat nilai VIF (di bawah 10,
+lebih aman di bawah 5) dan heteroskedastisitas lewat pola sebaran residual.
+
+Dan satu hal yang sering dilupakan: nilai signifikansi hanya memberi tahu
+apakah ada efek, bukan seberapa besar. Laporkan juga ukuran efeknya —
+Cohen's d, eta kuadrat, atau R² — karena itu yang menjawab "jadi, seberapa
+berpengaruh?"
+
+## Kalau masih ragu
+
+Hal yang paling mahal bukan salah memilih uji, tapi menyadarinya setelah
+seluruh bab 4 selesai ditulis. Cek pilihanmu sebelum mulai mengolah.
+`,
   },
-  "persiapan-sidang-skripsi-checklist": {
-    title: "Checklist Persiapan Sidang Skripsi yang Wajib Kamu Punya",
-    excerpt: "Jangan sampai ada yang terlewat. Gunakan checklist lengkap ini untuk memastikan semua persiapanmu matang.",
-    cover: "/promo-konsultasi.jpeg",
-    category: "Tips Skripsi",
-    readTime: "8 menit",
-    date: "15 Juli 2026",
+
+  "menerjemahkan-catatan-dosen-pembimbing": {
+    title: "Menerjemahkan Catatan Dosen Pembimbing Jadi Langkah Konkret",
+    excerpt: "\u201cPerdalam lagi\u201d dan \u201ckurang tajam\u201d sebenarnya menunjuk masalah yang spesifik. Begini cara membacanya.",
+    cover: "/promo-bundling.jpeg",
+    category: "Bimbingan",
+    readTime: "6 menit",
+    date: "7 Oktober 2026",
     author: "Tim Ruang Konsul Solo",
     content: `
-## Checklist Dokumen
+## Catatan singkat bukan berarti tidak jelas
 
-- [ ] Naskah skripsi final (sudah di-ACC pembimbing)
-- [ ] Laporan cek plagiasi (Turnitin / DrillBit)
-- [ ] Laporan cek AI (jika diminta)
-- [ ] Lembar persetujuan pembimbing
-- [ ] Form pendaftaran sidang
-- [ ] Hardcover / softcover sesuai ketentuan kampus
+Dosen pembimbing menulis singkat karena waktunya terbatas, bukan karena
+masalahnya samar. Hampir selalu ada persoalan spesifik di balik catatan yang
+terasa umum.
 
-## Checklist Presentasi
+## Beberapa yang paling sering muncul
 
-- [ ] File PowerPoint/Keynote siap dan sudah dibackup
-- [ ] Latihan presentasi minimal 3 kali
-- [ ] Siapkan jawaban untuk pertanyaan umum penguji
-- [ ] Cek durasi presentasi (biasanya 15–20 menit)
+**"Perdalam lagi."** Biasanya berarti kamu menyebut sebuah konsep tanpa
+menjelaskan cara kerjanya, atau mengutip satu sumber untuk klaim yang
+seharusnya ditopang beberapa sumber. Periksa paragraf yang ditandai: ada
+berapa sitasi di situ?
 
-## Checklist Teknis
+**"Kurang tajam."** Argumenmu melebar ke mana-mana. Satu paragraf
+seharusnya membawa satu gagasan. Kalau ada tiga gagasan berdesakan, pecah
+jadi tiga paragraf.
 
-- [ ] Laptop + charger
-- [ ] Flashdisk berisi file presentasi
-- [ ] Dress code sesuai aturan kampus
-- [ ] Datang minimal 30 menit sebelum jadwal
+**"Kaitkan dengan teori."** Kamu melaporkan temuan tanpa menjelaskannya.
+"Hasil menunjukkan X" perlu dilanjutkan dengan "ini sejalan dengan teori Y
+karena…" atau "ini bertentangan dengan Z, kemungkinan karena…".
 
-## Tips Hari-H Sidang
+**"Metodenya belum pas."** Ini yang paling berat karena bisa berarti
+perombakan besar. Jangan ditunda — temui pembimbing dan minta penjelasan
+sebelum menulis lebih jauh.
 
-1. **Tidur cukup** malam sebelumnya
-2. **Sarapan** — jangan sidang dalam keadaan lapar
-3. **Bawa air minum** ke ruang sidang
-4. **Tenang dan percaya diri** — kamu sudah persiapkan segalanya
+**"Perbaiki sitasi."** Bisa soal gaya penulisan yang tidak konsisten, bisa
+juga soal sumber yang terlalu tua atau tidak kredibel.
 
-## Setelah Sidang
+## Cara bertanya yang membuahkan jawaban
 
-Jika ada revisi, jangan tunda. Segera kerjakan dan manfaatkan [konsultasi Ruang Konsul Solo](/daftar) untuk membantu proses revisi lebih cepat.
-    `,
+Jangan datang dengan "Pak, maksudnya bagaimana ya?" Datanglah dengan
+tafsiranmu sendiri:
+
+"Pak, catatan 'perdalam' di bagian 2.3 saya tafsirkan sebagai kurangnya
+dukungan empiris. Saya berencana menambah tiga penelitian terbaru tentang
+ini. Apakah arahnya sudah benar?"
+
+Pertanyaan seperti itu menunjukkan kamu sudah berpikir, dan jauh lebih mudah
+dijawab.
+
+## Catat, jangan mengandalkan ingatan
+
+Setelah tiap sesi bimbingan, tulis ulang catatannya jadi daftar tindakan
+dengan tenggat. Bawa daftar itu di pertemuan berikutnya dan tunjukkan mana
+yang sudah selesai. Pembimbing akan melihat kamu bergerak, dan itu mengubah
+suasana bimbingan.
+`,
+  },
+
+  "menghindari-jurnal-predator": {
+    title: "Cara Mengenali Jurnal Predator Sebelum Naskahmu Terlanjur Masuk",
+    excerpt: "Biaya publikasi murah dan janji terbit seminggu adalah tanda bahaya. Ini daftar periksa sebelum submit.",
+    cover: "/promo-konsultasi.jpeg",
+    category: "Publikasi",
+    readTime: "8 menit",
+    date: "29 September 2026",
+    author: "Tim Ruang Konsul Solo",
+    content: `
+## Kenapa ini penting
+
+Naskah yang sudah terbit di jurnal predator tidak bisa ditarik lalu
+dikirimkan ke jurnal lain — itu terhitung publikasi ganda. Satu keputusan
+keliru bisa menghanguskan naskah yang kamu kerjakan berbulan-bulan.
+
+Sebagian kampus juga tidak mengakui publikasi di jurnal semacam itu untuk
+syarat kelulusan, jadi uang dan waktumu habis tanpa hasil.
+
+## Tanda yang perlu diwaspadai
+
+**Dikirimi ajakan lewat surel.** Jurnal bereputasi tidak memburu penulis.
+Kalau ada surel memuji "penelitian Anda yang luar biasa" padahal kamu belum
+pernah berhubungan dengan mereka, curigai.
+
+**Janji terbit sangat cepat.** Telaah sejawat yang sungguh-sungguh butuh
+waktu berminggu-minggu sampai berbulan-bulan. "Terbit dalam 3 hari" berarti
+tidak ada telaah sama sekali.
+
+**Cakupan yang terlalu luas.** Satu jurnal yang menerima naskah kedokteran,
+teknik, sastra, dan ekonomi sekaligus tidak mungkin punya penelaah yang
+kompeten di semuanya.
+
+**Biaya diminta di awal.** Jurnal yang sehat menagih biaya pemrosesan
+setelah naskah diterima, bukan sebagai syarat agar naskah dibaca.
+
+**Dewan redaksi yang tidak bisa ditelusuri.** Cari nama-namanya di Google
+Scholar. Kalau tidak ditemukan, atau afiliasinya tidak cocok, itu pertanda
+buruk.
+
+**Situs yang serampangan.** Banyak salah ketik, tautan mati, atau alamat
+kantor yang tidak jelas.
+
+## Cara memeriksa
+
+Untuk jurnal nasional, cari di **SINTA** (sinta.kemdikbud.go.id) — kalau
+terindeks, nomor akreditasinya terlihat di sana.
+
+Untuk jurnal internasional, periksa di **DOAJ** (doaj.org) untuk jurnal
+akses terbuka, atau di **Scopus** lewat laman Sources. Jangan percaya logo
+"Indexed in Scopus" yang dipajang di situs jurnalnya — selalu periksa dari
+sisi Scopus.
+
+Tanyakan juga ke perpustakaan kampus atau dosen pembimbingmu. Banyak kampus
+punya daftar jurnal yang direkomendasikan dan yang dihindari.
+
+## Kalau terlanjur
+
+Hubungi redaksi dan minta pencabutan secara tertulis sebelum naskah terbit.
+Setelah terbit, pilihannya jauh lebih sempit — bicarakan dengan pembimbing
+dan bagian akademik kampusmu.
+`,
+  },
+
+  "menyiapkan-diri-menghadapi-sidang": {
+    title: "Menyiapkan Diri Menghadapi Sidang: Pertanyaan yang Hampir Pasti Muncul",
+    excerpt: "Penguji jarang menanyakan hal yang tidak terduga. Sembilan pertanyaan ini muncul di hampir semua sidang.",
+    cover: "/promo-bimbingan.jpeg",
+    category: "Sidang",
+    readTime: "10 menit",
+    date: "21 September 2026",
+    author: "Tim Ruang Konsul Solo",
+    content: `
+## Penguji tidak sedang mencari celah
+
+Tugas penguji memastikan kamu paham apa yang kamu tulis. Pertanyaan yang
+terasa menyudutkan biasanya hanya cara menguji apakah kamu benar-benar
+mengerjakannya sendiri.
+
+## Sembilan yang hampir selalu ditanyakan
+
+**"Coba jelaskan penelitian Anda dalam tiga menit."** Latih sampai lancar.
+Ini membentuk kesan pertama, dan kesan pertama memengaruhi sisa sidang.
+
+**"Kenapa topik ini penting?"** Jawab dari sisi manfaatnya, bukan dari sisi
+"karena belum ada yang meneliti". Belum diteliti saja bukan alasan.
+
+**"Kenapa memakai metode ini, bukan yang lain?"** Sebutkan alternatif yang
+kamu pertimbangkan dan kenapa tidak dipilih. Ini menunjukkan kamu memilih,
+bukan sekadar mengikuti.
+
+**"Dari mana sampel ini, dan kenapa jumlahnya segitu?"** Siapkan dasar
+perhitungannya — rumus Slovin, tabel Krejcie-Morgan, atau analisis daya.
+
+**"Apa keterbatasan penelitian Anda?"** Jangan menjawab "tidak ada".
+Penelitian tanpa keterbatasan tidak ada, dan jawaban itu justru menandakan
+kamu belum memahami kerjamu sendiri.
+
+**"Apa bedanya dengan penelitian X?"** Kuasai tiga sampai lima penelitian
+terdekat dengan topikmu, dan bisa sebutkan bedanya.
+
+**"Kenapa hasilnya begini?"** Terutama kalau temuanmu bertentangan dengan
+teori. Siapkan penjelasan yang masuk akal — hasil yang berbeda bukan berarti
+salah.
+
+**"Apa sumbangan penelitian ini?"** Pisahkan sumbangan teoretis dan praktis.
+
+**"Kalau mengulang, apa yang akan Anda ubah?"** Jawaban jujur lebih baik
+daripada jawaban yang terdengar sempurna.
+
+## Yang perlu disiapkan selain jawaban
+
+Cetak naskahmu dan beri penanda di bagian-bagian penting, supaya bisa
+langsung dibuka saat ditanya.
+
+Kuasai bab 3 dan 4 lebih dalam dari bab lain — di situ pertanyaan paling
+banyak muncul.
+
+Siapkan slide cadangan berisi tabel detail yang tidak masuk presentasi
+utama. Kalau penguji menanyakan angka tertentu, kamu bisa langsung
+menunjukkannya.
+
+## Saat tidak tahu jawabannya
+
+Katakan terus terang: "Saya belum memeriksa hal itu, tapi menurut saya
+arahnya ke sana karena…" Jauh lebih baik daripada mengarang. Penguji hampir
+selalu tahu kalau sedang dikarang.
+`,
+  },
+
+  "mengutip-dengan-benar": {
+    title: "Mengutip dengan Benar: Parafrase, Kutipan Langsung, dan Sitasi",
+    excerpt: "Kemiripan tinggi biasanya berakar di cara mengutip, bukan di pilihan kata. Ini bedanya dan kapan memakai yang mana.",
+    cover: "/promo-parafrase.jpeg",
+    category: "Penulisan",
+    readTime: "7 menit",
+    date: "12 September 2026",
+    author: "Tim Ruang Konsul Solo",
+    content: `
+## Akar masalahnya bukan pilihan kata
+
+Banyak yang mengira angka kemiripan tinggi bisa diturunkan dengan mengganti
+kata demi kata dengan padanannya. Hasilnya biasanya dua-duanya buruk:
+angkanya tetap tinggi, dan tulisannya jadi janggal.
+
+Kemiripan tinggi hampir selalu berarti sesuatu yang lebih mendasar — terlalu
+banyak mengambil dari sumber dan terlalu sedikit menyuarakan analisis
+sendiri.
+
+## Parafrase yang sebenarnya
+
+Parafrase bukan mengganti kata. Parafrase adalah memahami gagasan lalu
+menuliskannya ulang dengan susunan pikiranmu sendiri.
+
+Caranya: baca paragraf sumbernya, **tutup sumbernya**, lalu tulis apa yang
+kamu pahami. Setelah itu baru bandingkan — bukan untuk menyalin, tapi untuk
+memastikan kamu tidak salah menangkap.
+
+Tetap wajib mencantumkan sitasi. Parafrase mengubah kalimatnya, bukan
+kepemilikan gagasannya.
+
+## Kapan memakai kutipan langsung
+
+Kutipan langsung hanya untuk tiga keadaan: definisi baku yang tidak boleh
+diubah, pernyataan yang kekuatannya justru ada pada susunan katanya, dan
+kalimat yang hendak kamu bantah sehingga perlu dikutip persis.
+
+Di luar itu, parafrase lebih baik. Naskah yang penuh kutipan langsung
+terbaca seperti kumpulan tempelan, bukan karya yang dipikirkan.
+
+## Mengatur sitasi sejak awal
+
+Pakai Mendeley atau Zotero sejak hari pertama membaca, bukan setelah naskah
+jadi. Merapikan 60 sitasi secara manual di akhir adalah pekerjaan berhari-hari
+yang sebenarnya bisa dihindari.
+
+## Memeriksa keseimbangan tulisanmu
+
+Ambil satu halaman bab 2. Tandai dengan warna berbeda: mana yang berasal dari
+sumber, mana analisismu sendiri.
+
+Kalau hampir seluruh halaman satu warna — warna sumber — di situlah
+persoalannya. Yang perlu ditambah bukan sinonim, melainkan suaramu sendiri:
+membandingkan temuan antarsumber, menunjukkan yang bertentangan, menarik
+simpulan sementara.
+
+## Catatan
+
+Memeriksa kemiripan untuk memperbaiki cara mengutip itu wajar dan sehat.
+Yang tidak kami layani adalah jasa menurunkan angka tanpa memperbaiki
+tulisannya — itu menyiasati pemeriksaan, bukan belajar menulis.
+`,
   },
 };
 
