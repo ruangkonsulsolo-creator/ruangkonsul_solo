@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { ArrowRight, CalendarDays, Clock, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/ui/logo";
+import { NavSubBrand } from "@/components/landing/NavSubBrand";
 import { BRAND, waLink } from "@/lib/brand";
 
 export const metadata: Metadata = {
@@ -200,6 +201,10 @@ export default async function BlogPage({
             Dari merumuskan masalah sampai menghadapi penguji. Semuanya bisa
             kamu kerjakan sendiri — artikel ini menunjukkan caranya.
           </p>
+
+          <div className="mt-8 max-w-3xl">
+            <NavSubBrand aktif="news" />
+          </div>
         </div>
       </section>
 

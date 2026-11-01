@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/ui/logo";
+import { NavSubBrand } from "@/components/landing/NavSubBrand";
 import { BRAND, waLink } from "@/lib/brand";
 
 export const metadata: Metadata = {
@@ -286,6 +287,10 @@ export default function EventPage() {
             Belajar bersama peserta lain yang sedang di tahap yang sama. Daring
             maupun tatap muka di Solo.
           </p>
+
+          <div className="mt-8 max-w-3xl">
+            <NavSubBrand aktif="events" />
+          </div>
         </div>
       </section>
 

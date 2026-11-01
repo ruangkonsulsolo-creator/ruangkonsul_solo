@@ -12,6 +12,7 @@ import { HeroSlider } from "@/components/landing/HeroSlider";
 import { HeroBackground } from "@/components/landing/HeroBackground";
 import { BannerStrip } from "@/components/landing/BannerStrip";
 import { LogoKampus } from "@/components/landing/LogoKampus";
+import { NavSubBrand } from "@/components/landing/NavSubBrand";
 import { KartuTool, TOOLS } from "@/components/landing/KartuTool";
 import { KotakPeriksa } from "@/components/periksa/KotakPeriksa";
 import { TestimoniWhatsApp } from "@/components/landing/TestimoniWhatsApp";
@@ -227,6 +228,13 @@ export default function LandingPage() {
 
       {/* ── Banner Iklan Bimbingan ── */}
       <BannerStrip />
+
+      {/* ── Empat lini Ruang Konsul Solo ── */}
+      <section className="border-b border-slate-100 bg-brand-50 px-4 py-10">
+        <div className="mx-auto max-w-4xl">
+          <NavSubBrand />
+        </div>
+      </section>
 
       {/* ── Layanan Tab Utama ── */}
       <section id="layanan" className="mx-auto max-w-6xl px-4 py-20">

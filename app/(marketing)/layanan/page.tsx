@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/ui/logo";
+import { NavSubBrand } from "@/components/landing/NavSubBrand";
 import { BRAND, waLink } from "@/lib/brand";
 
 export const metadata: Metadata = {
@@ -223,6 +224,10 @@ export default function LayananPage({
             Mentor membantu melewati bagian yang macet, bukan menggantikanmu
             mengerjakannya.
           </p>
+
+          <div className="mt-8 max-w-3xl">
+            <NavSubBrand aktif="service" />
+          </div>
         </div>
       </section>
 
