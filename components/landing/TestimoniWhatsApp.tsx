@@ -120,9 +120,10 @@ export function TestimoniWhatsApp() {
             className="h-8 w-8 lg:h-10 lg:w-10"
           />
         </h2>
-        <p className="mx-auto mb-12 max-w-xl text-center font-medium text-slate-600">
-          Dikirim langsung oleh mahasiswa yang sudah selesai bimbingan, dimuat
-          atas izin mereka.
+        <p className="mx-auto mb-12 max-w-2xl text-center font-medium text-slate-600">
+          Mereka Terbantu, Terbimbing, dan Terpuaskan. Kami,{" "}
+          <span className="font-bold text-brand">@ruangkonsull_solo</span> hadir
+          sebagai teman dan sahabat bagi Mahasiswa
         </p>
 
         <ul className="flex flex-wrap items-start justify-center gap-8">
@@ -148,12 +149,6 @@ export function TestimoniWhatsApp() {
                 </li>
               ))}
         </ul>
-
-        {berkas.length > 0 && (
-          <p className="mt-8 text-center text-xs font-medium text-slate-500">
-            Nomor dan foto profil disamarkan.
-          </p>
-        )}
       </div>
     </section>
   );
