@@ -32,30 +32,51 @@ export function KotakPeriksa() {
   const pKemiripan = penyediaAktif("kemiripan");
   const pAI = penyediaAktif("ai");
 
+  /**
+   * Tiga pilihan dibuat semirip mungkin dengan kartu produk, bukan sekadar
+   * tombol: warna aksen, judul, satu baris penjelas, dan contoh pertanyaan
+   * yang dijawabnya. Tujuannya supaya pengguna tidak perlu menebak bedanya.
+   *
+   * Pembeda utamanya teks dalam bahasa Indonesia, bukan logo. Logo penyedia
+   * hanya muncul kalau penyedianya memang dikonfigurasi, dan ditaruh kecil
+   * di bawah sebagai keterangan sumber — bukan sebagai penanda jenis.
+   */
   const PILIHAN = [
     {
       nilai: "kemiripan" as const,
-      label: "Cek Kemiripan",
-      sub: `${rupiah(TARIF.kemiripan)} / 1.000 kata`,
+      label: "Cek Plagiarisme",
+      ringkas: "Seberapa mirip tulisanmu dengan karya lain",
+      jawab: "Bagian mana yang perlu sitasi?",
+      harga: rupiah(TARIF.kemiripan),
       icon: FileSearch,
-      logo: pKemiripan?.logo ?? null,
-      namaPenyedia: pKemiripan?.nama ?? null,
+      aksen: "text-brand",
+      aksenBg: "bg-brand-50",
+      aksenBorder: "border-brand",
+      penyedia: pKemiripan,
     },
     {
       nilai: "ai" as const,
-      label: "Indikasi Gaya AI",
-      sub: `${rupiah(TARIF.ai)} / 1.000 kata`,
+      label: "Cek Indikasi AI",
+      ringkas: "Seberapa mirip gayanya dengan tulisan mesin",
+      jawab: "Kalimat mana yang terbaca kaku?",
+      harga: rupiah(TARIF.ai),
       icon: Bot,
-      logo: pAI?.logo ?? null,
-      namaPenyedia: pAI?.nama ?? null,
+      aksen: "text-slate-800",
+      aksenBg: "bg-slate-100",
+      aksenBorder: "border-slate-800",
+      penyedia: pAI,
     },
     {
       nilai: "keduanya" as const,
-      label: "Keduanya",
-      sub: `${rupiah(TARIF.kemiripan + TARIF.ai)} / 1.000 kata`,
+      label: "Keduanya Sekaligus",
+      ringkas: "Satu kiriman, dua pemeriksaan",
+      jawab: "Hemat waktu sebelum menyerahkan draf",
+      harga: rupiah(TARIF.kemiripan + TARIF.ai),
       icon: Sparkles,
-      logo: null,
-      namaPenyedia: null,
+      aksen: "text-brand-dark",
+      aksenBg: "bg-brand-100",
+      aksenBorder: "border-brand-dark",
+      penyedia: null,
     },
   ];
 
@@ -99,7 +120,7 @@ export function KotakPeriksa() {
       <div
         role="radiogroup"
         aria-label="Jenis pemeriksaan"
-        className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-3"
+        className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3"
       >
         {PILIHAN.map((p) => {
           const Icon = p.icon;
@@ -111,36 +132,62 @@ export function KotakPeriksa() {
               role="radio"
               aria-checked={aktif}
               onClick={() => setJenis(p.nilai)}
-              className={`flex items-center gap-3 rounded-xl border-2 p-4 text-left transition-colors ${
+              className={`flex flex-col rounded-2xl border-2 p-5 text-left transition-all ${
                 aktif
-                  ? "border-brand bg-brand-50"
-                  : "border-slate-200 bg-white hover:border-brand-200"
+                  ? `${p.aksenBorder} ${p.aksenBg} shadow-card`
+                  : "border-slate-200 bg-white hover:border-slate-300"
               }`}
             >
-              {p.logo ? (
-                <span className="flex h-10 w-14 flex-shrink-0 items-center justify-center rounded-lg bg-white p-1">
-                  <Image
-                    src={p.logo}
-                    alt={p.namaPenyedia ?? ""}
-                    width={112}
-                    height={40}
-                    className="max-h-full max-w-full object-contain"
-                  />
-                </span>
-              ) : (
+              <span className="mb-3 flex items-center justify-between gap-2">
                 <span
-                  className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg ${
-                    aktif ? "bg-brand text-white" : "bg-slate-100 text-slate-500"
+                  className={`flex h-11 w-11 items-center justify-center rounded-xl ${
+                    aktif ? `bg-white ${p.aksen}` : "bg-slate-100 text-slate-400"
                   }`}
                 >
                   <Icon className="h-5 w-5" aria-hidden="true" />
                 </span>
-              )}
-              <span className="min-w-0">
-                <span className="block font-bold text-slate-900">{p.label}</span>
-                <span className="block text-xs font-medium text-slate-500">
-                  {p.sub}
+                <span
+                  className={`flex h-5 w-5 items-center justify-center rounded-full border-2 ${
+                    aktif ? `${p.aksenBorder} ${p.aksen}` : "border-slate-300"
+                  }`}
+                >
+                  {aktif && (
+                    <span className="h-2.5 w-2.5 rounded-full bg-current" />
+                  )}
                 </span>
+              </span>
+
+              <span className="block font-extrabold text-slate-900">
+                {p.label}
+              </span>
+              <span className="mt-0.5 block text-xs font-medium text-slate-600">
+                {p.ringkas}
+              </span>
+              <span className="mt-2 block text-xs italic text-slate-500">
+                &ldquo;{p.jawab}&rdquo;
+              </span>
+
+              <span className="mt-3 flex items-end justify-between gap-2 border-t border-slate-200/70 pt-3">
+                <span className="text-sm">
+                  <span className={`font-extrabold ${aktif ? p.aksen : "text-slate-700"}`}>
+                    {p.harga}
+                  </span>
+                  <span className="text-xs font-medium text-slate-500"> / 1.000 kata</span>
+                </span>
+                {p.penyedia?.logo && (
+                  <span className="flex flex-col items-end">
+                    <span className="text-[9px] font-medium uppercase tracking-wide text-slate-400">
+                      via
+                    </span>
+                    <Image
+                      src={p.penyedia.logo}
+                      alt={p.penyedia.nama}
+                      width={112}
+                      height={40}
+                      className="h-4 w-auto object-contain"
+                    />
+                  </span>
+                )}
               </span>
             </button>
           );
@@ -215,7 +262,15 @@ export function KotakPeriksa() {
         <div className="flex flex-col rounded-2xl border-2 border-slate-200 bg-white">
           <div className="flex items-center gap-2 border-b border-slate-100 px-4 py-3">
             <CheckCircle2 className="h-4 w-4 text-brand" aria-hidden="true" />
-            <span className="text-sm font-bold text-slate-900">Hasil</span>
+            <span className="text-sm font-bold text-slate-900">
+              {hasil
+                ? hasil.jenis === "kemiripan"
+                  ? "Hasil Cek Plagiarisme"
+                  : hasil.jenis === "ai"
+                    ? "Hasil Cek Indikasi AI"
+                    : "Hasil Kedua Pemeriksaan"
+                : "Hasil"}
+            </span>
             {hasil && (
               <span className="ml-auto text-xs font-medium text-slate-400">
                 {hasil.jumlahKata.toLocaleString("id-ID")} kata diperiksa
@@ -305,7 +360,7 @@ function IsiHasil({ h }: { h: HasilPeriksa }) {
       {h.kemiripan && (
         <section>
           <div className="flex items-baseline justify-between gap-3">
-            <h3 className="font-extrabold text-slate-900">Kemiripan</h3>
+            <h3 className="font-extrabold text-slate-900">Plagiarisme</h3>
             <span className="text-2xl font-extrabold text-brand">
               {h.kemiripan.persen}%
             </span>
@@ -359,7 +414,7 @@ function IsiHasil({ h }: { h: HasilPeriksa }) {
       {h.ai && (
         <section className={h.kemiripan ? "border-t border-slate-100 pt-5" : ""}>
           <div className="flex items-baseline justify-between gap-3">
-            <h3 className="font-extrabold text-slate-900">Indikasi Gaya AI</h3>
+            <h3 className="font-extrabold text-slate-900">Indikasi AI</h3>
             <span className="text-2xl font-extrabold text-slate-700">
               {h.ai.skor}%
             </span>
