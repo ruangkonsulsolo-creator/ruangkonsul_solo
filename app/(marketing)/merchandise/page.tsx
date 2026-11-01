@@ -6,12 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/ui/logo";
 import { BRAND, waLink } from "@/lib/brand";
 import { formatRupiah } from "@/lib/utils/format-currency";
-import {
-  KATEGORI,
-  hargaTermurah,
-  produkKategori,
-} from "@/lib/merchandise/katalog";
+import { KATEGORI, produkKategori } from "@/lib/merchandise/katalog";
 import { fotoUtama } from "@/lib/merchandise/foto";
+import { NavSubBrand } from "@/components/landing/NavSubBrand";
 
 export const metadata: Metadata = {
   title: "Merchandise",
@@ -64,13 +61,17 @@ export default function MerchandisePage({
             </span>
           </div>
           <h1 className="text-3xl font-extrabold leading-tight text-slate-900 lg:text-5xl">
-            Perlengkapan kuliah dan{" "}
-            <span className="text-brand">hadiah hari wisuda</span>
+            Semua Kebutuhan Mahasiswa,{" "}
+            <span className="text-brand">Tersedia di RK Merchandise</span>
           </h1>
-          <p className="mt-3 max-w-xl leading-relaxed text-slate-600">
-            Mulai {formatRupiah(hargaTermurah())}. Bisa diambil langsung di
-            Solo atau dikirim ke seluruh Indonesia.
+          <p className="mt-3 max-w-2xl text-lg font-bold leading-relaxed text-slate-800">
+            Harga Terjangkau, Free Delivery, Kualitas Terjamin dan Bergaransi
+            100%
           </p>
+
+          <div className="mt-8 max-w-3xl">
+            <NavSubBrand aktif="merch" />
+          </div>
         </div>
       </section>
 
