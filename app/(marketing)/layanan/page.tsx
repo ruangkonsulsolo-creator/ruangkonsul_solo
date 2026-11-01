@@ -172,7 +172,7 @@ const LAYANAN: Layanan[] = [
     harga: "Mulai Rp 85.000",
     satuan: "per item",
     isi: ["Buket bunga dan snack", "Tumbler dan kaus", "Pengiriman seluruh Indonesia"],
-    href: "/dashboard/merchandise",
+    href: "/merchandise",
     cta: "Lihat katalog",
   },
 ];
