@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 export default function UlasanMentorPage() {
   return (
-    <div className="max-w-3xl space-y-5">
+    <div className="max-w-7xl space-y-5">
       <div>
         <h2 className="text-xl font-extrabold text-slate-900">Ulasan</h2>
         <p className="mt-0.5 text-sm text-slate-500">

@@ -118,6 +118,7 @@ export default function BimbinganPage() {
           </Link>
           <div className="hidden md:flex items-center gap-5 text-sm font-medium text-slate-600">
             <Link href="/layanan"    className="hover:text-[#8B0000] transition-colors">Layanan</Link>
+            <Link href="/merchandise" className="transition-colors hover:text-brand">Merchandise</Link>
             <Link href="/blog"       className="hover:text-[#8B0000] transition-colors">Blog</Link>
             <Link href="/paket-hemat" className="hover:text-[#8B0000] transition-colors">Paket Hemat</Link>
             <Link href="/bimbingan" className="text-[#8B0000] font-bold border-b-2 border-[#8B0000] pb-0.5">Bimbingan</Link>

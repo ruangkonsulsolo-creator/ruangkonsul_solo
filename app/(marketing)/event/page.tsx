@@ -258,6 +258,7 @@ export default function EventPage() {
           <Logo href="/" size="sm" />
           <div className="hidden items-center gap-6 text-sm font-medium text-slate-600 md:flex">
             <Link href="/layanan" className="transition-colors hover:text-brand">Layanan</Link>
+            <Link href="/merchandise" className="transition-colors hover:text-brand">Merchandise</Link>
             <Link href="/jadwal" className="transition-colors hover:text-brand">Jadwal</Link>
             <Link href="/paket-hemat" className="transition-colors hover:text-brand">Paket Langganan</Link>
             <Link href="/event" className="font-semibold text-brand">Event</Link>

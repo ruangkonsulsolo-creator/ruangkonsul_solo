@@ -22,7 +22,7 @@ const TYPE_ICONS: Record<string, React.ElementType> = {
 
 export default async function MateriPage() {
   return (
-    <div className="space-y-6 max-w-4xl">
+    <div className="space-y-6 max-w-7xl">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-xl font-extrabold text-slate-900">Materi & Modul</h2>

@@ -29,7 +29,7 @@ export default async function KlienMentorPage() {
   };
 
   return (
-    <div className="space-y-5 max-w-4xl">
+    <div className="space-y-5 max-w-7xl">
       <div>
         <h2 className="text-xl font-extrabold text-slate-900">Daftar Klien</h2>
         <p className="text-sm text-muted-foreground mt-0.5">Semua klien yang pernah booking bimbingan denganmu.</p>

@@ -21,13 +21,43 @@ export async function GET() {
     console.error("[profil-mentor] gagal memuat:", error);
     return NextResponse.json({ error: "Gagal memuat profil." }, { status: 500 });
   }
-  if (!data) {
+  if (data) return NextResponse.json({ data });
+
+  // Belum punya baris profil. Kalau perannya memang mentor, buatkan baris
+  // kosongnya sekarang — jalan buntu "hubungi admin" tidak perlu ada, karena
+  // peran mentor sudah ditetapkan admin dan baris ini cuma wadahnya.
+  // Tarif tetap 0; trigger jaga_tarif_mentor (migration 026) memastikan
+  // mentor tidak bisa menetapkan tarifnya sendiri.
+  const { data: profil } = await supabase
+    .from("profiles").select("role").eq("id", user.id).maybeSingle();
+
+  if (!profil || !["mentor", "admin", "superadmin"].includes(profil.role)) {
     return NextResponse.json(
-      { error: "Profil mentor belum dibuat. Hubungi admin untuk diaktifkan.",
+      { error: "Akun ini belum berperan sebagai mentor. Minta admin mengubah perannya lebih dulu.",
         action: "belum_mentor" },
-      { status: 404 });
+      { status: 403 });
   }
-  return NextResponse.json({ data });
+
+  const { data: baru, error: eBuat } = await supabase
+    .from("mentor_profiles")
+    .insert({ user_id: user.id })
+    .select(KOLOM)
+    .single();
+
+  if (eBuat) {
+    // 23505 = baris sudah dibuat permintaan lain yang berjalan bersamaan.
+    if (eBuat.code === "23505") {
+      const { data: lagi } = await supabase
+        .from("mentor_profiles").select(KOLOM).eq("user_id", user.id).maybeSingle();
+      if (lagi) return NextResponse.json({ data: lagi });
+    }
+    console.error("[profil-mentor] gagal membuat baris:", eBuat);
+    return NextResponse.json(
+      { error: "Gagal menyiapkan profil mentor. Jalankan migration 026 lebih dulu kalau belum." },
+      { status: 500 });
+  }
+
+  return NextResponse.json({ data: baru });
 }
 
 const pengalaman = z.object({

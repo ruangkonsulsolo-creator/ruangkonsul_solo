@@ -15,7 +15,7 @@ export default async function JadwalMentorPage() {
       { id: "s3", slot_date: new Date(Date.now() + 86400000).toISOString().slice(0,10), slot_start: "14:00:00", slot_end: "15:00:00", is_blocked: false },
     ];
     return (
-      <div className="max-w-3xl space-y-6">
+      <div className="max-w-7xl space-y-6">
         <div><h2 className="text-xl font-extrabold text-slate-900">Jadwal Saya</h2><p className="text-sm text-muted-foreground mt-0.5">Kelola slot waktu tersedia kamu.</p></div>
         <JadwalMentorClient mentorId="preview-mentor" isAvailable={true} slots={dummySlots as any} bookings={[
           { slot_id: "s1", status: "confirmed", profiles: { full_name: "Rizky Aditya" } }
@@ -34,7 +34,7 @@ export default async function JadwalMentorPage() {
   const slotIds = (slots ?? []).map((s) => s.id);
   const { data: bookings } = slotIds.length > 0 ? await supabase.from("bookings").select("slot_id, status, profiles(full_name)").in("slot_id", slotIds).in("status", ["pending","confirmed"]) : { data: [] };
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className="max-w-7xl space-y-6">
       <div><h2 className="text-xl font-extrabold text-slate-900">Jadwal Saya</h2><p className="text-sm text-muted-foreground mt-0.5">Kelola slot waktu tersedia kamu. Klien akan booking berdasarkan slot ini.</p></div>
       <JadwalMentorClient mentorId={mentorProfile?.id ?? ""} isAvailable={mentorProfile?.is_available ?? false} slots={(slots ?? []) as any[]} bookings={(bookings ?? []) as any[]} />
     </div>

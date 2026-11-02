@@ -77,7 +77,7 @@ export default async function CustomerDashboardPage() {
   const { nama, credits, orders, quotas } = await getData();
 
   return (
-    <div className="space-y-8 max-w-5xl">
+    <div className="space-y-8 max-w-7xl">
       {/* Greeting */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>

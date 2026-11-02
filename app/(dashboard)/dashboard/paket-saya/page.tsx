@@ -22,7 +22,7 @@ export default async function PaketSayaPage() {
   const expired = expiredQuotas ?? [];
 
   return (
-    <div className="space-y-7 max-w-3xl">
+    <div className="space-y-7 max-w-7xl">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-extrabold text-slate-900">Paket Saya</h2>
         <Button asChild size="sm" className="gap-2"><Link href="/paket-hemat">Beli Paket Baru <ArrowRight className="h-3.5 w-3.5" /></Link></Button>

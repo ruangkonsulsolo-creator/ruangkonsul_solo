@@ -139,12 +139,13 @@ export default function LandingPage() {
       <nav className="sticky top-0 z-30 border-b border-slate-100 bg-white/95 backdrop-blur-sm shadow-sm">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <Logo size="md" />
-          <div className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-600">
+          <div className="hidden md:flex items-center gap-5 lg:gap-6 text-sm font-medium text-slate-600">
             <Link href="/layanan"    className="hover:text-brand transition-colors">Layanan</Link>
             <Link href="/blog"       className="hover:text-brand transition-colors">Blog</Link>
             <Link href="/dashboard/riwayat-pesanan" className="hover:text-brand transition-colors">Cek Pesanan</Link>
             <Link href="/paket-hemat" className="hover:text-brand transition-colors">Paket Hemat</Link>
             <Link href="/bimbingan"  className="hover:text-brand transition-colors font-semibold">Bimbingan</Link>
+            <Link href="/merchandise" className="hover:text-brand transition-colors">Merchandise</Link>
             <Link href="/jadwal"     className="hover:text-brand transition-colors font-semibold">Jadwal</Link>
             <Link href="/event"      className="hover:text-brand transition-colors">Event</Link>
             <Link href="/referral"   className="hover:text-brand transition-colors">Referral</Link>

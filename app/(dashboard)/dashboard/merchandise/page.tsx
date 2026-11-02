@@ -22,7 +22,7 @@ const CATEGORIES = ["Semua", "Aksesoris", "Pakaian", "Stationery", "Sticker"];
 
 export default async function MerchandisePage() {
   return (
-    <div className="space-y-7 max-w-4xl">
+    <div className="space-y-7 max-w-7xl">
       <div>
         <h2 className="text-xl font-extrabold text-slate-900">Merchandise {BRAND.shortName}</h2>
         <p className="text-sm text-muted-foreground mt-0.5">Produk resmi Ruang Konsul Solo. Dukung kami sakin keren.</p>
