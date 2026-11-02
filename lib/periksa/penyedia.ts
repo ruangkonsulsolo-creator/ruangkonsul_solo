@@ -21,7 +21,7 @@ import { CATATAN_PARAFRASE, PERINGATAN_AI } from "./types";
  * akun kampus untuk melayani klien luar melanggar lisensi itu.
  *
  * Hitung dulu biaya per 1.000 kata dari penyedia pilihanmu, lalu bandingkan
- * dengan tarif di types.ts (Rp500 kemiripan, Rp1.000 AI, Rp1.000 parafrase).
+ * dengan tarif di types.ts (Rp3.300 kemiripan, Rp3.300 AI, Rp1.000 parafrase).
  * Kalau biaya API lebih tinggi, setiap pemeriksaan membuatmu rugi, dan
  * ruginya tumbuh seiring ramainya pemakai.
  *
