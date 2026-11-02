@@ -9,7 +9,7 @@ import {
   FileSearch, Bot, BookOpenCheck, PenLine,
   ClockIcon, PackageOpen, User, LogOut,
   LayoutDashboard, Menu, X, ChevronRight,
-  GraduationCap,
+  GraduationCap, MessageCircle,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -40,6 +40,7 @@ const navItems = [
   { type: "section" as const, label: "Akun" },
 
   // Halaman privat — butuh login
+  { label: "Chat Mentor",     href: "/dashboard/chat",            icon: MessageCircle },
   { label: "Riwayat Pesanan", href: "/dashboard/riwayat-pesanan", icon: ClockIcon },
   { label: "Paket Saya",      href: "/dashboard/paket-saya",      icon: PackageOpen },
   { label: "Profil",          href: "/dashboard/profil",           icon: User },

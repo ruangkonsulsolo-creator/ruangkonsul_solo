@@ -8,7 +8,7 @@ import { Logo } from "@/components/ui/logo";
 import {
   LayoutDashboard, ClipboardList, Users,
   BarChart3, Settings, Package, LogOut, ChevronRight,
-  GraduationCap, FileText, ShieldCheck, Phone,
+  GraduationCap, FileText, ShieldCheck, Phone, ShoppingBag,
 } from "lucide-react";
 
 const navItems = [
@@ -23,6 +23,7 @@ const navItems = [
   { label: "Blog",            href: "/admin/blog",         icon: FileText },
   { type: "section" as const, label: "Konfigurasi" },
   { label: "Layanan & Harga", href: "/admin/layanan",      icon: Settings },
+  { label: "Merchandise",    href: "/admin/merchandise",  icon: ShoppingBag },
   { label: "Paket Hemat",     href: "/admin/paket",        icon: Package },
   { label: "Superadmin",     href: "/admin/superadmin",   icon: ShieldCheck },
 ];
