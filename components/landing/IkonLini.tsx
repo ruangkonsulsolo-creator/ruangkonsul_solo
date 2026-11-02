@@ -27,14 +27,16 @@ const LOGO: Record<LiniBrand, string> = {
 
 export function IkonLini({ lini }: { lini: LiniBrand }) {
   return (
-    <Image
-      src={LOGO[lini]}
-      alt=""
-      width={512}
-      height={512}
-      sizes="160px"
-      priority
-      className="mx-auto h-28 w-28 object-contain lg:h-32 lg:w-32"
-    />
+    <span className="mx-auto flex h-28 w-28 items-center justify-center rounded-full border-2 border-brand lg:h-32 lg:w-32">
+      <Image
+        src={LOGO[lini]}
+        alt=""
+        width={512}
+        height={512}
+        sizes="128px"
+        priority
+        className="h-16 w-16 object-contain lg:h-[4.75rem] lg:w-[4.75rem]"
+      />
+    </span>
   );
 }
