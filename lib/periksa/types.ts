@@ -25,17 +25,22 @@ export type JenisPeriksa = "kemiripan" | "ai" | "parafrase";
  *
  * ── DASAR PENETAPAN ───────────────────────────────────────────────────────
  *
- * Disetel untuk margin kotor 45% setelah biaya API dan biaya QRIS (0,7%),
- * pada kurs Rp18.000/USD (Oktober 2026).
+ * Lantai margin kotor 45% setelah biaya API dan biaya QRIS (0,7%), pada
+ * kurs Rp18.000/USD (Oktober 2026).
  *
- *   kemiripan  modal ±Rp1.800 (Originality.ai, 2 kredit/100 kata)  -> 44,8%
- *   ai         modal ±Rp1.800 (Originality.ai, 1 kredit/100 kata)  -> 44,8%
- *   parafrase  modal ±Rp25    (Gemini Flash-Lite / GPT-4o mini)    -> 96,8%
+ *   kemiripan  modal ±Rp1.800 (Originality.ai, 2 kredit/100 kata)   -> 44,8%
+ *   ai         modal ±Rp1.656 (GPTZero Professional, bayar bulanan) -> 62,5%
+ *   parafrase  modal ±Rp25    (Gemini Flash-Lite / GPT-4o mini)     -> 97,6%
  *
- * Parafrase sengaja TIDAK diturunkan ke Rp50 meski margin 45% hanya menuntut
- * itu. Biayanya nyaris nol, jadi harga di sini ditentukan oleh nilai bagi
- * pembeli, bukan oleh modal; menurunkannya hanya membuang pendapatan tanpa
- * alasan. Angka 45% diperlakukan sebagai lantai, bukan target.
+ * Tagihan bulanan GPTZero hampir dua kali lipat tagihan tahunan per katanya
+ * (Rp1.656 berbanding Rp900 per 1.000 kata, sama-sama paket Professional
+ * 500.000 kata/bulan). Pindah ke tahunan begitu volumenya stabil menaikkan
+ * margin cek AI dari 62,5% ke 79,3% tanpa menyentuh harga jual.
+ *
+ * Tarif ai dan parafrase ditetapkan pemilik di atas lantai 45%, bukan
+ * dihitung mundur dari modal. Parafrase khususnya: modalnya nyaris nol,
+ * jadi harganya ditentukan nilai bagi pembeli, bukan modal. Angka 45%
+ * diperlakukan sebagai lantai, bukan target.
  *
  * Modal API berubah sewaktu-waktu dan kurs ikut bergerak. Tinjau ulang angka
  * di bawah setiap kali tagihan penyedia berubah, dan hitung dari tagihan
