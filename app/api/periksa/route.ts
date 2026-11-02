@@ -20,7 +20,7 @@ export const maxDuration = 120;
 
 const schema = z.object({
   teks: z.string().min(1),
-  jenis: z.enum(["kemiripan", "ai", "keduanya"]),
+  jenis: z.enum(["kemiripan", "ai", "parafrase"]),
 });
 
 export async function POST(request: NextRequest) {
@@ -129,13 +129,10 @@ export async function POST(request: NextRequest) {
 
   try {
     const kemiripan =
-      jenis === "kemiripan" || jenis === "keduanya"
-        ? await penyedia.kemiripan(teks)
-        : undefined;
-    const ai =
-      jenis === "ai" || jenis === "keduanya"
-        ? await penyedia.ai(teks)
-        : undefined;
+      jenis === "kemiripan" ? await penyedia.kemiripan(teks) : undefined;
+    const ai = jenis === "ai" ? await penyedia.ai(teks) : undefined;
+    const parafrase =
+      jenis === "parafrase" ? await penyedia.parafrase(teks) : undefined;
 
     const hasil: HasilPeriksa = {
       id: idPemeriksaan as string,
@@ -144,7 +141,8 @@ export async function POST(request: NextRequest) {
       biaya,
       kemiripan,
       ai,
-      saran: susunSaran(jenis, kemiripan, ai),
+      parafrase,
+      saran: susunSaran(jenis, kemiripan, ai, parafrase),
       diperiksaPada: new Date().toISOString(),
       penyedia: penyedia.nama,
     };

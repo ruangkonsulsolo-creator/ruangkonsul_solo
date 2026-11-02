@@ -11,25 +11,32 @@ interface Banner {
   link_url: string | null;
 }
 
-// Static fallback — diganti data DB setelah admin upload banner
+/**
+ * Banner bawaan, dipakai sampai admin mengunggah banner lewat dasbor.
+ *
+ * Berkasnya ada di /public/banner/ dengan rasio 8:1 (2576 x 322 px).
+ * Rasio strip ini dikunci 8:1 di semua lebar layar supaya desainnya utuh —
+ * sebelumnya strip menyempit jadi 4:1 di ponsel, yang memotong separuh
+ * lebar gambar dan membuang bagian kanan tiap banner.
+ */
 const STATIC_BANNERS: Banner[] = [
   {
     id: "static-1",
-    title: "Kelas Bimbingan Private Skripsi & Tesis",
-    image_url: "/promo-bimbingan.jpeg",
-    link_url: "/bimbingan",
+    title: "RK Merchandise — buket wisuda dan perlengkapan kuliah",
+    image_url: "/banner/1.jpg",
+    link_url: "/merchandise",
   },
   {
     id: "static-2",
-    title: "Paket Bundling Hemat Turnitin + Parafrase",
-    image_url: "/promo-bundling.jpeg",
-    link_url: "/paket-hemat",
+    title: "Kelas gratis Data Science & Data Analysis",
+    image_url: "/banner/2.jpg",
+    link_url: "/event",
   },
   {
     id: "static-3",
-    title: "Konsultasi Proposal & Skripsi",
-    image_url: "/promo-konsultasi.jpeg",
-    link_url: "/bimbingan",
+    title: "Giveaway tumbler untuk mahasiswa IPK di atas 3,5",
+    image_url: "/banner/3.jpg",
+    link_url: "/event",
   },
 ];
 
@@ -63,7 +70,7 @@ export function BannerStrip() {
   const banner = banners[current];
 
   const inner = (
-    <div className="relative w-full aspect-[4/1] sm:aspect-[6/1] lg:aspect-[8/1] overflow-hidden bg-brand-50">
+    <div className="relative w-full aspect-[8/1] overflow-hidden bg-brand-50">
       {banners.map((b, i) => (
         <div
           key={b.id}
@@ -80,8 +87,6 @@ export function BannerStrip() {
             sizes="100vw"
             priority={i === 0}
           />
-          {/* Overlay gradient kiri */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-transparent" />
         </div>
       ))}
 

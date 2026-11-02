@@ -1,9 +1,10 @@
 import type {
   HasilAI,
   HasilKemiripan,
+  HasilParafrase,
   JenisPeriksa,
 } from "./types";
-import { PERINGATAN_AI } from "./types";
+import { CATATAN_PARAFRASE, PERINGATAN_AI } from "./types";
 
 /**
  * Lapisan penyedia pemeriksaan naskah.
@@ -20,9 +21,14 @@ import { PERINGATAN_AI } from "./types";
  * akun kampus untuk melayani klien luar melanggar lisensi itu.
  *
  * Hitung dulu biaya per 1.000 kata dari penyedia pilihanmu, lalu bandingkan
- * dengan tarif di types.ts (Rp500 kemiripan, Rp1.000 AI). Kalau biaya API
- * lebih tinggi, setiap pemeriksaan membuatmu rugi, dan ruginya tumbuh
- * seiring ramainya pemakai.
+ * dengan tarif di types.ts (Rp500 kemiripan, Rp1.000 AI, Rp1.000 parafrase).
+ * Kalau biaya API lebih tinggi, setiap pemeriksaan membuatmu rugi, dan
+ * ruginya tumbuh seiring ramainya pemakai.
+ *
+ * Parafrase biasanya bukan layanan yang sama dengan pendeteksi kemiripan.
+ * Penyedianya kerap berbeda (umumnya model bahasa seperti OpenAI, Anthropic,
+ * atau Google), jadi PERIKSA_API_URL untuk parafrase mungkin perlu dipisah
+ * dari yang dipakai dua pemeriksaan lainnya.
  *
  * Setelah penyedia dipilih, isi PenyediaHttp di bawah dan setel
  * PERIKSA_PENYEDIA=http di environment.
@@ -32,6 +38,7 @@ export interface Penyedia {
   nama: string;
   kemiripan(teks: string): Promise<HasilKemiripan>;
   ai(teks: string): Promise<HasilAI>;
+  parafrase(teks: string): Promise<HasilParafrase>;
 }
 
 /** Dilempar saat penyedia belum dikonfigurasi, agar rute API bisa membalas 503. */
@@ -92,6 +99,11 @@ class PenyediaHttp implements Penyedia {
     const mentah = await this.panggil("/ai-detection", teks);
     return petakanAI(mentah);
   }
+
+  async parafrase(teks: string): Promise<HasilParafrase> {
+    const mentah = await this.panggil("/paraphrase", teks);
+    return petakanParafrase(mentah);
+  }
 }
 
 /** Isi sesuai bentuk tanggapan penyedia pilihanmu. */
@@ -107,6 +119,17 @@ function petakanAI(mentah: unknown): HasilAI {
   throw new Error(
     "petakanAI belum diisi. Buka lib/periksa/penyedia.ts dan petakan " +
       "tanggapan penyedia ke bentuk HasilAI sesuai dokumentasinya. " +
+      `Tanggapan yang diterima: ${JSON.stringify(mentah).slice(0, 300)}`
+  );
+}
+
+function petakanParafrase(mentah: unknown): HasilParafrase {
+  throw new Error(
+    "petakanParafrase belum diisi. Buka lib/periksa/penyedia.ts dan petakan " +
+      "tanggapan penyedia ke bentuk HasilParafrase sesuai dokumentasinya. " +
+      "Kalau memakai model bahasa, jaga agar perintahnya menyusun ulang " +
+      "kalimat tanpa mengubah makna, dan tidak menghapus penanda sitasi " +
+      "yang sudah ada di naskah. " +
       `Tanggapan yang diterima: ${JSON.stringify(mentah).slice(0, 300)}`
   );
 }
@@ -133,9 +156,14 @@ export function ambilPenyedia(): Penyedia {
 export function susunSaran(
   jenis: JenisPeriksa,
   kemiripan?: HasilKemiripan,
-  ai?: HasilAI
+  ai?: HasilAI,
+  parafrase?: HasilParafrase
 ): string[] {
   const saran: string[] = [];
+
+  if (parafrase) {
+    saran.push(...CATATAN_PARAFRASE);
+  }
 
   if (kemiripan) {
     const tanpaSitasi = Math.max(0, kemiripan.persen - kemiripan.persenBersitasi);

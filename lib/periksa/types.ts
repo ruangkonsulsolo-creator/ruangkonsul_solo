@@ -1,19 +1,30 @@
 /**
- * Pemeriksaan naskah: cek kemiripan dan indikasi gaya AI.
+ * Pemeriksaan naskah: cek kemiripan, indikasi gaya AI, dan parafrase.
  *
  * Catatan penting soal penamaan: hasil di sini BUKAN laporan Turnitin.
  * Turnitin tidak menjual akses API untuk layanan pihak ketiga, dan
  * memakai namanya untuk hasil dari penyedia lain menyesatkan pembeli
  * sekaligus menyentuh merek dagang orang. Di seluruh kode dan antarmuka,
  * sebut apa adanya: "cek kemiripan" dan "indikasi gaya AI".
+ *
+ * Tidak ada "humanizer" di sini, dan itu disengaja. Alat semacam itu
+ * gunanya satu: membuat tulisan mesin lolos dari pendeteksi AI kampus.
+ * Menjualnya kepada mahasiswa yang sedang menyusun skripsi berarti
+ * menjual alat bantu kecurangan akademik — bertentangan dengan janji
+ * layanan ini sendiri ("kamu tetap penulis karyamu") dan dengan UU No. 20
+ * Tahun 2003 Pasal 25 ayat (2) dan Pasal 70, yang mengancam pidana
+ * perolehan gelar lewat kecurangan. Parafrase berbeda: menyusun ulang
+ * kalimat sumber dengan bahasa sendiri lalu tetap menyitasinya adalah
+ * keterampilan akademik yang memang diajarkan.
  */
 
-export type JenisPeriksa = "kemiripan" | "ai" | "keduanya";
+export type JenisPeriksa = "kemiripan" | "ai" | "parafrase";
 
 /** Tarif per 1.000 kata, dalam rupiah. */
-export const TARIF: Record<Exclude<JenisPeriksa, "keduanya">, number> = {
+export const TARIF: Record<JenisPeriksa, number> = {
   kemiripan: 500,
   ai: 1000,
+  parafrase: 1000,
 };
 
 /** Di bawah ini teks terlalu pendek untuk memberi hasil yang berarti. */
@@ -25,9 +36,6 @@ export const MAKS_KATA = 20_000;
 /** Pembulatan tagihan ke atas per 1.000 kata, minimal satu satuan. */
 export function hitungBiaya(jumlahKata: number, jenis: JenisPeriksa): number {
   const satuan = Math.max(1, Math.ceil(jumlahKata / 1000));
-  if (jenis === "keduanya") {
-    return satuan * (TARIF.kemiripan + TARIF.ai);
-  }
   return satuan * TARIF[jenis];
 }
 
@@ -76,6 +84,13 @@ export type HasilAI = {
   peringatan: string;
 };
 
+export type HasilParafrase = {
+  /** Naskah yang sudah disusun ulang. */
+  teks: string;
+  /** Hal yang tetap jadi tanggung jawab penulis setelah parafrase. */
+  catatan: string[];
+};
+
 export type HasilPeriksa = {
   id: string;
   jumlahKata: number;
@@ -83,6 +98,7 @@ export type HasilPeriksa = {
   biaya: number;
   kemiripan?: HasilKemiripan;
   ai?: HasilAI;
+  parafrase?: HasilParafrase;
   /** Saran perbaikan konkret, inti dari produk ini. */
   saran: string[];
   diperiksaPada: string;
@@ -96,3 +112,11 @@ export const PERINGATAN_AI =
   "pertama. Pakai hasil ini untuk meninjau ulang bagian yang ditandai, bukan " +
   "untuk menyimpulkan tulisanmu bermasalah. Kalau kamu menulisnya sendiri, " +
   "skor tinggi tidak mengubah fakta itu.";
+
+export const CATATAN_PARAFRASE = [
+  "Parafrase tidak menghapus kewajiban menyitasi. Gagasan yang kamu susun " +
+    "ulang tetap milik penulis aslinya, dan menyajikannya tanpa sitasi tetap " +
+    "terhitung plagiarisme meski kalimatnya sudah berbeda.",
+  "Baca ulang hasilnya sebelum dipakai. Mesin bisa menggeser makna, " +
+    "menyalahartikan istilah teknis, atau membalik arah temuan.",
+];

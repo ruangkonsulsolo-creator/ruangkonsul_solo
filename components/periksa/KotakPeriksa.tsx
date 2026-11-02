@@ -1,11 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
-  FileSearch, Bot, Sparkles, AlertTriangle, CheckCircle2,
-  ArrowRight, Loader2, Info, FileText,
+  FileSearch, Bot, Wand2, AlertTriangle, CheckCircle2,
+  ArrowRight, Loader2, Info, FileText, Upload, Copy, Check, X,
 } from "lucide-react";
 import {
   hitungBiaya,
@@ -17,6 +17,11 @@ import {
   type JenisPeriksa,
 } from "@/lib/periksa/types";
 import { penyediaAktif } from "@/lib/periksa/daftar-penyedia";
+import {
+  BerkasTidakDidukung,
+  EKSTENSI_DIDUKUNG,
+  ekstrakTeks,
+} from "@/lib/periksa/ekstrak";
 
 const rupiah = (n: number) => `Rp${n.toLocaleString("id-ID")}`;
 
@@ -27,6 +32,9 @@ export function KotakPeriksa() {
   const [galat, setGalat] = useState<string | null>(null);
   const [aksi, setAksi] = useState<string | null>(null);
   const [hasil, setHasil] = useState<HasilPeriksa | null>(null);
+  const [namaBerkas, setNamaBerkas] = useState<string | null>(null);
+  const [membaca, setMembaca] = useState(false);
+  const inputBerkas = useRef<HTMLInputElement>(null);
 
   // Logo penyedia hanya muncul kalau penyedianya benar-benar dikonfigurasi.
   const pKemiripan = penyediaAktif("kemiripan");
@@ -67,12 +75,12 @@ export function KotakPeriksa() {
       penyedia: pAI,
     },
     {
-      nilai: "keduanya" as const,
-      label: "Keduanya Sekaligus",
-      ringkas: "Satu kiriman, dua pemeriksaan",
-      jawab: "Hemat waktu sebelum menyerahkan draf",
-      harga: rupiah(TARIF.kemiripan + TARIF.ai),
-      icon: Sparkles,
+      nilai: "parafrase" as const,
+      label: "Parafrase",
+      ringkas: "Susun ulang kalimatnya dengan bahasa sendiri",
+      jawab: "Bagaimana menuliskan ini tanpa menyalin?",
+      harga: rupiah(TARIF.parafrase),
+      icon: Wand2,
       aksen: "text-brand-dark",
       aksenBg: "bg-brand-100",
       aksenBorder: "border-brand-dark",
@@ -89,6 +97,32 @@ export function KotakPeriksa() {
   const terlaluPendek = jumlahKata > 0 && jumlahKata < MIN_KATA;
   const terlaluPanjang = jumlahKata > MAKS_KATA;
   const siap = jumlahKata >= MIN_KATA && !terlaluPanjang && !memproses;
+
+  async function pilihBerkas(f: File) {
+    setMembaca(true);
+    setGalat(null);
+    try {
+      const isi = await ekstrakTeks(f.name, await f.arrayBuffer());
+      if (!isi.trim()) {
+        throw new BerkasTidakDidukung(
+          "Berkasnya terbaca, tapi isinya kosong. Kalau naskahmu berupa hasil " +
+            "pindaian, teksnya perlu diketik atau disalin dulu."
+        );
+      }
+      setTeks(isi);
+      setNamaBerkas(f.name);
+      setHasil(null);
+    } catch (e) {
+      setNamaBerkas(null);
+      setGalat(
+        e instanceof Error ? e.message : "Berkas tidak bisa dibaca."
+      );
+    } finally {
+      setMembaca(false);
+      // Direset supaya memilih berkas yang sama dua kali tetap memicu onChange.
+      if (inputBerkas.current) inputBerkas.current.value = "";
+    }
+  }
 
   async function kirim() {
     setMemproses(true);
@@ -201,7 +235,51 @@ export function KotakPeriksa() {
           <div className="flex items-center gap-2 border-b border-slate-100 px-4 py-3">
             <FileText className="h-4 w-4 text-brand" aria-hidden="true" />
             <span className="text-sm font-bold text-slate-900">Naskahmu</span>
+
+            <input
+              ref={inputBerkas}
+              type="file"
+              accept={EKSTENSI_DIDUKUNG.join(",")}
+              className="sr-only"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) void pilihBerkas(f);
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => inputBerkas.current?.click()}
+              disabled={membaca}
+              className="ml-auto inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-bold text-slate-700 transition-colors hover:border-brand hover:text-brand disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {membaca ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+              ) : (
+                <Upload className="h-3.5 w-3.5" aria-hidden="true" />
+              )}
+              {membaca ? "Membaca…" : "Unggah berkas"}
+            </button>
           </div>
+
+          {namaBerkas && (
+            <div className="flex items-center gap-2 border-b border-slate-100 bg-brand-50 px-4 py-2">
+              <FileText className="h-3.5 w-3.5 flex-shrink-0 text-brand" aria-hidden="true" />
+              <span className="min-w-0 flex-1 truncate text-xs font-semibold text-slate-700">
+                {namaBerkas}
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setNamaBerkas(null);
+                  setTeks("");
+                }}
+                className="flex-shrink-0 rounded p-0.5 text-slate-500 transition-colors hover:text-brand"
+                aria-label="Hapus berkas dan kosongkan naskah"
+              >
+                <X className="h-3.5 w-3.5" aria-hidden="true" />
+              </button>
+            </div>
+          )}
 
           <label htmlFor="naskah" className="sr-only">
             Tempel naskahmu
@@ -210,7 +288,7 @@ export function KotakPeriksa() {
             id="naskah"
             value={teks}
             onChange={(e) => setTeks(e.target.value)}
-            placeholder="Tempel naskahmu di sini — satu bab sekaligus lebih baik daripada seluruh skripsi, karena hasilnya lebih mudah ditindaklanjuti…"
+            placeholder={`Tempel naskahmu di sini, atau unggah berkas ${EKSTENSI_DIDUKUNG.join(" / ")}.\n\nSatu bab sekaligus lebih baik daripada seluruh skripsi — hasilnya lebih mudah ditindaklanjuti.`}
             className="min-h-[340px] flex-1 resize-y px-4 py-3 text-sm leading-relaxed text-slate-900 placeholder:text-slate-400 focus:outline-none"
           />
 
@@ -268,7 +346,7 @@ export function KotakPeriksa() {
                   ? "Hasil Cek Plagiarisme"
                   : hasil.jenis === "ai"
                     ? "Hasil Cek Indikasi AI"
-                    : "Hasil Kedua Pemeriksaan"
+                    : "Hasil Parafrase"
                 : "Hasil"}
             </span>
             {hasil && (
@@ -445,6 +523,8 @@ function IsiHasil({ h }: { h: HasilPeriksa }) {
         </section>
       )}
 
+      {h.parafrase && <PanelParafrase teks={h.parafrase.teks} />}
+
       <section className="rounded-xl border-2 border-brand-200 bg-brand-50 p-4">
         <h3 className="mb-3 font-extrabold text-slate-900">
           Yang bisa kamu kerjakan
@@ -471,5 +551,56 @@ function IsiHasil({ h }: { h: HasilPeriksa }) {
         </Link>
       </section>
     </div>
+  );
+}
+
+/**
+ * Hasil parafrase.
+ *
+ * Teksnya ditaruh di kotak yang bisa digulir dan disalin, bukan langsung
+ * menimpa naskah di kolom kiri: penulisnya perlu membandingkan dulu versi
+ * lama dan baru sebelum memutuskan mana yang dipakai.
+ */
+function PanelParafrase({ teks }: { teks: string }) {
+  const [tersalin, setTersalin] = useState(false);
+
+  async function salin() {
+    try {
+      await navigator.clipboard.writeText(teks);
+      setTersalin(true);
+      setTimeout(() => setTersalin(false), 2000);
+    } catch {
+      // Beberapa peramban menolak akses papan klip tanpa izin; biarkan
+      // pengguna menyalin sendiri dari kotak di bawah.
+    }
+  }
+
+  return (
+    <section>
+      <div className="flex items-center justify-between gap-3">
+        <h3 className="font-extrabold text-slate-900">Hasil parafrase</h3>
+        <button
+          type="button"
+          onClick={salin}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-bold text-slate-700 transition-colors hover:border-brand hover:text-brand"
+        >
+          {tersalin ? (
+            <>
+              <Check className="h-3.5 w-3.5" aria-hidden="true" />
+              Tersalin
+            </>
+          ) : (
+            <>
+              <Copy className="h-3.5 w-3.5" aria-hidden="true" />
+              Salin
+            </>
+          )}
+        </button>
+      </div>
+
+      <div className="mt-3 max-h-80 overflow-y-auto whitespace-pre-wrap rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-relaxed text-slate-800">
+        {teks}
+      </div>
+    </section>
   );
 }

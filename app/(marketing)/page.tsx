@@ -316,7 +316,7 @@ export default function LandingPage() {
           <div className="mb-3 flex items-center justify-center gap-2">
             <span className="h-0.5 w-8 rounded-full bg-brand" />
             <span className="text-xs font-bold uppercase tracking-widest text-brand">
-              Periksa Naskah
+              AI Checking Proposal
             </span>
             <span className="h-0.5 w-8 rounded-full bg-brand" />
           </div>

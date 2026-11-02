@@ -493,9 +493,9 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
         {/* CTA in-article */}
         <div className="mt-10 rounded-2xl bg-brand p-6 text-center shadow-card">
           <p className="text-white font-extrabold text-lg mb-1">Siap cek dokumenmu sekarang?</p>
-          <p className="text-white/75 text-sm mb-4">Laporan siap dalam hitungan jam. Mulai dari Rp 25.000.</p>
+          <p className="text-white/75 text-sm mb-4">Cek plagiarisme dan indikasi AI, mulai Rp500 per 1.000 kata.</p>
           <Link
-            href="/daftar"
+            href="/#periksa"
             className="inline-flex items-center gap-2 rounded-xl bg-white text-brand text-sm font-extrabold px-5 py-2.5 hover:bg-brand-50 transition-colors shadow-md"
           >
             Mulai Cek Sekarang <ArrowRight className="h-4 w-4" aria-hidden="true" />
