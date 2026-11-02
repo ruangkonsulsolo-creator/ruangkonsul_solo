@@ -43,8 +43,8 @@ export type JenisPeriksa = "kemiripan" | "ai" | "parafrase";
  */
 export const TARIF: Record<JenisPeriksa, number> = {
   kemiripan: 3300,
-  ai: 3300,
-  parafrase: 1000,
+  ai: 4500,
+  parafrase: 1500,
 };
 
 /** Di bawah ini teks terlalu pendek untuk memberi hasil yang berarti. */

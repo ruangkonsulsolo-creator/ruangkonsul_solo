@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   FileSearch, Bot, Wand2, AlertTriangle, CheckCircle2,
-  ArrowRight, Loader2, Info, FileText, Upload, Copy, Check, X,
+  ArrowRight, Loader2, Info, FileText, Upload, Copy, Check, X, FileDown,
 } from "lucide-react";
 import {
   hitungBiaya,
@@ -543,12 +543,21 @@ function IsiHasil({ h }: { h: HasilPeriksa }) {
             </li>
           ))}
         </ul>
-        <Link
-          href="/booking"
-          className="mt-4 inline-flex items-center gap-2 rounded-xl bg-brand px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-brand-light"
-        >
-          Bedah bersama mentor <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-        </Link>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Link
+            href="/booking"
+            className="inline-flex items-center gap-2 rounded-xl bg-brand px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-brand-light"
+          >
+            Bedah bersama mentor <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+          </Link>
+          <Link
+            href={`/periksa/laporan/${h.id}`}
+            className="inline-flex items-center gap-2 rounded-xl border-2 border-brand px-4 py-2 text-xs font-bold text-brand transition-colors hover:bg-brand-50"
+          >
+            <FileDown className="h-3.5 w-3.5" aria-hidden="true" />
+            Laporan PDF
+          </Link>
+        </div>
       </section>
     </div>
   );

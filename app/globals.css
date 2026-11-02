@@ -134,3 +134,33 @@ h1, h2, h3, h4, h5, h6 {
     }
   }
 }
+
+/* ── Cetak laporan pemeriksaan ──────────────────────────────────────────── */
+/* Dialog cetak peramban dipakai untuk menghasilkan PDF, jadi aturan di sini
+   yang menentukan rupa berkasnya: tanpa latar abu, tanpa tombol, dan tanpa
+   bagian yang terpotong di pergantian halaman. */
+@media print {
+  @page {
+    margin: 16mm 14mm;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+  }
+
+  /* Peramban membuang warna latar saat mencetak; ini memaksanya tetap ada
+     supaya kotak peringatan tidak hilang jadi teks polos tanpa konteks. */
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .break-inside-avoid {
+    break-inside: avoid;
+  }
+
+  a[href]::after {
+    content: "";
+  }
+}

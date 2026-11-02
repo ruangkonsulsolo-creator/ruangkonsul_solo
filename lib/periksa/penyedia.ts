@@ -5,6 +5,8 @@ import type {
   JenisPeriksa,
 } from "./types";
 import { CATATAN_PARAFRASE, PERINGATAN_AI } from "./types";
+import { periksaAIGptZero } from "./penyedia-gptzero";
+import { parafraseLlm } from "./penyedia-parafrase";
 
 /**
  * Lapisan penyedia pemeriksaan naskah.
@@ -134,17 +136,59 @@ function petakanParafrase(mentah: unknown): HasilParafrase {
   );
 }
 
-export function ambilPenyedia(): Penyedia {
-  const mode = process.env.PERIKSA_PENYEDIA;
+/**
+ * Penyedia gabungan: tiap jenis pemeriksaan boleh memakai vendor berbeda.
+ *
+ * Ini perlu karena ketiganya memang pasar yang berbeda. Deteksi AI paling
+ * murah di GPTZero, parafrase paling murah lewat model bahasa biasa, dan
+ * cek kemiripan butuh vendor dengan indeks dokumen sendiri. Memaksanya ke
+ * satu vendor berarti membayar lebih mahal di dua dari tiga fitur.
+ *
+ * Tiap metode baru dicek konfigurasinya saat dipanggil, bukan di awal,
+ * supaya satu fitur yang belum disetel tidak mematikan dua lainnya.
+ */
+class PenyediaGabungan implements Penyedia {
+  nama = "gabungan";
 
-  if (mode === "http") {
+  async kemiripan(teks: string): Promise<HasilKemiripan> {
+    const url = process.env.KEMIRIPAN_API_URL;
+    const key = process.env.KEMIRIPAN_API_KEY;
+    if (!url || !key) throw new PenyediaBelumSiap();
+    const http = new PenyediaHttp(url, key, process.env.KEMIRIPAN_NAMA ?? "kemiripan");
+    return http.kemiripan(teks);
+  }
+
+  async ai(teks: string): Promise<HasilAI> {
+    if (process.env.PERIKSA_PENYEDIA_AI !== "gptzero") {
+      throw new PenyediaBelumSiap();
+    }
+    if (!process.env.GPTZERO_API_KEY) throw new PenyediaBelumSiap();
+    return periksaAIGptZero(teks);
+  }
+
+  async parafrase(teks: string): Promise<HasilParafrase> {
+    if (
+      !process.env.PARAFRASE_API_URL ||
+      !process.env.PARAFRASE_API_KEY ||
+      !process.env.PARAFRASE_MODEL
+    ) {
+      throw new PenyediaBelumSiap();
+    }
+    return parafraseLlm(teks);
+  }
+}
+
+export function ambilPenyedia(): Penyedia {
+  // Jalur lama: satu penyedia HTTP untuk semuanya. Dipertahankan supaya
+  // konfigurasi yang sudah ada tidak mendadak berhenti bekerja.
+  if (process.env.PERIKSA_PENYEDIA === "http") {
     const url = process.env.PERIKSA_API_URL;
     const key = process.env.PERIKSA_API_KEY;
     if (!url || !key) throw new PenyediaBelumSiap();
     return new PenyediaHttp(url, key, process.env.PERIKSA_NAMA ?? "penyedia-http");
   }
 
-  throw new PenyediaBelumSiap();
+  return new PenyediaGabungan();
 }
 
 /**
