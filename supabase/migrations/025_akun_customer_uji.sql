@@ -1,9 +1,16 @@
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 025 — Menyiapkan akun customer untuk dipakai menguji
 --
--- JANGAN jalankan berkas ini sebelum membaca bagian berikut.
+-- ⚠ SEBAGIAN ISI BERKAS INI KELIRU. Lihat 027_buat_akun_lewat_sql.sql.
 --
--- Akun pengguna TIDAK bisa dibuat sepenuhnya lewat SQL. Tabel auth.users
+-- Berkas ini menyatakan akun tidak bisa dibuat lewat SQL. Itu salah:
+-- bisa, asal kata sandinya di-hash bcrypt dan baris auth.identities
+-- ikut dibuat. Migration 027 melakukan keduanya dan sudah diuji.
+--
+-- Langkah lewat Dashboard di bawah tetap benar dan tetap cara yang
+-- paling tahan perubahan versi Supabase, jadi berkas ini dipertahankan.
+--
+-- Akun pengguna tidak bisa dibuat lewat SQL BIASA. Tabel auth.users
 -- milik Supabase menyimpan kata sandi dalam bentuk hash beserta baris
 -- pendamping di auth.identities; menyisipkannya manual menghasilkan akun yang
 -- ada di basis data tapi tidak bisa dipakai masuk, dan itu lebih
