@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/ui/logo";
-import { NavSubBrand } from "@/components/landing/NavSubBrand";
+import { IkonLini } from "@/components/landing/IkonLini";
 import { BRAND, waLink } from "@/lib/brand";
 
 export const metadata: Metadata = {
@@ -272,25 +272,16 @@ export default function EventPage() {
 
       {/* ── Hero ── */}
       <section className="bg-brand-50 px-4 py-12 lg:py-16">
-        <div className="mx-auto max-w-6xl">
-          <div className="mb-3 flex items-center gap-2">
-            <span className="h-0.5 w-8 rounded-full bg-brand" />
-            <span className="text-xs font-bold uppercase tracking-widest text-brand">
-              Event
-            </span>
-          </div>
-          <h1 className="text-3xl font-extrabold leading-tight text-slate-900 lg:text-5xl">
+        <div className="mx-auto max-w-4xl text-center">
+          <IkonLini lini="events" />
+          <h1 className="mt-5 text-3xl font-extrabold leading-tight text-slate-900 lg:text-5xl">
             Webinar, bootcamp, dan{" "}
             <span className="text-brand">workshop penelitian</span>
           </h1>
-          <p className="mt-3 max-w-xl leading-relaxed text-slate-600">
+          <p className="mx-auto mt-4 max-w-xl leading-relaxed text-slate-600">
             Belajar bersama peserta lain yang sedang di tahap yang sama. Daring
             maupun tatap muka di Solo.
           </p>
-
-          <div className="mt-8 max-w-3xl">
-            <NavSubBrand aktif="events" />
-          </div>
         </div>
       </section>
 

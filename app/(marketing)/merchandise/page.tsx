@@ -8,7 +8,7 @@ import { BRAND, waLink } from "@/lib/brand";
 import { formatRupiah } from "@/lib/utils/format-currency";
 import { KATEGORI, produkKategori } from "@/lib/merchandise/katalog";
 import { fotoUtama } from "@/lib/merchandise/foto";
-import { NavSubBrand } from "@/components/landing/NavSubBrand";
+import { IkonLini } from "@/components/landing/IkonLini";
 
 export const metadata: Metadata = {
   title: "Merchandise",
@@ -53,25 +53,16 @@ export default function MerchandisePage({
 
       {/* ── Hero ── */}
       <section className="bg-brand-50 px-4 py-12 lg:py-16">
-        <div className="mx-auto max-w-6xl">
-          <div className="mb-3 flex items-center gap-2">
-            <span className="h-0.5 w-8 rounded-full bg-brand" />
-            <span className="text-xs font-bold uppercase tracking-widest text-brand">
-              Merchandise
-            </span>
-          </div>
-          <h1 className="text-3xl font-extrabold leading-tight text-slate-900 lg:text-5xl">
+        <div className="mx-auto max-w-4xl text-center">
+          <IkonLini lini="merch" />
+          <h1 className="mt-5 text-3xl font-extrabold leading-tight text-slate-900 lg:text-5xl">
             Semua Kebutuhan Mahasiswa,{" "}
             <span className="text-brand">Tersedia di RK Merchandise</span>
           </h1>
-          <p className="mt-3 max-w-2xl text-lg font-bold leading-relaxed text-slate-800">
+          <p className="mx-auto mt-4 max-w-2xl text-lg font-bold leading-relaxed text-slate-800">
             Harga Terjangkau, Free Delivery, Kualitas Terjamin dan Bergaransi
             100%
           </p>
-
-          <div className="mt-8 max-w-3xl">
-            <NavSubBrand aktif="merch" />
-          </div>
         </div>
       </section>
 

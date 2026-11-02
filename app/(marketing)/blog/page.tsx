@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { ArrowRight, CalendarDays, Clock, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/ui/logo";
-import { NavSubBrand } from "@/components/landing/NavSubBrand";
+import { IkonLini } from "@/components/landing/IkonLini";
 import { BRAND, waLink } from "@/lib/brand";
 
 export const metadata: Metadata = {
@@ -186,25 +186,16 @@ export default async function BlogPage({
 
       {/* ── Hero ── */}
       <section className="bg-brand-50 px-4 py-12 lg:py-16">
-        <div className="mx-auto max-w-6xl">
-          <div className="mb-3 flex items-center gap-2">
-            <span className="h-0.5 w-8 rounded-full bg-brand" />
-            <span className="text-xs font-bold uppercase tracking-widest text-brand">
-              Blog
-            </span>
-          </div>
-          <h1 className="text-3xl font-extrabold leading-tight text-slate-900 lg:text-5xl">
+        <div className="mx-auto max-w-4xl text-center">
+          <IkonLini lini="news" />
+          <h1 className="mt-5 text-3xl font-extrabold leading-tight text-slate-900 lg:text-5xl">
             Panduan menyusun penelitian,{" "}
             <span className="text-brand">ditulis mentor kami</span>
           </h1>
-          <p className="mt-3 max-w-xl leading-relaxed text-slate-600">
+          <p className="mx-auto mt-4 max-w-xl leading-relaxed text-slate-600">
             Dari merumuskan masalah sampai menghadapi penguji. Semuanya bisa
             kamu kerjakan sendiri — artikel ini menunjukkan caranya.
           </p>
-
-          <div className="mt-8 max-w-3xl">
-            <NavSubBrand aktif="news" />
-          </div>
         </div>
       </section>
 
