@@ -24,7 +24,7 @@ const navItems = [
   { type: "section" as const, label: "Konfigurasi" },
   { label: "Layanan & Harga", href: "/admin/layanan",      icon: Settings },
   { label: "Paket Hemat",     href: "/admin/paket",        icon: Package },
-  { label: "⚡ Superadmin",   href: "/admin/superadmin",   icon: ShieldCheck },
+  { label: "Superadmin",     href: "/admin/superadmin",   icon: ShieldCheck },
 ];
 
 export function AdminSidebar() {

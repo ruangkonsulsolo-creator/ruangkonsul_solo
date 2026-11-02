@@ -99,7 +99,7 @@ export default async function SuperadminPage() {
             {data.isLive ? "Live — DB Aktif" : "Preview — Data Dummy"}
           </span>
           <span className="rounded-full bg-brand text-white px-3 py-1 text-xs font-extrabold">
-            ⚡ Superadmin
+            Superadmin
           </span>
         </div>
       </div>
