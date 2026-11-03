@@ -72,10 +72,18 @@ BEGIN
   -- email_confirmed_at diisi now() supaya akunnya langsung bisa dipakai
   -- tanpa menunggu email verifikasi. Kolom confirmed_at TIDAK diisi: itu
   -- kolom generated, dan mengisinya menyebabkan galat.
+  -- Kolom token di bawah WAJIB diisi string kosong, bukan dibiarkan NULL.
+  -- GoTrue membacanya sebagai string biasa; NULL membuat pembacaan baris
+  -- gagal dan login ditolak dengan "Database error querying schema" sebelum
+  -- sandinya sempat diperiksa. Akun yang dibuat lewat Dashboard tidak kena
+  -- karena GoTrue mengisinya sendiri.
   INSERT INTO auth.users (
     instance_id, id, aud, role, email, encrypted_password,
     email_confirmed_at, created_at, updated_at,
-    raw_app_meta_data, raw_user_meta_data, is_super_admin
+    raw_app_meta_data, raw_user_meta_data, is_super_admin,
+    confirmation_token, recovery_token, email_change_token_new,
+    email_change, email_change_token_current, phone_change,
+    phone_change_token, reauthentication_token
   ) VALUES (
     '00000000-0000-0000-0000-000000000000',
     v_id, 'authenticated', 'authenticated', v_email,
@@ -83,7 +91,8 @@ BEGIN
     now(), now(), now(),
     '{"provider":"email","providers":["email"]}'::jsonb,
     jsonb_build_object('full_name', v_nama),
-    false
+    false,
+    '', '', '', '', '', '', '', ''
   );
 
   -- Tanpa baris ini, login ditolak meski sandinya benar.
@@ -133,7 +142,9 @@ SELECT
   (u.encrypted_password LIKE '$2%')                   AS sandi_ter_hash,
   (u.email_confirmed_at IS NOT NULL
    AND u.encrypted_password LIKE '$2%'
-   AND EXISTS (SELECT 1 FROM auth.identities i WHERE i.user_id = u.id)) AS siap_login
+   AND EXISTS (SELECT 1 FROM auth.identities i WHERE i.user_id = u.id)
+   AND u.confirmation_token IS NOT NULL
+   AND u.recovery_token IS NOT NULL) AS siap_login
 FROM public.profiles p
 JOIN auth.users u ON u.id = p.id
 ORDER BY u.created_at DESC
