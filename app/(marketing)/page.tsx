@@ -71,17 +71,6 @@ const LAYANAN = [
 // dipakai inisial supaya tidak ada wajah palsu di situs.
 // Taruh foto mentor di /public/mentor/ lalu isi `foto` dengan nama berkasnya,
 // misal "/mentor/azarel.jpg". Kalau `foto` null, kartu memakai inisial.
-const MENTOR = [
-  { nama: "Jonnathan Azarel", gelar: "S.M., M.M.", bidang: ["Metodologi Kuantitatif", "SPSS"],
-    kampus: "Universitas Sebelas Maret", sesi: 120, rating: 4.9, inisial: "JA",
-    foto: null as string | null },
-  { nama: "Mentor Kualitatif", gelar: "S.Pd., M.Pd.", bidang: ["Studi Kasus", "NVivo"],
-    kampus: "Universitas Negeri Yogyakarta", sesi: 85, rating: 4.8, inisial: "MK",
-    foto: null as string | null },
-  { nama: "Mentor Ekonomi", gelar: "S.E., M.Si.", bidang: ["Ekonometrika", "EViews"],
-    kampus: "Universitas Gadjah Mada", sesi: 64, rating: 4.9, inisial: "ME",
-    foto: null as string | null },
-];
 
 // Promo berjalan. Atur tanggal berakhirnya supaya tidak basi di halaman.
 const PROMO = [
@@ -122,7 +111,69 @@ function SectionLabel({ children }: { children: string }) {
 }
 
 /* ─── page ──────────────────────────────────────────────────────────────────── */
-export default function LandingPage() {
+/**
+ * Mentor diambil dari basis data, bukan ditulis di kode.
+ *
+ * Sebelumnya bagian ini memuat tiga mentor tetap dengan rating dan jumlah
+ * sesi karangan, sementara basis datanya baru berisi satu mentor sungguhan.
+ * Calon klien yang menghubungi "Mentor Ekonomi" tidak akan menemukan siapa
+ * pun di sisi lain.
+ *
+ * rating dan jumlah sesi hanya ditampilkan kalau angkanya memang sudah ada.
+ * Mentor baru yang belum punya ulasan lebih baik tidak menampilkan apa-apa
+ * daripada menampilkan "0.0 · 0 sesi" — yang membuatnya terlihat buruk
+ * padahal cuma belum mulai.
+ */
+async function ambilMentor() {
+  try {
+    const { createClient } = await import("@/lib/supabase/server");
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from("mentor_profiles")
+      .select(
+        `id, gelar, education, specializations, rating_avg, session_count,
+         avatar_url, is_available, headline,
+         profil:profiles!mentor_profiles_user_id_fkey ( full_name )`
+      )
+      .order("rating_avg", { ascending: false })
+      .limit(6);
+
+    if (error) {
+      console.error("[beranda] gagal memuat mentor:", error);
+      return [];
+    }
+
+    return (data ?? []).map((m) => {
+      const pr = m.profil as unknown as { full_name: string | null } | null;
+      const nama = pr?.full_name?.trim() || "Mentor";
+      return {
+        id: m.id as string,
+        nama,
+        gelar: (m.gelar as string | null) ?? "",
+        kampus: (m.education as string | null) ?? "",
+        bidang: ((m.specializations as string[] | null) ?? []).slice(0, 3),
+        rating: Number(m.rating_avg ?? 0),
+        sesi: Number(m.session_count ?? 0),
+        foto: (m.avatar_url as string | null) ?? null,
+        tersedia: Boolean(m.is_available),
+        inisial: nama.split(/\s+/).filter(Boolean).slice(0, 2)
+          .map((x: string) => x[0]).join("").toUpperCase() || "M",
+      };
+    });
+  } catch (e) {
+    // Basis data tidak terjangkau saat build atau saat render. Bagian mentor
+    // disembunyikan, sisa halaman tetap tampil — satu kueri gagal tidak
+    // boleh menjatuhkan seluruh beranda.
+    console.error("[beranda] mentor tidak bisa diambil:", e);
+    return [];
+  }
+}
+
+/** Data mentor berubah jarang; lima menit cukup segar tanpa membebani. */
+export const revalidate = 300;
+
+export default async function LandingPage() {
+  const MENTOR = await ambilMentor();
   return (
     <div className="min-h-screen bg-white text-slate-900">
 
@@ -335,6 +386,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Mentor ── */}
+      {MENTOR.length > 0 && (
       <section id="mentor" className="bg-slate-50 px-4 py-16">
         <div className="mx-auto max-w-6xl">
           <SectionLabel>Mentor Kami</SectionLabel>
@@ -347,7 +399,7 @@ export default function LandingPage() {
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {MENTOR.map((m) => (
-              <div key={m.nama} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
+              <div key={m.id} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
                 <div className="flex items-start gap-4">
                   {m.foto ? (
                     <Image
@@ -364,8 +416,8 @@ export default function LandingPage() {
                   )}
                   <div className="min-w-0">
                     <h3 className="font-bold text-slate-900 leading-tight">{m.nama}</h3>
-                    <p className="text-xs font-medium text-slate-500">{m.gelar}</p>
-                    <p className="text-xs text-slate-500 mt-1">{m.kampus}</p>
+                    {m.gelar && <p className="text-xs font-medium text-slate-500">{m.gelar}</p>}
+                    {m.kampus && <p className="text-xs text-slate-500 mt-1">{m.kampus}</p>}
                   </div>
                 </div>
                 <div className="mt-4 flex flex-wrap gap-1.5">
@@ -373,20 +425,37 @@ export default function LandingPage() {
                     <span key={b} className="rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand">{b}</span>
                   ))}
                 </div>
-                <div className="mt-4 flex items-center gap-4 border-t border-slate-100 pt-3 text-sm">
-                  <span className="flex items-center gap-1 font-semibold text-slate-700">
-                    <Star className="h-4 w-4 fill-brand text-brand" aria-hidden="true" />{m.rating}
+                {(m.rating > 0 || m.sesi > 0) && (
+                  <div className="mt-4 flex items-center gap-4 border-t border-slate-100 pt-3 text-sm">
+                    {m.rating > 0 && (
+                      <span className="flex items-center gap-1 font-semibold text-slate-700">
+                        <Star className="h-4 w-4 fill-brand text-brand" aria-hidden="true" />
+                        {m.rating.toFixed(1)}
+                      </span>
+                    )}
+                    {m.sesi > 0 && (
+                      <span className="font-medium text-slate-500">{m.sesi} sesi selesai</span>
+                    )}
+                  </div>
+                )}
+                {m.tersedia ? (
+                  <Link
+                    href={`/booking?mentor=${m.id}`}
+                    className="mt-4 inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-brand py-2.5 text-sm font-bold text-white hover:bg-brand-light transition-colors"
+                  >
+                    Pesan jadwal <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                  </Link>
+                ) : (
+                  <span className="mt-4 inline-flex w-full items-center justify-center rounded-xl border border-slate-200 py-2.5 text-sm font-bold text-slate-400">
+                    Sedang tidak menerima booking
                   </span>
-                  <span className="font-medium text-slate-500">{m.sesi} sesi selesai</span>
-                </div>
-                <Link href="/booking" className="mt-4 inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-brand py-2.5 text-sm font-bold text-white hover:bg-brand-light transition-colors">
-                  Pesan jadwal <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                </Link>
+                )}
               </div>
             ))}
           </div>
         </div>
       </section>
+      )}
 
       {/* ── Promo ── */}
       <section className="mx-auto max-w-6xl px-4 py-16">
