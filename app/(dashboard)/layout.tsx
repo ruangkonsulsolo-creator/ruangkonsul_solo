@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
+import { MenuAkun } from "@/components/ui/MenuAkun";
+import { TautanBeranda } from "@/components/ui/TautanBeranda";
 import { DashboardHeaderFallback } from "@/components/dashboard/DashboardHeaderFallback";
 import { PREVIEW_MODE } from "@/lib/utils/preview-mode";
 
@@ -15,16 +17,11 @@ async function DashboardHeader() {
       .from("notifications").select("*", { count: "exact", head: true })
       .eq("user_id", user.id).eq("is_read", false);
 
-    const { data: profile } = await supabase
-      .from("profiles").select("full_name").eq("id", user.id).single();
-
-    const initials = profile?.full_name
-      ? profile.full_name.split(" ").map((n: string) => n[0]).slice(0, 2).join("").toUpperCase()
-      : user.email?.charAt(0).toUpperCase() ?? "U";
-
     return (
       <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-slate-100 bg-white/95 backdrop-blur-sm px-4 lg:px-6 shadow-sm">
-        <div className="pl-12 lg:pl-0" />
+        <div className="flex items-center gap-2 pl-12 lg:pl-0">
+          <TautanBeranda />
+        </div>
         <div className="flex items-center gap-2">
           {(unreadCount ?? 0) > 0 && (
             <a href="/dashboard/riwayat-pesanan"
@@ -35,10 +32,7 @@ async function DashboardHeader() {
               Notifikasi baru
             </a>
           )}
-          <a href="/dashboard/profil"
-            className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-gradient text-xs font-bold text-white shadow-brand-sm hover:opacity-90 transition-opacity">
-            {initials}
-          </a>
+          <MenuAkun />
         </div>
       </header>
     );
