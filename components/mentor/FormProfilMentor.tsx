@@ -62,13 +62,17 @@ export function FormProfilMentor() {
   const [menyimpan, setMenyimpan] = useState(false);
   const [galat, setGalat] = useState<string | null>(null);
   const [sukses, setSukses] = useState(false);
+  const [aksi, setAksi] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
       try {
         const r = await fetch("/api/mentor/profil");
         const j = await r.json();
-        if (!r.ok) throw new Error(j.error ?? "Gagal memuat profil.");
+        if (!r.ok) {
+          setAksi(j.action ?? null);
+          throw new Error(j.error ?? "Gagal memuat profil.");
+        }
         setP({
           ...j.data,
           specializations: j.data.specializations ?? [],
@@ -128,13 +132,26 @@ export function FormProfilMentor() {
   }
 
   if (!p) {
+    // Judulnya mengikuti penyebab sebenarnya. Versi sebelumnya selalu
+    // menulis "profil mentor belum aktif" apa pun galatnya, dan itu
+    // menuduh peran mentor padahal masalahnya bisa di tempat lain.
+    const kurangMigration = aksi === "migration_kurang";
     return (
       <div role="alert" className="rounded-2xl border border-amber-200 bg-amber-50 p-6">
-        <p className="font-bold text-amber-900">Profil mentor belum aktif</p>
-        <p className="mt-1 text-sm leading-relaxed text-amber-800">
-          {galat ?? "Akun ini belum terdaftar sebagai mentor."} Admin perlu
-          mengaktifkannya lebih dulu lewat panel Kinerja Mentor.
+        <p className="font-bold text-amber-900">
+          {kurangMigration
+            ? "Basis data belum diperbarui"
+            : "Profil mentor belum bisa dibuka"}
         </p>
+        <p className="mt-1 text-sm leading-relaxed text-amber-800">
+          {galat ?? "Terjadi galat yang tidak dikenali."}
+        </p>
+        {!kurangMigration && (
+          <p className="mt-2 text-xs leading-relaxed text-amber-700">
+            Kalau pesan di atas menyebut kolom yang tidak ada, jalankan
+            migration 023 dan 026 di SQL Editor Supabase.
+          </p>
+        )}
       </div>
     );
   }

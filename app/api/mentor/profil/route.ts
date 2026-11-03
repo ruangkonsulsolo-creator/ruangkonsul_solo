@@ -19,7 +19,33 @@ export async function GET() {
 
   if (error) {
     console.error("[profil-mentor] gagal memuat:", error);
-    return NextResponse.json({ error: "Gagal memuat profil." }, { status: 500 });
+
+    // 42703 = kolom tidak dikenal. Penyebabnya hampir selalu satu: kolom
+    // headline, gelar, pencapaian, pengalaman, dan pendidikan ditambahkan
+    // oleh migration 023, dan migration itu belum dijalankan.
+    //
+    // Pesan ini sengaja menyebut penyebabnya, bukan "gagal memuat profil"
+    // begitu saja. Galat yang tidak memberitahu apa yang harus dikerjakan
+    // membuat orang menebak di tempat yang salah — dan di kasus ini
+    // tebakannya mengarah ke peran mentor, yang sebenarnya tidak bermasalah.
+    if (error.code === "42703" || /column .* does not exist/i.test(error.message ?? "")) {
+      return NextResponse.json(
+        {
+          error:
+            "Kolom profil mentor belum ada di basis data. Jalankan migration " +
+            "023_chat_ulasan_profil_mentor.sql lalu 026_mentor_buat_profil_sendiri.sql " +
+            "di SQL Editor Supabase, lalu muat ulang halaman ini.",
+          action: "migration_kurang",
+          rinci: error.message,
+        },
+        { status: 503 }
+      );
+    }
+
+    return NextResponse.json(
+      { error: `Gagal memuat profil: ${error.message}`, rinci: error.code },
+      { status: 500 }
+    );
   }
   if (data) return NextResponse.json({ data });
 
