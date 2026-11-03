@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { ArrowRight, ArrowLeft, Star, Clock, CalendarDays } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/ui/logo";
-import { TombolAkun } from "@/components/ui/TombolAkun";
+import { MenuAkun } from "@/components/ui/MenuAkun";
 import { createClient } from "@/lib/supabase/server";
 import { BRAND, waLink } from "@/lib/brand";
 
@@ -112,7 +112,7 @@ export default async function JadwalPage() {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <Logo href="/" size="sm" />
           <div className="flex items-center gap-2">
-            <TombolAkun />
+            <MenuAkun />
           </div>
         </div>
       </nav>

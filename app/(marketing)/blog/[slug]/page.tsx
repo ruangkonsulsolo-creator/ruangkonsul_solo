@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, CalendarDays, Clock, ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
 import { BRAND } from "@/lib/brand";
-import { TombolAkun } from "@/components/ui/TombolAkun";
+import { MenuAkun } from "@/components/ui/MenuAkun";
 
 /* ─── Same seed data ─── */
 const articles: Record<string, {
@@ -434,7 +434,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
             <span className="text-lg font-extrabold text-brand">{BRAND.shortName}</span>
           </Link>
           <div className="flex gap-2">
-            <TombolAkun />
+            <MenuAkun />
           </div>
         </div>
       </nav>

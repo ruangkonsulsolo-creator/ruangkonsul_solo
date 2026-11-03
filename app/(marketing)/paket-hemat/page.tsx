@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/ui/logo";
-import { TombolAkun } from "@/components/ui/TombolAkun";
+import { MenuAkun } from "@/components/ui/MenuAkun";
 import { LogoKampus } from "@/components/landing/LogoKampus";
 import { BRAND, waLink } from "@/lib/brand";
 
@@ -247,7 +247,7 @@ export default function PaketHematPage() {
             <Link href="/blog" className="transition-colors hover:text-brand">Blog</Link>
           </div>
           <div className="flex items-center gap-2">
-            <TombolAkun />
+            <MenuAkun />
           </div>
         </div>
       </nav>

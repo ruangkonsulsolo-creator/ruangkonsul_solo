@@ -8,7 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Logo } from "@/components/ui/logo";
-import { TombolAkun } from "@/components/ui/TombolAkun";
+import { MenuAkun } from "@/components/ui/MenuAkun";
 import { HeroSlider } from "@/components/landing/HeroSlider";
 import { HeroBackground } from "@/components/landing/HeroBackground";
 import { BannerStrip } from "@/components/landing/BannerStrip";
@@ -152,7 +152,7 @@ export default function LandingPage() {
             <Link href="/referral"   className="hover:text-brand transition-colors">Referral</Link>
           </div>
           <div className="flex items-center gap-2">
-            <TombolAkun />
+            <MenuAkun />
           </div>
         </div>
       </nav>

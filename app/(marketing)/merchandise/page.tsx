@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { ImagePlus, Package, Truck, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/ui/logo";
-import { TombolAkun } from "@/components/ui/TombolAkun";
+import { MenuAkun } from "@/components/ui/MenuAkun";
 import { BRAND, waLink } from "@/lib/brand";
 import { formatRupiah } from "@/lib/utils/format-currency";
 import { KATEGORI, produkKategori } from "@/lib/merchandise/katalog";
@@ -46,7 +46,7 @@ export default function MerchandisePage({
             <Link href="/blog" className="transition-colors hover:text-brand">Blog</Link>
           </div>
           <div className="flex items-center gap-2">
-            <TombolAkun />
+            <MenuAkun />
           </div>
         </div>
       </nav>
