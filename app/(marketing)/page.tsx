@@ -8,6 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Logo } from "@/components/ui/logo";
+import { TombolAkun } from "@/components/ui/TombolAkun";
 import { HeroSlider } from "@/components/landing/HeroSlider";
 import { HeroBackground } from "@/components/landing/HeroBackground";
 import { BannerStrip } from "@/components/landing/BannerStrip";
@@ -151,8 +152,7 @@ export default function LandingPage() {
             <Link href="/referral"   className="hover:text-brand transition-colors">Referral</Link>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" asChild><Link href="/daftar">Daftar</Link></Button>
-            <Button size="sm" asChild><Link href="/login">Login</Link></Button>
+            <TombolAkun />
           </div>
         </div>
       </nav>

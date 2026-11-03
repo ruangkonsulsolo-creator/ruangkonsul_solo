@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { ArrowRight, CalendarDays, Clock, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/ui/logo";
+import { TombolAkun } from "@/components/ui/TombolAkun";
 import { IkonLini } from "@/components/landing/IkonLini";
 import { BRAND, waLink } from "@/lib/brand";
 
@@ -179,8 +180,7 @@ export default async function BlogPage({
             <Link href="/blog" className="font-semibold text-brand">Blog</Link>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" asChild><Link href="/daftar">Daftar</Link></Button>
-            <Button size="sm" asChild><Link href="/login">Login</Link></Button>
+            <TombolAkun />
           </div>
         </div>
       </nav>

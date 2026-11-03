@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Gift, Users, Wallet, CheckCircle2, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { TombolAkun } from "@/components/ui/TombolAkun";
 import { BRAND, waLink } from "@/lib/brand";
 import type { Metadata } from "next";
 
@@ -34,8 +35,7 @@ export default function ReferralPage() {
             <span className="text-lg font-extrabold text-[#8B0000]">{BRAND.shortName}</span>
           </Link>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" asChild><Link href="/daftar">Daftar</Link></Button>
-            <Button size="sm" asChild><Link href="/login">Login</Link></Button>
+            <TombolAkun />
           </div>
         </div>
       </nav>

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, CalendarDays, Clock, ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
 import { BRAND } from "@/lib/brand";
+import { TombolAkun } from "@/components/ui/TombolAkun";
 
 /* ─── Same seed data ─── */
 const articles: Record<string, {
@@ -433,8 +434,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
             <span className="text-lg font-extrabold text-brand">{BRAND.shortName}</span>
           </Link>
           <div className="flex gap-2">
-            <Link href="/daftar" className="rounded-lg border-2 border-brand px-3 py-1.5 text-sm font-semibold text-brand hover:bg-brand-50 transition-colors">Daftar</Link>
-            <Link href="/login" className="rounded-lg bg-brand px-3 py-1.5 text-sm font-semibold text-white hover:bg-brand transition-colors">Login</Link>
+            <TombolAkun />
           </div>
         </div>
       </nav>

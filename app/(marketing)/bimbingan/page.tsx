@@ -8,7 +8,7 @@ import {
   Star, BookOpen, GraduationCap, Trophy, BarChart2,
   Sparkles, MessageCircle,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { TombolAkun } from "@/components/ui/TombolAkun";
 import { Badge } from "@/components/ui/badge";
 import { BRAND, waLink } from "@/lib/brand";
 
@@ -125,8 +125,7 @@ export default function BimbinganPage() {
             <Link href="/referral"   className="hover:text-[#8B0000] transition-colors">Referral</Link>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" asChild><Link href="/daftar">Daftar</Link></Button>
-            <Button size="sm" asChild><Link href="/login">Login</Link></Button>
+            <TombolAkun />
           </div>
         </div>
       </nav>

@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { ArrowLeft, ChevronRight, Package, Scale, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/ui/logo";
+import { TombolAkun } from "@/components/ui/TombolAkun";
 import { formatRupiah } from "@/lib/utils/format-currency";
 import { DAFTAR_PRODUK, cariProduk } from "@/lib/merchandise/katalog";
 import { fotoProduk } from "@/lib/merchandise/foto";
@@ -55,8 +56,7 @@ export default function HalamanProduk({
             <Link href="/blog" className="transition-colors hover:text-brand">Blog</Link>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" asChild><Link href="/daftar">Daftar</Link></Button>
-            <Button size="sm" asChild><Link href="/login">Login</Link></Button>
+            <TombolAkun />
           </div>
         </div>
       </nav>
