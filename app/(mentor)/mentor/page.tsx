@@ -52,7 +52,7 @@ export default async function DashboardMentorPage() {
     .select(
       `id, status, notes,
        slot:booking_slots!bookings_slot_id_fkey ( slot_date, slot_start, slot_end ),
-       klien:profiles!bookings_user_id_fkey ( full_name )`
+       klien:profiles!bookings_customer_id_fkey ( full_name )`
     )
     .eq("mentor_id", mentor.id)
     .order("created_at", { ascending: false })

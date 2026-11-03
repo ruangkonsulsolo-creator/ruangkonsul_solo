@@ -160,7 +160,7 @@ LIMIT 10;
 -- Cek dulu:
 -- SELECT
 --   (SELECT count(*) FROM public.orders   WHERE user_id = p.id) AS pesanan,
---   (SELECT count(*) FROM public.bookings WHERE user_id = p.id) AS booking
+--   (SELECT count(*) FROM public.bookings WHERE customer_id = p.id) AS booking
 -- FROM public.profiles p WHERE p.email = 'agusbudiono@gmail.com';
 --
 -- Kalau dua-duanya 0, barulah hapus:

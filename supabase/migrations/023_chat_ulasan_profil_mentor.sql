@@ -233,7 +233,7 @@ CREATE POLICY "ulasan_insert_setelah_sesi"
     AND EXISTS (
       SELECT 1 FROM public.bookings b
       WHERE b.id = ulasan.booking_id
-        AND b.user_id = auth.uid()
+        AND b.customer_id = auth.uid()
         AND b.mentor_id = ulasan.mentor_id
         AND b.status = 'completed'
     )
@@ -265,6 +265,9 @@ AS $$
 DECLARE
   v_mentor UUID := COALESCE(NEW.mentor_id, OLD.mentor_id);
 BEGIN
+  -- Fungsi ini SECURITY DEFINER, jadi berjalan sebagai pemilik tabel dan
+  -- tidak terkena pembatasan kolom yang dipasang migration 026 untuk peran
+  -- authenticated. Rating tetap bisa ditulis sistem, tapi tidak oleh mentor.
   UPDATE public.mentor_profiles m
      SET rating_avg = COALESCE((
            SELECT ROUND(AVG(u.rating)::numeric, 2)

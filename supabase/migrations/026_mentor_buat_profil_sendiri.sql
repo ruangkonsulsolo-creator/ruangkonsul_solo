@@ -25,40 +25,43 @@ CREATE POLICY "mentor_insert_profil_sendiri"
     AND public.current_user_role() IN ('mentor', 'admin', 'superadmin')
   );
 
-GRANT SELECT, INSERT, UPDATE ON public.mentor_profiles TO authenticated;
+-- ══ Pembatasan kolom ═════════════════════════════════════════════════════════
+--
+-- Mendahulukan hak akses Postgres daripada trigger, dan itu disengaja.
+--
+-- Rancangan pertama berkas ini memakai trigger yang mengembalikan
+-- price_per_hour ke nilai lama, dengan jalan keluar berupa tanda sesi
+-- (set_config) supaya trigger rating tetap bisa menulis. Rancangan itu BOCOR:
+-- diuji, ternyata mentor bisa menyalakan sendiri tanda yang sama lalu
+-- menaikkan tarifnya menjadi berapa pun. Penjaga yang bisa dinyalakan oleh
+-- pihak yang dijaga bukan penjaga.
+--
+-- Pembatasan di bawah ditegakkan Postgres sendiri: peran authenticated tidak
+-- punya hak menulis ke price_per_hour, rating_avg, dan session_count sama
+-- sekali, jadi tidak ada tanda atau akal-akalan apa pun yang bisa
+-- melewatinya. Trigger hitung_rating_mentor tetap bisa menulis karena
+-- SECURITY DEFINER membuatnya berjalan sebagai pemilik tabel.
 
--- Harga per jam tidak boleh diisi mentor sendiri. Baris baru lahir dengan
--- nilai bawaan 0, dan admin yang menetapkannya lewat panel Kinerja Mentor.
--- Tanpa penjaga ini, mentor bisa menyisipkan barisnya sendiri dengan tarif
--- berapa pun pada saat pembuatan.
-CREATE OR REPLACE FUNCTION public.jaga_tarif_mentor()
-RETURNS TRIGGER
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = ''
-AS $$
-BEGIN
-  -- auth.uid() NULL berarti dijalankan dari SQL Editor oleh pemilik tabel;
-  -- biarkan lewat, sama seperti guard_role_change di migration 019.
-  IF auth.uid() IS NULL OR public.is_staff() THEN
-    RETURN NEW;
-  END IF;
+GRANT SELECT ON public.mentor_profiles TO authenticated, anon;
 
-  IF TG_OP = 'INSERT' THEN
-    NEW.price_per_hour := 0;
-    NEW.rating_avg     := 0;
-    NEW.session_count  := 0;
-  ELSE
-    NEW.price_per_hour := OLD.price_per_hour;
-    NEW.rating_avg     := OLD.rating_avg;
-    NEW.session_count  := OLD.session_count;
-  END IF;
+REVOKE INSERT, UPDATE ON public.mentor_profiles FROM authenticated;
 
-  RETURN NEW;
-END;
-$$;
+-- Kolom yang boleh diisi mentor saat membuat barisnya sendiri.
+GRANT INSERT (
+  user_id, bio, headline, gelar, education, specializations,
+  experience_years, is_available, avatar_url, linkedin_url,
+  pencapaian, pengalaman, pendidikan
+) ON public.mentor_profiles TO authenticated;
 
+-- Kolom yang boleh disunting mentor. price_per_hour, rating_avg, dan
+-- session_count sengaja TIDAK ada di daftar ini.
+GRANT UPDATE (
+  bio, headline, gelar, education, specializations,
+  experience_years, is_available, avatar_url, linkedin_url,
+  pencapaian, pengalaman, pendidikan, updated_at
+) ON public.mentor_profiles TO authenticated;
+
+-- Trigger penjaga dari rancangan pertama dibuang: tidak diperlukan lagi,
+-- dan membiarkannya berarti membiarkan jalan keluar yang bocor itu hidup.
 DROP TRIGGER IF EXISTS mentor_jaga_tarif ON public.mentor_profiles;
-CREATE TRIGGER mentor_jaga_tarif
-  BEFORE INSERT OR UPDATE ON public.mentor_profiles
-  FOR EACH ROW EXECUTE FUNCTION public.jaga_tarif_mentor();
+DROP FUNCTION IF EXISTS public.jaga_tarif_mentor();
