@@ -8,7 +8,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Logo } from "@/components/ui/logo";
-import { MenuAkun } from "@/components/ui/MenuAkun";
 import { HeroSlider } from "@/components/landing/HeroSlider";
 import { HeroBackground } from "@/components/landing/HeroBackground";
 import { BannerStrip } from "@/components/landing/BannerStrip";
@@ -18,6 +17,7 @@ import { KotakPeriksa } from "@/components/periksa/KotakPeriksa";
 import { TestimoniWhatsApp } from "@/components/landing/TestimoniWhatsApp";
 import { BRAND, waLink } from "@/lib/brand";
 import type { Metadata } from "next";
+import { NavbarUtama } from "@/components/ui/NavbarUtama";
 
 export const metadata: Metadata = {
   title: `${BRAND.name} — Bimbingan Skripsi & Tesis Solo`,
@@ -188,26 +188,7 @@ export default async function LandingPage() {
       </div>
 
       {/* ── Navbar ── */}
-      <nav className="sticky top-0 z-30 border-b border-slate-100 bg-white/95 backdrop-blur-sm shadow-sm">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-          <Logo size="md" />
-          <div className="hidden md:flex items-center gap-5 lg:gap-6 text-sm font-medium text-slate-600">
-            <Link href="/layanan"    className="hover:text-brand transition-colors">Layanan</Link>
-            <Link href="/blog"       className="hover:text-brand transition-colors">Blog</Link>
-            <Link href="/dashboard/riwayat-pesanan" className="hover:text-brand transition-colors">Cek Pesanan</Link>
-            <Link href="/paket-hemat" className="hover:text-brand transition-colors">Paket Hemat</Link>
-            <Link href="/bimbingan"  className="hover:text-brand transition-colors font-semibold">Bimbingan</Link>
-            <Link href="/merchandise" className="hover:text-brand transition-colors">Merchandise</Link>
-            <Link href="/mentor-kami" className="hover:text-brand transition-colors">Mentor</Link>
-            <Link href="/jadwal"     className="hover:text-brand transition-colors font-semibold">Jadwal</Link>
-            <Link href="/event"      className="hover:text-brand transition-colors">Event</Link>
-            <Link href="/referral"   className="hover:text-brand transition-colors">Referral</Link>
-          </div>
-          <div className="flex items-center gap-2">
-            <MenuAkun />
-          </div>
-        </div>
-      </nav>
+      <NavbarUtama />
 
       {/* ── Hero ── */}
       <section className="relative overflow-hidden hero-gradient">

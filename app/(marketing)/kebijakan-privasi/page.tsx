@@ -1,7 +1,7 @@
 import Link from "next/link";
-import Image from "next/image";
 import { BRAND, waLink } from "@/lib/brand";
 import type { Metadata } from "next";
+import { NavbarUtama } from "@/components/ui/NavbarUtama";
 
 export const metadata: Metadata = {
   title: `Kebijakan Privasi | ${BRAND.name}`,
@@ -24,17 +24,7 @@ const sections = [
 export default function KebijakanPrivasiPage() {
   return (
     <div className="min-h-screen bg-white">
-      <nav className="sticky top-0 z-30 border-b border-slate-100 bg-white/95 backdrop-blur-sm shadow-sm">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-          <Link href="/" className="flex items-center gap-2">
-            <Image src={BRAND.logoPng} alt={BRAND.name} width={28} height={28} unoptimized className="object-contain" />
-            <span className="text-lg font-extrabold text-[#8B0000]">{BRAND.shortName}</span>
-          </Link>
-          <Link href="/" className="text-sm text-muted-foreground hover:text-[#8B0000] transition-colors">
-            ← Kembali ke Beranda
-          </Link>
-        </div>
-      </nav>
+      <NavbarUtama />
       <div className="mx-auto max-w-2xl px-4 py-14">
         <div className="mb-8">
           <h1 className="text-3xl font-extrabold text-slate-900 mb-2">Kebijakan Privasi</h1>

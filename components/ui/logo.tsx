@@ -42,8 +42,11 @@ export function Logo({
       />
       {showText && (
         <span className={cn("flex flex-col leading-tight", textClassName)}>
+          {/* whitespace-nowrap: tanpa ini "Ruang Konsul Solo" patah jadi dua
+              baris begitu navbar mulai sempit, dan tinggi bilahnya ikut
+              melar mengikuti logo yang patah. */}
           <span className={cn(
-            s.text, "font-extrabold tracking-tight",
+            s.text, "font-extrabold tracking-tight whitespace-nowrap",
             light ? "text-white" : "text-[#8B0000]"
           )}>
             {BRAND.name}

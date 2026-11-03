@@ -1,12 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
-import { ArrowRight, ArrowLeft, Star, Clock, CalendarDays } from "lucide-react";
+import { ArrowRight, ArrowLeft, Clock, CalendarDays } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Logo } from "@/components/ui/logo";
-import { MenuAkun } from "@/components/ui/MenuAkun";
 import { createClient } from "@/lib/supabase/server";
 import { BRAND, waLink } from "@/lib/brand";
+import { NavbarUtama } from "@/components/ui/NavbarUtama";
 
 export const metadata: Metadata = {
   title: `Jadwal Bimbingan | ${BRAND.name}`,
@@ -108,14 +107,7 @@ export default async function JadwalPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* ── Navbar ── */}
-      <nav className="sticky top-0 z-30 border-b border-slate-100 bg-white/95 backdrop-blur-sm shadow-sm">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-          <Logo href="/" size="sm" />
-          <div className="flex items-center gap-2">
-            <MenuAkun />
-          </div>
-        </div>
-      </nav>
+      <NavbarUtama />
 
       {/* ── Tombol kembali ── */}
       <div className="mx-auto max-w-6xl px-4 pt-5">

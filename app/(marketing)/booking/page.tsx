@@ -3,10 +3,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, Star, CalendarDays } from "lucide-react";
 import KalenderBooking from "@/components/booking/KalenderBooking";
-import { Button } from "@/components/ui/button";
-import { Logo } from "@/components/ui/logo";
 import { createClient } from "@/lib/supabase/server";
 import { BRAND } from "@/lib/brand";
+import { NavbarUtama } from "@/components/ui/NavbarUtama";
 
 export const metadata: Metadata = {
   title: "Pesan Jadwal Bimbingan",
@@ -76,19 +75,7 @@ export default async function BookingPage({
   return (
     <div className="min-h-screen bg-white">
       {/* ── Navbar ── */}
-      <nav className="sticky top-0 z-30 border-b border-slate-100 bg-white/95 shadow-sm backdrop-blur-sm">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
-          <Logo href="/" size="sm" />
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" asChild>
-              <Link href="/jadwal">Semua Jadwal</Link>
-            </Button>
-            <Button size="sm" asChild>
-              <Link href="/login">Login</Link>
-            </Button>
-          </div>
-        </div>
-      </nav>
+      <NavbarUtama />
 
       <main className="mx-auto max-w-5xl px-4 pb-20">
         {/* ── Tombol kembali ── */}

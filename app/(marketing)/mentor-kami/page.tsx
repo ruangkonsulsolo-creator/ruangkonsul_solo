@@ -2,10 +2,9 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
 import { ArrowRight, Star, Clock } from "lucide-react";
-import { Logo } from "@/components/ui/logo";
-import { MenuAkun } from "@/components/ui/MenuAkun";
 import { createClient } from "@/lib/supabase/server";
 import { BRAND } from "@/lib/brand";
+import { NavbarUtama } from "@/components/ui/NavbarUtama";
 
 export const revalidate = 300;
 
@@ -48,21 +47,7 @@ export default async function DaftarMentorPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <nav className="sticky top-0 z-30 border-b border-slate-100 bg-white/95 shadow-sm backdrop-blur-sm">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-          <Logo href="/" size="sm" />
-          <div className="hidden items-center gap-5 text-sm font-medium text-slate-600 md:flex">
-            <Link href="/layanan" className="transition-colors hover:text-brand">Layanan</Link>
-            <Link href="/merchandise" className="transition-colors hover:text-brand">Merchandise</Link>
-            <Link href="/bimbingan" className="transition-colors hover:text-brand">Bimbingan</Link>
-            <Link href="/jadwal" className="transition-colors hover:text-brand">Jadwal</Link>
-            <Link href="/blog" className="transition-colors hover:text-brand">Blog</Link>
-          </div>
-          <div className="flex items-center gap-2">
-            <MenuAkun />
-          </div>
-        </div>
-      </nav>
+      <NavbarUtama />
 
       <section className="bg-brand-50 px-4 py-12 lg:py-16">
         <div className="mx-auto max-w-6xl">

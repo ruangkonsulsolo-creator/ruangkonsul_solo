@@ -3,13 +3,12 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { ArrowLeft, ChevronRight, Package, Scale, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Logo } from "@/components/ui/logo";
-import { MenuAkun } from "@/components/ui/MenuAkun";
 import { formatRupiah } from "@/lib/utils/format-currency";
 import { DAFTAR_PRODUK, cariProduk } from "@/lib/merchandise/katalog";
 import { fotoProduk } from "@/lib/merchandise/foto";
 import { GaleriProduk } from "@/components/merchandise/GaleriProduk";
 import { PemesananProduk } from "@/components/merchandise/PemesananProduk";
+import { NavbarUtama } from "@/components/ui/NavbarUtama";
 
 /** Tiap produk dibuat jadi halaman statis saat build. */
 export function generateStaticParams() {
@@ -45,21 +44,7 @@ export default function HalamanProduk({
 
   return (
     <div className="min-h-screen bg-white">
-      <nav className="sticky top-0 z-30 border-b border-slate-100 bg-white/95 shadow-sm backdrop-blur-sm">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-          <Logo href="/" size="sm" />
-          <div className="hidden items-center gap-6 text-sm font-medium text-slate-600 md:flex">
-            <Link href="/layanan" className="transition-colors hover:text-brand">Layanan</Link>
-            <Link href="/merchandise" className="font-semibold text-brand">Merchandise</Link>
-            <Link href="/jadwal" className="transition-colors hover:text-brand">Jadwal</Link>
-            <Link href="/event" className="transition-colors hover:text-brand">Event</Link>
-            <Link href="/blog" className="transition-colors hover:text-brand">Blog</Link>
-          </div>
-          <div className="flex items-center gap-2">
-            <MenuAkun />
-          </div>
-        </div>
-      </nav>
+      <NavbarUtama />
 
       {/* ── Remah roti ── */}
       <div className="border-b border-slate-100 px-4 py-3">

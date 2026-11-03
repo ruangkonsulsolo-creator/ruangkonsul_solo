@@ -8,9 +8,9 @@ import {
   Star, BookOpen, GraduationCap, Trophy, BarChart2,
   Sparkles, MessageCircle,
 } from "lucide-react";
-import { MenuAkun } from "@/components/ui/MenuAkun";
 import { Badge } from "@/components/ui/badge";
 import { BRAND, waLink } from "@/lib/brand";
+import { NavbarUtama } from "@/components/ui/NavbarUtama";
 
 const TABS = [
   { id: "semua",   label: "Semua" },
@@ -110,25 +110,7 @@ export default function BimbinganPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Navbar */}
-      <nav className="sticky top-0 z-30 border-b border-slate-100 bg-white/95 backdrop-blur-sm shadow-sm">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-          <Link href="/" className="flex items-center gap-2">
-            <Image src={BRAND.logoPng} alt={BRAND.name} width={28} height={28} unoptimized className="object-contain" />
-            <span className="text-lg font-extrabold text-[#8B0000]">{BRAND.shortName}</span>
-          </Link>
-          <div className="hidden md:flex items-center gap-5 text-sm font-medium text-slate-600">
-            <Link href="/layanan"    className="hover:text-[#8B0000] transition-colors">Layanan</Link>
-            <Link href="/merchandise" className="transition-colors hover:text-brand">Merchandise</Link>
-            <Link href="/blog"       className="hover:text-[#8B0000] transition-colors">Blog</Link>
-            <Link href="/paket-hemat" className="hover:text-[#8B0000] transition-colors">Paket Hemat</Link>
-            <Link href="/bimbingan" className="text-[#8B0000] font-bold border-b-2 border-[#8B0000] pb-0.5">Bimbingan</Link>
-            <Link href="/referral"   className="hover:text-[#8B0000] transition-colors">Referral</Link>
-          </div>
-          <div className="flex items-center gap-2">
-            <MenuAkun />
-          </div>
-        </div>
-      </nav>
+      <NavbarUtama />
 
       {/* Promo banner */}
       <div className="bg-[#8B0000] text-white text-sm py-2.5 px-4 text-center font-medium flex flex-wrap items-center justify-center gap-3">

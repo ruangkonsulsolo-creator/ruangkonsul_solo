@@ -3,8 +3,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { ArrowLeft, CalendarDays, Clock, ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
-import { BRAND } from "@/lib/brand";
-import { MenuAkun } from "@/components/ui/MenuAkun";
+import { NavbarUtama } from "@/components/ui/NavbarUtama";
 
 /* ─── Same seed data ─── */
 const articles: Record<string, {
@@ -427,17 +426,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
   return (
     <div className="min-h-screen bg-white">
       {/* Navbar */}
-      <nav className="sticky top-0 z-30 border-b border-slate-100 bg-white/95 backdrop-blur-sm shadow-sm">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-          <Link href="/" className="flex items-center gap-2">
-            <Image src="/logo-rks.png" alt="Ruang Konsul Solo" width={28} height={28} />
-            <span className="text-lg font-extrabold text-brand">{BRAND.shortName}</span>
-          </Link>
-          <div className="flex gap-2">
-            <MenuAkun />
-          </div>
-        </div>
-      </nav>
+      <NavbarUtama />
 
       <article className="mx-auto max-w-2xl px-4 py-12">
         {/* Breadcrumb */}

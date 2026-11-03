@@ -1,10 +1,9 @@
 import Link from "next/link";
-import Image from "next/image";
-import { ArrowRight, Gift, Users, Wallet, CheckCircle2, Share2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Gift, Users, Wallet, CheckCircle2, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { MenuAkun } from "@/components/ui/MenuAkun";
-import { BRAND, waLink } from "@/lib/brand";
+import { BRAND } from "@/lib/brand";
 import type { Metadata } from "next";
+import { NavbarUtama } from "@/components/ui/NavbarUtama";
 
 export const metadata: Metadata = {
   title: `Program Referral | ${BRAND.name}`,
@@ -28,23 +27,27 @@ const faqs = [
 export default function ReferralPage() {
   return (
     <div className="min-h-screen bg-white">
-      <nav className="sticky top-0 z-30 border-b border-slate-100 bg-white/95 backdrop-blur-sm shadow-sm">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-          <Link href="/" className="flex items-center gap-2">
-            <Image src={BRAND.logoPng} alt={BRAND.name} width={28} height={28} unoptimized className="object-contain" />
-            <span className="text-lg font-extrabold text-[#8B0000]">{BRAND.shortName}</span>
-          </Link>
-          <div className="flex gap-2">
-            <MenuAkun />
-          </div>
-        </div>
-      </nav>
+      <NavbarUtama />
 
-      <section className="bg-brand-gradient px-4 py-20 text-center relative overflow-hidden">
+      <section className="bg-brand-gradient px-4 pb-20 pt-7 text-center relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-10 h-40 w-40 rounded-full bg-white" />
           <div className="absolute bottom-10 right-10 h-60 w-60 rounded-full bg-white" />
         </div>
+
+        {/* Tombol pulang. Diletakkan di dalam hero, bukan di atasnya dengan
+            warna abu-abu seperti halaman lain, karena di atas gradien merah
+            teks abu-abu nyaris tak terbaca. */}
+        <div className="relative z-10 mx-auto mb-10 max-w-5xl text-left">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 rounded-xl border-2 border-white/50 px-3.5 py-2 text-sm font-bold text-white transition-colors hover:bg-white/10"
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            Kembali ke beranda
+          </Link>
+        </div>
+
         <div className="relative z-10 mx-auto max-w-xl">
           <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm mb-5 mx-auto">
             <Gift className="h-8 w-8 text-white" />

@@ -6,10 +6,9 @@ import {
   Video, Ticket, CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Logo } from "@/components/ui/logo";
-import { MenuAkun } from "@/components/ui/MenuAkun";
 import { IkonLini } from "@/components/landing/IkonLini";
 import { BRAND, waLink } from "@/lib/brand";
+import { NavbarUtama } from "@/components/ui/NavbarUtama";
 
 export const metadata: Metadata = {
   title: "Event & Workshop",
@@ -254,22 +253,7 @@ export default function EventPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <nav className="sticky top-0 z-30 border-b border-slate-100 bg-white/95 shadow-sm backdrop-blur-sm">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-          <Logo href="/" size="sm" />
-          <div className="hidden items-center gap-6 text-sm font-medium text-slate-600 md:flex">
-            <Link href="/layanan" className="transition-colors hover:text-brand">Layanan</Link>
-            <Link href="/merchandise" className="transition-colors hover:text-brand">Merchandise</Link>
-            <Link href="/jadwal" className="transition-colors hover:text-brand">Jadwal</Link>
-            <Link href="/paket-hemat" className="transition-colors hover:text-brand">Paket Langganan</Link>
-            <Link href="/event" className="font-semibold text-brand">Event</Link>
-            <Link href="/blog" className="transition-colors hover:text-brand">Blog</Link>
-          </div>
-          <div className="flex items-center gap-2">
-            <MenuAkun />
-          </div>
-        </div>
-      </nav>
+      <NavbarUtama />
 
       {/* ── Hero ── */}
       <section className="bg-brand-50 px-4 py-12 lg:py-16">
