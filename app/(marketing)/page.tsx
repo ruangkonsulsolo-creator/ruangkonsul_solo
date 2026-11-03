@@ -198,6 +198,7 @@ export default async function LandingPage() {
             <Link href="/paket-hemat" className="hover:text-brand transition-colors">Paket Hemat</Link>
             <Link href="/bimbingan"  className="hover:text-brand transition-colors font-semibold">Bimbingan</Link>
             <Link href="/merchandise" className="hover:text-brand transition-colors">Merchandise</Link>
+            <Link href="/mentor-kami" className="hover:text-brand transition-colors">Mentor</Link>
             <Link href="/jadwal"     className="hover:text-brand transition-colors font-semibold">Jadwal</Link>
             <Link href="/event"      className="hover:text-brand transition-colors">Event</Link>
             <Link href="/referral"   className="hover:text-brand transition-colors">Referral</Link>
@@ -415,7 +416,11 @@ export default async function LandingPage() {
                     </div>
                   )}
                   <div className="min-w-0">
-                    <h3 className="font-bold text-slate-900 leading-tight">{m.nama}</h3>
+                    <h3 className="font-bold text-slate-900 leading-tight">
+                      <Link href={`/mentor-kami/${m.id}`} className="hover:text-brand hover:underline">
+                        {m.nama}
+                      </Link>
+                    </h3>
                     {m.gelar && <p className="text-xs font-medium text-slate-500">{m.gelar}</p>}
                     {m.kampus && <p className="text-xs text-slate-500 mt-1">{m.kampus}</p>}
                   </div>
@@ -453,6 +458,12 @@ export default async function LandingPage() {
               </div>
             ))}
           </div>
+          <Link
+            href="/mentor-kami"
+            className="mt-6 inline-flex items-center gap-1.5 text-sm font-bold text-brand hover:underline"
+          >
+            Lihat profil lengkap semua mentor <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          </Link>
         </div>
       </section>
       )}
