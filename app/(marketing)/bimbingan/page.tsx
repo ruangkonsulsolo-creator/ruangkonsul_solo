@@ -41,7 +41,7 @@ function ClassCard({ cls }: { cls: KelasItem }) {
     <div className="flex flex-col rounded-2xl border border-slate-200 bg-white shadow-card overflow-hidden card-hover group">
       <div className="relative aspect-[16/9] bg-gradient-to-br from-brand-50 to-brand-100 overflow-hidden">
         {cls.image_url ? (
-          <Image src={cls.image_url} alt={cls.title} fill className="object-cover object-top group-hover:scale-105 transition-transform duration-500" sizes="33vw" />
+          <Image src={cls.image_url} alt={cls.title} fill className="object-cover object-top group-hover:scale-105 transition-transform duration-500" sizes="(max-width: 639px) 100vw, (max-width: 1279px) 50vw, 360px" />
         ) : (
           <div className="flex h-full items-center justify-center"><Icon className="h-16 w-16 text-brand-200" /></div>
         )}
