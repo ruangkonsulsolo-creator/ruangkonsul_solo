@@ -1,9 +1,15 @@
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { ArrowLeft, CalendarDays, Clock, ArrowRight } from "lucide-react";
+import {
+  ArrowLeft, CalendarDays, Clock, ArrowRight, MessageCircle, Sparkles,
+} from "lucide-react";
 import type { Metadata } from "next";
 import { NavbarUtama } from "@/components/ui/NavbarUtama";
+import { createClient } from "@/lib/supabase/server";
+import { BRAND, waLink } from "@/lib/brand";
+
+export const revalidate = 120;
 
 /* ─── Same seed data ─── */
 const articles: Record<string, {
@@ -387,11 +393,92 @@ tulisannya — itu menyiasati pemeriksaan, bukan belajar menulis.
   },
 };
 
+type Artikel = {
+  title: string; excerpt: string; cover: string; category: string;
+  readTime: string; date: string; author: string; content: string;
+};
+
+function tanggalId(nilai: string | null): string {
+  if (!nilai) return "";
+  const d = new Date(nilai);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("id-ID", {
+    day: "numeric", month: "long", year: "numeric",
+  });
+}
+
+/**
+ * Artikel dari basis data lebih dulu, baru artikel bawaan.
+ *
+ * Sebelumnya halaman ini sama sekali tidak menyentuh blog_posts — isinya
+ * hanya objek `articles` di berkas ini. Akibatnya artikel yang ditulis admin
+ * muncul di daftar /blog tapi halamannya 404: daftarnya baca basis data,
+ * halamannya tidak. Artikel bawaan tetap dipertahankan sebagai cadangan
+ * supaya /blog tidak kosong sebelum ada tulisan sungguhan.
+ */
+async function ambilArtikel(slug: string): Promise<Artikel | null> {
+  try {
+    const supabase = createClient();
+    const { data } = await supabase
+      .from("blog_posts")
+      .select("title, excerpt, content, cover_url, category, read_time, author, published_at")
+      .eq("slug", slug)
+      .eq("is_published", true)
+      .maybeSingle();
+
+    if (data) {
+      return {
+        title: data.title,
+        excerpt: data.excerpt ?? "",
+        cover: data.cover_url ?? "/promo-bimbingan.jpeg",
+        category: data.category,
+        readTime: data.read_time,
+        date: tanggalId(data.published_at),
+        author: data.author,
+        content: data.content,
+      };
+    }
+  } catch (e) {
+    console.error("[blog]", e);
+  }
+  return articles[slug] ?? null;
+}
+
+/** Artikel lain untuk sidebar: basis data dulu, lalu dilengkapi bawaan. */
+async function ambilLainnya(kecuali: string, batas = 4) {
+  const hasil: { slug: string; title: string; category: string; date: string }[] = [];
+  try {
+    const supabase = createClient();
+    const { data } = await supabase
+      .from("blog_posts")
+      .select("slug, title, category, published_at")
+      .eq("is_published", true)
+      .neq("slug", kecuali)
+      .order("published_at", { ascending: false })
+      .limit(batas);
+    for (const a of data ?? []) {
+      hasil.push({
+        slug: a.slug, title: a.title, category: a.category,
+        date: tanggalId(a.published_at),
+      });
+    }
+  } catch {
+    // Basis data tidak terjangkau — cukup pakai artikel bawaan di bawah.
+  }
+
+  for (const [slug, a] of Object.entries(articles)) {
+    if (hasil.length >= batas) break;
+    if (slug === kecuali || hasil.some((h) => h.slug === slug)) continue;
+    hasil.push({ slug, title: a.title, category: a.category, date: a.date });
+  }
+  return hasil;
+}
+
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const article = articles[params.slug];
-  if (!article) return { title: "Artikel tidak ditemukan | Ruang Konsul Solo" };
+  const article = await ambilArtikel(params.slug);
+  if (!article) return { title: `Artikel tidak ditemukan | ${BRAND.name}` };
   return {
-    title: `${article.title} | Blog Ruang Konsul Solo`,
+    title: `${article.title} | Blog ${BRAND.name}`,
     description: article.excerpt,
   };
 }
@@ -415,112 +502,178 @@ function renderMarkdown(md: string): string {
     );
 }
 
-export default function BlogPostPage({ params }: { params: { slug: string } }) {
-  const article = articles[params.slug];
-  if (!article) notFound();
+export default async function BlogPostPage({
+  params,
+}: { params: { slug: string } }) {
+  const article = await ambilArtikel(params.slug);
+  if (!article) return notFound();
 
-  const otherArticles = Object.entries(articles)
-    .filter(([slug]) => slug !== params.slug)
-    .slice(0, 3);
+  const lainnya = await ambilLainnya(params.slug);
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Navbar */}
       <NavbarUtama />
 
-      <article className="mx-auto max-w-2xl px-4 py-12">
-        {/* Breadcrumb */}
-        <Link href="/blog" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-brand mb-6 transition-colors">
-          <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
-          Kembali ke Blog
-        </Link>
+      {/*
+        Dua kolom: isi artikel dan sisi kanan yang ikut menggulir.
 
-        {/* Category + meta */}
-        <div className="flex flex-wrap items-center gap-3 mb-4">
-          <span className="rounded-full bg-brand text-white text-xs font-bold px-3 py-1">
-            {article.category}
-          </span>
-          <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" /> {article.date}
-          </span>
-          <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Clock className="h-3.5 w-3.5" aria-hidden="true" /> {article.readTime}
-          </span>
-        </div>
-
-        {/* Title */}
-        <h1 className="text-2xl lg:text-3xl font-extrabold text-slate-900 leading-snug mb-4">
-          {article.title}
-        </h1>
-
-        {/* Author */}
-        <div className="flex items-center gap-2 mb-6 pb-6 border-b border-slate-100">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand text-white text-xs font-bold">
-            K
-          </div>
-          <span className="text-sm font-medium text-slate-700">{article.author}</span>
-        </div>
-
-        {/* Cover image */}
-        <div className="relative aspect-[16/9] rounded-2xl overflow-hidden mb-8 shadow-card">
-          <Image
-            src={article.cover}
-            alt={article.title}
-            fill
-            className="object-cover object-top"
-            sizes="(max-width: 768px) 100vw, 672px"
-            priority
-          />
-        </div>
-
-        {/* Content */}
-        <div
-          className="prose-kalibri text-slate-600 leading-relaxed"
-          dangerouslySetInnerHTML={{ __html: renderMarkdown(article.content) }}
-        />
-
-        {/* CTA in-article */}
-        <div className="mt-10 rounded-2xl bg-brand p-6 text-center shadow-card">
-          <p className="text-white font-extrabold text-lg mb-1">Siap cek dokumenmu sekarang?</p>
-          <p className="text-white/75 text-sm mb-4">Cek plagiarisme dan indikasi AI, Rp3.300 per 1.000 kata.</p>
+        Satu kolom sempit di tengah membuat seluruh ajakan — bimbingan,
+        konsultasi, artikel lain — baru muncul setelah pembaca sampai ke
+        dasar halaman, dan sebagian besar pembaca tidak sampai ke sana.
+        Sisi kanan yang lengket membuatnya terlihat sepanjang bacaan tanpa
+        memotong tulisannya.
+      */}
+      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-10 lg:grid-cols-[minmax(0,1fr)_19rem]">
+        <article className="min-w-0">
           <Link
-            href="/#periksa"
-            className="inline-flex items-center gap-2 rounded-xl bg-white text-brand text-sm font-extrabold px-5 py-2.5 hover:bg-brand-50 transition-colors shadow-md"
+            href="/blog"
+            className="mb-6 inline-flex items-center gap-1.5 text-sm text-slate-500 transition-colors hover:text-brand"
           >
-            Mulai Cek Sekarang <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+            Kembali ke Blog
           </Link>
-        </div>
-      </article>
 
-      {/* Related articles */}
-      <section className="bg-slate-50 px-4 py-12">
-        <div className="mx-auto max-w-5xl">
-          <h2 className="text-lg font-extrabold text-slate-900 mb-6">Artikel Lainnya</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-            {otherArticles.map(([slug, a]) => (
-              <Link
-                key={slug}
-                href={`/blog/${slug}`}
-                className="group flex flex-col rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-card card-hover"
-              >
-                <div className="relative aspect-[16/9]">
-                  <Image src={a.cover} alt={a.title} fill className="object-cover object-top" sizes="33vw" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-                  <span className="absolute bottom-2 left-2 rounded-full bg-brand text-white text-[10px] font-bold px-2 py-0.5">
-                    {a.category}
-                  </span>
-                </div>
-                <div className="p-4">
-                  <h3 className="text-sm font-bold text-slate-900 group-hover:text-brand transition-colors line-clamp-2 mb-1">
-                    {a.title}
-                  </h3>
-                  <p className="text-[11px] text-muted-foreground">{a.date}</p>
-                </div>
-              </Link>
-            ))}
+          <div className="mb-4 flex flex-wrap items-center gap-3">
+            <span className="rounded-full bg-brand px-3 py-1 text-xs font-bold text-white">
+              {article.category}
+            </span>
+            {article.date && (
+              <span className="flex items-center gap-1.5 text-xs text-slate-500">
+                <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" /> {article.date}
+              </span>
+            )}
+            <span className="flex items-center gap-1.5 text-xs text-slate-500">
+              <Clock className="h-3.5 w-3.5" aria-hidden="true" /> {article.readTime}
+            </span>
           </div>
-        </div>
-      </section>
+
+          <h1 className="mb-4 text-2xl font-extrabold leading-snug text-slate-900 lg:text-4xl">
+            {article.title}
+          </h1>
+
+          {article.excerpt && (
+            <p className="mb-6 text-lg leading-relaxed text-slate-600">
+              {article.excerpt}
+            </p>
+          )}
+
+          <div className="mb-6 flex items-center gap-2 border-b border-slate-100 pb-6">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand text-xs font-bold text-white">
+              {article.author.trim().charAt(0).toUpperCase() || "R"}
+            </span>
+            <span className="text-sm font-medium text-slate-700">{article.author}</span>
+          </div>
+
+          <div className="relative mb-8 aspect-[16/9] overflow-hidden rounded-2xl shadow-card">
+            <Image
+              src={article.cover}
+              alt={article.title}
+              fill
+              className="object-cover object-top"
+              sizes="(max-width: 1023px) 100vw, 760px"
+              priority
+            />
+          </div>
+
+          <div
+            className="prose-kalibri leading-relaxed text-slate-600"
+            dangerouslySetInnerHTML={{ __html: renderMarkdown(article.content) }}
+          />
+
+          <div className="mt-10 rounded-2xl bg-brand p-6 text-center shadow-card">
+            <p className="mb-1 text-lg font-extrabold text-white">
+              Mentok di bagian yang dibahas tadi?
+            </p>
+            <p className="mb-4 text-sm text-white/75">
+              Bimbingan privat per jam, mulai Rp60.000. Ambil hanya bagian yang
+              sedang kamu butuhkan.
+            </p>
+            <Link
+              href="/bimbingan"
+              className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-extrabold text-brand shadow-md transition-colors hover:bg-brand-50"
+            >
+              Lihat paket bimbingan <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </Link>
+          </div>
+        </article>
+
+        {/* ── Sisi kanan ── */}
+        <aside className="lg:sticky lg:top-20 lg:self-start">
+          <div className="space-y-5">
+            <div className="rounded-2xl border border-brand-200 bg-brand-50 p-5">
+              <span className="mb-2 flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-brand">
+                <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+                Bimbingan
+              </span>
+              <p className="font-extrabold leading-snug text-slate-900">
+                Dibimbing sampai sanggup menulisnya sendiri
+              </p>
+              <p className="mt-1.5 text-sm leading-relaxed text-slate-600">
+                Skripsi, tesis, dan disertasi. Privat per jam atau langganan
+                sebulan penuh.
+              </p>
+              <Link
+                href="/bimbingan"
+                className="mt-4 inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-brand px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-brand-light"
+              >
+                Lihat paket <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+              </Link>
+            </div>
+
+            <a
+              href={waLink(`Halo ${BRAND.name}, saya mau konsultasi.`)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 rounded-2xl border border-slate-200 p-4 transition-colors hover:border-brand"
+            >
+              <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-brand-50">
+                <MessageCircle className="h-5 w-5 text-brand" aria-hidden="true" />
+              </span>
+              <span>
+                <span className="block text-sm font-bold text-slate-900">
+                  Konsultasi awal gratis
+                </span>
+                <span className="block text-xs text-slate-500">
+                  Tanya dulu lewat WhatsApp
+                </span>
+              </span>
+            </a>
+
+            {lainnya.length > 0 && (
+              <div className="rounded-2xl border border-slate-200 p-5">
+                <h2 className="mb-3 text-sm font-extrabold text-slate-900">
+                  Artikel lainnya
+                </h2>
+                <ul className="space-y-3">
+                  {lainnya.map((a) => (
+                    <li key={a.slug}>
+                      <Link href={`/blog/${a.slug}`} className="group block">
+                        <span className="text-[11px] font-bold uppercase tracking-wide text-brand">
+                          {a.category}
+                        </span>
+                        <span className="mt-0.5 block text-sm font-semibold leading-snug text-slate-800 transition-colors group-hover:text-brand">
+                          {a.title}
+                        </span>
+                        {a.date && (
+                          <span className="mt-0.5 block text-[11px] text-slate-400">
+                            {a.date}
+                          </span>
+                        )}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href="/blog"
+                  className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-brand hover:underline"
+                >
+                  Lihat semua artikel <ArrowRight className="h-3 w-3" aria-hidden="true" />
+                </Link>
+              </div>
+            )}
+          </div>
+        </aside>
+      </div>
     </div>
   );
 }

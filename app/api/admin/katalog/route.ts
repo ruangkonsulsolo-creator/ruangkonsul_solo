@@ -65,17 +65,28 @@ const skemaProduk = z.object({
   urutan: z.number().int().min(0).max(9999).optional(),
 });
 
+const skemaTestimoni = z.object({
+  id: z.string().uuid().optional(),
+  isi: teks(400).min(3),
+  penulis: opsional(80),
+  layanan: opsional(80),
+  tautan: opsional(300),
+  urutan: z.number().int().min(0).max(9999).optional(),
+  is_active: z.boolean().optional(),
+});
+
 const TABEL = {
   etalase: "etalase",
   kategori: "kategori_produk",
   produk: "produk",
+  testimoni: "testimoni",
 } as const;
 
 type Jenis = keyof typeof TABEL;
 
 function jenisDari(nilai: string | null): Jenis | null {
-  return nilai === "etalase" || nilai === "kategori" || nilai === "produk"
-    ? nilai
+  return nilai !== null && Object.prototype.hasOwnProperty.call(TABEL, nilai)
+    ? (nilai as Jenis)
     : null;
 }
 
@@ -106,7 +117,7 @@ export async function POST(request: NextRequest) {
   const jenis = jenisDari(request.nextUrl.searchParams.get("jenis"));
   if (!jenis)
     return NextResponse.json(
-      { error: "Jenis harus etalase, kategori, atau produk." },
+      { error: "Jenis harus etalase, kategori, produk, atau testimoni." },
       { status: 400 }
     );
 
@@ -129,7 +140,9 @@ export async function POST(request: NextRequest) {
       ? skemaEtalase
       : jenis === "kategori"
         ? skemaKategori
-        : skemaProduk;
+        : jenis === "testimoni"
+          ? skemaTestimoni
+          : skemaProduk;
 
   const hasil = skema.safeParse(mentah);
   if (!hasil.success) {

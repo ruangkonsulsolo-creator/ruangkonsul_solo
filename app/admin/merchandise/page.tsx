@@ -1,11 +1,12 @@
+import Link from "next/link";
 import type { Metadata } from "next";
-import { Package, ShoppingBag, TrendingUp, Truck } from "lucide-react";
+import { ArrowRight, Package, ShoppingBag, Store, TrendingUp, Truck } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { formatRupiah } from "@/lib/utils/format-currency";
-import { TabelMerchandise, type Produk } from "@/components/admin/TabelMerchandise";
+import { ETALASE } from "@/lib/katalog/tipe";
 import { BRAND } from "@/lib/brand";
 
-export const metadata: Metadata = { title: `Merchandise | ${BRAND.name}` };
+export const metadata: Metadata = { title: `Penjualan Merchandise | ${BRAND.name}` };
 export const dynamic = "force-dynamic";
 
 const LABEL_STATUS: Record<string, string> = {
@@ -18,38 +19,54 @@ const LABEL_STATUS: Record<string, string> = {
 };
 
 /**
- * Panel merchandise admin: etalase dan penjualan dalam satu halaman.
+ * Penjualan merchandise.
  *
- * Angka penjualan dihitung dari merchandise_orders yang benar-benar ada.
- * Omset hanya menghitung pesanan yang sudah dibayar — memasukkan pesanan
- * yang masih menunggu pembayaran membuat angka omset tampak lebih besar
- * daripada uang yang benar-benar masuk.
+ * Halaman ini dulu juga mengelola daftar produknya, dan membaca tabel
+ * `merchandise` lama. Setelah katalog disatukan, tabel itu dikosongkan dan
+ * halaman ini jadi menampilkan "0 produk" — padahal 23 produk merchandise
+ * ada dan aktif, hanya di tabel `produk`. Angka nol tanpa keterangan itu
+ * membuat orang menyimpulkan datanya hilang.
+ *
+ * Sekarang pengelolaan produk sepenuhnya di /admin/katalog, dan halaman ini
+ * hanya mengurus penjualannya. Angka produknya pun dibaca dari katalog yang
+ * sama, supaya tidak ada dua versi kebenaran.
  */
-export default async function AdminMerchandisePage() {
+export default async function AdminPenjualanMerchPage() {
   const supabase = createClient();
 
+  const { data: etalaseMerch } = await supabase
+    .from("etalase")
+    .select("id")
+    .eq("slug", ETALASE.merchandise)
+    .maybeSingle();
+
   const [{ data: produk }, { data: pesanan }] = await Promise.all([
-    supabase
-      .from("merchandise")
-      .select("id, name, description, category, price_idr, stock, weight_gram, images, is_active, sort_order")
-      .order("sort_order", { ascending: true })
-      .order("created_at", { ascending: false }),
+    etalaseMerch
+      ? supabase
+          .from("produk")
+          .select("id, nama, stok, is_active")
+          .eq("etalase_id", etalaseMerch.id)
+      : Promise.resolve({ data: [] as { id: string; nama: string; stok: number | null; is_active: boolean }[] }),
     supabase
       .from("merchandise_orders")
-      .select("id, order_number, total_idr, status, created_at, paid_at, shipping_name, items")
+      .select("id, order_number, total_idr, status, created_at, shipping_name")
       .order("created_at", { ascending: false })
       .limit(100),
   ]);
 
-  const daftar = (produk ?? []) as Produk[];
+  const daftar = produk ?? [];
   const order = pesanan ?? [];
 
+  // Omset hanya menghitung pesanan yang benar-benar dibayar. Memasukkan yang
+  // masih menunggu pembayaran membuat angkanya lebih besar dari uang masuk.
   const sudahBayar = order.filter(
     (o) => !["menunggu_pembayaran", "dibatalkan"].includes(o.status)
   );
   const omset = sudahBayar.reduce((s, o) => s + (o.total_idr ?? 0), 0);
   const perluKirim = order.filter((o) => ["dibayar", "diproses"].includes(o.status)).length;
-  const stokMenipis = daftar.filter((p) => p.is_active && p.stock > 0 && p.stock <= 3).length;
+  const stokMenipis = daftar.filter(
+    (p) => p.is_active && p.stok !== null && p.stok > 0 && p.stok <= 3
+  ).length;
 
   const kartu = [
     { icon: TrendingUp, nilai: formatRupiah(omset), label: "Omset terbayar" },
@@ -61,11 +78,31 @@ export default async function AdminMerchandisePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-extrabold text-slate-900">Merchandise</h2>
+        <h2 className="text-xl font-extrabold text-slate-900">Penjualan Merchandise</h2>
         <p className="mt-0.5 text-sm text-slate-500">
-          Kelola etalase dan pantau penjualannya.
+          Pantau pesanan yang masuk. Produknya dikelola di Katalog Produk.
         </p>
       </div>
+
+      <Link
+        href="/admin/katalog"
+        className="flex items-center justify-between gap-4 rounded-2xl border border-brand-200 bg-brand-50 p-4 transition-colors hover:border-brand"
+      >
+        <span className="flex items-center gap-3">
+          <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-white">
+            <Store className="h-5 w-5 text-brand" aria-hidden="true" />
+          </span>
+          <span>
+            <span className="block font-bold text-slate-900">
+              {daftar.length} produk merchandise di katalog
+            </span>
+            <span className="block text-sm text-slate-600">
+              Tambah, edit, dan hapus produknya di Katalog Produk.
+            </span>
+          </span>
+        </span>
+        <ArrowRight className="h-5 w-5 flex-shrink-0 text-brand" aria-hidden="true" />
+      </Link>
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {kartu.map((k) => (
@@ -80,11 +117,6 @@ export default async function AdminMerchandisePage() {
       </div>
 
       <section>
-        <h3 className="mb-3 font-extrabold text-slate-900">Etalase</h3>
-        <TabelMerchandise awal={daftar} />
-      </section>
-
-      <section>
         <h3 className="mb-3 font-extrabold text-slate-900">Penjualan terbaru</h3>
         {order.length === 0 ? (
           <div className="rounded-2xl border-2 border-dashed border-slate-200 p-10 text-center">
@@ -92,7 +124,7 @@ export default async function AdminMerchandisePage() {
             <p className="mx-auto mt-1 max-w-sm text-sm leading-relaxed text-slate-500">
               Pesanan merchandise muncul di sini begitu ada pembeli. Saat ini
               pemesanan masih lewat WhatsApp, jadi tabel ini baru terisi setelah
-              alur checkout di situs diaktifkan.
+              alur pembayaran di situs diaktifkan.
             </p>
           </div>
         ) : (
@@ -101,7 +133,10 @@ export default async function AdminMerchandisePage() {
               <thead className="border-b border-slate-100 bg-slate-50">
                 <tr>
                   {["No. Pesanan", "Pembeli", "Total", "Status", "Tanggal"].map((h) => (
-                    <th key={h} className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
+                    <th
+                      key={h}
+                      className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500"
+                    >
                       {h}
                     </th>
                   ))}
@@ -110,9 +145,13 @@ export default async function AdminMerchandisePage() {
               <tbody>
                 {order.map((o) => (
                   <tr key={o.id} className="border-b border-slate-50 last:border-0">
-                    <td className="px-4 py-3 font-mono text-xs text-slate-700">{o.order_number}</td>
+                    <td className="px-4 py-3 font-mono text-xs text-slate-700">
+                      {o.order_number}
+                    </td>
                     <td className="px-4 py-3 text-slate-700">{o.shipping_name ?? "—"}</td>
-                    <td className="px-4 py-3 font-bold text-brand">{formatRupiah(o.total_idr)}</td>
+                    <td className="px-4 py-3 font-bold text-brand">
+                      {formatRupiah(o.total_idr)}
+                    </td>
                     <td className="px-4 py-3">
                       <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">
                         {LABEL_STATUS[o.status] ?? o.status}
@@ -120,7 +159,9 @@ export default async function AdminMerchandisePage() {
                     </td>
                     <td className="px-4 py-3 text-xs text-slate-500">
                       {new Date(o.created_at).toLocaleDateString("id-ID", {
-                        day: "numeric", month: "short", year: "numeric",
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
                       })}
                     </td>
                   </tr>

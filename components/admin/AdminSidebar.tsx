@@ -8,7 +8,7 @@ import { Logo } from "@/components/ui/logo";
 import {
   LayoutDashboard, ClipboardList, Users,
   BarChart3, Settings, Package, LogOut, ChevronRight,
-  GraduationCap, FileText, ShieldCheck, Phone, ShoppingBag, Store,
+  GraduationCap, FileText, ShieldCheck, Phone, ShoppingBag, Store, Quote,
 } from "lucide-react";
 
 const navItems = [
@@ -18,18 +18,27 @@ const navItems = [
   { label: "Users",           href: "/admin/users",        icon: Users },
   { label: "Kinerja Mentor",  href: "/admin/mentor",       icon: GraduationCap },
   { label: "Laporan",         href: "/admin/laporan",      icon: BarChart3 },
+  // Semua yang dijual — merchandise, bimbingan, layanan utama, paket hemat —
+  // dikelola di satu tempat: Katalog Produk. Entri "Kelas Bimbingan" dan
+  // pengelolaan produk di "Merchandise" sudah dihapus dari sini karena
+  // keduanya membaca tabel yang sudah dipensiunkan dan selalu menampilkan
+  // nol. Dua pintu ke barang yang sama, satu di antaranya kosong, adalah
+  // cara tercepat membuat orang mengira datanya hilang.
   { type: "section" as const, label: "Katalog" },
-  // Satu pintu untuk semua yang dijual: etalase, kategori, dan produk.
-  // Entri lama di bawah masih ada karena tabelnya belum dipensiunkan.
-  { label: "Katalog Produk",  href: "/admin/katalog",      icon: Store },
+  { label: "Katalog Produk",   href: "/admin/katalog",     icon: Store },
+  { label: "Penjualan Merch",  href: "/admin/merchandise", icon: ShoppingBag },
   { type: "section" as const, label: "Konten" },
-  { label: "Kelas Bimbingan", href: "/admin/bimbingan",    icon: GraduationCap },
-  { label: "Blog",            href: "/admin/blog",         icon: FileText },
+  { label: "Blog",             href: "/admin/blog",        icon: FileText },
+  { label: "Testimoni",        href: "/admin/testimoni",   icon: Quote },
+  // Dua entri di bawah bukan bagian katalog: keduanya mengatur fitur periksa
+  // naskah (tabel services dan quota_packages), yang masih dipakai alur
+  // pesanan di /api/order. Namanya diperjelas supaya tidak tertukar dengan
+  // etalase "Layanan Utama" dan "Paket Hemat" di katalog.
+  { type: "section" as const, label: "Periksa Naskah" },
+  { label: "Tarif Pemeriksaan", href: "/admin/layanan",    icon: Settings },
+  { label: "Paket Kuota",       href: "/admin/paket",      icon: Package },
   { type: "section" as const, label: "Konfigurasi" },
-  { label: "Layanan & Harga", href: "/admin/layanan",      icon: Settings },
-  { label: "Merchandise",    href: "/admin/merchandise",  icon: ShoppingBag },
-  { label: "Paket Hemat",     href: "/admin/paket",        icon: Package },
-  { label: "Superadmin",     href: "/admin/superadmin",   icon: ShieldCheck },
+  { label: "Superadmin",       href: "/admin/superadmin",  icon: ShieldCheck },
 ];
 
 export function AdminSidebar() {
