@@ -58,26 +58,52 @@ export function MenuAkun() {
     const supabase = createClient();
     let batal = false;
 
+    /**
+     * Apa pun yang terjadi, pemuatan harus berakhir.
+     *
+     * Versi sebelumnya tidak punya try/catch dan tidak punya batas waktu:
+     * satu panggilan yang menggantung atau menolak membuat setMemuat(false)
+     * tidak pernah dijalankan, dan ikon profil berputar selamanya. Lebih
+     * baik jatuh ke tampilan "belum masuk" — pengguna masih bisa mengklik
+     * Login — daripada memutar tanpa akhir tanpa memberi tahu apa pun.
+     */
     async function muat() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (batal) return;
-      if (!user) {
-        setProfil(null);
-        setMemuat(false);
-        return;
+      const batasWaktu = new Promise<never>((_, tolak) =>
+        setTimeout(() => tolak(new Error("Supabase tidak menjawab")), 8000)
+      );
+
+      try {
+        const { data: { user } } = await Promise.race([
+          supabase.auth.getUser(),
+          batasWaktu,
+        ]);
+        if (batal) return;
+        if (!user) {
+          setProfil(null);
+          return;
+        }
+
+        const { data } = await Promise.race([
+          supabase
+            .from("profiles")
+            .select("full_name, role, credit_balance")
+            .eq("id", user.id)
+            .maybeSingle(),
+          batasWaktu,
+        ]);
+        if (batal) return;
+
+        setProfil({
+          nama: data?.full_name?.trim() || user.email?.split("@")[0] || "Akun",
+          peran: data?.role ?? "user",
+          saldo: data?.credit_balance ?? 0,
+        });
+      } catch (e) {
+        console.error("[menu-akun] gagal memuat sesi:", e);
+        if (!batal) setProfil(null);
+      } finally {
+        if (!batal) setMemuat(false);
       }
-      const { data } = await supabase
-        .from("profiles")
-        .select("full_name, role, credit_balance")
-        .eq("id", user.id)
-        .maybeSingle();
-      if (batal) return;
-      setProfil({
-        nama: data?.full_name?.trim() || user.email?.split("@")[0] || "Akun",
-        peran: data?.role ?? "user",
-        saldo: data?.credit_balance ?? 0,
-      });
-      setMemuat(false);
     }
 
     void muat();
