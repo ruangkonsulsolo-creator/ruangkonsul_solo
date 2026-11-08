@@ -8,7 +8,7 @@ import { Logo } from "@/components/ui/logo";
 import {
   LayoutDashboard, ClipboardList, Users,
   BarChart3, Settings, Package, LogOut, ChevronRight,
-  GraduationCap, FileText, ShieldCheck, Phone, ShoppingBag,
+  GraduationCap, FileText, ShieldCheck, Phone, ShoppingBag, Store,
 } from "lucide-react";
 
 const navItems = [
@@ -18,6 +18,10 @@ const navItems = [
   { label: "Users",           href: "/admin/users",        icon: Users },
   { label: "Kinerja Mentor",  href: "/admin/mentor",       icon: GraduationCap },
   { label: "Laporan",         href: "/admin/laporan",      icon: BarChart3 },
+  { type: "section" as const, label: "Katalog" },
+  // Satu pintu untuk semua yang dijual: etalase, kategori, dan produk.
+  // Entri lama di bawah masih ada karena tabelnya belum dipensiunkan.
+  { label: "Katalog Produk",  href: "/admin/katalog",      icon: Store },
   { type: "section" as const, label: "Konten" },
   { label: "Kelas Bimbingan", href: "/admin/bimbingan",    icon: GraduationCap },
   { label: "Blog",            href: "/admin/blog",         icon: FileText },

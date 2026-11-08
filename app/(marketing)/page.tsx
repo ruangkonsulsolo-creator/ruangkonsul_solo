@@ -1,8 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import {
-  FileSearch, Bot, BookOpenCheck, PenLine, GraduationCap,
-  ArrowRight, CheckCircle2, Star, ChevronDown,
+  GraduationCap, ArrowRight, CheckCircle2, Star, ChevronDown,
   MapPin, Clock, MessageCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,6 +17,9 @@ import { TestimoniWhatsApp } from "@/components/landing/TestimoniWhatsApp";
 import { BRAND, waLink } from "@/lib/brand";
 import type { Metadata } from "next";
 import { NavbarUtama } from "@/components/ui/NavbarUtama";
+import { ambilEtalase } from "@/lib/katalog/baca";
+import { ETALASE } from "@/lib/katalog/tipe";
+import { formatRupiah } from "@/lib/utils/format-currency";
 
 export const metadata: Metadata = {
   title: `${BRAND.name} — Bimbingan Skripsi & Tesis Solo`,
@@ -28,43 +30,9 @@ export const metadata: Metadata = {
 };
 
 /* ─── data ──────────────────────────────────────────────────────────────────── */
-const LAYANAN = [
-  {
-    icon: GraduationCap, name: "Bimbingan Privat", sub: "1-on-1 dengan mentor",
-    harga: "Rp 150.000", satuan: "/ sesi 60 menit", href: "/booking", featured: true,
-    fitur: ["Mentor sesuai bidang & metodemu", "Daring atau tatap muka di Solo",
-            "Catatan & tindak lanjut tiap sesi", "Jadwal pilih sendiri di kalender"],
-  },
-  {
-    icon: BookOpenCheck, name: "Paket Bulanan", sub: "Dampingi sampai sidang",
-    harga: "Rp 500.000", satuan: "/ bulan · 4 sesi", href: "/booking", featured: false,
-    fitur: ["Mentor tetap selama paket", "Tanya jawab singkat antar sesi",
-            "Rekap progres tiap bulan", "Sisa kuota terlihat di dashboard"],
-  },
-  {
-    icon: PenLine, name: "Pendampingan Revisi", sub: "Bedah catatan pembimbing",
-    harga: "Rp 150.000", satuan: "/ sesi", href: "/booking", featured: false,
-    fitur: ["Draf dibaca sebelum sesi", "Prioritas revisi disusun bersama",
-            "Penjelasan alasan tiap catatan"],
-  },
-  {
-    icon: FileSearch, name: "Olah & Interpretasi Data", sub: "Bab 4 tidak lagi gelap",
-    harga: "Rp 200.000", satuan: "/ sesi", href: "/booking", featured: false,
-    fitur: ["Pilih uji statistik yang tepat", "Jalankan bersama, bukan dikerjakan",
-            "Latihan membaca output", "Siap ditanya penguji"],
-  },
-  {
-    icon: Bot, name: "Pendampingan Publikasi", sub: "Jurnal & prosiding",
-    harga: "Rp 350.000", satuan: "/ pendampingan", href: "/layanan", featured: false,
-    fitur: ["Menilai kecocokan jurnal tujuan", "Menghindari jurnal predator",
-            "Penyesuaian template & sitasi", "Latihan menanggapi reviewer"],
-  },
-  {
-    icon: MessageCircle, name: "Desain Presentasi Sidang", sub: "Slide yang menolongmu",
-    harga: "Rp 250.000", satuan: "/ deck", href: "/layanan", featured: false,
-    fitur: ["Alur cerita disusun ulang", "Grafik terbaca dari kursi belakang", "Dua kali revisi"],
-  },
-];
+// Paket bimbingan harian kini datang dari tabel produk (etalase
+// bimbingan-online), disunting lewat panel admin. Daftar yang dulu
+// ditulis di sini sudah dihapus supaya tidak ada dua sumber harga.
 
 
 // Ganti dengan data mentor sungguhan. Foto menyusul — untuk sekarang
@@ -173,7 +141,11 @@ async function ambilMentor() {
 export const revalidate = 300;
 
 export default async function LandingPage() {
-  const MENTOR = await ambilMentor();
+  const [MENTOR, bimbingan] = await Promise.all([
+    ambilMentor(),
+    ambilEtalase(ETALASE.bimbinganOnline),
+  ]);
+  const paketHarian = bimbingan.produk;
   return (
     <div className="min-h-screen bg-white text-slate-900">
 
@@ -263,48 +235,84 @@ export default async function LandingPage() {
       <BannerStrip />
 
       {/* ── Layanan Tab Utama ── */}
-      <section id="layanan" className="mx-auto max-w-6xl px-4 py-20">
-        <SectionLabel>Layanan Utama</SectionLabel>
-        <h2 className="text-3xl lg:text-4xl font-extrabold text-slate-900 mb-2">
-          Bimbingan yang membuatmu<br className="hidden sm:block" /> sanggup menulisnya sendiri
-        </h2>
-        <p className="text-slate-600 font-medium max-w-xl mb-10">
-          Mentor membantumu melewati bagian yang macet — rumusan masalah, pemilihan metode,
-          olah data, persiapan sidang. Kamu tetap penulis karyamu.
-        </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {LAYANAN.map((l) => {
-            const Icon = l.icon;
-            return (
-              <div key={l.name} className={`group relative rounded-2xl border p-6 card-hover cursor-pointer transition-all ${
-                l.featured
-                  ? "border-brand bg-brand text-white shadow-card"
-                  : "border-slate-200 bg-white hover:border-brand-200"
-              }`}>
-                <div className={`inline-flex h-10 w-10 items-center justify-center rounded-xl mb-4 ${l.featured ? "bg-white/20" : "bg-brand-50"}`}>
-                  <Icon className={`h-5 w-5 ${l.featured ? "text-white" : "text-brand"}`} aria-hidden="true" />
+      {/*
+        Paket bimbingan harian, dibaca dari katalog (etalase bimbingan-online).
+        Sebelumnya bagian ini berisi enam layanan dengan harga yang tidak
+        pernah ada di daftar harga mana pun — Rp150.000 per sesi dan
+        seterusnya. Sekarang yang tampil di sini sama persis dengan yang
+        disunting admin di panel katalog.
+      */}
+      {paketHarian.length > 0 && (
+        <section id="layanan" className="mx-auto max-w-6xl px-4 py-20">
+          <SectionLabel>Bimbingan Online</SectionLabel>
+          <h2 className="text-3xl lg:text-4xl font-extrabold text-slate-900 mb-2">
+            Bimbingan yang membuatmu<br className="hidden sm:block" /> sanggup menulisnya sendiri
+          </h2>
+          <p className="text-slate-600 font-medium max-w-xl mb-10">
+            Privat per jam bersama mentor, tersedia untuk Skripsi, Tesis, dan
+            Disertasi. Ambil hanya bagian yang sedang kamu butuhkan.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {paketHarian.map((l, i) => {
+              const unggulan = i === 0;
+              return (
+                <div
+                  key={l.id}
+                  className={`group relative flex flex-col rounded-2xl border p-6 card-hover transition-all ${
+                    unggulan
+                      ? "border-brand bg-brand text-white shadow-card"
+                      : "border-slate-200 bg-white hover:border-brand-200"
+                  }`}
+                >
+                  <div className={`inline-flex h-10 w-10 items-center justify-center rounded-xl mb-4 ${unggulan ? "bg-white/20" : "bg-brand-50"}`}>
+                    <GraduationCap className={`h-5 w-5 ${unggulan ? "text-white" : "text-brand"}`} aria-hidden="true" />
+                  </div>
+                  <h3 className={`text-lg font-bold mb-0.5 leading-snug ${unggulan ? "text-white" : "text-slate-900"}`}>
+                    {l.nama}
+                  </h3>
+                  {l.subjudul && (
+                    <p className={`text-sm mb-3 ${unggulan ? "text-white/80" : "text-slate-500"}`}>
+                      {l.subjudul}
+                    </p>
+                  )}
+                  <p className={`text-sm font-semibold mb-4 ${unggulan ? "text-white" : "text-brand"}`}>
+                    {formatRupiah(l.harga)}
+                    {l.satuan && (
+                      <span className={`text-xs font-medium ${unggulan ? "text-white/75" : "text-slate-500"}`}>
+                        {" "}{l.satuan}
+                      </span>
+                    )}
+                  </p>
+                  <ul className="mb-5 space-y-2">
+                    {l.fitur.map((f) => (
+                      <li key={f} className={`flex items-start gap-2 text-sm ${unggulan ? "text-white/90" : "text-slate-600"}`}>
+                        <CheckCircle2 className={`h-4 w-4 flex-shrink-0 mt-0.5 ${unggulan ? "text-white/80" : "text-brand"}`} aria-hidden="true" />
+                        <span>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Link
+                    href={`/produk/${l.slug}`}
+                    className={`mt-auto inline-flex w-full items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-bold transition-colors ${
+                      unggulan ? "bg-white text-brand hover:bg-brand-50" : "bg-brand text-white hover:bg-brand-light"
+                    }`}
+                  >
+                    Selengkapnya <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                  </Link>
                 </div>
-                <h3 className={`text-lg font-bold mb-0.5 ${l.featured ? "text-white" : "text-slate-900"}`}>{l.name}</h3>
-                <p className={`text-sm mb-3 ${l.featured ? "text-white/80" : "text-slate-500"}`}>{l.sub}</p>
-                <p className={`text-sm font-semibold mb-4 ${l.featured ? "text-white" : "text-brand"}`}>{l.harga}<span className={`text-xs font-medium ${l.featured ? "text-white/75" : "text-slate-500"}`}> {l.satuan}</span></p>
-                <ul className="mb-5 space-y-2">
-                  {l.fitur.map((f) => (
-                    <li key={f} className={`flex items-start gap-2 text-sm ${l.featured ? "text-white/90" : "text-slate-600"}`}>
-                      <CheckCircle2 className={`h-4 w-4 flex-shrink-0 mt-0.5 ${l.featured ? "text-white/80" : "text-brand"}`} aria-hidden="true" />
-                      <span>{f}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Link href={l.href} className={`inline-flex w-full items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-bold transition-colors ${
-                  l.featured ? "bg-white text-brand hover:bg-brand-50" : "bg-brand text-white hover:bg-brand-light"
-                }`}>
-                  {l.href === "/booking" ? "Lihat jadwal" : "Selengkapnya"} <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                </Link>
-              </div>
-            );
-          })}
-        </div>
-      </section>
+              );
+            })}
+          </div>
+          <div className="mt-8 text-center">
+            <Link
+              href={`/etalase/${ETALASE.bimbinganBulanan}`}
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand hover:underline"
+            >
+              Mau sebulan penuh? Lihat paket bulanan <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </Link>
+          </div>
+        </section>
+      )}
 
       {/* ── Jasa Akademik ── */}
       <section className="bg-brand-50 px-4 py-16">

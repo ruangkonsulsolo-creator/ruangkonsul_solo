@@ -48,7 +48,9 @@
 -- dengan role 'user' dan is_active true.
 
 SELECT
-  p.email,
+  -- Email tinggal di auth.users, bukan di profiles. "p.email" membuat
+  -- seluruh berkas ini berhenti dengan 42703 di baris terakhirnya.
+  u.email,
   p.full_name,
   p.role,
   p.is_active,
