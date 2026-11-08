@@ -28,7 +28,7 @@ type Testimoni = {
 };
 
 const KUNCI_TUTUP = "rks_notif_testimoni_ditutup";
-const JEDA_MUNCUL = 6000;   // sebelum yang pertama tampil
+const JEDA_MUNCUL = 3000;   // sebelum yang pertama tampil
 const JEDA_GANTI = 12000;   // antar testimoni
 
 export function NotifTestimoni() {
@@ -56,16 +56,46 @@ export function NotifTestimoni() {
     (async () => {
       try {
         const supabase = createClient();
-        const { data, error } = await supabase
-          .from("testimoni")
-          .select("id, isi, penulis, layanan, tautan")
-          .eq("is_active", true)
-          .order("urutan")
-          .limit(12);
-        if (error || batal || !data || data.length === 0) return;
+
+        // Batas waktu supaya satu permintaan yang menggantung tidak membuat
+        // komponen ini menunggu selamanya tanpa jejak apa pun.
+        const { data, error } = await Promise.race([
+          supabase
+            .from("testimoni")
+            .select("id, isi, penulis, layanan, tautan")
+            .eq("is_active", true)
+            .order("urutan")
+            .limit(12),
+          new Promise<never>((_, tolak) =>
+            setTimeout(() => tolak(new Error("Supabase tidak menjawab")), 8000)
+          ),
+        ]);
+        if (batal) return;
+
+        // Bagi pengunjung komponen ini memang harus diam kalau tidak ada
+        // testimoni. Tapi diam juga membuat pemiliknya tidak bisa
+        // membedakan "belum diisi" dari "rusak", jadi alasannya dicatat
+        // di konsol. Pengunjung biasa tidak pernah membuka konsol.
+        if (error) {
+          console.warn(
+            "[notif-testimoni] tidak bisa membaca tabel testimoni:",
+            error.message,
+            "\nKalau pesannya menyebut relation \"testimoni\" does not exist, " +
+              "migration 032_testimoni_notif.sql belum dijalankan."
+          );
+          return;
+        }
+        if (!data || data.length === 0) {
+          console.info(
+            "[notif-testimoni] tabelnya ada tapi belum ada testimoni aktif. " +
+              "Isi di /admin/testimoni, dan pastikan centang \"Tampilkan di situs\"."
+          );
+          return;
+        }
+
         setDaftar(data as Testimoni[]);
-      } catch {
-        // Tabelnya belum ada — diamkan saja, tidak ada yang perlu ditampilkan.
+      } catch (e) {
+        console.warn("[notif-testimoni]", e);
       }
     })();
 
