@@ -24,13 +24,23 @@ export function KartuProduk({ produk }: { produk: Produk }) {
       href={`/produk/${p.slug}`}
       className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition-all hover:border-brand hover:shadow-card-hover"
     >
-      <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-brand-50 to-brand-100">
+      {/*
+        object-contain, bukan object-cover.
+
+        Katalognya memuat dua jenis gambar dengan bentuk yang jauh berbeda:
+        poster paket bimbingan 16:9 yang isinya tulisan, dan foto merchandise
+        yang hampir persegi. Dipotong agar memenuhi bingkai, poster kehilangan
+        tepi kiri-kanannya — dan di poster itulah harga dan isi paketnya
+        tertulis. Lebih baik ada sedikit ruang kosong daripada ada tulisan
+        yang terpangkas.
+      */}
+      <div className="relative aspect-[4/3] overflow-hidden bg-brand-50">
         {p.gambar.length > 0 ? (
           <Image
             src={p.gambar[0]}
             alt={p.nama}
             fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            className="object-contain p-2 transition-transform duration-500 group-hover:scale-105"
             sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 300px"
           />
         ) : (

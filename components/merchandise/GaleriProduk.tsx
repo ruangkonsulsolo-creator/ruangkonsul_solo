@@ -45,7 +45,7 @@ export function GaleriProduk({
           alt={`${nama} — foto ${aktif + 1}`}
           fill
           sizes="(min-width: 1024px) 480px, 100vw"
-          className="object-cover"
+          className="object-contain p-2"
           priority
         />
       </div>

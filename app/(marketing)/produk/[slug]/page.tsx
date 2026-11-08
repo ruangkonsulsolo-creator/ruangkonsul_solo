@@ -7,7 +7,6 @@ import { GaleriProduk } from "@/components/merchandise/GaleriProduk";
 import { PesanProduk } from "@/components/katalog/PesanProduk";
 import { formatRupiah } from "@/lib/utils/format-currency";
 import { ambilProduk, ambilSekategori } from "@/lib/katalog/baca";
-import { fotoProduk } from "@/lib/merchandise/foto";
 import { createClient } from "@/lib/supabase/server";
 import { BRAND } from "@/lib/brand";
 
@@ -63,10 +62,9 @@ export default async function HalamanProduk({
 
   const { produk: p, etalase, kategori } = data;
 
-  // Foto dari basis data lebih dulu; kalau belum diisi admin, folder
-  // /public/merchandise/<slug>/ tetap dipakai supaya cara lama yang sudah
-  // dipahami pemilik tidak mendadak berhenti bekerja.
-  const foto = p.gambar.length > 0 ? p.gambar : fotoProduk(p.slug);
+  // Penggabungan foto basis data dan folder sudah dilakukan di
+  // lib/katalog/baca.ts, jadi di sini tinggal dipakai.
+  const foto = p.gambar;
 
   const lainnya = await ambilSekategori(p.kategori_id, p.slug, 4);
 

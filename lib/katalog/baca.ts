@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { fotoDariFolder } from "@/lib/katalog/foto";
 import {
   KOLOM_ETALASE,
   KOLOM_KATEGORI,
@@ -31,12 +32,19 @@ type IsiEtalase = {
 const KOSONG: IsiEtalase = { etalase: null, kategori: [], produk: [] };
 
 function rapikan(baris: Record<string, unknown>[]): Produk[] {
-  return baris.map((b) => ({
-    ...b,
-    spesifikasi: Array.isArray(b.spesifikasi) ? b.spesifikasi : [],
-    fitur: Array.isArray(b.fitur) ? b.fitur : [],
-    gambar: Array.isArray(b.gambar) ? b.gambar : [],
-  })) as Produk[];
+  return baris.map((b) => {
+    const gambar = Array.isArray(b.gambar) ? (b.gambar as string[]) : [];
+    return {
+      ...b,
+      spesifikasi: Array.isArray(b.spesifikasi) ? b.spesifikasi : [],
+      fitur: Array.isArray(b.fitur) ? b.fitur : [],
+      // Kolom "Foto" di panel admin menang. Kalau kosong, folder
+      // /public/produk/<slug>/ dipakai. Penggabungannya di sini, bukan di
+      // tiap halaman, supaya kartu di daftar dan halaman detail tidak bisa
+      // lagi menampilkan foto yang berbeda.
+      gambar: gambar.length > 0 ? gambar : fotoDariFolder(b.slug as string),
+    };
+  }) as Produk[];
 }
 
 /** Satu etalase beserta kategori dan produknya, sudah urut. */
