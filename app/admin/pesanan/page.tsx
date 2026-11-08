@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import Link from "next/link";
 import { BRAND } from "@/lib/brand";
 import type { Metadata } from "next";
+import { formatRupiah } from "@/lib/utils/format-currency";
 export const metadata: Metadata = { title: `Manajemen Pesanan | Admin ${BRAND.name}` };
 
 const STATUS_CONFIG: Record<string, { label: string; variant: "success"|"warning"|"info"|"destructive"|"secondary" }> = {
@@ -67,7 +68,7 @@ export default async function AdminPesananPage({ searchParams }: { searchParams:
                     <td className="px-4 py-3"><p className="font-medium text-slate-800">{profile?.full_name ?? "-"}</p><p className="text-xs text-muted-foreground">{profile?.whatsapp ?? ""}</p></td>
                     <td className="px-4 py-3">{service?.name ?? "-"}</td>
                     <td className="px-4 py-3 max-w-[140px] truncate text-slate-600 text-xs">{file?.original_name ?? "-"}</td>
-                    <td className="px-4 py-3 text-xs whitespace-nowrap">{order.price_idr === 0 ? <span className="text-brand font-medium">Kuota</span> : new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(order.price_idr)}</td>
+                    <td className="px-4 py-3 text-xs whitespace-nowrap">{order.price_idr === 0 ? <span className="text-brand font-medium">Kuota</span> : formatRupiah(order.price_idr)}</td>
                     <td className="px-4 py-3"><Badge variant={st.variant}>{st.label}</Badge></td>
                     <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">{new Date(order.created_at).toLocaleString("id-ID", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</td>
                     <td className="px-4 py-3"><Link href={`/admin/pesanan/${order.id}`} className="text-xs font-medium text-brand hover:underline">Proses →</Link></td>

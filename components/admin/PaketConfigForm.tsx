@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Toast, useToast } from "@/components/ui/toast";
 import { Save, Loader2, Plus, Trash2, Star, ToggleLeft, ToggleRight } from "lucide-react";
+import { formatRupiah } from "@/lib/utils/format-currency";
 
 interface Package {
   id: string;
@@ -33,7 +34,7 @@ const emptyPackage: Omit<Package, "id"> = {
 };
 
 function fmt(n: number) {
-  return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(n);
+  return formatRupiah(n);
 }
 
 export function PaketConfigForm({

@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Toast, useToast } from "@/components/ui/toast";
 import { Plus, Pencil, Trash2, ToggleLeft, ToggleRight, Loader2, X, Save, Image as ImageIcon, Star } from "lucide-react";
+import { formatRupiah } from "@/lib/utils/format-currency";
 
 interface Kelas { id: string; tab: string; tag: string; title: string; subtitle: string | null; harga: number; is_active: boolean; sort_order: number; rating: number; review_count: number; image_url: string | null; }
 
@@ -31,7 +32,7 @@ const EMPTY_FORM = {
 };
 
 function fmt(n: number) {
-  return n === 0 ? "Gratis" : new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(n);
+  return n === 0 ? "Gratis" : formatRupiah(n);
 }
 
 export function KelasAdminTable({ kelas: initial }: { kelas: Kelas[] }) {

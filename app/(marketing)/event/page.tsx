@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { IkonLini } from "@/components/landing/IkonLini";
 import { BRAND, waLink } from "@/lib/brand";
 import { NavbarUtama } from "@/components/ui/NavbarUtama";
+import { formatRupiah } from "@/lib/utils/format-currency";
 
 export const metadata: Metadata = {
   title: "Event & Workshop",
@@ -126,11 +127,7 @@ const EVENT: Event[] = [
 const rupiah = (n: number) =>
   n === 0
     ? "Gratis"
-    : new Intl.NumberFormat("id-ID", {
-        style: "currency",
-        currency: "IDR",
-        maximumFractionDigits: 0,
-      }).format(n);
+    : formatRupiah(n);
 
 const WARNA_JENIS: Record<Event["jenis"], string> = {
   Webinar: "bg-blue-50 text-blue-700",

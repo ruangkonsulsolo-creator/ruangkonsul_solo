@@ -5,9 +5,10 @@ import Link from "next/link";
 import { ClipboardList, Users, TrendingUp, Clock } from "lucide-react";
 import { BRAND } from "@/lib/brand";
 import type { Metadata } from "next";
+import { formatRupiah } from "@/lib/utils/format-currency";
 export const metadata: Metadata = { title: `Admin Dashboard | ${BRAND.name}` };
 
-function fmt(n: number) { return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(n); }
+function fmt(n: number) { return formatRupiah(n); }
 
 const STATUS_BADGE: Record<string, { label: string; variant: "success"|"warning"|"info"|"destructive"|"secondary" }> = {
   menunggu_pembayaran: { label: "Menunggu", variant: "warning" },

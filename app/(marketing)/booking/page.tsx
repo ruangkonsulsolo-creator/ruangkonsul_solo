@@ -6,6 +6,7 @@ import KalenderBooking from "@/components/booking/KalenderBooking";
 import { createClient } from "@/lib/supabase/server";
 import { BRAND } from "@/lib/brand";
 import { NavbarUtama } from "@/components/ui/NavbarUtama";
+import { formatRupiah } from "@/lib/utils/format-currency";
 
 export const metadata: Metadata = {
   title: "Pesan Jadwal Bimbingan",
@@ -28,11 +29,6 @@ type MentorRow = {
   rating_avg: number;
 };
 
-const rupiah = new Intl.NumberFormat("id-ID", {
-  style: "currency",
-  currency: "IDR",
-  maximumFractionDigits: 0,
-});
 
 function inisial(nama: string) {
   return nama
@@ -173,7 +169,7 @@ export default async function BookingPage({
                     {terpilih.experience_years} tahun pengalaman
                   </span>
                   <span className="ml-auto text-lg font-extrabold text-brand">
-                    {rupiah.format(terpilih.price_per_hour)}
+                    {formatRupiah(terpilih.price_per_hour)}
                     <span className="text-xs font-normal text-slate-400">
                       {" "}
                       / sesi
@@ -219,7 +215,7 @@ export default async function BookingPage({
                       {m.display_name ?? "Mentor Ruang Konsul"}
                     </h3>
                     <p className="mt-0.5 text-sm font-semibold text-brand">
-                      {rupiah.format(m.price_per_hour)}
+                      {formatRupiah(m.price_per_hour)}
                       <span className="text-xs font-normal text-slate-400">
                         {" "}
                         / sesi

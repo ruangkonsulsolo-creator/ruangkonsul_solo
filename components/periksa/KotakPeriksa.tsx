@@ -22,8 +22,9 @@ import {
   EKSTENSI_DIDUKUNG,
   ekstrakTeks,
 } from "@/lib/periksa/ekstrak";
+import { formatRupiah } from "@/lib/utils/format-currency";
 
-const rupiah = (n: number) => `Rp${n.toLocaleString("id-ID")}`;
+const rupiah = (n: number) => formatRupiah(n);
 
 export function KotakPeriksa() {
   const [teks, setTeks] = useState("");

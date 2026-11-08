@@ -7,6 +7,8 @@ import {
   Star, CalendarDays, TrendingUp, AlertTriangle,
   UserPlus, EyeOff, Eye, ArrowDownCircle, Phone,
 } from "lucide-react";
+import { formatRupiah } from "@/lib/utils/format-currency";
+import { formatTanggal } from "@/lib/utils/format-tanggal";
 
 export type Performa = {
   mentor_id: string;
@@ -33,9 +35,7 @@ export type Performa = {
 
 export type CalonMentor = { id: string; full_name: string | null; email: string | null };
 
-const rupiah = new Intl.NumberFormat("id-ID", {
-  style: "currency", currency: "IDR", maximumFractionDigits: 0,
-});
+
 
 function inisial(n: string) {
   return n.split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase();
@@ -230,7 +230,7 @@ export function MentorPerformaTable({
                     <p className="mt-0.5 text-sm text-slate-400">
                       {(m.specializations ?? []).join(" · ") || "Belum ada bidang"}
                       {" · "}
-                      {rupiah.format(m.price_per_hour)} / sesi
+                      {formatRupiah(m.price_per_hour)} / sesi
                     </p>
                     {m.whatsapp && (
                       <a
@@ -309,22 +309,19 @@ export function MentorPerformaTable({
                   <span className="text-slate-500">
                     Pendapatan total{" "}
                     <strong className="font-bold text-slate-900">
-                      {rupiah.format(m.pendapatan_total)}
+                      {formatRupiah(m.pendapatan_total)}
                     </strong>
                   </span>
                   <span className="text-slate-500">
                     Bulan ini{" "}
                     <strong className="font-bold text-brand">
-                      {rupiah.format(m.pendapatan_bulan_ini)}
+                      {formatRupiah(m.pendapatan_bulan_ini)}
                     </strong>
                   </span>
                   <span className="text-slate-400">
                     Sesi terakhir{" "}
                     {m.sesi_terakhir
-                      ? new Intl.DateTimeFormat("id-ID", {
-                          day: "numeric", month: "short", year: "numeric",
-                          timeZone: "Asia/Jakarta",
-                        }).format(new Date(m.sesi_terakhir))
+                      ? formatTanggal(m.sesi_terakhir)
                       : "belum ada"}
                   </span>
                 </div>

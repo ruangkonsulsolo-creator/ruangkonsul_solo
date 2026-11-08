@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { formatRupiah } from "@/lib/utils/format-currency";
 
 /**
  * Kalender pemilihan jadwal bimbingan.
@@ -22,11 +23,7 @@ type Slot = {
 
 type Hari = { date: string; slots: Slot[] };
 
-const rupiah = new Intl.NumberFormat("id-ID", {
-  style: "currency",
-  currency: "IDR",
-  maximumFractionDigits: 0,
-});
+
 
 const namaHari = new Intl.DateTimeFormat("id-ID", {
   weekday: "short",
@@ -314,7 +311,7 @@ export default function KalenderBooking({
               <div className="flex justify-between gap-4 border-t border-brand-200 pt-1">
                 <dt className="text-muted-foreground">Biaya</dt>
                 <dd data-numeric className="font-semibold">
-                  {rupiah.format(slotTerpilih.price_per_hour)}
+                  {formatRupiah(slotTerpilih.price_per_hour)}
                 </dd>
               </div>
             </dl>

@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Toast, useToast } from "@/components/ui/toast";
 import { Save, Loader2, ToggleLeft, ToggleRight } from "lucide-react";
+import { formatRupiah } from "@/lib/utils/format-currency";
 
 interface Service {
   id: string;
@@ -94,7 +95,7 @@ export function LayananConfigForm({ services: initial }: { services: Service[] }
                   min={0}
                 />
                 <p className="text-[10px] text-muted-foreground">
-                  = {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(service.price_idr)}
+                  = {formatRupiah(service.price_idr)}
                 </p>
               </div>
 

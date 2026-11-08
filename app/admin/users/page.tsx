@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { BRAND } from "@/lib/brand";
 import type { Metadata } from "next";
+import { formatRupiah } from "@/lib/utils/format-currency";
 export const metadata: Metadata = { title: `Manajemen User | Admin ${BRAND.name}` };
 
 export default async function AdminUsersPage({ searchParams }: { searchParams: { page?: string } }) {
@@ -33,7 +34,7 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: {
                   <td className="px-4 py-3 font-medium text-slate-900">{u.full_name ?? "-"}</td>
                   <td className="px-4 py-3 text-slate-600">{u.whatsapp ?? "-"}</td>
                   <td className="px-4 py-3 font-mono text-xs">{u.referral_code}</td>
-                  <td className="px-4 py-3 text-xs">{u.credit_balance > 0 ? new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(u.credit_balance) : "-"}</td>
+                  <td className="px-4 py-3 text-xs">{u.credit_balance > 0 ? formatRupiah(u.credit_balance) : "-"}</td>
                   <td className="px-4 py-3"><Badge variant={u.role === "superadmin" ? "default" : u.role === "admin" ? "info" : "secondary"}>{u.role}</Badge></td>
                   <td className="px-4 py-3"><Badge variant={u.is_active ? "success" : "destructive"}>{u.is_active ? "Aktif" : "Nonaktif"}</Badge></td>
                   <td className="px-4 py-3 text-xs text-muted-foreground">{new Date(u.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}</td>

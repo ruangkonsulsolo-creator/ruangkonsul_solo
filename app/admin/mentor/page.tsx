@@ -5,15 +5,11 @@ import {
   type Performa,
   type CalonMentor,
 } from "@/components/admin/MentorPerformaTable";
+import { formatRupiah } from "@/lib/utils/format-currency";
 
 export const metadata: Metadata = { title: "Kinerja Mentor" };
 export const dynamic = "force-dynamic";
 
-const rupiah = new Intl.NumberFormat("id-ID", {
-  style: "currency",
-  currency: "IDR",
-  maximumFractionDigits: 0,
-});
 
 export default async function AdminMentorPage() {
   const supabase = createClient();
@@ -68,7 +64,7 @@ export default async function AdminMentorPage() {
           { label: "Mentor aktif", val: `${total.aktif} / ${total.mentor}` },
           { label: "Sesi selesai (total)", val: total.sesi },
           { label: "Sesi selesai bulan ini", val: total.bulanIni },
-          { label: "Pendapatan bulan ini", val: rupiah.format(total.pendapatan) },
+          { label: "Pendapatan bulan ini", val: formatRupiah(total.pendapatan) },
           {
             label: "Mentor tanpa slot",
             val: total.tanpaSlot,

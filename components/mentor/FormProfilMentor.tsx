@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Loader2, Plus, Trash2, Save, CheckCircle2 } from "lucide-react";
+import { formatRupiah } from "@/lib/utils/format-currency";
 
 /**
  * Formulir profil mentor.
@@ -340,7 +341,7 @@ export function FormProfilMentor() {
 
             <dl className="grid gap-3 rounded-xl bg-slate-50 p-4 sm:grid-cols-3">
               {[
-                ["Tarif per jam", `Rp${p.price_per_hour.toLocaleString("id-ID")}`],
+                ["Tarif per jam", formatRupiah(p.price_per_hour)],
                 ["Rating", p.session_count || p.rating_avg ? p.rating_avg.toFixed(2) : "—"],
                 ["Total sesi", String(p.session_count)],
               ].map(([k, v]) => (

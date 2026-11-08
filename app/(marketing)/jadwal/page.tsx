@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 import { BRAND, waLink } from "@/lib/brand";
 import { NavbarUtama } from "@/components/ui/NavbarUtama";
+import { formatRupiah } from "@/lib/utils/format-currency";
 
 export const metadata: Metadata = {
   title: `Jadwal Bimbingan | ${BRAND.name}`,
@@ -27,11 +28,6 @@ type SlotRow = {
   price_per_hour: number;
 };
 
-const rupiah = new Intl.NumberFormat("id-ID", {
-  style: "currency",
-  currency: "IDR",
-  maximumFractionDigits: 0,
-});
 
 const hariPanjang = new Intl.DateTimeFormat("id-ID", {
   weekday: "long",
@@ -195,7 +191,7 @@ export default async function JadwalPage() {
                         {m.nama}
                       </h3>
                       <p className="mt-0.5 text-sm font-semibold text-brand">
-                        {rupiah.format(m.harga)}
+                        {formatRupiah(m.harga)}
                         <span className="text-xs font-normal text-slate-400">
                           {" "}
                           / sesi

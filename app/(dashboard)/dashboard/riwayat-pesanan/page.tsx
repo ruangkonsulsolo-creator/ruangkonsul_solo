@@ -7,6 +7,7 @@ import { RebayarButton } from "@/components/dashboard/RebayarButton";
 import { FileSearch, Bot, BookOpenCheck, PenLine, FileText } from "lucide-react";
 import { PREVIEW_MODE, PREVIEW_USER } from "@/lib/utils/preview-mode";
 import type { Metadata } from "next";
+import { formatRupiah } from "@/lib/utils/format-currency";
 
 export const metadata: Metadata = { title: "Riwayat Pesanan" };
 
@@ -35,8 +36,9 @@ function formatDate(iso: string) {
   });
 }
 
-function formatRupiah(n: number) {
-  return n === 0 ? "Kuota" : new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(n);
+// Harga 0 berarti pesanan dibayar dengan kuota, bukan gratis.
+function hargaAtauKuota(n: number) {
+  return n === 0 ? "Kuota" : formatRupiah(n);
 }
 
 export default async function RiwayatPesananPage({
@@ -144,7 +146,7 @@ export default async function RiwayatPesananPage({
                         {file?.original_name ?? "-"}
                       </td>
                       <td className="px-4 py-3 text-slate-700 whitespace-nowrap">
-                        {formatRupiah(order.price_idr)}
+                        {hargaAtauKuota(order.price_idr)}
                       </td>
                       <td className="px-4 py-3">
                         <Badge variant={st.variant}>{st.label}</Badge>

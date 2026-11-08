@@ -12,6 +12,7 @@ import {
   Save, Loader2, ToggleLeft, ToggleRight, ChevronDown, ChevronUp,
   Plus, Trash2, DollarSign, Tag, Zap,
 } from "lucide-react";
+import { formatRupiah } from "@/lib/utils/format-currency";
 
 /* ── Types ─────────────────────────────────────────────────────── */
 interface Service {
@@ -120,7 +121,7 @@ export function SuperadminDashboard({ services: initialServices, packages: initi
   }
 
   function fmt(n: number) {
-    return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(n);
+    return formatRupiah(n);
   }
 
   return (

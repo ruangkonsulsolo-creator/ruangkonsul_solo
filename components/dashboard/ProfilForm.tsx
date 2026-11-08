@@ -9,6 +9,7 @@ import { Toast, useToast } from "@/components/ui/toast";
 import {
   User, Phone, Mail, Copy, CheckCircle2, Gift, Loader2,
 } from "lucide-react";
+import { formatRupiah } from "@/lib/utils/format-currency";
 
 interface ProfilFormProps {
   userId: string;
@@ -23,9 +24,7 @@ interface ProfilFormProps {
 }
 
 function fmt(n: number) {
-  return new Intl.NumberFormat("id-ID", {
-    style: "currency", currency: "IDR", minimumFractionDigits: 0,
-  }).format(n);
+  return formatRupiah(n);
 }
 
 export function ProfilForm({ userId, email, initialData, referralCount }: ProfilFormProps) {

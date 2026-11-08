@@ -8,6 +8,7 @@ import { Toast, useToast } from "@/components/ui/toast";
 import {
   Download, Upload, CheckCircle2, XCircle, Play, Loader2,
 } from "lucide-react";
+import { formatRupiah } from "@/lib/utils/format-currency";
 
 interface OrderDetailPanelProps {
   order: {
@@ -132,7 +133,7 @@ export function OrderDetailPanel({ order, documentDownloadUrl }: OrderDetailPane
               <p className="font-medium">
                 {order.price_idr === 0
                   ? "Kuota"
-                  : new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(order.price_idr)}
+                  : formatRupiah(order.price_idr)}
               </p>
             </div>
             <div>
