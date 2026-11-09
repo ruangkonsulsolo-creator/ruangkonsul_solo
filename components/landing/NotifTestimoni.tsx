@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { ArrowRight, Quote, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -36,6 +37,10 @@ export function NotifTestimoni() {
   const [indeks, setIndeks] = useState(0);
   const [tampil, setTampil] = useState(false);
   const [ditutup, setDitutup] = useState(true);
+  // Portal hanya boleh dibuat setelah komponen hidup di peramban;
+  // document tidak ada saat dirender di server.
+  const [terpasang, setTerpasang] = useState(false);
+  useEffect(() => setTerpasang(true), []);
 
   // Periksa penutupan lebih dulu. sessionStorage bisa melempar di mode
   // penyamaran atau saat cookie situs diblokir, jadi dibungkus try.
@@ -131,18 +136,37 @@ export function NotifTestimoni() {
     }
   }
 
-  if (ditutup || !tampil || daftar.length === 0) return null;
+  if (!terpasang || ditutup || !tampil || daftar.length === 0) return null;
 
   const t = daftar[indeks];
   const keterangan = [t.penulis, t.layanan && `Layanan: ${t.layanan}`]
     .filter(Boolean)
     .join(" · ");
 
-  return (
+  /*
+    Dipasang lewat portal langsung ke <body>, bukan di tempatnya berada
+    dalam pohon komponen.
+
+    position: fixed berpatokan pada layar — kecuali kalau ada satu saja
+    elemen induk yang punya transform, filter, backdrop-filter, perspective,
+    atau contain. Satu properti itu diam-diam mengubah patokannya jadi
+    elemen tersebut, dan notifikasinya ikut menggulir bersama halaman.
+    Hari ini tidak ada induk seperti itu, tapi satu kelas Tailwind yang
+    ditambahkan kapan saja di masa depan sudah cukup untuk merusaknya, dan
+    gejalanya tidak akan terlihat seperti sebab-akibat.
+
+    Portal ke <body> membuat pertanyaan itu tidak pernah perlu diajukan
+    lagi: tidak ada induk sama sekali.
+  */
+  return createPortal(
     <div
       role="status"
       aria-live="polite"
-      className="fixed bottom-5 left-5 z-40 w-[min(21rem,calc(100vw-2.5rem))] overflow-hidden rounded-2xl bg-brand text-white shadow-xl animate-in fade-in slide-in-from-bottom-4 duration-500"
+      style={{
+        // Di iPhone, bagian bawah layar tertutup batang gestur Safari.
+        bottom: "max(1.25rem, env(safe-area-inset-bottom))",
+      }}
+      className="fixed left-5 z-50 w-[min(21rem,calc(100vw-2.5rem))] overflow-hidden rounded-2xl bg-brand text-white shadow-2xl ring-1 ring-black/10 animate-in fade-in slide-in-from-bottom-4 duration-500"
     >
       <div className="flex items-start gap-2 px-4 pt-3.5">
         <span className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-white/80">
@@ -186,6 +210,7 @@ export function NotifTestimoni() {
           ))}
         </div>
       )}
-    </div>
+    </div>,
+    document.body
   );
 }
