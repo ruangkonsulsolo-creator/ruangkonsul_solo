@@ -1,3 +1,4 @@
+import { requirePageRole } from "@/lib/auth/page-guard";
 import { SuperadminDashboard } from "@/components/admin/SuperadminDashboard";
 import { SuperadminStats } from "@/components/admin/SuperadminStats";
 import { BRAND } from "@/lib/brand";
@@ -16,7 +17,7 @@ async function getData() {
       supabase.from("quota_packages").select("*, services(name)").order("created_at", { ascending: true }),
       supabase.from("banners").select("*").order("sort_order", { ascending: true }),
       supabase.from("kelas_bimbingan").select("id, tab, title, harga, is_active, sort_order").order("sort_order", { ascending: true }),
-      supabase.from("transactions").select("amount_idr").eq("type", "order_payment"),
+      supabase.from("transactions").select("amount_idr").in("type", ["order_payment", "package_purchase", "booking_payment"]),
       supabase.from("orders").select("*", { count: "exact", head: true }),
       supabase.from("profiles").select("*", { count: "exact", head: true }).eq("role", "user"),
       supabase.from("bookings").select("*", { count: "exact", head: true }),
@@ -77,6 +78,7 @@ async function getData() {
 }
 
 export default async function SuperadminPage() {
+  await requirePageRole(["superadmin"]);
   const data = await getData();
 
   return (

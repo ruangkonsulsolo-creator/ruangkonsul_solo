@@ -45,6 +45,7 @@ const navItems = [
   // Halaman privat — butuh login
   { label: "Riwayat Pesanan", href: "/dashboard/riwayat-pesanan", icon: ClockIcon },
   { label: "Paket Saya",      href: "/dashboard/paket-saya",      icon: PackageOpen },
+  { label: "Bimbingan Saya",  href: "/dashboard/bimbingan-saya",  icon: GraduationCap },
   { label: "Profil",          href: "/dashboard/profil",           icon: User },
 ];
 

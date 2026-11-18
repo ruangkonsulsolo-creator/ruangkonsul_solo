@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Badge } from "@/components/ui/badge";
 import { BRAND } from "@/lib/brand";
 import { PREVIEW_MODE, PREVIEW_USER } from "@/lib/utils/preview-mode";
+import { MentorBookingActions } from "@/components/booking/BookingActions";
 import type { Metadata } from "next";
 export const metadata: Metadata = { title: `Daftar Klien | ${BRAND.name}` };
 
@@ -16,7 +17,8 @@ export default async function KlienMentorPage() {
 
   const { data: bookings } = await supabase
     .from("bookings")
-    .select("id, booking_number, status, topic, created_at, profiles(full_name, whatsapp), booking_slots(slot_date, slot_start)")
+    .select("id, booking_number, status, topic, notes, meeting_link, created_at, profiles(full_name, whatsapp), booking_slots(slot_date, slot_start)")
+    .neq("status", "pending")
     .eq("mentor_id", mentorProfile?.id ?? "")
     .order("created_at", { ascending: false });
 
@@ -62,13 +64,14 @@ export default async function KlienMentorPage() {
                       {slot?.slot_date ? new Date(slot.slot_date + "T00:00:00").toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }) : "-"}
                       {slot?.slot_start && ` · ${slot.slot_start.slice(0,5)} WIB`}
                     </td>
-                    <td className="px-4 py-3 max-w-[180px] truncate text-slate-600">{b.topic ?? "-"}</td>
+                    <td className="px-4 py-3 max-w-[200px] text-slate-600"><p className="truncate">{b.topic ?? "-"}</p>{(b as any).notes && <p className="text-[11px] text-muted-foreground line-clamp-2">{(b as any).notes}</p>}</td>
                     <td className="px-4 py-3"><Badge variant={st.variant}>{st.label}</Badge></td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 space-y-2">
                       {cust?.whatsapp && (
                         <a href={`https://wa.me/${cust.whatsapp}`} target="_blank" rel="noopener noreferrer"
-                          className="text-xs font-semibold text-[#8B0000] hover:underline">Chat WA</a>
+                          className="block text-xs font-semibold text-[#8B0000] hover:underline">Chat WA</a>
                       )}
+                      <MentorBookingActions bookingId={b.id} status={b.status} meetingLink={(b as any).meeting_link ?? null} />
                     </td>
                   </tr>
                 );

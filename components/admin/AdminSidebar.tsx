@@ -8,25 +8,26 @@ import { Logo } from "@/components/ui/logo";
 import {
   LayoutDashboard, ClipboardList, Users,
   BarChart3, Settings, Package, LogOut, ChevronRight,
-  GraduationCap, FileText, ShieldCheck, Phone,
+  GraduationCap, FileText, ShieldCheck, Phone, CreditCard,
 } from "lucide-react";
 
 const navItems = [
   { label: "Dashboard",       href: "/admin",              icon: LayoutDashboard, exact: true },
   { label: "Pesanan",         href: "/admin/pesanan",      icon: ClipboardList },
+  { label: "Pembayaran",      href: "/admin/pembayaran",   icon: CreditCard },
   { label: "Booking Leads",   href: "/admin/booking-leads",icon: Phone },
   { label: "Users",           href: "/admin/users",        icon: Users },
   { label: "Laporan",         href: "/admin/laporan",      icon: BarChart3 },
   { type: "section" as const, label: "Konten" },
   { label: "Kelas Bimbingan", href: "/admin/bimbingan",    icon: GraduationCap },
   { label: "Blog",            href: "/admin/blog",         icon: FileText },
-  { type: "section" as const, label: "Konfigurasi" },
-  { label: "Layanan & Harga", href: "/admin/layanan",      icon: Settings },
-  { label: "Paket Hemat",     href: "/admin/paket",        icon: Package },
-  { label: "⚡ Superadmin",   href: "/admin/superadmin",   icon: ShieldCheck },
+  { type: "section" as const, label: "Konfigurasi", superadminOnly: true },
+  { label: "Layanan & Harga", href: "/admin/layanan",      icon: Settings,    superadminOnly: true },
+  { label: "Paket Hemat",     href: "/admin/paket",        icon: Package,     superadminOnly: true },
+  { label: "⚡ Superadmin",   href: "/admin/superadmin",   icon: ShieldCheck, superadminOnly: true },
 ];
 
-export function AdminSidebar() {
+export function AdminSidebar({ role = "admin" }: { role?: string }) {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
@@ -53,8 +54,10 @@ export function AdminSidebar() {
 
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-0.5" aria-label="Admin navigation">
-        {navItems.map((item, i) => {
-          if (item.type === "section") {
+        {navItems
+          .filter((item) => !("superadminOnly" in item && item.superadminOnly) || role === "superadmin")
+          .map((item, i) => {
+          if ("type" in item && item.type === "section") {
             return (
               <p key={i} className="px-3 pt-5 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-white/40">
                 {item.label}
@@ -63,7 +66,7 @@ export function AdminSidebar() {
           }
 
           const Icon = item.icon!;
-          const active = isActive(item.href!, item.exact);
+          const active = isActive(item.href!, "exact" in item ? item.exact : false);
 
           return (
             <Link

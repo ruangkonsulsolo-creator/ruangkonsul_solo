@@ -1,3 +1,5 @@
+import { BRAND } from "@/lib/brand";
+
 // Fonnte WhatsApp API
 // Docs: https://fonnte.com/docs
 
@@ -27,8 +29,8 @@ export async function sendWhatsApp(params: {
 // Template pesan
 export const waTemplates = {
   orderReceived: (orderNumber: string) =>
-    `✅ *Kalibri* — Pesanan *${orderNumber}* telah diterima dan sedang dalam antrian proses. Kami akan segera memberitahu Anda saat laporan selesai.`,
+    `✅ *${BRAND.name}* — Pesanan *${orderNumber}* telah diterima dan sedang dalam antrian proses. Kami akan segera memberitahu Anda saat laporan selesai.`,
 
   orderCompleted: (orderNumber: string, downloadUrl: string) =>
-    `🎉 *Kalibri* — Laporan pesanan *${orderNumber}* sudah siap!\n\nUnduh laporan Anda di dashboard: ${downloadUrl}\n\n_Link berlaku 1 jam._`,
+    `🎉 *${BRAND.name}* — Laporan pesanan *${orderNumber}* sudah siap!\n\nUnduh laporan Anda di dashboard: ${downloadUrl}\n\n_Link berlaku 1 jam._`,
 };

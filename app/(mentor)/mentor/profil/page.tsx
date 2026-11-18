@@ -5,6 +5,7 @@ import { PREVIEW_MODE, PREVIEW_USER } from "@/lib/utils/preview-mode";
 import { BRAND } from "@/lib/brand";
 import { formatRupiah } from "@/lib/utils/format-currency";
 import { Star, Users, Clock, CheckCircle2, GraduationCap, DollarSign, Edit3 } from "lucide-react";
+import { MentorProfileEditor } from "@/components/mentor/MentorProfileEditor";
 import type { Metadata } from "next";
 export const metadata: Metadata = { title: `Profil Mentor | ${BRAND.name}` };
 
@@ -24,29 +25,29 @@ async function getData() {
       rating_count: 38,
     };
   }
-  try {
-    const { createClient } = await import("@/lib/supabase/server");
-    const { redirect } = await import("next/navigation");
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) redirect("/login");
-    const { data: profile } = await supabase.from("profiles").select("full_name, email, role").eq("id", user!.id).single();
-    if (!profile || !["mentor","admin","superadmin"].includes(profile.role)) redirect("/dashboard");
-    const { data: mp } = await supabase.from("mentor_profiles").select("id, bio, specializations, price_per_hour, is_available, session_count, rating_avg, rating_count").eq("user_id", user!.id).single();
-    return {
-      full_name: profile!.full_name,
-      email: profile!.email ?? "",
-      bio: mp?.bio ?? "",
-      specializations: (mp?.specializations as string[]) ?? [],
-      price_per_hour: mp?.price_per_hour ?? 0,
-      is_available: mp?.is_available ?? false,
-      session_count: mp?.session_count ?? 0,
-      rating_avg: mp?.rating_avg ?? 0,
-      rating_count: mp?.rating_count ?? 0,
-    };
-  } catch {
-    return { full_name: "Mentor", email: "", bio: "", specializations: [], price_per_hour: 0, is_available: false, session_count: 0, rating_avg: 0, rating_count: 0 };
-  }
+  // Layout (mentor) sudah memastikan user login & ber-role mentor/admin/superadmin.
+  const { createClient } = await import("@/lib/supabase/server");
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { full_name: "Mentor", email: "", bio: "", specializations: [], price_per_hour: 0, is_available: false, session_count: 0, rating_avg: 0, rating_count: 0 };
+  const [{ data: profile }, { data: mp }] = await Promise.all([
+    supabase.from("profiles").select("full_name").eq("id", user.id).single(),
+    supabase.from("mentor_profiles").select("id, bio, specializations, price_per_hour, is_available, session_count, rating_avg").eq("user_id", user.id).maybeSingle(),
+  ]);
+  const { count: ratingCount } = mp?.id
+    ? await supabase.from("bookings").select("id", { count: "exact", head: true }).eq("mentor_id", mp.id).not("rating", "is", null)
+    : { count: 0 };
+  return {
+    full_name: profile?.full_name || user.email?.split("@")[0] || "Mentor",
+    email: user.email ?? "",
+    bio: mp?.bio ?? "",
+    specializations: (mp?.specializations as string[]) ?? [],
+    price_per_hour: mp?.price_per_hour ?? 0,
+    is_available: mp?.is_available ?? false,
+    session_count: mp?.session_count ?? 0,
+    rating_avg: Number(mp?.rating_avg ?? 0),
+    rating_count: ratingCount ?? 0,
+  };
 }
 
 export default async function MentorProfilPage() {
@@ -66,10 +67,10 @@ export default async function MentorProfilPage() {
           <h2 className="text-xl font-extrabold text-slate-900">Profil Mentor</h2>
           <p className="text-sm text-muted-foreground mt-0.5">Kelola informasi profil yang ditampilkan ke klien.</p>
         </div>
-        <Button className="gap-2">
-          <Edit3 className="h-3.5 w-3.5" />
-          Edit Profil
-        </Button>
+        <MentorProfileEditor
+          initial={{ bio: data.bio, specializations: data.specializations, price_per_hour: data.price_per_hour, is_available: data.is_available }}
+          options={SPECIALIZATIONS}
+        />
       </div>
 
       {/* Profile header */}

@@ -34,8 +34,11 @@ async function getData() {
     const { data: profile } = await supabase.from("profiles").select("role, full_name").eq("id", user!.id).single();
     if (!profile || !["mentor","admin","superadmin"].includes(profile.role)) redirect("/dashboard");
     const { data: mp } = await supabase.from("mentor_profiles").select("id, session_count, rating_avg, is_available, price_per_hour").eq("user_id", user!.id).single();
-    const today = new Date().toISOString().slice(0, 10);
-    const { data: todayB } = await supabase.from("bookings").select("id, status, booking_slots(slot_start, slot_end), profiles(full_name, whatsapp)").eq("mentor_id", mp?.id ?? "").in("status", ["confirmed","pending"]).limit(10);
+    // Tanggal hari ini versi WIB; hanya sesi yang sudah dibayar (confirmed)
+    const today = new Date(Date.now() + 7 * 3600_000).toISOString().slice(0, 10);
+    const { data: todayB } = mp?.id
+      ? await supabase.from("bookings").select("id, status, booking_slots!inner(slot_date, slot_start, slot_end), profiles(full_name, whatsapp)").eq("mentor_id", mp.id).eq("status", "confirmed").eq("booking_slots.slot_date", today).limit(20)
+      : { data: [] as any[] };
     return {
       nama: profile!.full_name?.split(" ")[0] ?? "Mentor",
       isAvailable: mp?.is_available ?? false,

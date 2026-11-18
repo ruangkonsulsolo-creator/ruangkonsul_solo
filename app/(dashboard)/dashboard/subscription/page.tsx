@@ -5,62 +5,34 @@ import { Card } from "@/components/ui/card";
 import { formatRupiah } from "@/lib/utils/format-currency";
 import { PREVIEW_MODE } from "@/lib/utils/preview-mode";
 import { BRAND } from "@/lib/brand";
+import { BuyPackageButton } from "@/components/payment/BuyPackageButton";
 import { Star, Check, Sparkles, Crown, ArrowRight, CalendarCheck } from "lucide-react";
 import type { Metadata } from "next";
-export const metadata: Metadata = { title: `Subscription | ${BRAND.name}` };
+export const metadata: Metadata = { title: `Paket Hemat | ${BRAND.name}` };
 
-const PLANS = [
-  {
-    name: "Starter",
-    icon: Star,
-    price: 99000,
-    period: "/bulan",
-    desc: "Untuk mahasiswa yang baru mulai skripsi",
-    features: [
-      "5x cek plagiasi / bulan",
-      "3x AI Detector / bulan",
-      "1x DrillBit / bulan",
-      "Akses webinar gratis",
-      "Email support",
-    ],
-    popular: false,
-  },
-  {
-    name: "Pro",
-    icon: Crown,
-    price: 199000,
-    period: "/bulan",
-    desc: "Pilihan terpopuler untuk mahasiswa aktif",
-    features: [
-      "15x cek plagiasi / bulan",
-      "10x AI Detector / bulan",
-      "5x DrillBit / bulan",
-      "2 sesi bimbingan / bulan",
-      "Akses semua webinar",
-      "Priority WhatsApp support",
-      "Diskon 10% jasa parafrase",
-    ],
-    popular: true,
-  },
-  {
-    name: "Premium",
-    icon: Sparkles,
-    price: 349000,
-    period: "/bulan",
-    desc: "Untuk mahasiswa S2 & peneliti",
-    features: [
-      "Unlimited cek plagiasi",
-      "Unlimited AI Detector",
-      "10x DrillBit / bulan",
-      "4 sesi bimbingan / bulan",
-      "Akses semua webinar + rekaman",
-      "Dedicated mentor support",
-      "Diskon 20% semua layanan",
-      "Free parafrase 5 halaman / bulan",
-    ],
-    popular: false,
-  },
-];
+interface PackageRow {
+  id: string; name: string; quota_amount: number; price_idr: number;
+  validity_days: number; is_popular: boolean; services: { name: string; slug: string } | null;
+}
+
+/** Paket hemat aktif dari DB (dikelola superadmin di /admin/paket). */
+async function getPackages(): Promise<PackageRow[]> {
+  try {
+    const { createClient } = await import("@/lib/supabase/server");
+    const supabase = createClient();
+    const { data } = await supabase
+      .from("quota_packages")
+      .select("id, name, quota_amount, price_idr, validity_days, is_popular, services(name, slug)")
+      .eq("is_active", true)
+      .order("price_idr", { ascending: true });
+    return ((data ?? []) as any[]).map((p) => ({
+      ...p,
+      services: Array.isArray(p.services) ? p.services[0] ?? null : p.services,
+    }));
+  } catch {
+    return [];
+  }
+}
 
 async function getActiveSubscription() {
   if (PREVIEW_MODE) return null;
@@ -82,14 +54,14 @@ async function getActiveSubscription() {
 }
 
 export default async function SubscriptionPage() {
-  const activeSub = await getActiveSubscription();
+  const [activeSub, packages] = await Promise.all([getActiveSubscription(), getPackages()]);
 
   return (
     <div className="space-y-7 max-w-4xl">
       <div>
-        <h2 className="text-xl font-extrabold text-slate-900">Subscription Bimbingan</h2>
+        <h2 className="text-xl font-extrabold text-slate-900">Paket Hemat &amp; Kuota</h2>
         <p className="text-sm text-muted-foreground mt-0.5">
-          Berlangganan bulanan dan dapatkan kuota layanan + bimbingan dengan harga lebih hemat.
+          Beli kuota sekaligus dengan harga per cek yang lebih murah. Bayar sekali via QRIS, VA bank, atau e-wallet.
         </p>
       </div>
 
@@ -98,7 +70,7 @@ export default async function SubscriptionPage() {
         <div className="rounded-2xl border border-green-200 bg-green-50 p-4">
           <div className="flex items-center gap-2 mb-3">
             <CalendarCheck className="h-4 w-4 text-green-600" />
-            <h3 className="text-sm font-bold text-green-800">Subscription Aktif</h3>
+            <h3 className="text-sm font-bold text-green-800">Kuota Aktif</h3>
           </div>
           <div className="space-y-2">
             {(activeSub as any[]).map((q) => (
@@ -111,68 +83,82 @@ export default async function SubscriptionPage() {
         </div>
       )}
 
-      {/* Pricing plans */}
+      {/* Paket dari DB */}
+      {packages.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-slate-200 bg-white py-12 text-center text-sm text-muted-foreground">
+          Belum ada paket yang dijual saat ini.
+        </div>
+      ) : (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {PLANS.map((plan) => {
-          const Icon = plan.icon;
+        {packages.map((pkg) => {
+          const Icon = pkg.is_popular ? Crown : pkg.quota_amount >= 50 ? Sparkles : Star;
+          const features = [
+            `${pkg.quota_amount}x ${pkg.services?.name ?? "layanan"}`,
+            `${formatRupiah(Math.round(pkg.price_idr / pkg.quota_amount))} per cek`,
+            `Masa aktif ${pkg.validity_days} hari`,
+            "Notifikasi WhatsApp otomatis",
+          ];
           return (
             <Card
-              key={plan.name}
+              key={pkg.id}
               className={`relative flex flex-col p-6 ${
-                plan.popular ? "border-2 border-[#8B0000] shadow-lg" : ""
+                pkg.is_popular ? "border-2 border-[#8B0000] shadow-lg" : ""
               }`}
             >
-              {plan.popular && (
+              {pkg.is_popular && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                   <Badge variant="info" className="shadow-sm">Paling Populer</Badge>
                 </div>
               )}
               <div className="flex items-center gap-2 mb-3">
-                <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${plan.popular ? "bg-brand-gradient" : "bg-brand-50"}`}>
-                  <Icon className={`h-5 w-5 ${plan.popular ? "text-white" : "text-[#8B0000]"}`} />
+                <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${pkg.is_popular ? "bg-brand-gradient" : "bg-brand-50"}`}>
+                  <Icon className={`h-5 w-5 ${pkg.is_popular ? "text-white" : "text-[#8B0000]"}`} />
                 </div>
-                <h3 className="text-lg font-extrabold text-slate-900">{plan.name}</h3>
+                <h3 className="text-lg font-extrabold text-slate-900">{pkg.name}</h3>
               </div>
-              <p className="text-xs text-muted-foreground mb-4">{plan.desc}</p>
+              <p className="text-xs text-muted-foreground mb-4">{pkg.services?.name ?? "Layanan"}</p>
               <div className="mb-5">
-                <span className="text-3xl font-extrabold text-slate-900">{formatRupiah(plan.price)}</span>
-                <span className="text-sm text-muted-foreground">{plan.period}</span>
+                <span className="text-3xl font-extrabold text-slate-900">{formatRupiah(pkg.price_idr)}</span>
               </div>
               <ul className="space-y-2.5 flex-1 mb-5">
-                {plan.features.map((f) => (
+                {features.map((f) => (
                   <li key={f} className="flex items-start gap-2 text-sm">
                     <Check className="h-4 w-4 text-[#8B0000] flex-shrink-0 mt-0.5" />
                     <span className="text-slate-700">{f}</span>
                   </li>
                 ))}
               </ul>
-              <Button
-                className={`w-full gap-2 ${plan.popular ? "" : "variant-outline"}`}
-                variant={plan.popular ? "default" : "outline"}
-              >
-                Pilih {plan.name}
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Button>
+              <BuyPackageButton
+                packageId={pkg.id}
+                label={`Beli ${pkg.name}`}
+                returnTo="/dashboard/subscription"
+                className={`rounded-xl py-2.5 text-sm font-semibold transition-colors ${
+                  pkg.is_popular
+                    ? "bg-[#8B0000] text-white hover:bg-brand-light"
+                    : "border border-[#8B0000] text-[#8B0000] hover:bg-brand-50"
+                }`}
+              />
             </Card>
           );
         })}
       </div>
+      )}
 
       {/* FAQ */}
       <div className="rounded-2xl border border-slate-200 bg-white p-5 space-y-4">
-        <h3 className="text-sm font-bold text-slate-900">FAQ Subscription</h3>
+        <h3 className="text-sm font-bold text-slate-900">FAQ Paket</h3>
         <div className="space-y-3">
           <div>
-            <p className="text-sm font-semibold text-slate-700">Apakah kuota terpakai bisa diakumulasikan?</p>
-            <p className="text-xs text-muted-foreground mt-1">Ya, kuota yang tidak terpakai di bulan ini akan terbawa ke bulan berikutnya selama subscription aktif.</p>
+            <p className="text-sm font-semibold text-slate-700">Kapan kuota aktif?</p>
+            <p className="text-xs text-muted-foreground mt-1">Otomatis begitu pembayaran terkonfirmasi Midtrans — biasanya beberapa detik untuk QRIS/e-wallet.</p>
           </div>
           <div>
-            <p className="text-sm font-semibold text-slate-700">Bagaimana cara pembatalan?</p>
-            <p className="text-xs text-muted-foreground mt-1">Kamu bisa batalkan kapan saja melalui menu Profil → Subscription. Tidak ada biaya pembatalan.</p>
+            <p className="text-sm font-semibold text-slate-700">Apa yang terjadi dengan sisa kuota saat masa aktif habis?</p>
+            <p className="text-xs text-muted-foreground mt-1">Sisa kuota hangus dan tidak dapat di-refund. Lihat sisa kuota & tanggal kedaluwarsa di menu Paket Saya.</p>
           </div>
           <div>
-            <p className="text-sm font-semibold text-slate-700">Apakah bisa upgrade plan?</p>
-            <p className="text-xs text-muted-foreground mt-1">Ya, upgrade kapan saja. Selisih harga akan diprorata sesuai sisa hari di bulan berjalan.</p>
+            <p className="text-sm font-semibold text-slate-700">Apakah ini langganan otomatis?</p>
+            <p className="text-xs text-muted-foreground mt-1">Tidak. Setiap paket dibayar sekali, tanpa tagihan bulanan otomatis.</p>
           </div>
         </div>
       </div>

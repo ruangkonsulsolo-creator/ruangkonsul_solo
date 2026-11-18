@@ -1,3 +1,4 @@
+import { requirePageRole } from "@/lib/auth/page-guard";
 import { createClient } from "@/lib/supabase/server";
 import { LayananConfigForm } from "@/components/admin/LayananConfigForm";
 import { BRAND } from "@/lib/brand";
@@ -5,6 +6,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = { title: `Konfigurasi Layanan | Admin ${BRAND.name}` };
 
 export default async function AdminLayananPage() {
+  await requirePageRole(["superadmin"]);
   const supabase = createClient();
   const { data: services } = await supabase.from("services").select("id, slug, name, description, price_idr, sla_hours, max_file_size_mb, is_active").order("created_at", { ascending: true });
   return (

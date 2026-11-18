@@ -1,23 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { requireUser, STAFF_ROLES } from "@/lib/auth/roles";
 
 export async function POST(request: NextRequest) {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const auth = await requireUser(STAFF_ROLES);
+  if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status });
 
-  if (!user) {
-    return NextResponse.json({ error: "Tidak terautentikasi." }, { status: 401 });
-  }
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-
-  if (!profile || !["admin", "super_admin"].includes(profile.role)) {
-    return NextResponse.json({ error: "Akses ditolak." }, { status: 403 });
-  }
+  // Storage bucket "reports" tidak punya policy tulis untuk user → pakai service role
+  const supabase = createAdminClient();
 
   let formData: FormData;
   try {

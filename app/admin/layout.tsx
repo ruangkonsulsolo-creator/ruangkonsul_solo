@@ -1,24 +1,24 @@
 import type { ReactNode } from "react";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 import { PREVIEW_MODE } from "@/lib/utils/preview-mode";
 
 async function getAdminProfile() {
   if (PREVIEW_MODE) {
     return { role: "superadmin", full_name: "Preview Admin" };
   }
-  try {
-    const { createClient } = await import("@/lib/supabase/server");
-    const { redirect } = await import("next/navigation");
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) redirect("/login");
-    const { data: profile } = await supabase
-      .from("profiles").select("role, full_name").eq("id", user!.id).single();
-    if (!profile || !["admin", "superadmin"].includes(profile.role)) redirect("/dashboard");
-    return profile!;
-  } catch {
-    return { role: "admin", full_name: "Admin" };
+  // PENTING: redirect() melempar error khusus Next.js — jangan dibungkus try/catch,
+  // kalau tidak guard role bisa "tertelan" dan user biasa lolos ke panel admin.
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login?next=/admin");
+  const { data: profile } = await supabase
+    .from("profiles").select("role, full_name, is_active").eq("id", user.id).single();
+  if (!profile || profile.is_active === false || !["admin", "superadmin"].includes(profile.role)) {
+    redirect("/dashboard");
   }
+  return profile;
 }
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
@@ -28,7 +28,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
 
   return (
     <div className="flex min-h-screen bg-slate-50">
-      <AdminSidebar />
+      <AdminSidebar role={profile.role} />
       <div className="flex flex-1 flex-col min-w-0">
         <header className="flex h-14 items-center justify-between border-b border-slate-100 bg-white/95 backdrop-blur-sm px-6 shadow-sm">
           <div />

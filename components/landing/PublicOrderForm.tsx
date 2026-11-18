@@ -3,7 +3,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import type { LucideIcon } from "lucide-react";
+import { Bot, BookOpenCheck, FileSearch, PenLine, type LucideIcon } from "lucide-react";
+
+// Komponen ikon tidak bisa dioper dari Server Component ke Client Component,
+// jadi halaman mengirim nama ikon (string) dan dipetakan di sini.
+const ICONS = { bot: Bot, "book-open-check": BookOpenCheck, "file-search": FileSearch, "pen-line": PenLine } satisfies Record<string, LucideIcon>;
+export type PublicOrderIcon = keyof typeof ICONS;
 import { Upload, X, CheckCircle2, ArrowRight, LogIn, Clock, FileCheck2, ShieldCheck, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -12,7 +17,7 @@ import { BRAND, waLink } from "@/lib/brand";
 interface PublicOrderFormProps {
   serviceSlug: string; serviceName: string; servicePrice: number;
   slaHours: number; formats: string; maxSizeMb: number;
-  icon: LucideIcon; iconColor: string; iconBg: string;
+  icon: PublicOrderIcon; iconColor: string; iconBg: string;
   description: string; note?: string;
 }
 
@@ -28,8 +33,9 @@ const ALLOWED_MIME = [
 
 export function PublicOrderForm({
   serviceSlug, serviceName, servicePrice, slaHours,
-  formats, maxSizeMb, icon: Icon, iconColor, iconBg, description, note,
+  formats, maxSizeMb, icon, iconColor, iconBg, description, note,
 }: PublicOrderFormProps) {
+  const Icon = ICONS[icon];
   const [isDragging, setIsDragging] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);

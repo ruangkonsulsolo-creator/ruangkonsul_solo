@@ -2,16 +2,46 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { BRAND } from "@/lib/brand";
 import { Star, MessageSquare, TrendingUp, ThumbsUp } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
+import { PREVIEW_MODE } from "@/lib/utils/preview-mode";
 import type { Metadata } from "next";
 export const metadata: Metadata = { title: `Ulasan | ${BRAND.name}` };
 
-const REVIEWS = [
-  { id: "r1", name: "Rizky Aditya", initials: "RA", rating: 5, date: "2 minggu lalu", sesi: "Bimbingan Skripsi", comment: "Mentor sangat sabar dan detail dalam menjelaskan. BAB 3 saya akhirnya clear setelah bimbingan 3 sesi. Recommended banget!" },
-  { id: "r2", name: "Siti Mariyam", initials: "SM", rating: 5, date: "1 bulan lalu", sesi: "Konsultasi Judul", comment: "Membantu banget dalam menentukan judul yang relevant dan feasible. Makasih mentor!" },
-  { id: "r3", name: "Budi Santoso", initials: "BS", rating: 4, date: "1 bulan lalu", sesi: "Parafrase", comment: "Hasil parafrasenya bagus, plagiasi turun dari 40% ke 12%. Hanya saja prosesnya agak lama." },
-  { id: "r4", name: "Dewi Rahayu", initials: "DR", rating: 5, date: "2 bulan lalu", sesi: "Bimbingan Tesis S2", comment: "Sangat membantu dalam analisis data SPSS. Penjelasannya mudah dipahami dan sabar menjawab pertanyaan." },
-  { id: "r5", name: "Ahmad Fauzi", initials: "AF", rating: 5, date: "2 bulan lalu", sesi: "Metodologi Riset", comment: "Akhirnya paham bedanya kualitatif dan kuantitatif. Mentor terbaik yang pernah saya temui!" },
+interface Review { id: string; name: string; initials: string; rating: number; date: string; sesi: string; comment: string }
+
+const DEMO_REVIEWS: Review[] = [
+  { id: "r1", name: "Rizky Aditya", initials: "RA", rating: 5, date: "2 minggu lalu", sesi: "Bimbingan Skripsi", comment: "Mentor sangat sabar dan detail dalam menjelaskan." },
+  { id: "r2", name: "Siti Mariyam", initials: "SM", rating: 4, date: "1 bulan lalu", sesi: "Konsultasi Judul", comment: "Membantu banget dalam menentukan judul." },
 ];
+
+/** Ulasan nyata dari tabel bookings (rating diisi customer setelah sesi selesai). */
+async function getReviews(): Promise<Review[]> {
+  if (PREVIEW_MODE) return DEMO_REVIEWS;
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+  const { data: mp } = await supabase.from("mentor_profiles").select("id").eq("user_id", user.id).maybeSingle();
+  if (!mp) return [];
+  const { data } = await supabase
+    .from("bookings")
+    .select("id, rating, review, topic, completed_at, profiles(full_name)")
+    .eq("mentor_id", mp.id)
+    .not("rating", "is", null)
+    .order("completed_at", { ascending: false })
+    .limit(100);
+  return (data ?? []).map((b: any) => {
+    const name: string = (Array.isArray(b.profiles) ? b.profiles[0] : b.profiles)?.full_name || "Klien";
+    return {
+      id: b.id,
+      name,
+      initials: name.split(" ").map((n: string) => n[0]).slice(0, 2).join("").toUpperCase(),
+      rating: b.rating,
+      date: b.completed_at ? new Date(b.completed_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }) : "",
+      sesi: b.topic ?? "Bimbingan",
+      comment: b.review ?? "",
+    };
+  });
+}
 
 function renderStars(rating: number) {
   return Array.from({ length: 5 }, (_, i) => (
@@ -20,12 +50,13 @@ function renderStars(rating: number) {
 }
 
 export default async function UlasanPage() {
-  const avgRating = REVIEWS.reduce((s, r) => s + r.rating, 0) / REVIEWS.length;
+  const REVIEWS = await getReviews();
+  const avgRating = REVIEWS.length ? REVIEWS.reduce((s, r) => s + r.rating, 0) / REVIEWS.length : 0;
   const totalReviews = REVIEWS.length;
   const ratingDist = [5, 4, 3, 2, 1].map(r => ({
     stars: r,
     count: REVIEWS.filter(rv => rv.rating === r).length,
-    pct: Math.round((REVIEWS.filter(rv => rv.rating === r).length / totalReviews) * 100),
+    pct: totalReviews ? Math.round((REVIEWS.filter(rv => rv.rating === r).length / totalReviews) * 100) : 0,
   }));
 
   return (
@@ -64,6 +95,9 @@ export default async function UlasanPage() {
 
       {/* Reviews list */}
       <div className="space-y-4">
+        {REVIEWS.length === 0 && (
+          <Card className="p-8 text-center text-sm text-muted-foreground">Belum ada ulasan. Ulasan muncul setelah klien menilai sesi yang selesai.</Card>
+        )}
         {REVIEWS.map((r) => (
           <Card key={r.id} className="p-5">
             <div className="flex items-start gap-3">

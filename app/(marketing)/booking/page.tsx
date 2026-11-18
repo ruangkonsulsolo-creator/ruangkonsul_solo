@@ -1,4 +1,5 @@
 import { BookingForm } from "@/components/landing/BookingForm";
+import { MentorBookingCheckout } from "@/components/booking/MentorBookingCheckout";
 import { BRAND } from "@/lib/brand";
 import Link from "next/link";
 import Image from "next/image";
@@ -12,14 +13,18 @@ export const metadata: Metadata = {
 export default async function BookingPage() {
   // Ambil mentor yang tersedia (tanpa login)
   let mentors: any[] = [];
+  let isLoggedIn = false;
   try {
     const { createClient } = await import("@/lib/supabase/server");
     const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    isLoggedIn = !!user;
     const { data } = await supabase
       .from("mentor_profiles")
-      .select("id, bio, specializations, price_per_hour, rating_avg, session_count, profiles(full_name)")
-      .eq("is_active", true)
-      .eq("is_available", true);
+      .select("id, bio, specializations, price_per_hour, rating_avg, session_count, profiles!inner(full_name, is_active, role)")
+      .eq("is_available", true)
+      .eq("profiles.is_active", true)
+      .eq("profiles.role", "mentor");
     mentors = data ?? [];
   } catch { /* fallback empty */ }
 
@@ -49,6 +54,14 @@ export default async function BookingPage() {
             Isi form di bawah untuk memesan sesi bimbingan. Tidak perlu login — tim kami akan konfirmasi via WhatsApp.
           </p>
         </div>
+        {mentors.length > 0 && (
+          <div className="mb-8">
+            <MentorBookingCheckout mentors={mentors} isLoggedIn={isLoggedIn} />
+            <p className="mt-6 text-center text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+              atau kirim permintaan tanpa login
+            </p>
+          </div>
+        )}
         <BookingForm mentors={mentors} />
       </div>
     </div>

@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { ReportDownloadButton } from "@/components/dashboard/ReportDownloadButton";
 import { RebayarButton } from "@/components/dashboard/RebayarButton";
+import { PaymentStatusSync } from "@/components/dashboard/PaymentStatusSync";
 import { FileSearch, Bot, BookOpenCheck, PenLine, FileText } from "lucide-react";
 import { PREVIEW_MODE, PREVIEW_USER } from "@/lib/utils/preview-mode";
 import type { Metadata } from "next";
@@ -16,6 +17,7 @@ const STATUS_CONFIG: Record<string, { label: string; variant: "success" | "warni
   diproses:           { label: "Diproses",        variant: "info" },
   selesai:            { label: "Selesai",         variant: "success" },
   dibatalkan:         { label: "Dibatalkan",      variant: "destructive" },
+  processing_failed:  { label: "Diproses Ulang",  variant: "warning" },
 };
 
 const SERVICE_ICONS: Record<string, React.ElementType> = {
@@ -42,7 +44,7 @@ function formatRupiah(n: number) {
 export default async function RiwayatPesananPage({
   searchParams,
 }: {
-  searchParams: { status?: string; page?: string };
+  searchParams: { status?: string; page?: string; order?: string; paid?: string; pending?: string };
 }) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -76,6 +78,13 @@ export default async function RiwayatPesananPage({
   return (
     <div className="space-y-5">
       <h2 className="text-xl font-bold text-slate-900">Riwayat Pesanan</h2>
+
+      {/* Cek status pembayaran yang masih pending (cadangan webhook) */}
+      <PaymentStatusSync
+        purpose="order"
+        referenceIds={(orders ?? []).filter((o) => o.status === "menunggu_pembayaran").map((o) => o.id)}
+        showBanner={!!(searchParams.paid || searchParams.pending || searchParams.order)}
+      />
 
       {/* Filter status */}
       <div className="flex flex-wrap gap-2" role="group" aria-label="Filter status pesanan">

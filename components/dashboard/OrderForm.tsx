@@ -29,6 +29,8 @@ export function OrderForm({ serviceSlug, serviceName, servicePrice, activeQuota,
   const [useQuota, setUseQuota] = useState(!!activeQuota);
   const [submitting, setSubmitting] = useState(false);
   const [snapToken, setSnapToken] = useState<string | null>(null);
+  const [paymentId, setPaymentId] = useState<string | null>(null);
+  const [orderId, setOrderId] = useState<string | null>(null);
 
   async function handleSubmit() {
     if (!uploadedFile) return;
@@ -51,6 +53,8 @@ export function OrderForm({ serviceSlug, serviceName, servicePrice, activeQuota,
       setStep("done");
     } else {
       setSnapToken(json.data.snap_token);
+      setPaymentId(json.data.payment_id ?? null);
+      setOrderId(json.data.order_id ?? null);
       setStep("processing");
     }
     setSubmitting(false);
@@ -199,7 +203,18 @@ export function OrderForm({ serviceSlug, serviceName, servicePrice, activeQuota,
       </div>
 
       {step === "processing" && snapToken && (
-        <PaymentModal snapToken={snapToken} onClose={() => { setStep("confirm"); setSnapToken(null); }} />
+        <PaymentModal
+          snapToken={snapToken}
+          paymentId={paymentId}
+          successPath={`/dashboard/riwayat-pesanan${orderId ? `?order=${orderId}` : ""}`}
+          onError={(m) => showToast(m, "error")}
+          onClose={() => {
+            // Pesanan sudah dibuat (menunggu pembayaran) → jangan kembali ke form
+            // agar user tidak membuat pesanan ganda. Bayar bisa dilanjutkan dari riwayat.
+            setSnapToken(null);
+            router.push(`/dashboard/riwayat-pesanan${orderId ? `?order=${orderId}` : ""}`);
+          }}
+        />
       )}
 
       {toast && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}

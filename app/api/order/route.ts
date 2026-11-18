@@ -1,20 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/auth/roles";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createOrderSchema } from "@/lib/validators/order.schema";
 import { generateOrderNumber } from "@/lib/utils/generate-order-number";
+import { startPayment, getCustomerDetails } from "@/lib/payment/checkout";
+import { runDetectionPipeline } from "@/lib/detection/pipeline";
+
+export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
-  const supabase = createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ error: "Tidak terautentikasi." }, { status: 401 });
+  const auth = await requireUser(["user"]);
+  if (!auth.ok) {
+    const msg = auth.status === 403 ? "Hanya akun customer yang bisa membuat pesanan." : auth.error;
+    return NextResponse.json({ error: msg }, { status: auth.status });
   }
+  const { user } = auth.ctx;
 
-  // Validasi body
   let body: unknown;
   try {
     body = await request.json();
@@ -32,10 +33,12 @@ export async function POST(request: NextRequest) {
 
   const { file_id, service_slug, use_quota_id } = parsed.data;
 
-  // Ambil service
-  const { data: service } = await supabase
+  // Semua tulis via service role; harga SELALU diambil dari DB, bukan dari client.
+  const admin = createAdminClient();
+
+  const { data: service } = await admin
     .from("services")
-    .select("id, price_idr, name")
+    .select("id, price_idr, name, slug")
     .eq("slug", service_slug)
     .eq("is_active", true)
     .single();
@@ -45,7 +48,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Verifikasi kepemilikan file
-  const { data: file } = await supabase
+  const { data: file } = await admin
     .from("uploaded_files")
     .select("id")
     .eq("id", file_id)
@@ -57,39 +60,45 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "File tidak ditemukan." }, { status: 404 });
   }
 
-  // Generate order number — ambil count orders hari ini untuk sequence
-  const today = new Date().toISOString().slice(0, 10);
-  const { count } = await supabase
+  // File yang sudah dipakai di pesanan aktif tidak boleh dipesan ulang
+  const { count: activeOrders } = await admin
     .from("orders")
-    .select("*", { count: "exact", head: true })
-    .gte("created_at", `${today}T00:00:00Z`);
+    .select("id", { count: "exact", head: true })
+    .eq("file_id", file.id)
+    .neq("status", "dibatalkan");
+  if ((activeOrders ?? 0) > 0) {
+    return NextResponse.json({ error: "File ini sudah dipakai di pesanan lain. Upload ulang file." }, { status: 409 });
+  }
 
-  const orderNumber = generateOrderNumber((count ?? 0) + 1);
+  const orderNumber = generateOrderNumber();
 
-  // --- PAKAI KUOTA ---
+  // ─── PAKAI KUOTA ───────────────────────────────────────────────────────────
   if (use_quota_id) {
-    const { data: quota } = await supabase
+    const { data: quota } = await admin
       .from("user_quotas")
-      .select("id, quota_remaining, service_id")
+      .select("id, service_id")
       .eq("id", use_quota_id)
       .eq("user_id", user.id)
-      .eq("is_expired", false)
       .single();
 
     if (!quota) {
       return NextResponse.json({ error: "Kuota tidak ditemukan atau sudah kedaluwarsa." }, { status: 400 });
     }
-
     if (quota.service_id !== service.id) {
       return NextResponse.json({ error: "Kuota tidak berlaku untuk layanan ini." }, { status: 400 });
     }
 
-    if (quota.quota_remaining <= 0) {
-      return NextResponse.json({ error: "Saldo kuota habis." }, { status: 400 });
+    // Potong kuota secara atomik (mencegah double-spend saat klik berulang)
+    const { data: remaining, error: quotaError } = await admin.rpc("consume_quota", {
+      p_quota_id: quota.id,
+      p_user_id: user.id,
+    });
+    if (quotaError) {
+      return NextResponse.json({ error: "Saldo kuota habis atau sudah kedaluwarsa." }, { status: 400 });
     }
 
-    // Buat order langsung diproses
-    const { data: order, error: orderError } = await supabase
+    const now = new Date().toISOString();
+    const { data: order, error: orderError } = await admin
       .from("orders")
       .insert({
         order_number: orderNumber,
@@ -100,23 +109,19 @@ export async function POST(request: NextRequest) {
         used_quota_id: quota.id,
         status: "diproses",
         payment_method: "quota",
-        paid_at: new Date().toISOString(),
+        paid_at: now,
       })
-      .select("id, order_number, status")
+      .select("id, order_number, status, user_id, file_id")
       .single();
 
     if (orderError || !order) {
+      // Kembalikan kuota yang sudah terpotong
+      const { data: q } = await admin.from("user_quotas").select("quota_remaining").eq("id", quota.id).single();
+      if (q) await admin.from("user_quotas").update({ quota_remaining: q.quota_remaining + 1 }).eq("id", quota.id);
       return NextResponse.json({ error: "Gagal membuat pesanan." }, { status: 500 });
     }
 
-    // Kurangi saldo kuota
-    await supabase
-      .from("user_quotas")
-      .update({ quota_remaining: quota.quota_remaining - 1 })
-      .eq("id", quota.id);
-
-    // Catat transaksi
-    await supabase.from("transactions").insert({
+    await admin.from("transactions").insert({
       user_id: user.id,
       type: "order_payment",
       amount_idr: 0,
@@ -125,8 +130,7 @@ export async function POST(request: NextRequest) {
       notes: `Kuota dipakai untuk pesanan ${orderNumber}`,
     });
 
-    // Notifikasi in-app
-    await supabase.from("notifications").insert({
+    await admin.from("notifications").insert({
       user_id: user.id,
       order_id: order.id,
       channel: "in_app",
@@ -134,22 +138,31 @@ export async function POST(request: NextRequest) {
       body: `Pesanan ${orderNumber} (${service.name}) sedang diproses.`,
     });
 
+    runDetectionPipeline(order.id, {
+      user_id: order.user_id,
+      order_number: order.order_number,
+      file_id: order.file_id,
+      services: { name: service.name, slug: service.slug },
+      profiles: null,
+    }).catch((err) => console.error("[order] detection pipeline error:", err));
+
     return NextResponse.json({
       data: {
         order_id: order.id,
         order_number: order.order_number,
         status: order.status,
         payment_method: "quota",
-        quota_remaining: quota.quota_remaining - 1,
+        quota_remaining: remaining,
       },
     });
   }
 
-  // --- BAYAR SATUAN VIA MIDTRANS ---
-  const midtransOrderId = `KALIBRI-${orderNumber}`;
+  // ─── BAYAR SATUAN VIA MIDTRANS ─────────────────────────────────────────────
+  if (!service.price_idr || service.price_idr <= 0) {
+    return NextResponse.json({ error: "Harga layanan belum dikonfigurasi." }, { status: 400 });
+  }
 
-  // Buat order dengan status menunggu_pembayaran dulu
-  const { data: order, error: orderError } = await supabase
+  const { data: order, error: orderError } = await admin
     .from("orders")
     .insert({
       order_number: orderNumber,
@@ -159,7 +172,6 @@ export async function POST(request: NextRequest) {
       price_idr: service.price_idr,
       status: "menunggu_pembayaran",
       payment_method: "midtrans",
-      midtrans_order_id: midtransOrderId,
     })
     .select("id, order_number, status")
     .single();
@@ -168,68 +180,21 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Gagal membuat pesanan." }, { status: 500 });
   }
 
-  // Ambil profil user untuk Midtrans
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("full_name, whatsapp")
-    .eq("id", user.id)
-    .single();
-
-  // Buat Midtrans SNAP token
   try {
-    const midtransAuth = Buffer.from(
-      `${process.env.MIDTRANS_SERVER_KEY}:`
-    ).toString("base64");
-
-    const isSandbox = process.env.MIDTRANS_IS_PRODUCTION !== "true";
-    const midtransUrl = isSandbox
-      ? "https://app.sandbox.midtrans.com/snap/v1/transactions"
-      : "https://app.midtrans.com/snap/v1/transactions";
-
-    const midtransPayload = {
-      transaction_details: {
-        order_id: midtransOrderId,
-        gross_amount: service.price_idr,
-      },
-      item_details: [
-        {
-          id: service_slug,
-          price: service.price_idr,
-          quantity: 1,
-          name: service.name,
-        },
-      ],
-      customer_details: {
-        first_name: profile?.full_name ?? user.email?.split("@")[0] ?? "User",
-        email: user.email,
-        phone: profile?.whatsapp ?? undefined,
-      },
-      callbacks: {
-        finish: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/riwayat-pesanan?order=${order.id}`,
-        error: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/riwayat-pesanan?error=payment_failed`,
-        pending: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/riwayat-pesanan?order=${order.id}`,
-      },
-    };
-
-    const snapRes = await fetch(midtransUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Basic ${midtransAuth}`,
-      },
-      body: JSON.stringify(midtransPayload),
+    const payment = await startPayment({
+      purpose: "order",
+      referenceId: order.id,
+      displayRef: order.order_number,
+      userId: user.id,
+      amountIdr: service.price_idr,
+      items: [{ id: service.slug, price: service.price_idr, quantity: 1, name: service.name }],
+      customer: await getCustomerDetails(user.id, user.email),
+      finishPath: `/dashboard/riwayat-pesanan?order=${order.id}`,
     });
 
-    const snapData = await snapRes.json();
-
-    if (!snapData.token) {
-      throw new Error(snapData.error_messages?.join(", ") ?? "Midtrans error");
-    }
-
-    // Simpan snap token
-    await supabase
+    await admin
       .from("orders")
-      .update({ midtrans_snap_token: snapData.token })
+      .update({ midtrans_order_id: payment.midtransOrderId, midtrans_snap_token: payment.snapToken })
       .eq("id", order.id);
 
     return NextResponse.json({
@@ -238,16 +203,16 @@ export async function POST(request: NextRequest) {
         order_number: order.order_number,
         status: order.status,
         payment_method: "midtrans",
-        snap_token: snapData.token,
+        payment_id: payment.paymentId,
+        snap_token: payment.snapToken,
       },
     });
   } catch (err) {
-    console.error("Midtrans error:", err);
-    // Batalkan order jika Midtrans gagal
-    await supabase.from("orders").update({ status: "dibatalkan", cancel_reason: "Midtrans error" }).eq("id", order.id);
-    return NextResponse.json(
-      { error: "Gagal membuat transaksi pembayaran. Coba lagi." },
-      { status: 500 }
-    );
+    console.error("[order] Midtrans error:", err);
+    await admin
+      .from("orders")
+      .update({ status: "dibatalkan", cancelled_at: new Date().toISOString(), cancel_reason: "Gagal membuat transaksi Midtrans" })
+      .eq("id", order.id);
+    return NextResponse.json({ error: "Gagal membuat transaksi pembayaran. Coba lagi." }, { status: 502 });
   }
 }

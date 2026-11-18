@@ -4,20 +4,31 @@ import { CheckCircle2, ArrowRight, Zap, Shield, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BRAND, waLink } from "@/lib/brand";
+import { BuyPackageButton } from "@/components/payment/BuyPackageButton";
 import type { Metadata } from "next";
+
+// Harga & paket diambil dari DB (dikelola superadmin) — refresh tiap 60 detik
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: `Paket Hemat | ${BRAND.name}`,
   description: "Beli paket kuota cek plagiasi dan AI detector dengan harga lebih hemat per cek-nya.",
 };
 
-const paketPlagiasi = [
+type Paket = {
+  id: string; name: string; sub: string; harga: number; perCek: number;
+  quota: number; hari: number; popular: boolean;
+  /** id quota_packages di DB — jika ada, tombol beli langsung ke Midtrans */
+  dbId?: string;
+};
+
+const paketPlagiasiFallback: Paket[] = [
   { id: "a", name: "Paket A", sub: "Cek Plagiasi 10× · masa aktif 30 hari", harga: 299000, perCek: 29900, quota: 10, hari: 30, popular: false },
   { id: "b", name: "Paket B", sub: "Cek Plagiasi 25× · masa aktif 60 hari", harga: 625000, perCek: 25000, quota: 25, hari: 60, popular: true },
   { id: "c", name: "Paket C", sub: "Cek Plagiasi 50× · masa aktif 90 hari", harga: 1100000, perCek: 22000, quota: 50, hari: 90, popular: false },
 ];
 
-const paketAI = [
+const paketAIFallback: Paket[] = [
   { id: "ai-a", name: "AI Starter", sub: "AI Detector 10× · masa aktif 30 hari", harga: 199000, perCek: 19900, quota: 10, hari: 30, popular: false },
   { id: "ai-b", name: "AI Pro",     sub: "AI Detector 25× · masa aktif 60 hari", harga: 450000, perCek: 18000, quota: 25, hari: 60, popular: true },
 ];
@@ -28,7 +39,52 @@ function fmt(n: number) {
   return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(n);
 }
 
-function PaketCard({ name, sub, harga, perCek, quota, hari, popular }: typeof paketPlagiasi[0]) {
+const SERVICE_LABEL: Record<string, string> = {
+  plagiasi: "Cek Plagiasi", "ai-detector": "AI Detector", drillbit: "DrillBit", parafrase: "Parafrase",
+};
+
+async function getPackages(): Promise<{ plagiasi: Paket[]; ai: Paket[] }> {
+  try {
+    const { createClient } = await import("@supabase/supabase-js");
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (!url || !key) throw new Error("no env");
+    const supabase = createClient(url, key, { auth: { persistSession: false } });
+    const { data } = await supabase
+      .from("quota_packages")
+      .select("id, name, quota_amount, price_idr, validity_days, is_popular, services(slug, is_active)")
+      .eq("is_active", true)
+      .order("price_idr", { ascending: true });
+
+    if (!data || data.length === 0) throw new Error("empty");
+
+    const map = (row: (typeof data)[number]): Paket & { slug: string } => {
+      const svc = (Array.isArray(row.services) ? row.services[0] : row.services) as { slug: string; is_active: boolean } | null;
+      const slug = svc?.slug ?? "";
+      return {
+        id: row.id, dbId: row.id, slug,
+        name: row.name,
+        sub: `${SERVICE_LABEL[slug] ?? "Layanan"} ${row.quota_amount}× · masa aktif ${row.validity_days} hari`,
+        harga: row.price_idr,
+        perCek: Math.round(row.price_idr / row.quota_amount),
+        quota: row.quota_amount,
+        hari: row.validity_days,
+        popular: row.is_popular,
+      };
+    };
+    const all = data.map(map);
+    const plagiasi = all.filter((p) => p.slug !== "ai-detector");
+    const ai = all.filter((p) => p.slug === "ai-detector");
+    return {
+      plagiasi: plagiasi.length ? plagiasi : paketPlagiasiFallback,
+      ai: ai.length ? ai : paketAIFallback,
+    };
+  } catch {
+    return { plagiasi: paketPlagiasiFallback, ai: paketAIFallback };
+  }
+}
+
+function PaketCard({ name, sub, harga, perCek, quota, hari, popular, dbId }: Paket) {
   return (
     <div className={`relative flex flex-col rounded-3xl border p-6 transition-shadow hover:shadow-card-hover ${popular ? "border-[#8B0000] bg-[#8B0000] text-white shadow-brand" : "border-slate-200 bg-white"}`}>
       {popular && (
@@ -48,14 +104,22 @@ function PaketCard({ name, sub, harga, perCek, quota, hari, popular }: typeof pa
           </li>
         ))}
       </ul>
-      <Link href="/daftar" className={`flex w-full items-center justify-center rounded-2xl py-3 text-sm font-bold transition-all ${popular ? "bg-white text-[#8B0000] hover:bg-brand-50" : "bg-[#8B0000] text-white hover:bg-brand-light shadow-brand-sm"}`}>
-        Beli sekarang
-      </Link>
+      {dbId ? (
+        <BuyPackageButton
+          packageId={dbId}
+          className={`mt-auto rounded-2xl py-3 text-sm font-bold transition-all ${popular ? "bg-white text-[#8B0000] hover:bg-brand-50" : "bg-[#8B0000] text-white hover:bg-brand-light shadow-brand-sm"}`}
+        />
+      ) : (
+        <Link href="/daftar" className={`mt-auto flex w-full items-center justify-center rounded-2xl py-3 text-sm font-bold transition-all ${popular ? "bg-white text-[#8B0000] hover:bg-brand-50" : "bg-[#8B0000] text-white hover:bg-brand-light shadow-brand-sm"}`}>
+          Beli sekarang
+        </Link>
+      )}
     </div>
   );
 }
 
-export default function PaketHematPage() {
+export default async function PaketHematPage() {
+  const { plagiasi: paketPlagiasi, ai: paketAI } = await getPackages();
   return (
     <div className="min-h-screen bg-white">
       <nav className="sticky top-0 z-30 border-b border-slate-100 bg-white/95 backdrop-blur-sm shadow-sm">

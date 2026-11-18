@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { BRAND } from "@/lib/brand";
 
 export async function POST(request: NextRequest) {
@@ -16,9 +16,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Nama, WhatsApp, dan kebutuhan wajib diisi." }, { status: 422 });
   }
 
-  // Simpan ke tabel booking_leads (tabel sederhana untuk lead tanpa auth)
-  // Jika mentor_id dan slot tersedia, langsung ke tabel bookings
-  const supabase = createClient();
+  // Simpan ke tabel booking_leads (lead tanpa akun). booking_leads tidak punya
+  // policy INSERT untuk anon, jadi ditulis lewat service role setelah validasi.
+  if (body.nama.length > 120 || body.whatsapp.length > 20 || body.kebutuhan.length > 20 || (body.catatan?.length ?? 0) > 2000) {
+    return NextResponse.json({ error: "Input terlalu panjang." }, { status: 422 });
+  }
+  const supabase = createAdminClient();
 
   // Coba insert ke booking_leads
   const { error } = await supabase.from("booking_leads").insert({

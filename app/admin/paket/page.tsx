@@ -1,3 +1,4 @@
+import { requirePageRole } from "@/lib/auth/page-guard";
 import { createClient } from "@/lib/supabase/server";
 import { PaketConfigForm } from "@/components/admin/PaketConfigForm";
 import { BRAND } from "@/lib/brand";
@@ -5,6 +6,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = { title: `Konfigurasi Paket Hemat | Admin ${BRAND.name}` };
 
 export default async function AdminPaketPage() {
+  await requirePageRole(["superadmin"]);
   const supabase = createClient();
   const [{ data: packages }, { data: services }] = await Promise.all([
     supabase.from("quota_packages").select("id, name, service_id, quota_amount, price_idr, validity_days, is_active, is_popular").order("created_at", { ascending: true }),

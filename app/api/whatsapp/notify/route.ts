@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { BRAND } from "@/lib/brand";
 
 export async function POST(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
 
-  if (!authHeader || authHeader !== `Bearer ${serviceKey}`) {
+  if (!serviceKey || !authHeader || authHeader !== `Bearer ${serviceKey}`) {
     return NextResponse.json({ error: "Tidak terotorisasi." }, { status: 401 });
   }
 
@@ -17,11 +17,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Body tidak valid." }, { status: 400 });
   }
 
-  const supabase = createClient();
+  // Dipanggil server-to-server (Bearer service key) → tanpa sesi user
+  const supabase = createAdminClient();
 
   const { data: order } = await supabase
     .from("orders")
-    .select("id, order_number, user_id, services(name), profiles(full_name, whatsapp)")
+    .select("id, order_number, user_id, services(name), profiles:profiles!orders_user_id_fkey(full_name, whatsapp)")
     .eq("id", body.order_id)
     .single();
 

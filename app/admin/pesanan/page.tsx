@@ -21,7 +21,7 @@ export default async function AdminPesananPage({ searchParams }: { searchParams:
   const page = Math.max(1, parseInt(searchParams.page ?? "1", 10));
   const statusFilter = searchParams.status;
   const search = searchParams.q?.trim();
-  let query = supabase.from("orders").select("id, order_number, status, price_idr, payment_method, created_at, services(name), profiles(full_name, whatsapp), uploaded_files(original_name)", { count: "exact" }).order("created_at", { ascending: false }).range((page - 1) * pageSize, page * pageSize - 1);
+  let query = supabase.from("orders").select("id, order_number, status, price_idr, payment_method, created_at, services(name), profiles:profiles!orders_user_id_fkey(full_name, whatsapp), uploaded_files(original_name)", { count: "exact" }).order("created_at", { ascending: false }).range((page - 1) * pageSize, page * pageSize - 1);
   if (statusFilter && statusFilter !== "semua") query = query.eq("status", statusFilter);
   if (search) query = query.ilike("order_number", `%${search}%`);
   const { data: orders, count } = await query;

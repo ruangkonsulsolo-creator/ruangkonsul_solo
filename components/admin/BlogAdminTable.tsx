@@ -160,7 +160,7 @@ export function BlogAdminTable({ posts: initial }: { posts: Post[] }) {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {posts.length === 0 ? (
-                <tr><td colSpan={6} className="px-4 py-10 text-center text-muted-foreground">Belum ada artikel. Klik "Tulis Artikel" untuk mulai.</td></tr>
+                <tr><td colSpan={6} className="px-4 py-10 text-center text-muted-foreground">Belum ada artikel. Klik &quot;Tulis Artikel&quot; untuk mulai.</td></tr>
               ) : posts.map((p) => (
                 <tr key={p.id} className="hover:bg-slate-50 transition-colors">
                   <td className="px-4 py-3 max-w-[280px]">

@@ -1,34 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { requireUser, STAFF_ROLES } from "@/lib/auth/roles";
 
 export async function GET(
   _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const auth = await requireUser();
+  if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status });
+  const { user, role } = auth.ctx;
+  const isAdmin = STAFF_ROLES.includes(role);
 
-  if (!user) {
-    return NextResponse.json({ error: "Tidak terautentikasi." }, { status: 401 });
-  }
+  // Signed URL dibuat dengan service role (bucket privat), setelah cek kepemilikan
+  const supabase = createAdminClient();
 
-  // Cek kepemilikan order (user biasa atau admin)
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-
-  const isAdmin = profile?.role === "admin" || profile?.role === "super_admin";
-
-  const query = supabase
+  let query = supabase
     .from("orders")
     .select("id, user_id, status, report_storage_path")
     .eq("id", params.id);
 
   // Non-admin hanya bisa akses order milik sendiri
   if (!isAdmin) {
-    query.eq("user_id", user.id);
+    query = query.eq("user_id", user.id);
   }
 
   const { data: order } = await query.single();

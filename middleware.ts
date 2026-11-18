@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { PREVIEW_MODE } from "@/lib/utils/preview-mode";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -9,10 +10,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
-  // ── PREVIEW MODE: bypass auth untuk semua protected route ────────
-  // Hapus blok ini setelah DB aktif dan akun sudah dibuat
-  const PREVIEW_MODE = true; // <-- ubah ke false setelah DB siap
-
+  // ── PREVIEW MODE: bypass auth (NEXT_PUBLIC_PREVIEW_MODE=true) ─────
   if (PREVIEW_MODE) {
     // Semua route bisa diakses langsung
     return NextResponse.next();
@@ -54,8 +52,15 @@ export async function middleware(request: NextRequest) {
   }
 
   const { data: profile } = await supabase
-    .from("profiles").select("role").eq("id", user.id).single();
+    .from("profiles").select("role, is_active").eq("id", user.id).single();
   const role = profile?.role ?? "user";
+
+  // Akun dinonaktifkan superadmin → paksa keluar
+  if (profile && profile.is_active === false) {
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("error", "account_disabled");
+    return NextResponse.redirect(loginUrl);
+  }
 
   if (pathname.startsWith("/dashboard")) {
     if (role === "mentor") return NextResponse.redirect(new URL("/mentor", request.url));
@@ -71,7 +76,8 @@ export async function middleware(request: NextRequest) {
     if (!["admin","superadmin"].includes(role)) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
-    if (pathname.startsWith("/admin/superadmin") && role !== "superadmin") {
+    const superadminOnly = ["/admin/superadmin", "/admin/layanan", "/admin/paket"];
+    if (superadminOnly.some((p) => pathname.startsWith(p)) && role !== "superadmin") {
       return NextResponse.redirect(new URL("/admin", request.url));
     }
   }

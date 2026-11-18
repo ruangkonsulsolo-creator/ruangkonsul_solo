@@ -214,7 +214,7 @@ export function KelasAdminTable({ kelas: initial }: { kelas: Kelas[] }) {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {kelas.length === 0 ? (
-                <tr><td colSpan={7} className="px-4 py-10 text-center text-muted-foreground">Belum ada kelas. Klik "Tambah Kelas" untuk mulai.</td></tr>
+                <tr><td colSpan={7} className="px-4 py-10 text-center text-muted-foreground">Belum ada kelas. Klik &quot;Tambah Kelas&quot; untuk mulai.</td></tr>
               ) : kelas.map((k) => (
                 <tr key={k.id} className="hover:bg-slate-50 transition-colors">
                   <td className="px-4 py-3">

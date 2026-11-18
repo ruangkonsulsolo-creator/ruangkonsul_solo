@@ -27,7 +27,12 @@ export default async function JadwalMentorPage() {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
-  const { data: mentorProfile } = await supabase.from("mentor_profiles").select("id, is_available").eq("user_id", user.id).single();
+  let { data: mentorProfile } = await supabase.from("mentor_profiles").select("id, is_available").eq("user_id", user.id).maybeSingle();
+  if (!mentorProfile) {
+    // Mentor baru (role di-set sebelum mentor_profiles ada) → buatkan profil kosong
+    const { data: created } = await supabase.from("mentor_profiles").insert({ user_id: user.id }).select("id, is_available").single();
+    mentorProfile = created;
+  }
   const today = new Date().toISOString().slice(0, 10);
   const end   = new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10);
   const { data: slots } = await supabase.from("booking_slots").select("id, slot_date, slot_start, slot_end, is_blocked").eq("mentor_id", mentorProfile?.id ?? "").gte("slot_date", today).lte("slot_date", end).order("slot_date").order("slot_start");

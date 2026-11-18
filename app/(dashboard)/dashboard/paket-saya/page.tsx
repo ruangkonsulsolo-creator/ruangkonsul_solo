@@ -6,18 +6,22 @@ import { Button } from "@/components/ui/button";
 import { PackageOpen, ArrowRight, Clock, AlertTriangle } from "lucide-react";
 import { BRAND } from "@/lib/brand";
 import { PREVIEW_MODE, PREVIEW_USER } from "@/lib/utils/preview-mode";
+import { PaymentStatusSync } from "@/components/dashboard/PaymentStatusSync";
 import type { Metadata } from "next";
 export const metadata: Metadata = { title: `Paket Saya | ${BRAND.name}` };
 
 function daysLeft(expiresAt: string) { return Math.ceil((new Date(expiresAt).getTime() - Date.now()) / 86400000); }
 function fmt(n: number) { return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(n); }
 
-export default async function PaketSayaPage() {
+export default async function PaketSayaPage({ searchParams }: { searchParams: { paid?: string; pending?: string } }) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) { if (!PREVIEW_MODE) redirect("/login"); }
   const { data: activeQuotas } = await supabase.from("user_quotas").select("id, quota_remaining, quota_total, expires_at, purchased_at, services(name, slug)").eq("user_id", user?.id ?? PREVIEW_USER.id).eq("is_expired", false).order("expires_at", { ascending: true });
   const { data: expiredQuotas } = await supabase.from("user_quotas").select("id, quota_remaining, quota_total, expires_at, purchased_at, services(name)").eq("user_id", user?.id ?? PREVIEW_USER.id).eq("is_expired", true).order("expires_at", { ascending: false }).limit(10);
+  // Pembelian paket yang masih menunggu pembayaran → disinkronkan ke Midtrans di browser
+  const { data: pendingPayments } = await supabase.from("payments").select("reference_id").eq("user_id", user?.id ?? PREVIEW_USER.id).eq("purpose", "package").eq("status", "pending").order("created_at", { ascending: false }).limit(5);
+  const pendingPackageIds = Array.from(new Set((pendingPayments ?? []).map((p) => p.reference_id as string)));
   const active = activeQuotas ?? [];
   const expired = expiredQuotas ?? [];
 
@@ -25,15 +29,16 @@ export default async function PaketSayaPage() {
     <div className="space-y-7 max-w-3xl">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-extrabold text-slate-900">Paket Saya</h2>
-        <Button asChild size="sm" className="gap-2"><Link href="/paket-hemat">Beli Paket Baru <ArrowRight className="h-3.5 w-3.5" /></Link></Button>
+        <Button asChild size="sm" className="gap-2"><Link href="/dashboard/subscription">Beli Paket Baru <ArrowRight className="h-3.5 w-3.5" /></Link></Button>
       </div>
+      <PaymentStatusSync purpose="package" referenceIds={pendingPackageIds} showBanner={!!(searchParams.paid || searchParams.pending)} />
       <div>
         <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">Kuota Aktif</h3>
         {active.length === 0 ? (
           <div className="flex flex-col items-center gap-4 rounded-2xl border border-dashed border-slate-200 bg-white py-14 text-center">
             <PackageOpen className="h-10 w-10 text-slate-200" />
             <div><p className="text-sm font-semibold text-slate-700">Belum ada paket aktif</p><p className="text-xs text-muted-foreground mt-1">Beli paket hemat dan hemat lebih banyak per cek-nya.</p></div>
-            <Button asChild size="sm" className="gap-2"><Link href="/paket-hemat">Lihat Paket Hemat <ArrowRight className="h-3.5 w-3.5" /></Link></Button>
+            <Button asChild size="sm" className="gap-2"><Link href="/dashboard/subscription">Lihat Paket Hemat <ArrowRight className="h-3.5 w-3.5" /></Link></Button>
           </div>
         ) : (
           <div className="space-y-3">
