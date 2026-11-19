@@ -6,7 +6,8 @@ export async function POST(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
 
-  if (!authHeader || authHeader !== `Bearer ${serviceKey}`) {
+  // Tanpa key di env, "Bearer " kosong akan cocok — tolak eksplisit.
+  if (!serviceKey || !authHeader || authHeader !== `Bearer ${serviceKey}`) {
     return NextResponse.json({ error: "Tidak terotorisasi." }, { status: 401 });
   }
 

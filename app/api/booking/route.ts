@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { BRAND } from "@/lib/brand";
+import { rateLimit } from "@/lib/security/rate-limit";
 
 export async function POST(request: NextRequest) {
   let body: {
@@ -8,6 +9,12 @@ export async function POST(request: NextRequest) {
     mentor_id?: string; tanggal?: string; jam?: string;
     kebutuhan: string[]; catatan?: string;
   };
+
+  // Form publik tanpa login: batasi per IP supaya tidak jadi pintu spam.
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "anon";
+  if (!(await rateLimit(`lead:${ip}`, 600, 5))) {
+    return NextResponse.json({ error: "Terlalu banyak permintaan. Coba lagi nanti." }, { status: 429 });
+  }
 
   try { body = await request.json(); }
   catch { return NextResponse.json({ error: "Body tidak valid." }, { status: 400 }); }

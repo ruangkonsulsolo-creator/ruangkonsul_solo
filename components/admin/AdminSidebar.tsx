@@ -8,13 +8,13 @@ import { Logo } from "@/components/ui/logo";
 import {
   LayoutDashboard, ClipboardList, Users,
   BarChart3, Settings, Package, LogOut, ChevronRight,
-  GraduationCap, FileText, ShieldCheck, Phone, ShoppingBag, Store, Quote,
-} from "lucide-react";
+  GraduationCap, FileText, ShieldCheck, Phone, ShoppingBag, Store, Quote, CalendarDays } from "lucide-react";
 
 const navItems = [
   { label: "Dashboard",       href: "/admin",              icon: LayoutDashboard, exact: true },
   { label: "Pesanan",         href: "/admin/pesanan",      icon: ClipboardList },
   { label: "Pesanan Produk",  href: "/admin/pesanan-produk", icon: ShoppingBag },
+  { label: "Sesi Bimbingan",  href: "/admin/sesi",         icon: CalendarDays },
   { label: "Booking Leads",   href: "/admin/booking-leads",icon: Phone },
   { label: "Users",           href: "/admin/users",        icon: Users },
   { label: "Kinerja Mentor",  href: "/admin/mentor",       icon: GraduationCap },

@@ -104,5 +104,6 @@ export const ROUTE_GUARDS: Array<{ prefix: string; allow: DbRole[] }> = [
 ];
 
 export function guardFor(pathname: string) {
-  return ROUTE_GUARDS.find((g) => pathname.startsWith(g.prefix));
+  // Batas segmen: "/mentor-kami" (publik) tidak boleh dianggap "/mentor".
+  return ROUTE_GUARDS.find((g) => pathname === g.prefix || pathname.startsWith(`${g.prefix}/`));
 }
