@@ -82,7 +82,11 @@ export function MerchStore({ products }: { products: MerchProduct[] }) {
       setCart({});
       setCheckout(false);
       const { status } = await pay(json.data.snap_token, json.data.payment_id);
-      router.push(`/dashboard/merchandise?order=${json.data.merch_order_id}&${status === "paid" ? "paid=1" : "pending=1"}`);
+      router.push(
+        status === "paid"
+          ? `/receipt/${json.data.payment_id}`
+          : `/dashboard/merchandise?order=${json.data.merch_order_id}&pending=1`
+      );
       router.refresh();
     } finally {
       setSubmitting(false);

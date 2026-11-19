@@ -114,8 +114,11 @@ export function MentorBookingCheckout({ mentors, isLoggedIn }: { mentors: Mentor
 
       setSubmitting(false);
       const { status } = await pay(json.data.snap_token, json.data.payment_id);
-      const q = status === "paid" ? "paid=1" : "pending=1";
-      router.push(`/dashboard/bimbingan-saya?booking=${json.data.booking_id}&${q}`);
+      router.push(
+        status === "paid"
+          ? `/receipt/${json.data.payment_id}`
+          : `/dashboard/bimbingan-saya?booking=${json.data.booking_id}&pending=1`
+      );
     } finally {
       setSubmitting(false);
     }

@@ -40,9 +40,14 @@ export function PaymentModal({
           onClose();
           return;
         }
-        if (paymentId) await syncPaymentStatus({ paymentId });
-        const sep = successPath.includes("?") ? "&" : "?";
-        router.push(`${successPath}${sep}${outcome === "success" ? "paid=1" : "pending=1"}`);
+        const status = paymentId ? await syncPaymentStatus({ paymentId }) : null;
+        if (paymentId && (outcome === "success" || status === "paid")) {
+          // Lunas → receipt + tombol "Konfirmasi via WhatsApp"
+          router.push(`/receipt/${paymentId}`);
+        } else {
+          const sep = successPath.includes("?") ? "&" : "?";
+          router.push(`${successPath}${sep}pending=1`);
+        }
         router.refresh();
       } catch (err) {
         onError?.(err instanceof Error ? err.message : "Gagal membuka pembayaran.");

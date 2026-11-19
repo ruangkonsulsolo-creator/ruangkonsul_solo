@@ -6,6 +6,8 @@ import { formatRupiah } from "@/lib/utils/format-currency";
 import { formatWhatsApp } from "@/lib/validators/whatsapp";
 import { BRAND } from "@/lib/brand";
 import { PrintButton } from "@/components/payment/PrintButton";
+import { ConfirmWhatsAppButton } from "@/components/payment/ConfirmWhatsAppButton";
+import { ReceiptPendingSync } from "@/components/payment/ReceiptPendingSync";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -107,6 +109,21 @@ export default async function ReceiptPage({ params }: { params: { id: string } }
                 </tr>
               </tfoot>
             </table>
+
+            {r.status === "pending" && <ReceiptPendingSync paymentId={r.paymentId} />}
+
+            {paid && r.receiptNumber && r.status === "paid" && (
+              <div className="flex flex-col items-start gap-2 rounded-xl border border-green-200 bg-green-50 p-4 print:hidden sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm text-green-800">Pembayaran lunas. Konfirmasi ke admin untuk penjadwalan / tindak lanjut.</p>
+                <ConfirmWhatsAppButton
+                  receiptNumber={r.receiptNumber}
+                  purposeLabel={r.purposeLabel}
+                  items={r.items.filter((i) => i.id !== "ongkir")}
+                  amountIdr={r.amountIdr}
+                  customerName={r.customer.name}
+                />
+              </div>
+            )}
 
             {r.receiptNumber && (
               <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs text-slate-600">

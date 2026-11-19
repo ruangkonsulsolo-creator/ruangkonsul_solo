@@ -45,7 +45,8 @@ export function BuyPackageButton({ packageId, label = "Beli sekarang", className
       const { outcome, status } = await pay(json.data.snap_token, json.data.payment_id);
 
       if (status === "paid") {
-        router.push("/dashboard/paket-saya?paid=1");
+        // Lunas → receipt + tombol "Konfirmasi via WhatsApp"
+        router.push(`/receipt/${json.data.payment_id}`);
         router.refresh();
       } else if (outcome === "pending" || status === "pending") {
         router.push("/dashboard/paket-saya?pending=1");
