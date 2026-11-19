@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { BRAND } from "@/lib/brand";
 import { NavbarUtama } from "@/components/ui/NavbarUtama";
 import { formatRupiah } from "@/lib/utils/format-currency";
+import { perluPilihJadwal } from "@/lib/katalog/checkout";
 
 export const metadata: Metadata = {
   title: "Pesan Jadwal Bimbingan",
@@ -42,9 +43,23 @@ function inisial(nama: string) {
 export default async function BookingPage({
   searchParams,
 }: {
-  searchParams: { mentor?: string };
+  searchParams: { mentor?: string; produk?: string };
 }) {
   const supabase = createClient();
+
+  // Datang dari halaman paket "per jam": harga mengikuti paket.
+  let paket: { id: string; slug: string; nama: string; harga: number } | undefined;
+  if (searchParams.produk) {
+    const { data: p } = await supabase
+      .from("produk")
+      .select("id, slug, nama, harga, harga_mulai, satuan, is_active")
+      .eq("slug", searchParams.produk)
+      .maybeSingle();
+    if (p && p.is_active && !p.harga_mulai && p.harga > 0 && perluPilihJadwal(p)) {
+      paket = { id: p.id, slug: p.slug, nama: p.nama, harga: p.harga };
+    }
+  }
+  const qProduk = paket ? `&produk=${encodeURIComponent(paket.slug)}` : "";
 
   // Versi sebelumnya memfilter .eq("is_active", true) pada mentor_profiles,
   // kolom yang tidak ada di tabel itu. Error-nya ditelan try/catch kosong,
@@ -115,6 +130,19 @@ export default async function BookingPage({
           </p>
         </header>
 
+        {paket && (
+          <div className="mb-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-brand-200 bg-brand-50 px-5 py-4">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-brand">Paket dipilih</p>
+              <p className="font-extrabold text-slate-900">{paket.nama}</p>
+            </div>
+            <p className="text-lg font-extrabold text-brand">
+              {formatRupiah(paket.harga)}
+              <span className="text-xs font-normal text-slate-500"> / jam</span>
+            </p>
+          </div>
+        )}
+
         {/* ── Profil mentor terpilih ── */}
         {terpilih && (
           <section className="mb-12 rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
@@ -169,7 +197,7 @@ export default async function BookingPage({
                     {terpilih.experience_years} tahun pengalaman
                   </span>
                   <span className="ml-auto text-lg font-extrabold text-brand">
-                    {formatRupiah(terpilih.price_per_hour)}
+                    {formatRupiah(paket?.harga ?? terpilih.price_per_hour)}
                     <span className="text-xs font-normal text-slate-400">
                       {" "}
                       / sesi
@@ -194,7 +222,7 @@ export default async function BookingPage({
               {mentors.map((m) => (
                 <Link
                   key={m.id}
-                  href={`/booking?mentor=${m.id}`}
+                  href={`/booking?mentor=${m.id}${qProduk}`}
                   className="flex items-start gap-4 rounded-2xl border border-slate-200 bg-white p-5 transition-colors hover:border-brand hover:bg-brand-50"
                 >
                   {m.avatar_url ? (
@@ -215,7 +243,7 @@ export default async function BookingPage({
                       {m.display_name ?? "Mentor Ruang Konsul"}
                     </h3>
                     <p className="mt-0.5 text-sm font-semibold text-brand">
-                      {formatRupiah(m.price_per_hour)}
+                      {formatRupiah(paket?.harga ?? m.price_per_hour)}
                       <span className="text-xs font-normal text-slate-400">
                         {" "}
                         / sesi
@@ -252,7 +280,7 @@ export default async function BookingPage({
             <CalendarDays className="h-6 w-6 text-brand" aria-hidden="true" />
             {terpilih ? "Jadwal tersedia" : "Semua jadwal tersedia"}
           </h2>
-          <KalenderBooking mentorId={terpilih?.id} />
+          <KalenderBooking mentorId={terpilih?.id} paket={paket ? { id: paket.id, nama: paket.nama, harga: paket.harga } : undefined} />
         </section>
 
         <aside className="mt-16 rounded-2xl border border-slate-200 bg-slate-50 p-6">

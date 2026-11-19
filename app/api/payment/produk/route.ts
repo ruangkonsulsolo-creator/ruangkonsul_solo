@@ -5,7 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { startPayment, getCustomerDetails, requireWhatsApp } from "@/lib/payment/checkout";
 import { rateLimit } from "@/lib/security/rate-limit";
 import { nomorUnik } from "@/lib/utils/nomor-unik";
-import { ongkirFlat, bisaDibayarLangsung } from "@/lib/katalog/checkout";
+import { ongkirFlat, bisaDibayarLangsung, perluPilihJadwal } from "@/lib/katalog/checkout";
 
 export const dynamic = "force-dynamic";
 
@@ -49,6 +49,12 @@ export async function POST(request: NextRequest) {
   if (!produk || !produk.is_active) return NextResponse.json({ error: "Produk tidak tersedia." }, { status: 404 });
   if (!bisaDibayarLangsung(produk)) {
     return NextResponse.json({ error: "Harga produk ini perlu dikonfirmasi dulu via WhatsApp." }, { status: 400 });
+  }
+  if (perluPilihJadwal(produk)) {
+    return NextResponse.json(
+      { error: "Paket per jam dipesan lewat pemilihan jadwal.", redirect: `/booking?produk=${produk.slug}` },
+      { status: 409 }
+    );
   }
   if (produk.stok !== null && produk.stok < input.jumlah) {
     return NextResponse.json({ error: produk.stok === 0 ? "Stok habis." : `Stok tersisa ${produk.stok}.` }, { status: 409 });

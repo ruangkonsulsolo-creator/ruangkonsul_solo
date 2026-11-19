@@ -53,8 +53,11 @@ function jam(t: string) {
 
 export default function KalenderBooking({
   mentorId,
+  paket,
 }: {
   mentorId?: string;
+  /** Paket katalog per jam; harganya menggantikan tarif mentor. */
+  paket?: { id: string; nama: string; harga: number };
 }) {
   const [hari, setHari] = useState<Hari[]>([]);
   const [memuat, setMemuat] = useState(true);
@@ -62,6 +65,7 @@ export default function KalenderBooking({
 
   const [tanggalAktif, setTanggalAktif] = useState<string | null>(null);
   const [slotTerpilih, setSlotTerpilih] = useState<Slot | null>(null);
+  const hargaSesi = paket ? paket.harga : (slotTerpilih?.price_per_hour ?? 0);
   const [topik, setTopik] = useState("");
   const [mengirim, setMengirim] = useState(false);
   const [berhasil, setBerhasil] = useState<string | null>(null);
@@ -120,6 +124,7 @@ export default function KalenderBooking({
           mentor_id: slotTerpilih.mentor_id,
           topik,
           whatsapp,
+          produk_id: paket?.id,
         }),
       });
       const json = await res.json();
@@ -327,6 +332,12 @@ export default function KalenderBooking({
             />
 
             <dl className="mt-4 space-y-1 text-sm">
+              {paket && (
+                <div className="flex justify-between gap-4">
+                  <dt className="text-muted-foreground">Paket</dt>
+                  <dd className="text-right">{paket.nama}</dd>
+                </div>
+              )}
               <div className="flex justify-between gap-4">
                 <dt className="text-muted-foreground">Mentor</dt>
                 <dd>{slotTerpilih.mentor_name ?? "—"}</dd>
@@ -341,12 +352,12 @@ export default function KalenderBooking({
               <div className="flex justify-between gap-4 border-t border-brand-200 pt-1">
                 <dt className="text-muted-foreground">Biaya</dt>
                 <dd data-numeric className="font-semibold">
-                  {formatRupiah(slotTerpilih.price_per_hour)}
+                  {formatRupiah(hargaSesi)}
                 </dd>
               </div>
             </dl>
 
-            {slotTerpilih.price_per_hour > 0 && (
+            {hargaSesi > 0 && (
               <div className="mt-4">
                 <WhatsAppField value={whatsapp} onChange={setWhatsapp} error={galatWa} />
               </div>
@@ -368,12 +379,12 @@ export default function KalenderBooking({
             >
               {mengirim
                 ? "Memproses…"
-                : slotTerpilih.price_per_hour > 0
-                  ? `Bayar ${formatRupiah(slotTerpilih.price_per_hour)} & kunci jadwal`
+                : hargaSesi > 0
+                  ? `Bayar ${formatRupiah(hargaSesi)} & kunci jadwal`
                   : "Pesan jadwal ini"}
             </button>
             <p className="mt-2 text-sm text-muted-foreground">
-              {slotTerpilih.price_per_hour > 0
+              {hargaSesi > 0
                 ? "Jadwal dikunci untukmu selama 60 menit. Selesaikan pembayaran agar sesi terkonfirmasi; jika tidak, jadwal dilepas otomatis."
                 : "Sesi ini gratis. Admin mengonfirmasi lewat WhatsApp."}
             </p>

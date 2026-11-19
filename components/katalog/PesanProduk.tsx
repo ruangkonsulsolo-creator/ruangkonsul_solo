@@ -2,10 +2,11 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CreditCard, Loader2, MessageCircle, Minus, Plus, ShieldCheck } from "lucide-react";
+import Link from "next/link";
+import { CalendarDays, CreditCard, Loader2, MessageCircle, Minus, Plus, ShieldCheck } from "lucide-react";
 import { formatRupiah } from "@/lib/utils/format-currency";
 import { BRAND, waLink } from "@/lib/brand";
-import { bisaDibayarLangsung, ongkirFlat } from "@/lib/katalog/checkout";
+import { bisaDibayarLangsung, ongkirFlat, perluPilihJadwal } from "@/lib/katalog/checkout";
 import { useSnapCheckout } from "@/lib/payment/use-snap";
 import { WhatsAppField, isValidWhatsApp } from "@/components/payment/WhatsAppField";
 import type { Produk } from "@/lib/katalog/tipe";
@@ -96,6 +97,26 @@ export function PesanProduk({ produk }: { produk: Produk }) {
     } finally {
       setLoading(false);
     }
+  }
+
+  // Paket per jam: pilih mentor + jam dulu, bayar di langkah berikutnya.
+  if (bayarLangsung && perluPilihJadwal(produk)) {
+    return (
+      <div className="space-y-3">
+        <Link
+          href={`/booking?produk=${encodeURIComponent(produk.slug)}`}
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand px-5 py-3.5 text-base font-extrabold text-white shadow-md transition-opacity hover:opacity-90"
+        >
+          <CalendarDays className="h-5 w-5" aria-hidden="true" />
+          Pilih Mentor &amp; Jadwal
+        </Link>
+        <ol className="space-y-1 rounded-xl bg-slate-50 p-4 text-sm text-slate-600">
+          <li>1. Pilih mentor dan jam yang kosong.</li>
+          <li>2. Bayar {formatRupiah(produk.harga)} lewat QRIS — jadwal dikunci untukmu.</li>
+          <li>3. Dapat receipt &amp; konfirmasi via WhatsApp.</li>
+        </ol>
+      </div>
+    );
   }
 
   if (habis) {
@@ -193,7 +214,7 @@ export function PesanProduk({ produk }: { produk: Produk }) {
           </button>
           <p className="flex items-center justify-center gap-1.5 text-xs text-slate-500">
             <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
-            QRIS, Virtual Account, GoPay, ShopeePay — diproses aman oleh Midtrans
+            Bayar dengan QRIS (semua m-banking & e-wallet) — diproses aman oleh Midtrans
           </p>
         </>
       )}

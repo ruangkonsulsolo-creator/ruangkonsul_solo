@@ -11,6 +11,11 @@ export function ongkirFlat(): number {
  * Produk "mulai dari" tetap dikonfirmasi lewat WhatsApp karena harga akhirnya
  * bergantung pilihan isi.
  */
+/** Paket bimbingan per jam harus pilih mentor + jadwal dulu sebelum bayar. */
+export function perluPilihJadwal(p: { satuan: string | null }): boolean {
+  return /\bper\s*jam\b/i.test(p.satuan ?? "");
+}
+
 export function bisaDibayarLangsung(p: { harga: number; harga_mulai: boolean }): boolean {
   return p.harga > 0 && !p.harga_mulai;
 }

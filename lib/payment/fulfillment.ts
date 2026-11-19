@@ -125,7 +125,7 @@ async function fulfilBooking(admin: Admin, p: PaymentRow) {
     .eq("id", p.reference_id)
     .eq("status", "pending")
     .is("paid_at", null)
-    .select("id, booking_number, whatsapp, mentor_id, booking_slots:booking_slots!bookings_slot_id_fkey ( slot_date, slot_start ), mentor_profiles ( display_name, user_id )");
+    .select("id, booking_number, whatsapp, notes, mentor_id, booking_slots:booking_slots!bookings_slot_id_fkey ( slot_date, slot_start ), mentor_profiles ( display_name, user_id )");
   if (error) throw new Error(`Gagal update booking: ${error.message}`);
   const raw = updated?.[0];
   if (!raw) {
@@ -148,7 +148,8 @@ async function fulfilBooking(admin: Admin, p: PaymentRow) {
   const waktu = slot
     ? `${jamWib.format(new Date(`${slot.slot_date}T00:00:00+07:00`))}, ${slot.slot_start.slice(0, 5).replace(":", ".")} WIB`
     : "";
-  const item = `Sesi bimbingan${mentor?.display_name ? ` dengan ${mentor.display_name}` : ""}${waktu ? ` — ${waktu}` : ""}`;
+  const paket = /^Paket: (.+)$/m.exec((raw as { notes?: string | null }).notes ?? "")?.[1];
+  const item = `${paket ?? "Sesi bimbingan"}${mentor?.display_name ? ` dengan ${mentor.display_name}` : ""}${waktu ? ` — ${waktu}` : ""}`;
 
   await admin.from("transactions").insert({
     user_id: p.user_id,

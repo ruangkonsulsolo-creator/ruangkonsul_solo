@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { startPayment, getCustomerDetails, requireWhatsApp } from "@/lib/payment/checkout";
 import { rateLimit } from "@/lib/security/rate-limit";
 import { lepasBookingKedaluwarsa } from "@/lib/booking/lepas-kedaluwarsa";
+import { perluPilihJadwal } from "@/lib/katalog/checkout";
 
 /** Lama slot dikunci menunggu pembayaran. */
 const BATAS_BAYAR_MENIT = 60;
@@ -17,6 +18,8 @@ const bodySchema = z.object({
   topik: z.string().trim().min(4, "Ceritakan singkat yang ingin dibahas.").max(300),
   catatan: z.string().trim().max(1000).optional(),
   whatsapp: z.string().max(25).optional(),
+  /** Paket katalog "per jam" yang dipilih — harga mengikuti paket. */
+  produk_id: z.string().uuid().optional(),
 });
 
 /** RKS-20261028-4821 — tanggal WIB agar urut dan mudah dicari admin. */
@@ -64,7 +67,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { slot_id, mentor_id, topik, catatan, whatsapp } = parsed.data;
+  const { slot_id, mentor_id, topik, catatan, whatsapp, produk_id } = parsed.data;
   const supabase = createClient();
 
   const {
@@ -114,6 +117,22 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // Paket katalog (opsional). Harga dari DB, bukan dari klien.
+  let paket: { nama: string; harga: number } | null = null;
+  if (produk_id) {
+    const { data: p } = await admin
+      .from("produk")
+      .select("nama, harga, harga_mulai, satuan, is_active")
+      .eq("id", produk_id)
+      .maybeSingle();
+    if (!p || !p.is_active || p.harga_mulai || !(p.harga > 0) || !perluPilihJadwal(p)) {
+      return NextResponse.json({ error: "Paket tidak tersedia untuk pemesanan jadwal." }, { status: 422 });
+    }
+    paket = { nama: p.nama, harga: p.harga };
+  }
+  const harga = paket ? paket.harga : mentor.price_per_hour;
+  const catatanFinal = [paket ? `Paket: ${paket.nama}` : null, catatan ?? null].filter(Boolean).join("\n") || null;
+
   const { data: booking, error } = await supabase
     .from("bookings")
     .insert({
@@ -123,11 +142,11 @@ export async function POST(request: NextRequest) {
       slot_id,
       status: "pending",
       topic: topik,
-      notes: catatan ?? null,
-      price_idr: mentor.price_per_hour,
+      notes: catatanFinal,
+      price_idr: harga,
       whatsapp: wa.whatsapp,
       bayar_sebelum:
-        mentor.price_per_hour > 0
+        harga > 0
           ? new Date(Date.now() + BATAS_BAYAR_MENIT * 60_000).toISOString()
           : null,
     })
@@ -198,7 +217,7 @@ export async function POST(request: NextRequest) {
           id: "sesi-mentor",
           price: booking.price_idr,
           quantity: 1,
-          name: `Sesi ${mentor.display_name ?? "mentor"} ${waktu}`.trim(),
+          name: `${paket ? paket.nama : "Sesi"} · ${mentor.display_name ?? "mentor"} ${waktu}`.trim(),
         },
       ],
       customer: { ...(await getCustomerDetails(user.id, user.email)), phone: wa.whatsapp },
