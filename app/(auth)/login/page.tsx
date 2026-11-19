@@ -40,7 +40,9 @@ export default function LoginPage() {
 
     // Jika ada next param spesifik, pakai itu
     // Jika tidak, fetch role lalu redirect ke dashboard sesuai role
-    if (params.get("next")) {
+    // "/dashboard" adalah tujuan bawaan (dari middleware / tombol Masuk), bukan
+    // tujuan khusus — jadi tetap arahkan sesuai role.
+    if (params.get("next") && next !== "/dashboard") {
       router.push(next);
     } else {
       // Ambil role via API

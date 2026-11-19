@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+import { homeForRole, type DbRole } from "@/lib/auth/roles";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -44,32 +46,37 @@ async function getData() {
       quotas:  [] as any[],
     };
   }
+  const { createClient } = await import("@/lib/supabase/server");
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  // redirect() bekerja dengan melempar error khusus. Dulu dipanggil di dalam
+  // try/catch sehingga tertelan: superadmin/admin/mentor tidak pernah
+  // dipindahkan dan halaman jatuh ke fallback "Halo, Kamu!". Sekarang semua
+  // redirect berada DI LUAR try/catch.
+  if (!user) redirect("/login?next=/dashboard");
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name, role, credit_balance")
+    .eq("id", user.id)
+    .single();
+
+  const role = (profile?.role ?? "user") as DbRole;
+  if (role !== "user") redirect(homeForRole(role));
+
   try {
-    const { createClient } = await import("@/lib/supabase/server");
-    const { redirect } = await import("next/navigation");
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) redirect("/login");
-
-    const [profileRes, ordersRes, quotasRes] = await Promise.all([
-      supabase.from("profiles").select("full_name, role, credit_balance").eq("id", user!.id).single(),
-      supabase.from("orders").select("id, order_number, status, created_at, services(name)").eq("user_id", user!.id).order("created_at", { ascending: false }).limit(5),
-      supabase.from("user_quotas").select("id, quota_remaining, expires_at, services(name)").eq("user_id", user!.id).eq("is_expired", false).gt("quota_remaining", 0).order("expires_at", { ascending: true }),
+    const [ordersRes, quotasRes] = await Promise.all([
+      supabase.from("orders").select("id, order_number, status, created_at, services(name)").eq("user_id", user.id).order("created_at", { ascending: false }).limit(5),
+      supabase.from("user_quotas").select("id, quota_remaining, expires_at, services(name)").eq("user_id", user.id).eq("is_expired", false).gt("quota_remaining", 0).order("expires_at", { ascending: true }),
     ]);
-
-    const role = profileRes.data?.role ?? "user";
-    if (role === "mentor")     redirect("/mentor");
-    if (role === "admin")      redirect("/admin");
-    if (role === "superadmin") redirect("/admin/superadmin");
-
     return {
-      nama:    profileRes.data?.full_name?.split(" ")[0] ?? "Kamu",
-      credits: profileRes.data?.credit_balance ?? 0,
+      nama:    profile?.full_name?.split(" ")[0] || "Kamu",
+      credits: profile?.credit_balance ?? 0,
       orders:  ordersRes.data ?? [],
       quotas:  quotasRes.data ?? [],
     };
   } catch {
-    return { nama: "Kamu", credits: 0, orders: [], quotas: [] };
+    return { nama: profile?.full_name?.split(" ")[0] || "Kamu", credits: profile?.credit_balance ?? 0, orders: [], quotas: [] };
   }
 }
 

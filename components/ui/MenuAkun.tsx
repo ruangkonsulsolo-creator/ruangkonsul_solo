@@ -232,7 +232,7 @@ export function MenuAkun() {
                 </Link>
               </li>
             )}
-            {profil.peran === "mentor" && (
+            {(profil.peran === "mentor" || staf) && (
               <li>
                 <Link
                   href="/mentor"
