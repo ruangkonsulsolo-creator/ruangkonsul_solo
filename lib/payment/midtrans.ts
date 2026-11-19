@@ -60,6 +60,18 @@ export interface CreateSnapParams {
   finishPath: string;
 }
 
+/**
+ * Metode pembayaran yang ditampilkan di Snap.
+ * MIDTRANS_ENABLED_PAYMENTS = daftar dipisah koma, mis. "other_qris" (default: hanya QRIS).
+ * Isi "all" untuk menampilkan semua metode yang aktif di dashboard Midtrans.
+ */
+function enabledPayments(): string[] | undefined {
+  const raw = (process.env.MIDTRANS_ENABLED_PAYMENTS ?? "other_qris").trim();
+  if (!raw || raw.toLowerCase() === "all") return undefined;
+  const list = raw.split(",").map((s) => s.trim()).filter(Boolean);
+  return list.length ? list : undefined;
+}
+
 export async function createSnapTransaction(
   params: CreateSnapParams
 ): Promise<{ token: string; redirectUrl: string }> {
@@ -85,6 +97,7 @@ export async function createSnapTransaction(
       phone: params.customer.phone ?? undefined,
     },
     expiry: { unit: "hours", duration: PAYMENT_EXPIRY_HOURS },
+    ...(enabledPayments() ? { enabled_payments: enabledPayments() } : {}),
     ...(appUrl
       ? {
           callbacks: {
