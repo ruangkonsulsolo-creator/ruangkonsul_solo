@@ -26,6 +26,7 @@ select public.generate_receipt_number();      -- RCP-YYYYMMDD-XXXXXXXX
 | `NEXT_PUBLIC_APP_URL` | `https://ruangkonsulsolo.id` | untuk link receipt & redirect Midtrans |
 | `MIDTRANS_SERVER_KEY` | Midtrans → Settings → Access Keys | sandbox: `SB-Mid-server-…` |
 | `NEXT_PUBLIC_MIDTRANS_CLIENT_KEY` | idem | sandbox: `SB-Mid-client-…` |
+| `MIDTRANS_SIGNATURE_KEY` | Access Keys → General Credentials → Signature Secret Key | opsional, untuk verifikasi webhook |
 | `MIDTRANS_IS_PRODUCTION` | `false` (sandbox) / `true` (live) | |
 | `NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION` | sama dengan di atas | |
 | `NEXT_PUBLIC_ONGKIR_FLAT` | `15000` | hanya untuk produk ber-`berat_gram` |

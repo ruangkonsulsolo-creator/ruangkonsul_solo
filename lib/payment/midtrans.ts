@@ -159,15 +159,25 @@ export async function cancelTransaction(orderId: string): Promise<void> {
 
 // ─── Signature & klasifikasi status ──────────────────────────────────────────
 
-/** SHA512(order_id + status_code + gross_amount + server_key) */
+/**
+ * SHA512(order_id + status_code + gross_amount + key).
+ *
+ * Dashboard Midtrans versi baru punya "Signature Secret Key" terpisah dari
+ * server key, jadi keduanya dicoba: MIDTRANS_SIGNATURE_KEY (jika di-set) lalu
+ * MIDTRANS_SERVER_KEY.
+ */
 export function verifySignature(n: MidtransNotification): boolean {
   if (!n.signature_key) return false;
-  const expected = createHash("sha512")
-    .update(`${n.order_id}${n.status_code}${n.gross_amount}${serverKey()}`)
-    .digest("hex");
-  const a = Buffer.from(expected);
+  const keys = [process.env.MIDTRANS_SIGNATURE_KEY, process.env.MIDTRANS_SERVER_KEY].filter(
+    (k): k is string => !!k
+  );
   const b = Buffer.from(String(n.signature_key));
-  return a.length === b.length && timingSafeEqual(a, b);
+  return keys.some((key) => {
+    const a = Buffer.from(
+      createHash("sha512").update(`${n.order_id}${n.status_code}${n.gross_amount}${key}`).digest("hex")
+    );
+    return a.length === b.length && timingSafeEqual(a, b);
+  });
 }
 
 export type PaymentOutcome = "paid" | "pending" | "failed" | "expired" | "cancelled" | "refunded";

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifySignature, type MidtransNotification } from "@/lib/payment/midtrans";
+import { getTransactionStatus, verifySignature, type MidtransNotification } from "@/lib/payment/midtrans";
 import { applyMidtransStatus } from "@/lib/payment/fulfillment";
 
 export const dynamic = "force-dynamic";
@@ -26,8 +26,15 @@ export async function POST(request: NextRequest) {
   }
 
   if (!verifySignature(body)) {
-    console.warn("[webhook] Midtrans: invalid signature for order_id:", body.order_id);
-    return NextResponse.json({ error: "Invalid signature" }, { status: 403 });
+    // Signature tidak cocok (mis. key berbeda di dashboard baru). Jangan percaya
+    // isi body — ambil status resmi langsung dari API Midtrans dengan server key.
+    const official = await getTransactionStatus(body.order_id).catch(() => null);
+    if (!official || official.order_id !== body.order_id) {
+      console.warn("[webhook] Midtrans: invalid signature for order_id:", body.order_id);
+      return NextResponse.json({ error: "Invalid signature" }, { status: 403 });
+    }
+    console.warn("[webhook] signature tidak cocok, memakai status resmi API untuk:", body.order_id);
+    body = official;
   }
 
   const result = await applyMidtransStatus(body);
