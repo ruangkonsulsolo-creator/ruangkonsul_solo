@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { rateLimit } from "@/lib/security/rate-limit";
 import { z } from "zod";
 import { requireUser, STAFF_ROLES } from "@/lib/auth/roles";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -11,7 +12,7 @@ const schema = z
   .object({
     payment_id: z.string().uuid().optional(),
     // alternatif: cari pembayaran pending terbaru untuk referensi ini
-    purpose: z.enum(["order", "package", "booking"]).optional(),
+    purpose: z.enum(["order", "package", "booking", "merch"]).optional(),
     reference_id: z.string().uuid().optional(),
   })
   .refine((v) => v.payment_id || (v.purpose && v.reference_id), {
@@ -31,6 +32,9 @@ export async function POST(request: NextRequest) {
   if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status });
   const { user, role } = auth.ctx;
 
+  if (!(await rateLimit(`sync:${user.id}`, 60, 40))) {
+    return NextResponse.json({ error: "Terlalu banyak permintaan. Coba lagi sebentar." }, { status: 429 });
+  }
   const parsed = schema.safeParse(await request.json().catch(() => ({})));
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.errors[0]?.message }, { status: 422 });

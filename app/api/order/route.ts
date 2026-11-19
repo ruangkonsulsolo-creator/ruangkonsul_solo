@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import { rateLimit } from "@/lib/security/rate-limit";
 import { requireUser } from "@/lib/auth/roles";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createOrderSchema } from "@/lib/validators/order.schema";
 import { generateOrderNumber } from "@/lib/utils/generate-order-number";
-import { startPayment, getCustomerDetails } from "@/lib/payment/checkout";
-import { runDetectionPipeline } from "@/lib/detection/pipeline";
+import { startPayment, getCustomerDetails, requireWhatsApp } from "@/lib/payment/checkout";
+import { scheduleProcessing } from "@/lib/processing/runner";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +17,9 @@ export async function POST(request: NextRequest) {
   }
   const { user } = auth.ctx;
 
+  if (!(await rateLimit(`order:${user.id}`, 60, 10))) {
+    return NextResponse.json({ error: "Terlalu banyak permintaan. Coba lagi sebentar." }, { status: 429 });
+  }
   let body: unknown;
   try {
     body = await request.json();
@@ -31,7 +35,11 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { file_id, service_slug, use_quota_id } = parsed.data;
+  const { file_id, service_slug, use_quota_id, whatsapp } = parsed.data;
+
+  // Wajib nomor WA sebelum memesan layanan (notifikasi hasil dikirim via WA)
+  const wa = await requireWhatsApp(user.id, whatsapp);
+  if (!wa.ok) return NextResponse.json({ error: wa.error, code: "WHATSAPP_REQUIRED" }, { status: 422 });
 
   // Semua tulis via service role; harga SELALU diambil dari DB, bukan dari client.
   const admin = createAdminClient();
@@ -138,13 +146,7 @@ export async function POST(request: NextRequest) {
       body: `Pesanan ${orderNumber} (${service.name}) sedang diproses.`,
     });
 
-    runDetectionPipeline(order.id, {
-      user_id: order.user_id,
-      order_number: order.order_number,
-      file_id: order.file_id,
-      services: { name: service.name, slug: service.slug },
-      profiles: null,
-    }).catch((err) => console.error("[order] detection pipeline error:", err));
+    scheduleProcessing(order.id);
 
     return NextResponse.json({
       data: {

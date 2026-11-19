@@ -23,6 +23,8 @@ export function safeRedirectPath(
 
   // Harus dimulai dengan "/" tapi BUKAN "//"
   if (!trimmed.startsWith("/") || trimmed.startsWith("//")) return fallback;
+  // Browser memperlakukan "/\\evil.com" sama dengan "//evil.com"; tolak juga karakter kontrol
+  if (trimmed.includes("\\") || /[\u0000-\u001f]/.test(trimmed)) return fallback;
 
   // Cegah protocol injection: "javascript:", "data:", dll.
   // Cek apakah ada karakter ":" sebelum "/" pertama

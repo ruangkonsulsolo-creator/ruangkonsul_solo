@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { extOf, magicMatches } from "@/lib/security/file-check";
 
 const ALLOWED_MIME = new Set([
   "application/pdf",
@@ -57,6 +58,9 @@ export async function POST(request: NextRequest) {
 
   // Upload ke Supabase Storage bucket "documents"
   const arrayBuffer = await file.arrayBuffer();
+  if (!magicMatches(extOf(file.name), new Uint8Array(arrayBuffer.slice(0, 16)))) {
+    return NextResponse.json({ error: "Isi file tidak sesuai format PDF/DOCX." }, { status: 415 });
+  }
   const { error: uploadError } = await supabase.storage
     .from("documents")
     .upload(storagePath, arrayBuffer, {

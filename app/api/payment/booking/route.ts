@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { rateLimit } from "@/lib/security/rate-limit";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth/roles";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { startPayment, getCustomerDetails } from "@/lib/payment/checkout";
+import { startPayment, getCustomerDetails, requireWhatsApp } from "@/lib/payment/checkout";
 import { generateOrderNumber } from "@/lib/utils/generate-order-number";
 import { MIN_LEAD_MINUTES, slotPrice, slotStartsAt, type SlotRow } from "@/lib/booking/slots";
 
@@ -12,6 +13,7 @@ const schema = z.object({
   slot_id: z.string().uuid(),
   topic: z.string().trim().min(3, "Topik minimal 3 karakter.").max(200),
   notes: z.string().trim().max(1000).optional(),
+  whatsapp: z.string().max(25).optional(),
 });
 
 /**
@@ -27,10 +29,16 @@ export async function POST(request: NextRequest) {
   }
   const { user } = auth.ctx;
 
+  if (!(await rateLimit(`bkg:${user.id}`, 60, 6))) {
+    return NextResponse.json({ error: "Terlalu banyak permintaan. Coba lagi sebentar." }, { status: 429 });
+  }
   const parsed = schema.safeParse(await request.json().catch(() => ({})));
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.errors[0]?.message ?? "Input tidak valid." }, { status: 422 });
   }
+
+  const wa = await requireWhatsApp(user.id, parsed.data.whatsapp);
+  if (!wa.ok) return NextResponse.json({ error: wa.error, code: "WHATSAPP_REQUIRED" }, { status: 422 });
 
   const admin = createAdminClient();
   const { data: slot } = await admin

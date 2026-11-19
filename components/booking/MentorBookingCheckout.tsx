@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Toast, useToast } from "@/components/ui/toast";
 import { useSnapCheckout } from "@/lib/payment/use-snap";
+import { WhatsAppField, isValidWhatsApp } from "@/components/payment/WhatsAppField";
 import { formatRupiah } from "@/lib/utils/format-currency";
 import { cn } from "@/lib/utils";
 
@@ -55,6 +56,8 @@ export function MentorBookingCheckout({ mentors, isLoggedIn }: { mentors: Mentor
   const [slotId, setSlotId] = useState<string>("");
   const [topic, setTopic] = useState("");
   const [notes, setNotes] = useState("");
+  const [whatsapp, setWhatsapp] = useState("");
+  const [waError, setWaError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -81,13 +84,17 @@ export function MentorBookingCheckout({ mentors, isLoggedIn }: { mentors: Mentor
   async function handlePay() {
     if (!selected) return showToast("Pilih jadwal dulu.", "error");
     if (topic.trim().length < 3) return showToast("Isi topik bimbingan (min. 3 karakter).", "error");
+    if (!isValidWhatsApp(whatsapp)) {
+      setWaError("Nomor WhatsApp wajib diisi dengan benar.");
+      return showToast("Nomor WhatsApp wajib diisi.", "error");
+    }
 
     setSubmitting(true);
     try {
       const res = await fetch("/api/payment/booking", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slot_id: selected.id, topic: topic.trim(), notes: notes.trim() || undefined }),
+        body: JSON.stringify({ slot_id: selected.id, topic: topic.trim(), notes: notes.trim() || undefined, whatsapp }),
       });
       const json = await res.json().catch(() => ({}));
 
@@ -96,6 +103,7 @@ export function MentorBookingCheckout({ mentors, isLoggedIn }: { mentors: Mentor
         return;
       }
       if (!res.ok || !json.data?.snap_token) {
+        if (json.code === "WHATSAPP_REQUIRED") setWaError(json.error);
         showToast(json.error ?? "Gagal membuat booking.", "error");
         if (res.status === 409) {
           setSlots((prev) => prev.filter((s) => s.id !== selected.id));
@@ -203,6 +211,8 @@ export function MentorBookingCheckout({ mentors, isLoggedIn }: { mentors: Mentor
               placeholder="Opsional"
             />
           </div>
+
+          {isLoggedIn && <WhatsAppField value={whatsapp} onChange={(v) => { setWhatsapp(v); setWaError(null); }} error={waError} />}
 
           <div className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3">
             <div className="text-xs text-slate-600">

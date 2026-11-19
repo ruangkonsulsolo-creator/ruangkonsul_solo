@@ -6,7 +6,7 @@ import { Loader2, CheckCircle2, Clock } from "lucide-react";
 import { syncPaymentStatus } from "@/lib/payment/use-snap";
 
 interface Props {
-  purpose: "order" | "package" | "booking";
+  purpose: "order" | "package" | "booking" | "merch";
   /** referensi yang masih menunggu pembayaran (order id / booking id / package id) */
   referenceIds: string[];
   /** tampilkan banner "pembayaran sedang dicek" (mis. saat ?paid=1 di URL) */
@@ -59,7 +59,12 @@ export function PaymentStatusSync({ purpose, referenceIds, showBanner = false }:
   return (
     <div className={`flex items-start gap-2.5 rounded-xl border px-4 py-3 text-sm ${cfg.cls}`} role="status">
       <Icon className={`h-4 w-4 mt-0.5 flex-shrink-0 ${cfg.spin ? "animate-spin" : ""}`} aria-hidden="true" />
-      <span>{cfg.text}</span>
+      <span>
+        {cfg.text}
+        {state === "paid" && (
+          <> <a href="/dashboard/receipt" className="font-semibold underline">Lihat receipt</a></>
+        )}
+      </span>
     </div>
   );
 }

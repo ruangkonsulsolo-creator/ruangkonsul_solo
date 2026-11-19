@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -56,6 +56,19 @@ export default function LoginPage() {
     router.refresh();
   }
 
+  // Pesan error dari redirect (callback OAuth, akun dinonaktifkan, dll.)
+  useEffect(() => {
+    const code = new URLSearchParams(window.location.search).get("error");
+    const map: Record<string, string> = {
+      account_disabled: "Akun kamu dinonaktifkan. Hubungi admin.",
+      oauth_cancelled: "Login Google dibatalkan.",
+      oauth_failed: "Login Google gagal. Coba lagi.",
+      auth_callback_failed: "Link login/verifikasi tidak valid atau kedaluwarsa.",
+    };
+    if (code && map[code]) showToast(map[code], "error");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   async function handleGoogleLogin() {
     setGoogleLoading(true);
     const params = new URLSearchParams(window.location.search);
@@ -64,6 +77,7 @@ export default function LoginPage() {
       provider: "google",
       options: {
         redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
+        queryParams: { prompt: "select_account" },
       },
     });
     if (error) {

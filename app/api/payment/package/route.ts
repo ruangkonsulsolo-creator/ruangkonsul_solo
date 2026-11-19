@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { rateLimit } from "@/lib/security/rate-limit";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth/roles";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -17,6 +18,9 @@ export async function POST(request: NextRequest) {
   }
   const { user } = auth.ctx;
 
+  if (!(await rateLimit(`pkg:${user.id}`, 60, 6))) {
+    return NextResponse.json({ error: "Terlalu banyak permintaan. Coba lagi sebentar." }, { status: 429 });
+  }
   const parsed = schema.safeParse(await request.json().catch(() => ({})));
   if (!parsed.success) return NextResponse.json({ error: "Paket tidak valid." }, { status: 422 });
 

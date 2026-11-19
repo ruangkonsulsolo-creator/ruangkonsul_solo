@@ -29,6 +29,7 @@ export default function DaftarPage() {
   async function handleDaftar(e: React.FormEvent) {
     e.preventDefault();
     if (password.length < 8) { showToast("Password minimal 8 karakter.", "error"); return; }
+    if (!/[A-Za-z]/.test(password) || !/\d/.test(password)) { showToast("Password harus mengandung huruf dan angka.", "error"); return; }
     setLoading(true);
 
     const params = new URLSearchParams(window.location.search);
@@ -51,9 +52,13 @@ export default function DaftarPage() {
 
   async function handleGoogleLogin() {
     setGoogleLoading(true);
+    // Kode referral ikut dibawa ke callback agar tercatat untuk akun Google baru
+    const ref = new URLSearchParams(window.location.search).get("ref");
+    const cb = new URL("/auth/callback", window.location.origin);
+    if (ref && /^RKS-[A-Z0-9]{5}$/i.test(ref)) cb.searchParams.set("ref", ref.toUpperCase());
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { redirectTo: cb.toString(), queryParams: { prompt: "select_account" } },
     });
     if (error) { showToast("Gagal daftar dengan Google.", "error"); setGoogleLoading(false); }
   }

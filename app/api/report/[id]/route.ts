@@ -47,7 +47,7 @@ export async function GET(
   // Generate signed URL (1 jam)
   const { data: signedData, error: signedError } = await supabase.storage
     .from("reports")
-    .createSignedUrl(order.report_storage_path, 3600);
+    .createSignedUrl(order.report_storage_path, 300, { download: true });
 
   if (signedError || !signedData?.signedUrl) {
     return NextResponse.json(

@@ -1,8 +1,13 @@
+import { rateLimit, clientIp } from "@/lib/security/rate-limit";
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { BRAND } from "@/lib/brand";
 
 export async function POST(request: NextRequest) {
+  // Form publik tanpa login → batasi per IP (anti spam)
+  if (!(await rateLimit(`lead:${clientIp()}`, 600, 5))) {
+    return NextResponse.json({ error: "Terlalu banyak permintaan. Coba lagi nanti." }, { status: 429 });
+  }
   let body: {
     nama: string; prodi?: string; whatsapp: string;
     mentor_id?: string; tanggal?: string; jam?: string;

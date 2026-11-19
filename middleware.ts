@@ -20,7 +20,8 @@ export async function middleware(request: NextRequest) {
   const needsAuth =
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/admin") ||
-    pathname.startsWith("/mentor");
+    pathname.startsWith("/mentor") ||
+    pathname.startsWith("/receipt");
 
   if (!needsAuth) return NextResponse.next();
 

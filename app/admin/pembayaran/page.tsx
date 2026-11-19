@@ -30,7 +30,7 @@ export default async function AdminPembayaranPage({
 
   let query = supabase
     .from("payments")
-    .select("id, midtrans_order_id, purpose, amount_idr, status, payment_type, paid_at, created_at, profiles(full_name)", { count: "exact" })
+    .select("id, receipt_number, midtrans_order_id, purpose, amount_idr, status, payment_type, paid_at, created_at, profiles(full_name)", { count: "exact" })
     .order("created_at", { ascending: false })
     .range((page - 1) * pageSize, page * pageSize - 1);
   if (searchParams.status && STATUS[searchParams.status]) query = query.eq("status", searchParams.status);
@@ -98,7 +98,7 @@ export default async function AdminPembayaranPage({
                 const cust = (Array.isArray(p.profiles) ? p.profiles[0] : p.profiles) as { full_name: string | null } | null;
                 return (
                   <tr key={p.id} className="hover:bg-slate-50">
-                    <td className="px-4 py-3 font-mono text-xs">{p.midtrans_order_id}</td>
+                    <td className="px-4 py-3 font-mono text-xs">{p.midtrans_order_id}{p.receipt_number && <div className="text-[10px] text-muted-foreground">{p.receipt_number}</div>}</td>
                     <td className="px-4 py-3">{cust?.full_name || "-"}</td>
                     <td className="px-4 py-3 text-xs">{PURPOSE[p.purpose] ?? p.purpose}</td>
                     <td className="px-4 py-3 font-semibold">{formatRupiah(p.amount_idr)}</td>
@@ -107,7 +107,10 @@ export default async function AdminPembayaranPage({
                     <td className="px-4 py-3 text-xs text-muted-foreground">
                       {new Date(p.paid_at ?? p.created_at).toLocaleString("id-ID", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Jakarta" })}
                     </td>
-                    <td className="px-4 py-3">{p.status === "pending" && <PaymentSyncButton paymentId={p.id} />}</td>
+                    <td className="px-4 py-3">
+                      {p.status === "pending" && <PaymentSyncButton paymentId={p.id} />}
+                      {p.receipt_number && <a href={`/receipt/${p.id}`} className="text-xs font-semibold text-[#8B0000] hover:underline">Receipt</a>}
+                    </td>
                   </tr>
                 );
               })}

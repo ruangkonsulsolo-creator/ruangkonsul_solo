@@ -8,13 +8,14 @@ import { Logo } from "@/components/ui/logo";
 import {
   LayoutDashboard, ClipboardList, Users,
   BarChart3, Settings, Package, LogOut, ChevronRight,
-  GraduationCap, FileText, ShieldCheck, Phone, CreditCard,
+  GraduationCap, FileText, ShieldCheck, Phone, CreditCard, ShoppingBag,
 } from "lucide-react";
 
 const navItems = [
   { label: "Dashboard",       href: "/admin",              icon: LayoutDashboard, exact: true },
   { label: "Pesanan",         href: "/admin/pesanan",      icon: ClipboardList },
   { label: "Pembayaran",      href: "/admin/pembayaran",   icon: CreditCard },
+  { label: "Merchandise",     href: "/admin/merchandise",  icon: ShoppingBag },
   { label: "Booking Leads",   href: "/admin/booking-leads",icon: Phone },
   { label: "Users",           href: "/admin/users",        icon: Users },
   { label: "Laporan",         href: "/admin/laporan",      icon: BarChart3 },

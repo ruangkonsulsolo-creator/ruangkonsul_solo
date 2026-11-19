@@ -1,17 +1,19 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { normalizeWhatsApp } from "@/lib/validators/whatsapp";
 import {
   createSnapTransaction,
   makeMidtransOrderId,
   type SnapItem,
 } from "./midtrans";
 
-export type PaymentPurpose = "order" | "package" | "booking";
+export type PaymentPurpose = "order" | "package" | "booking" | "merch";
 
-const PREFIX: Record<PaymentPurpose, "ORD" | "PKG" | "BKG"> = {
+const PREFIX: Record<PaymentPurpose, "ORD" | "PKG" | "BKG" | "MRC"> = {
   order: "ORD",
   package: "PKG",
   booking: "BKG",
+  merch: "MRC",
 };
 
 export interface StartPaymentParams {
@@ -53,6 +55,13 @@ export async function startPayment(p: StartPaymentParams): Promise<StartedPaymen
       reference_id: p.referenceId,
       amount_idr: p.amountIdr,
       status: "pending",
+      // Snapshot untuk receipt — tidak berubah walau profil/harga diubah kemudian
+      customer_snapshot: {
+        name: p.customer.firstName,
+        email: p.customer.email ?? null,
+        whatsapp: p.customer.phone ?? null,
+      },
+      item_snapshot: p.items,
     })
     .select("id")
     .single();
@@ -127,4 +136,29 @@ export async function findReusablePayment(
     .limit(1)
     .maybeSingle();
   return data;
+}
+
+export type WhatsAppCheck = { ok: true; whatsapp: string } | { ok: false; error: string };
+
+/**
+ * Wajib WA sebelum bayar (layanan, bimbingan, merch).
+ * - Jika `provided` valid → disimpan ke profil lalu dipakai.
+ * - Jika kosong → pakai WA di profil (harus valid).
+ */
+export async function requireWhatsApp(userId: string, provided?: string | null): Promise<WhatsAppCheck> {
+  const admin = createAdminClient();
+
+  if (provided && provided.trim()) {
+    const n = normalizeWhatsApp(provided);
+    if (!n) return { ok: false, error: "Nomor WhatsApp tidak valid (contoh: 0812xxxxxxxx)." };
+    await admin.from("profiles").update({ whatsapp: n }).eq("id", userId);
+    return { ok: true, whatsapp: n };
+  }
+
+  const { data } = await admin.from("profiles").select("whatsapp").eq("id", userId).single();
+  const n = normalizeWhatsApp(data?.whatsapp);
+  if (!n) {
+    return { ok: false, error: "Nomor WhatsApp wajib diisi sebelum melakukan pembayaran." };
+  }
+  return { ok: true, whatsapp: n };
 }

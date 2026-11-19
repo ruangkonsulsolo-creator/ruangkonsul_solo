@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FileUploadZone } from "./FileUploadZone";
 import { PaymentModal } from "./PaymentModal";
+import { WhatsAppField, isValidWhatsApp } from "@/components/payment/WhatsAppField";
 import { Button } from "@/components/ui/button";
 import { formatRupiah } from "@/lib/utils/format-currency";
 import { PackageOpen, CreditCard, CheckCircle2, ArrowRight, Loader2 } from "lucide-react";
@@ -31,9 +32,16 @@ export function OrderForm({ serviceSlug, serviceName, servicePrice, activeQuota,
   const [snapToken, setSnapToken] = useState<string | null>(null);
   const [paymentId, setPaymentId] = useState<string | null>(null);
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [whatsapp, setWhatsapp] = useState("");
+  const [waError, setWaError] = useState<string | null>(null);
 
   async function handleSubmit() {
     if (!uploadedFile) return;
+    if (!isValidWhatsApp(whatsapp)) {
+      setWaError("Nomor WhatsApp wajib diisi dengan benar sebelum lanjut.");
+      return;
+    }
+    setWaError(null);
     setSubmitting(true);
 
     const res = await fetch("/api/order", {
@@ -43,11 +51,17 @@ export function OrderForm({ serviceSlug, serviceName, servicePrice, activeQuota,
         file_id: uploadedFile.file_id,
         service_slug: serviceSlug,
         use_quota_id: useQuota && activeQuota ? activeQuota.id : null,
+        whatsapp,
       }),
     });
 
     const json = await res.json();
-    if (!res.ok) { showToast(json.error ?? "Gagal membuat pesanan.", "error"); setSubmitting(false); return; }
+    if (!res.ok) {
+      if (json.code === "WHATSAPP_REQUIRED") setWaError(json.error);
+      showToast(json.error ?? "Gagal membuat pesanan.", "error");
+      setSubmitting(false);
+      return;
+    }
 
     if (json.data.payment_method === "quota") {
       setStep("done");
@@ -179,6 +193,8 @@ export function OrderForm({ serviceSlug, serviceName, servicePrice, activeQuota,
                 </div>
               </button>
             </div>
+
+            <WhatsAppField value={whatsapp} onChange={(v) => { setWhatsapp(v); setWaError(null); }} error={waError} />
 
             <div className="flex gap-3 pt-1">
               <Button

@@ -58,7 +58,7 @@ export default async function RiwayatPesananPage({
     .from("orders")
     .select(`
       id, order_number, status, price_idr, payment_method,
-      created_at, completed_at, midtrans_snap_token,
+      created_at, completed_at, midtrans_snap_token, output_storage_path,
       services ( name, slug ),
       uploaded_files ( original_name )
     `, { count: "exact" })
@@ -163,7 +163,12 @@ export default async function RiwayatPesananPage({
                       </td>
                       <td className="px-4 py-3">
                         {order.status === "selesai" ? (
-                          <ReportDownloadButton orderId={order.id} />
+                          <div className="flex flex-col items-start gap-1">
+                            <ReportDownloadButton orderId={order.id} />
+                            {(order as any).output_storage_path && (
+                              <a href={`/api/order/${order.id}/output`} className="text-xs font-semibold text-[#8B0000] hover:underline">Unduh hasil .docx</a>
+                            )}
+                          </div>
                         ) : order.status === "menunggu_pembayaran" ? (
                           <RebayarButton orderId={order.id} snapToken={(order as any).midtrans_snap_token ?? null} />
                         ) : (

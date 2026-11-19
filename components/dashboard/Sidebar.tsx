@@ -9,7 +9,7 @@ import {
   FileSearch, Bot, BookOpenCheck, PenLine,
   ClockIcon, PackageOpen, User, LogOut,
   LayoutDashboard, Menu, X, ChevronRight,
-  GraduationCap,
+  GraduationCap, Receipt, ShoppingBag,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -46,6 +46,8 @@ const navItems = [
   { label: "Riwayat Pesanan", href: "/dashboard/riwayat-pesanan", icon: ClockIcon },
   { label: "Paket Saya",      href: "/dashboard/paket-saya",      icon: PackageOpen },
   { label: "Bimbingan Saya",  href: "/dashboard/bimbingan-saya",  icon: GraduationCap },
+  { label: "Receipt",         href: "/dashboard/receipt",         icon: Receipt },
+  { label: "Merchandise",     href: "/dashboard/merchandise",     icon: ShoppingBag },
   { label: "Profil",          href: "/dashboard/profil",           icon: User },
 ];
 

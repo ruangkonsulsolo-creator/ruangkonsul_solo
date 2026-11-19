@@ -1,6 +1,6 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { runDetectionPipeline } from "@/lib/detection/pipeline";
+import { scheduleProcessing } from "@/lib/processing/runner";
 import { sendWhatsApp, waTemplates } from "@/lib/notification/whatsapp";
 import { sendEmail } from "@/lib/notification/email";
 import { formatRupiah } from "@/lib/utils/format-currency";
@@ -14,7 +14,7 @@ interface PaymentRow {
   id: string;
   midtrans_order_id: string;
   user_id: string;
-  purpose: "order" | "package" | "booking";
+  purpose: "order" | "package" | "booking" | "merch";
   reference_id: string;
   amount_idr: number;
   status: string;
@@ -160,6 +160,8 @@ async function fulfil(admin: Admin, p: PaymentRow) {
       return fulfilPackage(admin, p);
     case "booking":
       return fulfilBooking(admin, p);
+    case "merch":
+      return fulfilMerch(admin, p);
   }
 }
 
@@ -237,11 +239,9 @@ async function fulfilOrder(admin: Admin, p: PaymentRow) {
     label: `pesanan ${order.order_number}`,
   });
 
-  // Pipeline deteksi otomatis (hanya layanan plagiasi). Tidak di-await agar
-  // webhook Midtrans cepat mendapat HTTP 200.
-  runDetectionPipeline(order.id, order).catch((err) =>
-    console.error("[payment] detection pipeline error:", err)
-  );
+  // Engine otomatis (similarity / AI checker / parafrase) berjalan di background.
+  // Cron /api/cron/process menjadi cadangan jika proses ini terputus.
+  scheduleProcessing(order.id);
 }
 
 async function fulfilPackage(admin: Admin, p: PaymentRow) {
@@ -373,6 +373,46 @@ async function fulfilBooking(admin: Admin, p: PaymentRow) {
   });
 }
 
+async function fulfilMerch(admin: Admin, p: PaymentRow) {
+  const { data: updated, error } = await admin
+    .from("merch_orders")
+    .update({ status: "dibayar", paid_at: new Date().toISOString() })
+    .eq("id", p.reference_id)
+    .eq("status", "menunggu_pembayaran")
+    .select("id, order_number, items, stock_released");
+  if (error) throw new Error(`Gagal update pesanan merch: ${error.message}`);
+  const order = updated?.[0];
+  if (!order) return;
+
+  // Stok sempat dikembalikan (mis. dibatalkan lalu ternyata dibayar) → reservasi ulang
+  if (order.stock_released) {
+    const items = (order.items as { product_id: string; quantity: number }[]).map((i) => ({ product_id: i.product_id, quantity: i.quantity }));
+    const { error: e } = await admin.rpc("reserve_merch_stock", { p_items: items });
+    await admin.from("merch_orders").update({ stock_released: false, notes: e ? "PERLU REVIEW: stok kurang setelah pembayaran" : null }).eq("id", order.id);
+  }
+
+  await admin.from("transactions").insert({
+    user_id: p.user_id,
+    type: "merch_payment",
+    amount_idr: p.amount_idr,
+    reference_id: order.id,
+    reference_type: "merch",
+    gateway_ref: p.midtrans_order_id,
+    notes: `Pembayaran merchandise ${order.order_number}`,
+  });
+
+  await admin.from("notifications").insert({
+    user_id: p.user_id,
+    channel: "in_app",
+    title: "Pembayaran Merchandise Berhasil",
+    body: `Pesanan ${order.order_number} sedang dikemas. Nomor resi akan dikirim setelah paket diserahkan ke kurir.`,
+  });
+
+  const items = order.items as { name: string; quantity: number }[];
+  await sendReceipt(admin, p, `Merchandise ${order.order_number}: ${items.map((i) => `${i.quantity}x ${i.name}`).join(", ")}`);
+  await creditReferralIfFirstPurchase({ userId: p.user_id, amountIdr: p.amount_idr, label: `merchandise ${order.order_number}` });
+}
+
 // ─── Gagal / expire / batal ──────────────────────────────────────────────────
 
 async function handleFailure(admin: Admin, p: PaymentRow, outcome: PaymentOutcome) {
@@ -423,6 +463,16 @@ async function handleFailure(admin: Admin, p: PaymentRow, outcome: PaymentOutcom
       .eq("status", "pending")
       .eq("midtrans_order_id", p.midtrans_order_id);
   }
+  if (p.purpose === "merch") {
+    const { data: cancelled } = await admin
+      .from("merch_orders")
+      .update({ status: "dibatalkan", cancelled_at: now, cancel_reason: `Midtrans: ${outcome}` })
+      .eq("id", p.reference_id)
+      .eq("status", "menunggu_pembayaran")
+      .eq("midtrans_order_id", p.midtrans_order_id)
+      .select("id");
+    if (cancelled?.length) await admin.rpc("release_merch_stock", { p_order_id: p.reference_id });
+  }
   // purpose 'package': tidak ada yang perlu di-rollback
 }
 
@@ -433,31 +483,40 @@ function one<T>(v: T | T[] | null | undefined): T | null {
   return v ?? null;
 }
 
-/** FR-P05: kirim bukti pembayaran via email (jika Resend dikonfigurasi). */
+/** FR-P05: kirim receipt via email (jika Resend dikonfigurasi). */
 async function sendReceipt(admin: Admin, p: PaymentRow, description: string) {
   if (!process.env.RESEND_API_KEY || !process.env.RESEND_FROM_EMAIL) return;
   try {
-    const { data } = await admin.auth.admin.getUserById(p.user_id);
+    const [{ data }, { data: pay }] = await Promise.all([
+      admin.auth.admin.getUserById(p.user_id),
+      admin.from("payments").select("receipt_number").eq("id", p.id).single(),
+    ]);
     const email = data?.user?.email;
     if (!email) return;
+    const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? `https://${BRAND.domain}`).replace(/\/$/, "");
+    const receiptNo = pay?.receipt_number ?? p.midtrans_order_id;
     await sendEmail({
       to: email,
-      subject: `Bukti Pembayaran ${p.midtrans_order_id} — ${BRAND.name}`,
+      subject: `Receipt ${receiptNo} — ${BRAND.name}`,
       html: `
         <div style="font-family:Arial,sans-serif;max-width:520px;margin:auto">
           <h2 style="color:${BRAND.primaryColor}">Pembayaran Berhasil</h2>
           <p>Terima kasih! Pembayaran kamu sudah kami terima.</p>
           <table style="width:100%;border-collapse:collapse;font-size:14px">
-            <tr><td style="padding:6px 0;color:#666">No. Transaksi</td><td><b>${p.midtrans_order_id}</b></td></tr>
+            <tr><td style="padding:6px 0;color:#666">No. Receipt</td><td><b>${receiptNo}</b></td></tr>
+            <tr><td style="padding:6px 0;color:#666">Order ID</td><td>${p.midtrans_order_id}</td></tr>
             <tr><td style="padding:6px 0;color:#666">Item</td><td>${escapeHtml(description)}</td></tr>
             <tr><td style="padding:6px 0;color:#666">Total</td><td><b>${formatRupiah(p.amount_idr)}</b></td></tr>
             <tr><td style="padding:6px 0;color:#666">Tanggal</td><td>${new Date().toLocaleString("id-ID", { timeZone: "Asia/Jakarta" })} WIB</td></tr>
           </table>
-          <p style="margin-top:24px;color:#888;font-size:12px">${BRAND.name} · ${BRAND.domain}</p>
+          <p style="margin-top:20px">
+            <a href="${appUrl}/receipt/${p.id}" style="background:${BRAND.primaryColor};color:#fff;padding:10px 16px;border-radius:8px;text-decoration:none;font-weight:bold">Lihat &amp; Unduh Receipt</a>
+          </p>
+          <p style="margin-top:24px;color:#888;font-size:12px">Verifikasi: ${appUrl}/verify/${receiptNo}<br/>${BRAND.name} · ${BRAND.domain}</p>
         </div>`,
     });
   } catch (err) {
-    console.error("[payment] email bukti bayar gagal:", err);
+    console.error("[payment] email receipt gagal:", err);
   }
 }
 

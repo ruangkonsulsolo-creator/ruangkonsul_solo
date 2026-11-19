@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { rateLimit } from "@/lib/security/rate-limit";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth/roles";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -15,6 +16,9 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
   const auth = await requireUser();
   if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status });
 
+  if (!(await rateLimit(`review:${auth.ctx.user.id}`, 60, 10))) {
+    return NextResponse.json({ error: "Terlalu banyak permintaan. Coba lagi sebentar." }, { status: 429 });
+  }
   const parsed = schema.safeParse(await request.json().catch(() => ({})));
   if (!parsed.success) return NextResponse.json({ error: "Rating 1–5 wajib diisi." }, { status: 422 });
 

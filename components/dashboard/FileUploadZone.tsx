@@ -54,17 +54,33 @@ export function FileUploadZone({
     setUploading(true);
     setProgress(10);
 
-    const fd = new FormData();
-    fd.append("file", file);
-
-    const interval = setInterval(() => setProgress((p) => Math.min(p + 12, 85)), 300);
+    const interval = setInterval(() => setProgress((p) => Math.min(p + 6, 90)), 400);
 
     try {
-      const res = await fetch("/api/upload", { method: "POST", body: fd });
-      clearInterval(interval);
-      setProgress(100);
+      // 1. Minta signed upload URL
+      const signRes = await fetch("/api/upload/sign", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: file.name, size: file.size, type: file.type }),
+      });
+      const sign = await signRes.json();
+      if (!signRes.ok) { setError(sign.error ?? "Upload gagal."); return; }
 
+      // 2. Upload langsung ke Supabase Storage (tidak lewat server → mendukung file besar)
+      const { createClient } = await import("@/lib/supabase/client");
+      const { error: upErr } = await createClient()
+        .storage.from("documents")
+        .uploadToSignedUrl(sign.data.path, sign.data.token, file, { contentType: file.type || "application/octet-stream" });
+      if (upErr) { setError("Upload ke penyimpanan gagal. Coba lagi."); return; }
+
+      // 3. Verifikasi isi file di server & catat
+      const res = await fetch("/api/upload/complete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ path: sign.data.path, name: file.name }),
+      });
       const json = await res.json();
+      setProgress(100);
       if (!res.ok) { setError(json.error ?? "Upload gagal."); return; }
 
       setUploadedFile(json.data);
@@ -72,6 +88,7 @@ export function FileUploadZone({
     } catch {
       setError("Koneksi gagal. Coba lagi.");
     } finally {
+      clearInterval(interval);
       setUploading(false);
     }
   }
@@ -153,7 +170,7 @@ export function FileUploadZone({
         )}
 
         <input
-          id="file-upload" type="file" accept=".pdf,.docx,.doc"
+          id="file-upload" type="file" accept=".pdf,.docx,.doc,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
           onChange={(e) => { const f = e.target.files?.[0]; if (f) upload(f); e.target.value = ""; }}
           disabled={disabled || uploading}
           className="sr-only"
