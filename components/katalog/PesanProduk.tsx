@@ -6,7 +6,7 @@ import Link from "next/link";
 import { CalendarDays, CreditCard, Loader2, MessageCircle, Minus, Plus, ShieldCheck } from "lucide-react";
 import { formatRupiah } from "@/lib/utils/format-currency";
 import { BRAND, waLink } from "@/lib/brand";
-import { bisaDibayarLangsung, ongkirFlat, perluPilihJadwal } from "@/lib/katalog/checkout";
+import { bisaDibayarLangsung, jadwalViaWhatsApp, ongkirFlat, perluPilihJadwal } from "@/lib/katalog/checkout";
 import { useSnapCheckout } from "@/lib/payment/use-snap";
 import { WhatsAppField, isValidWhatsApp } from "@/components/payment/WhatsAppField";
 import type { Produk } from "@/lib/katalog/tipe";
@@ -204,6 +204,13 @@ export function PesanProduk({ produk }: { produk: Produk }) {
               <span>Total</span><span className="text-brand">{formatRupiah(total)}</span>
             </div>
           </div>
+
+          {jadwalViaWhatsApp(produk) && (
+            <p className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+              <CalendarDays className="mt-0.5 h-4 w-4 flex-shrink-0" aria-hidden="true" />
+              Jadwal sesi akan diinformasikan mentor lewat WhatsApp setelah pembayaran.
+            </p>
+          )}
 
           {error && <p className="text-sm text-red-600" role="alert">{error}</p>}
 
