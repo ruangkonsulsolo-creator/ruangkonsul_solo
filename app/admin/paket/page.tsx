@@ -1,19 +1,38 @@
 import { createClient } from "@/lib/supabase/server";
-import { PaketConfigForm } from "@/components/admin/PaketConfigForm";
+import { PaketSaldoForm } from "@/components/admin/PaketSaldoForm";
 import { BRAND } from "@/lib/brand";
 import type { Metadata } from "next";
-export const metadata: Metadata = { title: `Konfigurasi Paket Hemat | Admin ${BRAND.name}` };
 
+export const dynamic = "force-dynamic";
+export const metadata: Metadata = { title: `Paket Isi Saldo | Admin ${BRAND.name}` };
+
+/**
+ * Dulu halaman ini mengelola quota_packages (kuota per layanan) dari alur
+ * pesanan lama yang sudah tidak dipakai. Cek naskah real-time memotong saldo
+ * kredit, jadi yang dijual sekarang adalah paket isi saldo (migration 035).
+ */
 export default async function AdminPaketPage() {
   const supabase = createClient();
-  const [{ data: packages }, { data: services }] = await Promise.all([
-    supabase.from("quota_packages").select("id, name, service_id, quota_amount, price_idr, validity_days, is_active, is_popular").order("created_at", { ascending: true }),
-    supabase.from("services").select("id, name, slug").eq("is_active", true),
-  ]);
+  const { data: paket, error } = await supabase
+    .from("paket_saldo")
+    .select("id, nama, harga_idr, saldo_idr, is_active, is_populer, urutan")
+    .order("urutan", { ascending: true });
+
   return (
-    <div className="space-y-6 max-w-7xl">
-      <div><h2 className="text-xl font-extrabold text-slate-900">Konfigurasi Paket Hemat</h2><p className="text-sm text-muted-foreground mt-1">Kelola paket kuota yang ditawarkan kepada pengguna.</p></div>
-      <PaketConfigForm packages={packages ?? []} services={services ?? []} />
+    <div className="max-w-5xl space-y-6">
+      <div>
+        <h2 className="text-xl font-extrabold text-slate-900">Paket Isi Saldo</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Paket top-up saldo untuk cek naskah. Customer membayar lewat QRIS, saldo langsung bertambah setelah lunas.
+          Isi &ldquo;Saldo didapat&rdquo; lebih besar dari harga untuk memberi bonus.
+        </p>
+      </div>
+      {error && (
+        <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          Tabel paket belum ada. Jalankan migration 035 di Supabase SQL Editor.
+        </p>
+      )}
+      <PaketSaldoForm paket={paket ?? []} />
     </div>
   );
 }

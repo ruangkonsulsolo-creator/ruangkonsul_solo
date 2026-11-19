@@ -13,6 +13,7 @@ import { BannerStrip } from "@/components/landing/BannerStrip";
 import { LogoKampus } from "@/components/landing/LogoKampus";
 import { KartuTool, TOOLS } from "@/components/landing/KartuTool";
 import { KotakPeriksa } from "@/components/periksa/KotakPeriksa";
+import { ambilTarifPeriksa } from "@/lib/periksa/tarif";
 import { TestimoniWhatsApp } from "@/components/landing/TestimoniWhatsApp";
 import { BRAND, waLink } from "@/lib/brand";
 import type { Metadata } from "next";
@@ -141,6 +142,7 @@ async function ambilMentor() {
 export const revalidate = 300;
 
 export default async function LandingPage() {
+  const tarifPeriksa = await ambilTarifPeriksa();
   const [MENTOR, bimbingan] = await Promise.all([
     ambilMentor(),
     ambilEtalase(ETALASE.bimbinganOnline),
@@ -371,7 +373,7 @@ export default async function LandingPage() {
             mengutip — bukan mengakali pemeriksaan kampus.
           </p>
 
-          <KotakPeriksa />
+          <KotakPeriksa tarif={tarifPeriksa.tarif} aktif={tarifPeriksa.aktif} />
         </div>
       </section>
 

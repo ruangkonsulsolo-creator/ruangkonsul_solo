@@ -14,6 +14,7 @@ import {
   PenyediaBelumSiap,
   susunSaran,
 } from "@/lib/periksa/penyedia";
+import { ambilTarifPeriksa } from "@/lib/periksa/tarif";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;
@@ -60,7 +61,15 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const biaya = hitungBiaya(jumlahKata, jenis);
+  // Tarif dari Admin > Tarif Pemeriksaan (per 1.000 kata), bukan dari klien.
+  const { tarif, aktif } = await ambilTarifPeriksa();
+  if (!aktif[jenis]) {
+    return NextResponse.json(
+      { error: "Layanan ini sedang dinonaktifkan admin. Coba jenis pemeriksaan lain." },
+      { status: 409 }
+    );
+  }
+  const biaya = hitungBiaya(jumlahKata, jenis, tarif);
   const supabase = createClient();
 
   const {

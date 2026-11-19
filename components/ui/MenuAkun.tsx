@@ -37,6 +37,7 @@ const MENU_MEMBER = [
   { label: "Chat Mentor", href: "/dashboard/chat", icon: MessageCircle },
   { label: "Riwayat Pesanan", href: "/dashboard/riwayat-pesanan", icon: Clock },
   { label: "Sesi Saya", href: "/dashboard/sesi-saya", icon: Clock },
+  { label: "Isi Saldo", href: "/dashboard/isi-saldo", icon: Clock },
   { label: "Pesanan Produk", href: "/dashboard/pesanan-produk", icon: Clock },
   { label: "Receipt", href: "/dashboard/receipt", icon: Clock },
   { label: "Paket Saya", href: "/dashboard/paket-saya", icon: PackageOpen },

@@ -231,7 +231,7 @@ export function classifyStatus(transactionStatus: string, fraudStatus?: string):
 }
 
 /** Buat midtrans order_id unik. Midtrans menolak order_id yang pernah dipakai. */
-export function makeMidtransOrderId(prefix: "ORD" | "PRD" | "BKG", base: string): string {
+export function makeMidtransOrderId(prefix: "ORD" | "PRD" | "BKG" | "TOP", base: string): string {
   const suffix = Date.now().toString(36).toUpperCase();
   return `RKS-${prefix}-${base}-${suffix}`.slice(0, 50);
 }

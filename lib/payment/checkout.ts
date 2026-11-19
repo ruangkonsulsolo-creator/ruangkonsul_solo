@@ -7,12 +7,13 @@ import {
   type SnapItem,
 } from "./midtrans";
 
-export type PaymentPurpose = "order" | "produk" | "booking";
+export type PaymentPurpose = "order" | "produk" | "booking" | "saldo";
 
-const PREFIX: Record<PaymentPurpose, "ORD" | "PRD" | "BKG"> = {
+const PREFIX: Record<PaymentPurpose, "ORD" | "PRD" | "BKG" | "TOP"> = {
   order: "ORD",
   produk: "PRD",
   booking: "BKG",
+  saldo: "TOP",
 };
 
 export interface StartPaymentParams {
@@ -27,6 +28,8 @@ export interface StartPaymentParams {
   finishPath: string;
   /** Batas waktu bayar (menit). Default 24 jam. */
   expiryMinutes?: number;
+  /** Snapshot item yang disimpan di DB (default = items). Boleh berisi field tambahan. */
+  itemSnapshot?: Array<SnapItem & Record<string, unknown>>;
 }
 
 export interface StartedPayment {
@@ -62,7 +65,7 @@ export async function startPayment(p: StartPaymentParams): Promise<StartedPaymen
         email: p.customer.email ?? null,
         whatsapp: p.customer.phone ?? null,
       },
-      item_snapshot: p.items,
+      item_snapshot: p.itemSnapshot ?? p.items,
     })
     .select("id")
     .single();

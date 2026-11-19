@@ -13,7 +13,7 @@ interface PaymentRow {
   id: string;
   midtrans_order_id: string;
   user_id: string;
-  purpose: "order" | "produk" | "booking";
+  purpose: "order" | "produk" | "booking" | "saldo";
   reference_id: string;
   amount_idr: number;
   status: string;
@@ -109,7 +109,46 @@ async function adoptLegacyOrder(admin: Admin, n: MidtransNotification): Promise<
 async function fulfil(admin: Admin, p: PaymentRow) {
   if (p.purpose === "produk") return fulfilProduk(admin, p);
   if (p.purpose === "booking") return fulfilBooking(admin, p);
+  if (p.purpose === "saldo") return fulfilSaldo(admin, p);
   return fulfilOrder(admin, p);
+}
+
+// ── Isi saldo (paket_saldo) ────────────────────────────────────────────────
+async function fulfilSaldo(admin: Admin, p: PaymentRow) {
+  // Jumlah saldo diambil dari snapshot saat transaksi dibuat, bukan dari
+  // paket sekarang — admin bisa mengubah paket setelah customer membayar.
+  const { data: pay } = await admin.from("payments").select("item_snapshot").eq("id", p.id).maybeSingle();
+  const item = (Array.isArray(pay?.item_snapshot) ? pay!.item_snapshot[0] : null) as
+    | { saldo_idr?: number; name?: string }
+    | null;
+  const snap = { saldo_idr: item?.saldo_idr, nama: item?.name };
+  const saldo = Number(snap.saldo_idr);
+  if (!Number.isFinite(saldo) || saldo <= 0) throw new Error("Snapshot saldo tidak valid");
+
+  const { data: saldoAkhir, error } = await admin.rpc("tambah_saldo", {
+    p_user_id: p.user_id,
+    p_jumlah: Math.round(saldo),
+    p_keterangan: `Isi saldo: ${snap.nama ?? "paket"} (${p.midtrans_order_id})`,
+    p_ref_id: p.id,
+  });
+  if (error) throw new Error(`Gagal menambah saldo: ${error.message}`);
+
+  await admin.from("transactions").insert({
+    user_id: p.user_id,
+    type: "order_payment",
+    amount_idr: p.amount_idr,
+    reference_id: p.id,
+    reference_type: null,
+    gateway_ref: p.midtrans_order_id,
+    notes: `Isi saldo ${snap.nama ?? ""}: +${saldo}`,
+  });
+  await admin.from("notifications").insert({
+    user_id: p.user_id,
+    channel: "in_app",
+    title: "Saldo Bertambah",
+    body: `Saldo cek naskah bertambah Rp${saldo.toLocaleString("id-ID")}. Saldo sekarang Rp${Number(saldoAkhir ?? 0).toLocaleString("id-ID")}.`,
+  });
+  await sendReceipt(admin, p, `Isi saldo ${snap.nama ?? ""} (+Rp${saldo.toLocaleString("id-ID")})`.trim());
 }
 
 // ── Sesi mentor (booking slot) ─────────────────────────────────────────────
@@ -263,6 +302,7 @@ async function handleFailure(admin: Admin, p: PaymentRow, outcome: PaymentOutcom
     if (data?.length) await admin.rpc("lepas_stok_pesanan", { p_pesanan_id: p.reference_id });
     return;
   }
+  if (p.purpose === "saldo") return; // tidak ada pesanan yang perlu dibatalkan
   if (p.purpose === "booking") {
     // status → cancelled melepas slot (trigger sync_slot_booked_flag)
     await admin

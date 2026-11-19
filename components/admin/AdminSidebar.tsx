@@ -37,7 +37,7 @@ const navItems = [
   // etalase "Layanan Utama" dan "Paket Hemat" di katalog.
   { type: "section" as const, label: "Periksa Naskah" },
   { label: "Tarif Pemeriksaan", href: "/admin/layanan",    icon: Settings },
-  { label: "Paket Kuota",       href: "/admin/paket",      icon: Package },
+  { label: "Paket Isi Saldo",   href: "/admin/paket",      icon: Package },
   { type: "section" as const, label: "Konfigurasi" },
   { label: "Superadmin",       href: "/admin/superadmin",  icon: ShieldCheck },
 ];

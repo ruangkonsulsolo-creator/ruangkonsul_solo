@@ -26,9 +26,18 @@ import { formatRupiah } from "@/lib/utils/format-currency";
 
 const rupiah = (n: number) => formatRupiah(n);
 
-export function KotakPeriksa() {
+export function KotakPeriksa({
+  tarif = TARIF,
+  aktif = { kemiripan: true, ai: true, parafrase: true },
+}: {
+  /** Tarif per 1.000 kata dari Admin > Tarif Pemeriksaan. */
+  tarif?: Record<JenisPeriksa, number>;
+  aktif?: Record<JenisPeriksa, boolean>;
+} = {}) {
   const [teks, setTeks] = useState("");
-  const [jenis, setJenis] = useState<JenisPeriksa>("kemiripan");
+  const [jenis, setJenis] = useState<JenisPeriksa>(
+    (["kemiripan", "ai", "parafrase"] as JenisPeriksa[]).find((j) => aktif[j]) ?? "kemiripan"
+  );
   const [memproses, setMemproses] = useState(false);
   const [galat, setGalat] = useState<string | null>(null);
   const [aksi, setAksi] = useState<string | null>(null);
@@ -56,7 +65,7 @@ export function KotakPeriksa() {
       label: "Cek Plagiarisme",
       ringkas: "Seberapa mirip tulisanmu dengan karya lain",
       jawab: "Bagian mana yang perlu sitasi?",
-      harga: rupiah(TARIF.kemiripan),
+      harga: rupiah(tarif.kemiripan),
       icon: FileSearch,
       aksen: "text-brand",
       aksenBg: "bg-brand-50",
@@ -68,7 +77,7 @@ export function KotakPeriksa() {
       label: "Cek Indikasi AI",
       ringkas: "Seberapa mirip gayanya dengan tulisan mesin",
       jawab: "Kalimat mana yang terbaca kaku?",
-      harga: rupiah(TARIF.ai),
+      harga: rupiah(tarif.ai),
       icon: Bot,
       aksen: "text-slate-800",
       aksenBg: "bg-slate-100",
@@ -80,7 +89,7 @@ export function KotakPeriksa() {
       label: "Parafrase",
       ringkas: "Susun ulang kalimatnya dengan bahasa sendiri",
       jawab: "Bagaimana menuliskan ini tanpa menyalin?",
-      harga: rupiah(TARIF.parafrase),
+      harga: rupiah(tarif.parafrase),
       icon: Wand2,
       aksen: "text-brand-dark",
       aksenBg: "bg-brand-100",
@@ -91,8 +100,8 @@ export function KotakPeriksa() {
 
   const jumlahKata = useMemo(() => hitungKata(teks), [teks]);
   const biaya = useMemo(
-    () => (jumlahKata > 0 ? hitungBiaya(jumlahKata, jenis) : 0),
-    [jumlahKata, jenis]
+    () => (jumlahKata > 0 ? hitungBiaya(jumlahKata, jenis, tarif) : 0),
+    [jumlahKata, jenis, tarif]
   );
 
   const terlaluPendek = jumlahKata > 0 && jumlahKata < MIN_KATA;
@@ -157,7 +166,7 @@ export function KotakPeriksa() {
         aria-label="Jenis pemeriksaan"
         className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3"
       >
-        {PILIHAN.map((p) => {
+        {PILIHAN.filter((p) => aktif[p.nilai]).map((p) => {
           const Icon = p.icon;
           const aktif = jenis === p.nilai;
           return (
@@ -417,7 +426,7 @@ function PanelGalat({ pesan, aksi }: { pesan: string; aksi: string | null }) {
         </Link>
       )}
       {aksi === "isi_saldo" && (
-        <Link href="/dashboard/paket-saya" className="mt-1 inline-block text-sm font-bold text-red-900 underline">
+        <Link href="/dashboard/isi-saldo" className="mt-1 inline-block text-sm font-bold text-red-900 underline">
           Isi saldo
         </Link>
       )}

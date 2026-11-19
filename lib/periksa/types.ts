@@ -59,9 +59,13 @@ export const MIN_KATA = 150;
 export const MAKS_KATA = 20_000;
 
 /** Pembulatan tagihan ke atas per 1.000 kata, minimal satu satuan. */
-export function hitungBiaya(jumlahKata: number, jenis: JenisPeriksa): number {
+export function hitungBiaya(
+  jumlahKata: number,
+  jenis: JenisPeriksa,
+  tarif: Record<JenisPeriksa, number> = TARIF
+): number {
   const satuan = Math.max(1, Math.ceil(jumlahKata / 1000));
-  return satuan * TARIF[jenis];
+  return satuan * tarif[jenis];
 }
 
 export function hitungKata(teks: string): number {

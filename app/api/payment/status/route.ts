@@ -12,7 +12,7 @@ const schema = z
   .object({
     payment_id: z.string().uuid().optional(),
     // alternatif: cari pembayaran pending terbaru untuk referensi ini
-    purpose: z.enum(["order", "produk", "booking"]).optional(),
+    purpose: z.enum(["order", "produk", "booking", "saldo"]).optional(),
     reference_id: z.string().uuid().optional(),
   })
   .refine((v) => v.payment_id || (v.purpose && v.reference_id), {

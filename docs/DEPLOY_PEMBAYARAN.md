@@ -8,6 +8,7 @@ Migration 018–032 sudah ada di branch katalog Anda. Yang baru hanya:
 
 - `supabase/migrations/033_pembayaran_produk_receipt.sql`
 - `supabase/migrations/034_booking_bayar_midtrans.sql` (booking mentor dibayar via Midtrans; jalankan **setelah** 033)
+- `supabase/migrations/035_paket_isi_saldo.sql` (paket isi saldo cek naskah + tarif per 1.000 kata dari DB; jalankan **setelah** 034)
 
 Cara menjalankan (pilih satu):
 - **SQL Editor**: Supabase Dashboard → SQL Editor → tempel isi file 033 → Run, lalu file 034 → Run.

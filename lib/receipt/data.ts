@@ -12,7 +12,7 @@ export interface ReceiptData {
   paymentId: string;
   receiptNumber: string | null;
   status: string;
-  purpose: "order" | "produk" | "booking";
+  purpose: "order" | "produk" | "booking" | "saldo";
   purposeLabel: string;
   referenceLabel: string | null; // order_number / booking_number / nama paket
   midtransOrderId: string;
@@ -30,6 +30,7 @@ export const PURPOSE_LABEL: Record<ReceiptData["purpose"], string> = {
   order: "Layanan Dokumen",
   produk: "Produk / Bimbingan",
   booking: "Sesi Bimbingan Mentor",
+  saldo: "Isi Saldo Cek Naskah",
 };
 
 const PAYMENT_TYPE_LABEL: Record<string, string> = {

@@ -43,6 +43,7 @@ const navItems = [
   { label: "Chat Mentor",     href: "/dashboard/chat",            icon: MessageCircle },
   { label: "Riwayat Pesanan", href: "/dashboard/riwayat-pesanan", icon: ClockIcon },
   { label: "Sesi Saya",       href: "/dashboard/sesi-saya",       icon: ClockIcon },
+  { label: "Isi Saldo",       href: "/dashboard/isi-saldo",       icon: ClockIcon },
   { label: "Pesanan Produk", href: "/dashboard/pesanan-produk", icon: ClockIcon },
   { label: "Receipt", href: "/dashboard/receipt", icon: ClockIcon },
   { label: "Paket Saya",      href: "/dashboard/paket-saya",      icon: PackageOpen },
