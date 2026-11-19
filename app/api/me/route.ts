@@ -10,7 +10,7 @@ export async function GET() {
 
     const { data: profile } = await supabase
       .from("profiles")
-      .select("role, full_name, referral_code, credit_balance")
+      .select("role, full_name, referral_code, credit_balance, whatsapp")
       .eq("id", user.id)
       .single();
 
@@ -21,6 +21,7 @@ export async function GET() {
       full_name:      profile?.full_name ?? "",
       referral_code:  profile?.referral_code ?? "",
       credit_balance: profile?.credit_balance ?? 0,
+      whatsapp:       profile?.whatsapp ?? "",
     });
   } catch {
     return NextResponse.json({ role: "user" });

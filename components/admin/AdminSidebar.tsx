@@ -14,6 +14,7 @@ import {
 const navItems = [
   { label: "Dashboard",       href: "/admin",              icon: LayoutDashboard, exact: true },
   { label: "Pesanan",         href: "/admin/pesanan",      icon: ClipboardList },
+  { label: "Pesanan Produk",  href: "/admin/pesanan-produk", icon: ShoppingBag },
   { label: "Booking Leads",   href: "/admin/booking-leads",icon: Phone },
   { label: "Users",           href: "/admin/users",        icon: Users },
   { label: "Kinerja Mentor",  href: "/admin/mentor",       icon: GraduationCap },

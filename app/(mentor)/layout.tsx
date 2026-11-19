@@ -2,23 +2,21 @@ import type { ReactNode } from "react";
 import { MentorSidebar } from "@/components/mentor/MentorSidebar";
 import { MenuAkun } from "@/components/ui/MenuAkun";
 import { TautanBeranda } from "@/components/ui/TautanBeranda";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 import { PREVIEW_MODE } from "@/lib/utils/preview-mode";
 
 async function getMentorProfile() {
   if (PREVIEW_MODE) return { full_name: "Preview Mentor", role: "mentor" };
-  try {
-    const { createClient } = await import("@/lib/supabase/server");
-    const { redirect } = await import("next/navigation");
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) redirect("/login");
-    const { data: profile } = await supabase
-      .from("profiles").select("role, full_name").eq("id", user!.id).single();
-    if (!profile || !["mentor","admin","superadmin"].includes(profile.role)) redirect("/dashboard");
-    return profile!;
-  } catch {
-    return { full_name: "Mentor", role: "mentor" };
-  }
+  // redirect() melempar error khusus Next.js — JANGAN dibungkus try/catch,
+  // kalau tidak, penjagaan role tertelan dan role lain bisa melihat panel ini.
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+  const { data: profile } = await supabase
+    .from("profiles").select("role, full_name, is_active").eq("id", user.id).single();
+  if (!profile || profile.is_active === false || !["mentor", "admin", "superadmin"].includes(profile.role)) redirect("/dashboard");
+  return profile;
 }
 
 export default async function MentorLayout({ children }: { children: ReactNode }) {

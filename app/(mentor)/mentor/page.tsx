@@ -59,7 +59,7 @@ export default async function DashboardMentorPage() {
     .limit(400);
 
   const sesi: SesiJadwal[] = (booking ?? [])
-    .map((b) => {
+    .map((b): SesiJadwal | null => {
       const s = b.slot as unknown as {
         slot_date: string; slot_start: string; slot_end: string;
       } | null;
@@ -74,7 +74,7 @@ export default async function DashboardMentorPage() {
         selesai: `${s.slot_date}T${s.slot_end}+07:00`,
         namaKlien: k?.full_name ?? "Klien",
         status: b.status as SesiJadwal["status"],
-        catatan: b.notes,
+        catatan: b.notes ?? undefined,
       };
     })
     .filter((x): x is SesiJadwal => x !== null);
