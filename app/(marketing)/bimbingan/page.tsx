@@ -66,6 +66,23 @@ export default async function HalamanBimbingan() {
             sebulan penuh sampai sidang hasil. Tersedia untuk Skripsi, Tesis,
             dan Disertasi.
           </p>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <Link
+              href="/booking"
+              className="inline-flex items-center gap-2 rounded-xl bg-[#8B0000] px-5 py-3 text-sm font-extrabold text-white shadow-md transition-opacity hover:opacity-90"
+            >
+              Pilih Mentor &amp; Jadwal
+            </Link>
+            <Link
+              href="/jadwal"
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-bold text-slate-700 transition-colors hover:border-[#8B0000] hover:text-[#8B0000]"
+            >
+              Lihat semua jadwal
+            </Link>
+          </div>
+          <p className="mt-2 text-xs text-slate-500">
+            Pilih jam yang kosong, bayar, dan jadwal langsung terkunci untukmu.
+          </p>
         </div>
       </section>
 

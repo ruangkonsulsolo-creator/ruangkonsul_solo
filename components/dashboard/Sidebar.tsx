@@ -34,6 +34,7 @@ const navItems = [
   { type: "section" as const, label: "Layanan" },
 
   { label: "Bimbingan",        href: "/bimbingan",       icon: GraduationCap },
+  { label: "Pilih Mentor & Jadwal", href: "/booking",     icon: GraduationCap },
   { label: "Jadwal Mentor",    href: "/jadwal",          icon: GraduationCap },
   { label: "Event",            href: "/event",           icon: GraduationCap },
 
@@ -42,6 +43,7 @@ const navItems = [
   // Halaman privat — butuh login
   { label: "Chat Mentor",     href: "/dashboard/chat",            icon: MessageCircle },
   { label: "Riwayat Pesanan", href: "/dashboard/riwayat-pesanan", icon: ClockIcon },
+  { label: "Sesi Saya",       href: "/dashboard/sesi-saya",       icon: ClockIcon },
   { label: "Pesanan Produk", href: "/dashboard/pesanan-produk", icon: ClockIcon },
   { label: "Receipt", href: "/dashboard/receipt", icon: ClockIcon },
   { label: "Paket Saya",      href: "/dashboard/paket-saya",      icon: PackageOpen },

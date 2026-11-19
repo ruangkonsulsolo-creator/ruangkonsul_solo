@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { BRAND, waLink } from "@/lib/brand";
 import { NavbarUtama } from "@/components/ui/NavbarUtama";
 import { formatRupiah } from "@/lib/utils/format-currency";
+import { lepasBookingKedaluwarsa } from "@/lib/booking/lepas-kedaluwarsa";
 
 export const metadata: Metadata = {
   title: `Jadwal Bimbingan | ${BRAND.name}`,
@@ -39,6 +40,7 @@ const hariPanjang = new Intl.DateTimeFormat("id-ID", {
 const jam = (t: string) => t.slice(0, 5).replace(":", ".");
 
 export default async function JadwalPage() {
+  await lepasBookingKedaluwarsa();
   const supabase = createClient();
 
   // Ambil 14 hari ke depan sekaligus untuk semua mentor, lalu kelompokkan.

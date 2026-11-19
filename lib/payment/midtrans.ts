@@ -58,6 +58,8 @@ export interface CreateSnapParams {
   items: SnapItem[];
   /** Path relatif tujuan setelah bayar, mis. "/dashboard/riwayat-pesanan" */
   finishPath: string;
+  /** Batas waktu bayar dalam menit (default PAYMENT_EXPIRY_HOURS jam). */
+  expiryMinutes?: number;
 }
 
 /**
@@ -96,7 +98,9 @@ export async function createSnapTransaction(
       email: params.customer.email ?? undefined,
       phone: params.customer.phone ?? undefined,
     },
-    expiry: { unit: "hours", duration: PAYMENT_EXPIRY_HOURS },
+    expiry: params.expiryMinutes
+      ? { unit: "minutes", duration: params.expiryMinutes }
+      : { unit: "hours", duration: PAYMENT_EXPIRY_HOURS },
     ...(enabledPayments() ? { enabled_payments: enabledPayments() } : {}),
     ...(appUrl
       ? {
@@ -227,7 +231,7 @@ export function classifyStatus(transactionStatus: string, fraudStatus?: string):
 }
 
 /** Buat midtrans order_id unik. Midtrans menolak order_id yang pernah dipakai. */
-export function makeMidtransOrderId(prefix: "ORD" | "PRD", base: string): string {
+export function makeMidtransOrderId(prefix: "ORD" | "PRD" | "BKG", base: string): string {
   const suffix = Date.now().toString(36).toUpperCase();
   return `RKS-${prefix}-${base}-${suffix}`.slice(0, 50);
 }

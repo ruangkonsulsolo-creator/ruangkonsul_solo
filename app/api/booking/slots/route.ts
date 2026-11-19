@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { z } from "zod";
+import { lepasBookingKedaluwarsa } from "@/lib/booking/lepas-kedaluwarsa";
 
 export const dynamic = "force-dynamic";
 
@@ -51,6 +52,7 @@ export async function GET(request: NextRequest) {
   const from = parsed.data.from ?? todayWib();
   const to = addDays(from, days);
 
+  await lepasBookingKedaluwarsa();
   const supabase = createClient();
 
   let query = supabase

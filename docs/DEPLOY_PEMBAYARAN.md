@@ -7,9 +7,10 @@ baru dan `SUPABASE_SERVICE_ROLE_KEY`, endpoint pembayaran akan error di situs li
 Migration 018–032 sudah ada di branch katalog Anda. Yang baru hanya:
 
 - `supabase/migrations/033_pembayaran_produk_receipt.sql`
+- `supabase/migrations/034_booking_bayar_midtrans.sql` (booking mentor dibayar via Midtrans; jalankan **setelah** 033)
 
 Cara menjalankan (pilih satu):
-- **SQL Editor**: Supabase Dashboard → SQL Editor → tempel isi file 033 → Run.
+- **SQL Editor**: Supabase Dashboard → SQL Editor → tempel isi file 033 → Run, lalu file 034 → Run.
 - **CLI**: `npx supabase db push` (hanya menjalankan migration yang belum tercatat).
 
 Cek berhasil:
@@ -17,7 +18,13 @@ Cek berhasil:
 select count(*) from public.payments;         -- 0, tanpa error
 select count(*) from public.pesanan_produk;   -- 0, tanpa error
 select public.generate_receipt_number();      -- RCP-YYYYMMDD-XXXXXXXX
+select column_name from information_schema.columns
+ where table_name = 'bookings' and column_name = 'bayar_sebelum';  -- 1 baris (034)
 ```
+
+Alur booking mentor (034): customer pilih mentor + jam di `/booking` → isi WhatsApp →
+bayar (slot dikunci 60 menit) → lunas: booking `confirmed` + receipt; tidak dibayar:
+dibatalkan otomatis dan slot muncul lagi. Daftar sesi customer: `/dashboard/sesi-saya`.
 
 ## 2. Environment Variables (Vercel → Project → Settings → Environment Variables)
 | Nama | Nilai | Catatan |

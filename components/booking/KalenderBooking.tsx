@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { formatRupiah } from "@/lib/utils/format-currency";
+import { WhatsAppField } from "@/components/payment/WhatsAppField";
+import { openSnap, syncPaymentStatus } from "@/lib/payment/use-snap";
 
 /**
  * Kalender pemilihan jadwal bimbingan.
@@ -63,6 +65,8 @@ export default function KalenderBooking({
   const [topik, setTopik] = useState("");
   const [mengirim, setMengirim] = useState(false);
   const [berhasil, setBerhasil] = useState<string | null>(null);
+  const [whatsapp, setWhatsapp] = useState("");
+  const [galatWa, setGalatWa] = useState<string | null>(null);
 
   const muatSlot = useCallback(async () => {
     setMemuat(true);
@@ -105,6 +109,7 @@ export default function KalenderBooking({
 
     setMengirim(true);
     setGalat(null);
+    setGalatWa(null);
 
     try {
       const res = await fetch("/api/booking/create", {
@@ -114,6 +119,7 @@ export default function KalenderBooking({
           slot_id: slotTerpilih.slot_id,
           mentor_id: slotTerpilih.mentor_id,
           topik,
+          whatsapp,
         }),
       });
       const json = await res.json();
@@ -125,11 +131,35 @@ export default function KalenderBooking({
           )}`;
           return;
         }
+        if (json.code === "WHATSAPP_REQUIRED") {
+          setGalatWa(json.error);
+          return;
+        }
         if (json.action === "refresh_slots") {
           setSlotTerpilih(null);
           await muatSlot();
         }
         throw new Error(json.error ?? "Gagal menyimpan pesanan.");
+      }
+
+      // Sesi berbayar → buka Midtrans. Slot sudah dikunci untuk kita.
+      if (json.data.snap_token) {
+        const bookingId: string = json.data.id;
+        const paymentId: string | undefined = json.data.payment_id;
+        const outcome = await openSnap(json.data.snap_token);
+        let status: string | null = outcome === "success" ? "paid" : null;
+        if (outcome !== "closed") {
+          for (let i = 0; i < 4 && status !== "paid"; i++) {
+            const s = await syncPaymentStatus({ purpose: "booking", referenceId: bookingId });
+            if (s && s !== "pending") { status = s; break; }
+            await new Promise((r) => setTimeout(r, 1500));
+          }
+        }
+        window.location.href =
+          status === "paid" && paymentId
+            ? `/receipt/${paymentId}`
+            : `/dashboard/sesi-saya?booking=${bookingId}`;
+        return;
       }
 
       setBerhasil(json.data.booking_number);
@@ -316,6 +346,12 @@ export default function KalenderBooking({
               </div>
             </dl>
 
+            {slotTerpilih.price_per_hour > 0 && (
+              <div className="mt-4">
+                <WhatsAppField value={whatsapp} onChange={setWhatsapp} error={galatWa} />
+              </div>
+            )}
+
             {galat && (
               <p
                 role="alert"
@@ -330,11 +366,16 @@ export default function KalenderBooking({
               disabled={mengirim}
               className="mt-4 w-full bg-brand px-5 py-3 font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50 sm:w-auto"
             >
-              {mengirim ? "Menyimpan…" : "Pesan jadwal ini"}
+              {mengirim
+                ? "Memproses…"
+                : slotTerpilih.price_per_hour > 0
+                  ? `Bayar ${formatRupiah(slotTerpilih.price_per_hour)} & kunci jadwal`
+                  : "Pesan jadwal ini"}
             </button>
             <p className="mt-2 text-sm text-muted-foreground">
-              Belum ada pembayaran di langkah ini. Admin mengonfirmasi dulu lewat
-              WhatsApp.
+              {slotTerpilih.price_per_hour > 0
+                ? "Jadwal dikunci untukmu selama 60 menit. Selesaikan pembayaran agar sesi terkonfirmasi; jika tidak, jadwal dilepas otomatis."
+                : "Sesi ini gratis. Admin mengonfirmasi lewat WhatsApp."}
             </p>
           </div>
         </form>

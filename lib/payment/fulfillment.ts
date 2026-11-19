@@ -13,7 +13,7 @@ interface PaymentRow {
   id: string;
   midtrans_order_id: string;
   user_id: string;
-  purpose: "order" | "produk";
+  purpose: "order" | "produk" | "booking";
   reference_id: string;
   amount_idr: number;
   status: string;
@@ -108,7 +108,78 @@ async function adoptLegacyOrder(admin: Admin, n: MidtransNotification): Promise<
 
 async function fulfil(admin: Admin, p: PaymentRow) {
   if (p.purpose === "produk") return fulfilProduk(admin, p);
+  if (p.purpose === "booking") return fulfilBooking(admin, p);
   return fulfilOrder(admin, p);
+}
+
+// ── Sesi mentor (booking slot) ─────────────────────────────────────────────
+const jamWib = new Intl.DateTimeFormat("id-ID", {
+  weekday: "long", day: "numeric", month: "long", timeZone: "Asia/Jakarta",
+});
+
+async function fulfilBooking(admin: Admin, p: PaymentRow) {
+  const now = new Date().toISOString();
+  const { data: updated, error } = await admin
+    .from("bookings")
+    .update({ status: "confirmed", paid_at: now, confirmed_at: now, payment_method: "midtrans" })
+    .eq("id", p.reference_id)
+    .eq("status", "pending")
+    .is("paid_at", null)
+    .select("id, booking_number, whatsapp, mentor_id, booking_slots:booking_slots!bookings_slot_id_fkey ( slot_date, slot_start ), mentor_profiles ( display_name, user_id )");
+  if (error) throw new Error(`Gagal update booking: ${error.message}`);
+  const raw = updated?.[0];
+  if (!raw) {
+    // Booking sudah dibatalkan (mis. lewat batas waktu) tapi uang masuk → perlu tindakan admin.
+    const { data: b } = await admin.from("bookings").select("booking_number, status").eq("id", p.reference_id).maybeSingle();
+    if (b && b.status === "cancelled") {
+      console.error(`[payment] booking ${b.booking_number} sudah dibatalkan tapi pembayaran ${p.midtrans_order_id} lunas — perlu reschedule/refund manual.`);
+      await admin.from("notifications").insert({
+        user_id: p.user_id,
+        channel: "in_app",
+        title: "Pembayaran diterima — jadwal perlu diatur ulang",
+        body: `Pembayaran untuk ${b.booking_number} masuk setelah slot dilepas. Admin akan menghubungi kamu untuk memilih jadwal pengganti.`,
+      });
+    }
+    return;
+  }
+
+  const slot = one(raw.booking_slots) as { slot_date: string; slot_start: string } | null;
+  const mentor = one(raw.mentor_profiles) as { display_name: string | null; user_id: string | null } | null;
+  const waktu = slot
+    ? `${jamWib.format(new Date(`${slot.slot_date}T00:00:00+07:00`))}, ${slot.slot_start.slice(0, 5).replace(":", ".")} WIB`
+    : "";
+  const item = `Sesi bimbingan${mentor?.display_name ? ` dengan ${mentor.display_name}` : ""}${waktu ? ` — ${waktu}` : ""}`;
+
+  await admin.from("transactions").insert({
+    user_id: p.user_id,
+    type: "order_payment",
+    amount_idr: p.amount_idr,
+    reference_id: raw.id,
+    reference_type: null,
+    gateway_ref: p.midtrans_order_id,
+    notes: `Pembayaran booking ${raw.booking_number}: ${item}`,
+  });
+  await admin.from("notifications").insert({
+    user_id: p.user_id,
+    channel: "in_app",
+    title: "Jadwal Bimbingan Terkonfirmasi",
+    body: `${raw.booking_number} lunas. ${item}. Link sesi akan dikirim sebelum jadwal dimulai.`,
+  });
+  if (mentor?.user_id) {
+    await admin.from("notifications").insert({
+      user_id: mentor.user_id,
+      channel: "in_app",
+      title: "Sesi Baru Terjadwal",
+      body: `${raw.booking_number} — ${waktu}. Customer sudah membayar.`,
+    });
+  }
+  if (raw.whatsapp) {
+    sendWhatsApp({
+      to: raw.whatsapp,
+      message: `✅ *${BRAND.name}* — Pembayaran *${raw.booking_number}* diterima. ${item}. Link sesi akan kami kirim sebelum jadwal dimulai.`,
+    }).catch(() => undefined);
+  }
+  await sendReceipt(admin, p, item);
 }
 
 // ── Produk katalog ─────────────────────────────────────────────────────────
@@ -189,6 +260,17 @@ async function handleFailure(admin: Admin, p: PaymentRow, outcome: PaymentOutcom
       .eq("midtrans_order_id", p.midtrans_order_id)
       .select("id");
     if (data?.length) await admin.rpc("lepas_stok_pesanan", { p_pesanan_id: p.reference_id });
+    return;
+  }
+  if (p.purpose === "booking") {
+    // status → cancelled melepas slot (trigger sync_slot_booked_flag)
+    await admin
+      .from("bookings")
+      .update({ status: "cancelled", cancelled_at: now, cancel_reason: reason })
+      .eq("id", p.reference_id)
+      .eq("status", "pending")
+      .is("paid_at", null)
+      .eq("midtrans_order_id", p.midtrans_order_id);
     return;
   }
   await admin

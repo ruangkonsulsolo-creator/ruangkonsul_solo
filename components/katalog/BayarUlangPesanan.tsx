@@ -6,7 +6,17 @@ import { CreditCard, Loader2 } from "lucide-react";
 import { openSnap, syncPaymentStatus } from "@/lib/payment/use-snap";
 
 /** Lanjutkan pembayaran pesanan produk yang belum dibayar (token Snap berlaku 24 jam). */
-export function BayarUlangPesanan({ pesananId, snapToken, paymentId }: { pesananId: string; snapToken: string; paymentId: string | null }) {
+export function BayarUlangPesanan({
+  pesananId,
+  snapToken,
+  paymentId,
+  purpose = "produk",
+}: {
+  pesananId: string;
+  snapToken: string;
+  paymentId: string | null;
+  purpose?: "produk" | "booking";
+}) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   return (
@@ -17,7 +27,7 @@ export function BayarUlangPesanan({ pesananId, snapToken, paymentId }: { pesanan
         setBusy(true);
         try {
           const outcome = await openSnap(snapToken);
-          const s = outcome === "closed" ? null : await syncPaymentStatus({ purpose: "produk", referenceId: pesananId });
+          const s = outcome === "closed" ? null : await syncPaymentStatus({ purpose, referenceId: pesananId });
           if (paymentId && (outcome === "success" || s === "paid")) router.push(`/receipt/${paymentId}`);
           else router.refresh();
         } finally {

@@ -7,11 +7,12 @@ import {
   type SnapItem,
 } from "./midtrans";
 
-export type PaymentPurpose = "order" | "produk";
+export type PaymentPurpose = "order" | "produk" | "booking";
 
-const PREFIX: Record<PaymentPurpose, "ORD" | "PRD"> = {
+const PREFIX: Record<PaymentPurpose, "ORD" | "PRD" | "BKG"> = {
   order: "ORD",
   produk: "PRD",
+  booking: "BKG",
 };
 
 export interface StartPaymentParams {
@@ -24,6 +25,8 @@ export interface StartPaymentParams {
   items: SnapItem[];
   customer: { firstName: string; email?: string | null; phone?: string | null };
   finishPath: string;
+  /** Batas waktu bayar (menit). Default 24 jam. */
+  expiryMinutes?: number;
 }
 
 export interface StartedPayment {
@@ -75,6 +78,7 @@ export async function startPayment(p: StartPaymentParams): Promise<StartedPaymen
       customer: p.customer,
       items: p.items,
       finishPath: p.finishPath,
+      expiryMinutes: p.expiryMinutes,
     });
 
     await admin

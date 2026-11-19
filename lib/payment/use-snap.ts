@@ -70,7 +70,7 @@ export async function openSnap(token: string): Promise<SnapOutcome> {
  * belum sampai). Mengembalikan status internal: paid | pending | failed | ...
  */
 export async function syncPaymentStatus(
-  args: { paymentId: string } | { purpose: "order" | "produk"; referenceId: string }
+  args: { paymentId: string } | { purpose: "order" | "produk" | "booking"; referenceId: string }
 ): Promise<string | null> {
   const body =
     "paymentId" in args

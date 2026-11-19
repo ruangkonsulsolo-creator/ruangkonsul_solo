@@ -12,7 +12,7 @@ export interface ReceiptData {
   paymentId: string;
   receiptNumber: string | null;
   status: string;
-  purpose: "order" | "produk";
+  purpose: "order" | "produk" | "booking";
   purposeLabel: string;
   referenceLabel: string | null; // order_number / booking_number / nama paket
   midtransOrderId: string;
@@ -29,6 +29,7 @@ export interface ReceiptData {
 export const PURPOSE_LABEL: Record<ReceiptData["purpose"], string> = {
   order: "Layanan Dokumen",
   produk: "Produk / Bimbingan",
+  booking: "Sesi Bimbingan Mentor",
 };
 
 const PAYMENT_TYPE_LABEL: Record<string, string> = {
@@ -78,6 +79,9 @@ export async function getReceipt(paymentId: string): Promise<ReceiptData | null>
   } else if (purpose === "produk") {
     const { data } = await admin.from("pesanan_produk").select("nomor").eq("id", p.reference_id).maybeSingle();
     referenceLabel = data?.nomor ?? null;
+  } else if (purpose === "booking") {
+    const { data } = await admin.from("bookings").select("booking_number").eq("id", p.reference_id).maybeSingle();
+    referenceLabel = data?.booking_number ?? null;
   }
 
   const items: ReceiptItem[] =
