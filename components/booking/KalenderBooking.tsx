@@ -51,13 +51,23 @@ function jam(t: string) {
   return t.slice(0, 5).replace(":", ".");
 }
 
+type Paket = { id: string; nama: string; harga: number };
+
 export default function KalenderBooking({
   mentorId,
-  paket,
+  paket: paketAwal,
+  pilihanPaket = [],
+  tanggalAwal,
+  slotAwal,
 }: {
   mentorId?: string;
-  /** Paket katalog per jam; harganya menggantikan tarif mentor. */
-  paket?: { id: string; nama: string; harga: number };
+  /** Paket katalog per jam yang sudah dipilih (dari halaman produk). */
+  paket?: Paket;
+  /** Daftar paket per jam yang bisa dipilih di langkah konfirmasi. */
+  pilihanPaket?: Paket[];
+  tanggalAwal?: string;
+  /** slot_id yang langsung dipilih (dari klik jam di halaman Jadwal). */
+  slotAwal?: string;
 }) {
   const [hari, setHari] = useState<Hari[]>([]);
   const [memuat, setMemuat] = useState(true);
@@ -65,8 +75,17 @@ export default function KalenderBooking({
 
   const [tanggalAktif, setTanggalAktif] = useState<string | null>(null);
   const [slotTerpilih, setSlotTerpilih] = useState<Slot | null>(null);
+  // "" = sesi umum (tarif mentor); selain itu id paket.
+  const [paketId, setPaketId] = useState<string>(paketAwal?.id ?? "");
+  const daftarPaket = useMemo(() => {
+    const semua = [...pilihanPaket];
+    if (paketAwal && !semua.some((p) => p.id === paketAwal.id)) semua.unshift(paketAwal);
+    return semua;
+  }, [pilihanPaket, paketAwal]);
+  const paket = daftarPaket.find((p) => p.id === paketId);
   const hargaSesi = paket ? paket.harga : (slotTerpilih?.price_per_hour ?? 0);
   const [topik, setTopik] = useState("");
+  const [catatan, setCatatan] = useState("");
   const [mengirim, setMengirim] = useState(false);
   const [berhasil, setBerhasil] = useState<string | null>(null);
   const [whatsapp, setWhatsapp] = useState("");
@@ -86,17 +105,27 @@ export default function KalenderBooking({
 
       if (!res.ok) throw new Error(json.error ?? "Gagal memuat jadwal.");
 
-      setHari(json.days ?? []);
+      const days: Hari[] = json.days ?? [];
+      setHari(days);
       setTanggalAktif((kini) => {
-        const masihAda = json.days?.some((h: Hari) => h.date === kini);
-        return masihAda ? kini : (json.days?.[0]?.date ?? null);
+        const ada = (d?: string | null) => !!d && days.some((h) => h.date === d);
+        if (ada(kini)) return kini;
+        if (ada(tanggalAwal)) return tanggalAwal!;
+        return days[0]?.date ?? null;
       });
+      if (slotAwal) {
+        const s = days.flatMap((h) => h.slots).find((x) => x.slot_id === slotAwal);
+        if (s) {
+          setTanggalAktif(s.slot_date);
+          setSlotTerpilih((kini) => kini ?? s);
+        }
+      }
     } catch (e) {
       setGalat(e instanceof Error ? e.message : "Gagal memuat jadwal.");
     } finally {
       setMemuat(false);
     }
-  }, [mentorId]);
+  }, [mentorId, tanggalAwal, slotAwal]);
 
   useEffect(() => {
     void muatSlot();
@@ -123,6 +152,7 @@ export default function KalenderBooking({
           slot_id: slotTerpilih.slot_id,
           mentor_id: slotTerpilih.mentor_id,
           topik,
+          catatan: catatan.trim() || undefined,
           whatsapp,
           produk_id: paket?.id,
         }),
@@ -132,7 +162,7 @@ export default function KalenderBooking({
       if (!res.ok) {
         if (json.action === "login") {
           window.location.href = `/login?next=${encodeURIComponent(
-            window.location.pathname
+            `${window.location.pathname}${window.location.search}`
           )}`;
           return;
         }
@@ -310,10 +340,38 @@ export default function KalenderBooking({
       {/* ── Konfirmasi ──────────────────────────────────────────────── */}
       {slotTerpilih && (
         <form onSubmit={kirim} className="grid gap-4 border-t border-brand-200 pt-6">
-          <p className="text-xs text-muted-foreground">Topik</p>
+          <p className="text-xs font-bold uppercase tracking-wider text-brand">
+            Langkah terakhir · Request &amp; pembayaran
+          </p>
           <div className="max-w-xl">
+            {daftarPaket.length > 0 && (
+              <fieldset className="mb-5">
+                <legend className="block font-medium">Jenis bimbingan</legend>
+                <div className="mt-2 grid gap-2">
+                  {slotTerpilih.price_per_hour > 0 && (
+                    <label className={`flex cursor-pointer items-center justify-between gap-3 border px-3 py-2 text-sm ${paketId === "" ? "border-brand bg-brand-50" : "border-brand-200"}`}>
+                      <span className="flex items-center gap-2">
+                        <input type="radio" name="paket" checked={paketId === ""} onChange={() => setPaketId("")} />
+                        Konsultasi umum dengan mentor
+                      </span>
+                      <span data-numeric className="font-semibold">{formatRupiah(slotTerpilih.price_per_hour)}</span>
+                    </label>
+                  )}
+                  {daftarPaket.map((p) => (
+                    <label key={p.id} className={`flex cursor-pointer items-center justify-between gap-3 border px-3 py-2 text-sm ${paketId === p.id ? "border-brand bg-brand-50" : "border-brand-200"}`}>
+                      <span className="flex items-center gap-2">
+                        <input type="radio" name="paket" checked={paketId === p.id} onChange={() => setPaketId(p.id)} />
+                        {p.nama.replace(/^Paket Daily Bimbingan Online\s*/i, "")}
+                      </span>
+                      <span data-numeric className="font-semibold">{formatRupiah(p.harga)}</span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+            )}
+
             <label htmlFor="topik" className="block font-medium">
-              Yang ingin dibahas
+              Topik yang ingin dibahas
             </label>
             <p className="mt-1 text-sm text-muted-foreground">
               Tulis sedetail mungkin supaya mentor bisa menyiapkan bahan.
@@ -328,6 +386,23 @@ export default function KalenderBooking({
               rows={3}
               value={topik}
               onChange={(e) => setTopik(e.target.value)}
+              className="mt-2 w-full border border-brand-200 bg-brand-50 px-3 py-2 text-base"
+            />
+
+            <label htmlFor="catatan" className="mt-4 block font-medium">
+              Request / catatan untuk mentor{" "}
+              <span className="text-sm font-normal text-muted-foreground">(opsional)</span>
+            </label>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Misalnya: minta sesi lewat Zoom, kirim file draf sebelumnya, atau
+              bagian yang ingin difokuskan.
+            </p>
+            <textarea
+              id="catatan"
+              maxLength={1000}
+              rows={3}
+              value={catatan}
+              onChange={(e) => setCatatan(e.target.value)}
               className="mt-2 w-full border border-brand-200 bg-brand-50 px-3 py-2 text-base"
             />
 

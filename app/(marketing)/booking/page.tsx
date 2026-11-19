@@ -43,7 +43,7 @@ function inisial(nama: string) {
 export default async function BookingPage({
   searchParams,
 }: {
-  searchParams: { mentor?: string; produk?: string };
+  searchParams: { mentor?: string; produk?: string; tanggal?: string; slot?: string };
 }) {
   const supabase = createClient();
 
@@ -60,6 +60,17 @@ export default async function BookingPage({
     }
   }
   const qProduk = paket ? `&produk=${encodeURIComponent(paket.slug)}` : "";
+
+  // Semua paket bimbingan per jam — dipilih di langkah konfirmasi.
+  const { data: paketRows } = await supabase
+    .from("produk")
+    .select("id, nama, harga, harga_mulai, satuan, urutan")
+    .eq("is_active", true)
+    .ilike("satuan", "%jam%")
+    .order("urutan", { ascending: true });
+  const pilihanPaket = (paketRows ?? [])
+    .filter((p) => !p.harga_mulai && p.harga > 0 && perluPilihJadwal(p))
+    .map((p) => ({ id: p.id, nama: p.nama, harga: p.harga }));
 
   // Versi sebelumnya memfilter .eq("is_active", true) pada mentor_profiles,
   // kolom yang tidak ada di tabel itu. Error-nya ditelan try/catch kosong,
@@ -280,7 +291,13 @@ export default async function BookingPage({
             <CalendarDays className="h-6 w-6 text-brand" aria-hidden="true" />
             {terpilih ? "Jadwal tersedia" : "Semua jadwal tersedia"}
           </h2>
-          <KalenderBooking mentorId={terpilih?.id} paket={paket ? { id: paket.id, nama: paket.nama, harga: paket.harga } : undefined} />
+          <KalenderBooking
+            mentorId={terpilih?.id}
+            paket={paket ? { id: paket.id, nama: paket.nama, harga: paket.harga } : undefined}
+            pilihanPaket={pilihanPaket}
+            tanggalAwal={searchParams.tanggal}
+            slotAwal={searchParams.slot}
+          />
         </section>
 
         <aside className="mt-16 rounded-2xl border border-slate-200 bg-slate-50 p-6">

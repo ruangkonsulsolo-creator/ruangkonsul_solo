@@ -589,7 +589,7 @@ export default async function BlogPostPage({
               sedang kamu butuhkan.
             </p>
             <Link
-              href="/bimbingan"
+              href="/jadwal"
               className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-extrabold text-brand shadow-md transition-colors hover:bg-brand-50"
             >
               Lihat paket bimbingan <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -613,7 +613,7 @@ export default async function BlogPostPage({
                 sebulan penuh.
               </p>
               <Link
-                href="/bimbingan"
+                href="/jadwal"
                 className="mt-4 inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-brand px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-brand-light"
               >
                 Lihat paket <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />

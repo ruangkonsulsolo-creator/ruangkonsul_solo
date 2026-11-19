@@ -494,8 +494,8 @@ export default async function LandingPage() {
               </p>
               <div className="flex flex-wrap gap-3 justify-center lg:justify-start">
                 <Button variant="dark" size="lg" asChild>
-                  <Link href="/bimbingan" className="gap-2">
-                    Lihat Program <ArrowRight className="h-4 w-4" />
+                  <Link href="/jadwal" className="gap-2">
+                    Pilih Mentor &amp; Jadwal <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
                 <a href={waLink("Halo, saya ingin konsultasi bimbingan skripsi")} target="_blank" rel="noopener noreferrer"
@@ -817,8 +817,8 @@ export default async function LandingPage() {
                 {[
                   { label: "Beranda",     href: "/" },
                   { label: "Layanan",     href: "/layanan" },
-                  { label: "Bimbingan",   href: "/bimbingan" },
-                { label: "Jadwal",      href: "/jadwal" },
+                  { label: "Bimbingan",   href: "/jadwal" },
+                { label: "Paket Bimbingan", href: "/bimbingan" },
                   { label: "Paket Hemat", href: "/paket-hemat" },
                   { label: "Blog",        href: "/blog" },
                   { label: "Referral",    href: "/referral" },
@@ -842,10 +842,10 @@ export default async function LandingPage() {
                 {[
                   { label: "Jasa Revisi",         href: "/layanan" },
                   { label: "Jasa PowerPoint",     href: "/layanan" },
-                  { label: "Bimbingan Skripsi",   href: "/bimbingan" },
-                  { label: "Bimbingan Tesis",     href: "/bimbingan" },
-                  { label: "Bimbingan Lomba",     href: "/bimbingan" },
-                  { label: "Bimbingan Olah Data", href: "/bimbingan" },
+                  { label: "Bimbingan Skripsi",   href: "/jadwal" },
+                  { label: "Bimbingan Tesis",     href: "/jadwal" },
+                  { label: "Bimbingan Lomba",     href: "/jadwal" },
+                  { label: "Bimbingan Olah Data", href: "/jadwal" },
                   { label: "Merchandise",         href: "/merchandise" },
                 ].map((l) => (
                   <li key={l.label}>

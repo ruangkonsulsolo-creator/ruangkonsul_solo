@@ -30,13 +30,13 @@ type Tautan = { label: string; href: string };
 
 const UTAMA: Tautan[] = [
   { label: "Layanan", href: "/layanan" },
-  { label: "Bimbingan", href: "/bimbingan" },
-  { label: "Jadwal", href: "/jadwal" },
+  { label: "Bimbingan", href: "/jadwal" },
   { label: "Merchandise", href: "/merchandise" },
   { label: "Mentor", href: "/mentor-kami" },
 ];
 
 const LAINNYA: Tautan[] = [
+  { label: "Paket Bimbingan", href: "/bimbingan" },
   { label: "Paket Hemat", href: "/paket-hemat" },
   { label: "Event", href: "/event" },
   { label: "Blog", href: "/blog" },
@@ -44,6 +44,8 @@ const LAINNYA: Tautan[] = [
 ];
 
 function aktif(pathname: string, href: string): boolean {
+  // Halaman pemesanan jadwal (/booking) bagian dari menu Bimbingan.
+  if (href === "/jadwal" && (pathname === "/booking" || pathname.startsWith("/booking/"))) return true;
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 

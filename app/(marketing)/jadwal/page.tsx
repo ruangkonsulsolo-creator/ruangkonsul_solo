@@ -133,6 +133,23 @@ export default async function JadwalPage() {
           Bandingkan mentor, bidang, dan jam yang tersedia. Pilih yang cocok, lalu
           pesan sesimu. Semua jam dalam WIB.
         </p>
+        <ol className="mt-6 grid max-w-3xl gap-3 sm:grid-cols-3">
+          {[
+            ["1", "Pilih mentor & jam", "Klik jam kosong yang cocok."],
+            ["2", "Tulis request", "Topik, jenis bimbingan & catatan untuk mentor."],
+            ["3", "Bayar QRIS", "Jadwal langsung terkunci & dapat receipt."],
+          ].map(([n, judul, isi]) => (
+            <li key={n} className="flex gap-3 rounded-xl border border-slate-200 bg-white p-3">
+              <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-brand text-sm font-extrabold text-white">
+                {n}
+              </span>
+              <span>
+                <span className="block text-sm font-bold text-slate-900">{judul}</span>
+                <span className="block text-xs text-slate-500">{isi}</span>
+              </span>
+            </li>
+          ))}
+        </ol>
       </section>
 
       {mentors.length === 0 ? (
@@ -276,7 +293,7 @@ export default async function JadwalPage() {
                       {isi.slice(0, 24).map((s) => (
                         <Link
                           key={s.slot_id}
-                          href={`/booking?mentor=${s.mentor_id}&tanggal=${s.slot_date}`}
+                          href={`/booking?mentor=${s.mentor_id}&tanggal=${s.slot_date}&slot=${s.slot_id}`}
                           className="group rounded-xl border border-slate-200 px-3 py-2 text-sm transition-colors hover:border-brand hover:bg-brand-50"
                         >
                           <span className="font-semibold text-slate-900">

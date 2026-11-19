@@ -33,9 +33,8 @@ const navItems = [
 
   { type: "section" as const, label: "Layanan" },
 
-  { label: "Bimbingan",        href: "/bimbingan",       icon: GraduationCap },
-  { label: "Pilih Mentor & Jadwal", href: "/booking",     icon: GraduationCap },
-  { label: "Jadwal Mentor",    href: "/jadwal",          icon: GraduationCap },
+  { label: "Bimbingan",        href: "/jadwal",          icon: GraduationCap },
+  { label: "Paket Bimbingan",  href: "/bimbingan",       icon: GraduationCap },
   { label: "Event",            href: "/event",           icon: GraduationCap },
 
   { type: "section" as const, label: "Akun" },
