@@ -22,6 +22,13 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  // Pilihan tampilan saja. Hak akses tetap ditentukan role di database:
+  // akun customer yang memilih "Mentor" tetap diarahkan ke dashboard customer.
+  const [sebagai, setSebagai] = useState<"customer" | "mentor">("customer");
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    if (q.get("sebagai") === "mentor" || (q.get("next") ?? "").startsWith("/mentor")) setSebagai("mentor");
+  }, []);
 
   // Pesan dari /auth/callback (mis. Login Google dibatalkan / belum aktif).
   useEffect(() => {
@@ -51,6 +58,20 @@ export default function LoginPage() {
     const params = new URLSearchParams(window.location.search);
     const next = safeRedirectPath(params.get("next"));
 
+    if (sebagai === "mentor") {
+      const res = await fetch("/api/me");
+      const json = await res.json().catch(() => ({}));
+      const role: string = json.role ?? "user";
+      if (["mentor", "admin", "superadmin"].includes(role)) {
+        router.push(next.startsWith("/mentor") ? next : "/mentor");
+      } else {
+        showToast("Akun ini belum terdaftar sebagai mentor. Kamu masuk sebagai customer.", "error");
+        router.push("/dashboard");
+      }
+      router.refresh();
+      return;
+    }
+
     // Jika ada next param spesifik, pakai itu
     // Jika tidak, fetch role lalu redirect ke dashboard sesuai role
     // "/dashboard" adalah tujuan bawaan (dari middleware / tombol Masuk), bukan
@@ -74,7 +95,10 @@ export default function LoginPage() {
   async function handleGoogleLogin() {
     setGoogleLoading(true);
     const params = new URLSearchParams(window.location.search);
-    const next = safeRedirectPath(params.get("next"));
+    const nextAwal = safeRedirectPath(params.get("next"));
+    // Mode mentor: setelah Google, ke panel mentor (middleware tetap menolak
+    // akun yang bukan mentor dan mengarahkannya ke dashboard customer).
+    const next = sebagai === "mentor" && !nextAwal.startsWith("/mentor") ? "/mentor" : nextAwal;
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
@@ -90,14 +114,45 @@ export default function LoginPage() {
   return (
     <>
       <div>
+        <div role="tablist" aria-label="Masuk sebagai" className="mb-6 grid grid-cols-2 rounded-xl bg-slate-100 p-1 text-sm font-semibold">
+          {(["customer", "mentor"] as const).map((k) => (
+            <button
+              key={k}
+              type="button"
+              role="tab"
+              aria-selected={sebagai === k}
+              onClick={() => setSebagai(k)}
+              className={`rounded-lg px-3 py-2 transition-colors ${sebagai === k ? "bg-white text-[#8B0000] shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+            >
+              {k === "customer" ? "Customer" : "Mentor"}
+            </button>
+          ))}
+        </div>
+
         <div className="mb-8">
-          <h2 className="text-2xl font-extrabold text-slate-900">Selamat datang kembali! 👋</h2>
-          <p className="mt-1.5 text-sm text-muted-foreground">
-            Belum punya akun?{" "}
-            <Link href="/daftar" className="font-semibold text-[#8B0000] hover:text-brand-light">
-              Daftar gratis
-            </Link>
-          </p>
+          <h2 className="text-2xl font-extrabold text-slate-900">
+            {sebagai === "mentor" ? "Masuk Panel Mentor" : "Selamat datang kembali! 👋"}
+          </h2>
+          {sebagai === "mentor" ? (
+            <p className="mt-1.5 text-sm text-muted-foreground">
+              Akun mentor dibuat oleh admin. Belum punya?{" "}
+              <a
+                href={`https://wa.me/${BRAND.whatsapp}?text=${encodeURIComponent("Halo, saya ingin bergabung sebagai mentor Ruang Konsul Solo.")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-[#8B0000] hover:text-brand-light"
+              >
+                Hubungi admin
+              </a>
+            </p>
+          ) : (
+            <p className="mt-1.5 text-sm text-muted-foreground">
+              Belum punya akun?{" "}
+              <Link href="/daftar" className="font-semibold text-[#8B0000] hover:text-brand-light">
+                Daftar gratis
+              </Link>
+            </p>
+          )}
         </div>
 
         {/* Google */}

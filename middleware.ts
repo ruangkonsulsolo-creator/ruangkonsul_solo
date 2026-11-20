@@ -18,6 +18,18 @@ import { guardFor, homeForRole, type DbRole } from "@/lib/auth/roles";
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Supabase kembali ke Site URL (beranda) dengan ?code=... bila redirectTo
+  // tidak ada di daftar Redirect URLs. Teruskan ke /auth/callback agar kode
+  // tetap ditukar menjadi sesi, alih-alih diabaikan diam-diam.
+  if (pathname === "/") {
+    const code = request.nextUrl.searchParams.get("code");
+    const err = request.nextUrl.searchParams.get("error");
+    if (!code && !err) return NextResponse.next();
+    const tujuan = request.nextUrl.clone();
+    tujuan.pathname = "/auth/callback";
+    return NextResponse.redirect(tujuan);
+  }
+
   if (pathname === "/dashboard/dashboard") {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
@@ -85,5 +97,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/admin/:path*", "/mentor/:path*"],
+  matcher: ["/", "/dashboard/:path*", "/admin/:path*", "/mentor/:path*"],
 };
