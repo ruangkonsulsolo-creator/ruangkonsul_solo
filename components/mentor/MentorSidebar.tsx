@@ -7,8 +7,7 @@ import { cn } from "@/lib/utils";
 import { Logo } from "@/components/ui/logo";
 import {
   LayoutDashboard, CalendarDays, Users, MessageCircle,
-  BookOpen, Star, Settings, LogOut, ChevronRight, Menu, X,
-} from "lucide-react";
+  BookOpen, Star, Settings, LogOut, ChevronRight, Menu, X, Bell } from "lucide-react";
 import { useState } from "react";
 import { BRAND } from "@/lib/brand";
 
@@ -17,6 +16,7 @@ const navItems = [
   { type: "section" as const, label: "Bimbingan" },
   { label: "Jadwal Saya",     href: "/mentor/jadwal",   icon: CalendarDays },
   { label: "Sesi & Klien",    href: "/mentor/klien",    icon: Users },
+  { label: "Notifikasi",      href: "/dashboard/notifikasi", icon: Bell },
   { label: "Materi & Modul",  href: "/mentor/materi",   icon: BookOpen },
   { type: "section" as const, label: "Komunikasi" },
   { label: "Chat",            href: "/mentor/chat",     icon: MessageCircle },

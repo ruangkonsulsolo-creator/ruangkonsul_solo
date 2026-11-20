@@ -24,7 +24,7 @@ async function DashboardHeader() {
         </div>
         <div className="flex items-center gap-2">
           {(unreadCount ?? 0) > 0 && (
-            <a href="/dashboard/riwayat-pesanan"
+            <a href="/dashboard/notifikasi"
               className="relative flex h-9 items-center gap-1.5 rounded-xl bg-brand-50 border border-brand-200 px-3 text-xs font-semibold text-brand hover:bg-brand-100 transition-colors">
               <span className="flex h-4 w-4 items-center justify-center rounded-full bg-brand text-[9px] font-bold text-white">
                 {(unreadCount ?? 0) > 9 ? "9+" : unreadCount}

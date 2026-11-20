@@ -68,6 +68,16 @@ export default async function HalamanMentor({
   const m = await ambil(params.id);
   if (!m) notFound();
 
+  // Ulasan bersifat publik (policy ulasan_select_publik). Nama klien tidak
+  // ditampilkan: profil customer tidak terbuka untuk publik.
+  const { data: ulasan } = await createClient()
+    .from("ulasan")
+    .select("id, rating, komentar, balasan, dibuat_pada")
+    .eq("mentor_id", m.id)
+    .not("komentar", "is", null)
+    .order("dibuat_pada", { ascending: false })
+    .limit(10);
+
   const bidang = (m.specializations as string[] | null) ?? [];
   const pencapaian = (m.pencapaian as string[] | null) ?? [];
   const pengalaman = (m.pengalaman as Pengalaman[] | null) ?? [];
@@ -279,6 +289,34 @@ export default async function HalamanMentor({
               </ol>
             }
           />
+        )}
+
+        {(ulasan ?? []).length > 0 && (
+          <section className="mt-10" aria-labelledby="judul-ulasan">
+            <h2 id="judul-ulasan" className="mb-4 text-lg font-extrabold text-slate-900">
+              Ulasan klien
+            </h2>
+            <ul className="space-y-3">
+              {(ulasan ?? []).map((u) => (
+                <li key={u.id} className="rounded-2xl border border-slate-200 bg-white p-4">
+                  <p className="flex items-center gap-1 text-amber-500" aria-label={`Rating ${u.rating} dari 5`}>
+                    {Array.from({ length: 5 }, (_, i) => (
+                      <Star key={i} className={`h-4 w-4 ${i < u.rating ? "fill-current" : "text-slate-200"}`} aria-hidden="true" />
+                    ))}
+                    <span className="ml-2 text-xs text-slate-400">
+                      {new Date(u.dibuat_pada).toLocaleDateString("id-ID", { month: "long", year: "numeric" })}
+                    </span>
+                  </p>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-700">{u.komentar}</p>
+                  {u.balasan && (
+                    <p className="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-600">
+                      <span className="font-semibold text-slate-800">Balasan mentor:</span> {u.balasan}
+                    </p>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </section>
         )}
 
         {/* Kalau mentornya belum mengisi apa pun, halaman tidak boleh terasa

@@ -42,7 +42,7 @@ const navItems = [
   { label: "Superadmin",       href: "/admin/superadmin",  icon: ShieldCheck },
 ];
 
-export function AdminSidebar() {
+export function AdminSidebar({ role = "admin" }: { role?: string }) {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
@@ -69,7 +69,7 @@ export function AdminSidebar() {
 
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-0.5" aria-label="Admin navigation">
-        {navItems.map((item, i) => {
+        {navItems.filter((item) => item.href !== "/admin/superadmin" || role === "superadmin").map((item, i) => {
           if (item.type === "section") {
             return (
               <p key={i} className="px-3 pt-5 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-white/40">

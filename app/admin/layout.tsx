@@ -25,7 +25,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   const profile = await getAdminProfile();
   return (
     <div className="flex min-h-screen bg-slate-50">
-      <AdminSidebar />
+      <AdminSidebar role={profile.role} />
       <div className="flex flex-1 flex-col min-w-0">
         <header className="flex h-14 items-center justify-between border-b border-slate-100 bg-white/95 backdrop-blur-sm px-6 shadow-sm">
           <TautanBeranda />
