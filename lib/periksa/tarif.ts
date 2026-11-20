@@ -1,4 +1,5 @@
 import "server-only";
+import { unstable_noStore as noStore } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { TARIF, type JenisPeriksa } from "@/lib/periksa/types";
 
@@ -18,6 +19,9 @@ export type StatusPeriksa = { tarif: TarifPeriksa; aktif: Record<JenisPeriksa, b
  * pemeriksaan tetap jalan dengan harga yang wajar.
  */
 export async function ambilTarifPeriksa(): Promise<StatusPeriksa> {
+  // Jangan ikut cache halaman (beranda revalidate 300 dtk): harga yang diubah
+  // admin harus langsung tampil, sama dengan yang ditagihkan /api/periksa.
+  noStore();
   const tarif: TarifPeriksa = { ...TARIF };
   const aktif: Record<JenisPeriksa, boolean> = { kemiripan: true, ai: true, parafrase: true };
   try {
