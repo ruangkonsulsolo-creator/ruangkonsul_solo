@@ -24,6 +24,10 @@ export function safeRedirectPath(
   // Harus dimulai dengan "/" tapi BUKAN "//"
   if (!trimmed.startsWith("/") || trimmed.startsWith("//")) return fallback;
 
+  // Browser memperlakukan "\" seperti "/" — "/\evil.com" menjadi
+  // "//evil.com" (open redirect). Tolak backslash & karakter kontrol.
+  if (/[\\\u0000-\u001f\u007f]/.test(trimmed)) return fallback;
+
   // Cegah protocol injection: "javascript:", "data:", dll.
   // Cek apakah ada karakter ":" sebelum "/" pertama
   const colonIndex = trimmed.indexOf(":");

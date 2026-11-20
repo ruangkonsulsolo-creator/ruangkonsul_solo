@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { z } from "zod";
 
 export const dynamic = "force-dynamic";
@@ -48,6 +49,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Sesi berakhir." }, { status: 401 });
   }
 
+  // Pemanggil harus staff. Perubahan role tetap lewat klien user supaya
+  // trigger guard_role_change menegakkan batas admin vs superadmin.
+  const { data: pemanggil } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
+  if (!pemanggil || !["admin", "superadmin"].includes(pemanggil.role)) {
+    return NextResponse.json({ error: "Akses ditolak." }, { status: 403 });
+  }
+  // mentor_profiles: kolom display_name & price_per_hour sengaja tidak bisa
+  // ditulis user login (migration 026, agar mentor tak mengubah tarif sendiri),
+  // jadi setelah pemanggil terbukti staff, tulis lewat service role.
+  const admin = createAdminClient();
+
   const tolak = (error: { code?: string; message: string }) => {
     if (error.code === "42501") {
       return NextResponse.json(
@@ -76,13 +88,13 @@ export async function POST(request: NextRequest) {
     // Nama tampil disimpan di mentor_profiles, bukan dibaca dari profiles,
     // supaya halaman booking tetap bisa dibuka pengunjung tanpa membuka
     // tabel profiles ke publik.
-    const { data: profil } = await supabase
+    const { data: profil } = await admin
       .from("profiles")
-      .select("full_name")
+      .select("full_name, role")
       .eq("id", user_id)
       .maybeSingle();
 
-    const { error: eMentor } = await supabase.from("mentor_profiles").upsert(
+    const { error: eMentor } = await admin.from("mentor_profiles").upsert(
       {
         user_id,
         display_name: display_name ?? profil?.full_name ?? "Mentor Ruang Konsul",
@@ -92,7 +104,11 @@ export async function POST(request: NextRequest) {
       },
       { onConflict: "user_id" }
     );
-    if (eMentor) return tolak(eMentor);
+    if (eMentor) {
+      // Jangan tinggalkan data setengah jadi: kembalikan role.
+      await supabase.from("profiles").update({ role: "user" }).eq("id", user_id);
+      return tolak(eMentor);
+    }
 
     return NextResponse.json({ message: "Mentor berhasil diangkat." });
   }
@@ -100,7 +116,7 @@ export async function POST(request: NextRequest) {
   if (aksi === "turunkan") {
     // Profil mentor tidak dihapus, hanya disembunyikan. Menghapusnya akan
     // memutus referensi dari booking lama dan menghilangkan riwayat kinerja.
-    const { error: eMentor } = await supabase
+    const { error: eMentor } = await admin
       .from("mentor_profiles")
       .update({ is_available: false })
       .eq("user_id", user_id);
@@ -117,7 +133,7 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  const { error } = await supabase
+  const { error } = await admin
     .from("mentor_profiles")
     .update({ is_available: aksi === "aktifkan" })
     .eq("user_id", user_id);
