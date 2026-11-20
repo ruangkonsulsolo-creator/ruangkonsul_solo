@@ -27,7 +27,7 @@ export default async function AdminDashboardPage() {
     supabase.from("orders").select("*", { count: "exact", head: true }).gte("created_at", `${today}T00:00:00Z`),
     supabase.from("profiles").select("*", { count: "exact", head: true }).eq("role", "user"),
     supabase.from("transactions").select("amount_idr").eq("type", "order_payment").gte("created_at", `${today}T00:00:00Z`),
-    supabase.from("orders").select("id, order_number, status, created_at, services(name), profiles(full_name)").order("created_at", { ascending: false }).limit(8),
+    supabase.from("orders").select("id, order_number, status, created_at, services(name), profiles:profiles!orders_user_id_fkey(full_name)").order("created_at", { ascending: false }).limit(8),
   ]);
   const todayRevenue = (revenueResult.data ?? []).reduce((s, t) => s + (t.amount_idr ?? 0), 0);
   const stats = [

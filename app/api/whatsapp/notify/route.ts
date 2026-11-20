@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
 
   const { data: order } = await supabase
     .from("orders")
-    .select("id, order_number, user_id, services(name), profiles(full_name, whatsapp)")
+    .select("id, order_number, user_id, services(name), profiles:profiles!orders_user_id_fkey(full_name, whatsapp)")
     .eq("id", body.order_id)
     .single();
 

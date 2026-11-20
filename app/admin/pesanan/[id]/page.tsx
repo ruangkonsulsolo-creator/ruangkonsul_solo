@@ -25,7 +25,7 @@ export default async function AdminPesananDetailPage({
       created_at, completed_at, admin_notes,
       report_storage_path, report_uploaded_at,
       services ( name, slug ),
-      profiles ( full_name, whatsapp ),
+      profiles:profiles!orders_user_id_fkey ( full_name, whatsapp ),
       uploaded_files ( original_name, storage_path )
     `)
     .eq("id", params.id)

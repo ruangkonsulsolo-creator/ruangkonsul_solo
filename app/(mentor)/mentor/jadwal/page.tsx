@@ -27,12 +27,12 @@ export default async function JadwalMentorPage() {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
-  const { data: mentorProfile } = await supabase.from("mentor_profiles").select("id, is_available").eq("user_id", user.id).single();
+  const { data: mentorProfile } = await supabase.from("mentor_profiles").select("id, is_available").eq("user_id", user.id).maybeSingle();
   const today = new Date().toISOString().slice(0, 10);
   const end   = new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10);
-  const { data: slots } = await supabase.from("booking_slots").select("id, slot_date, slot_start, slot_end, is_blocked").eq("mentor_id", mentorProfile?.id ?? "").gte("slot_date", today).lte("slot_date", end).order("slot_date").order("slot_start");
+  const { data: slots } = !mentorProfile ? { data: [] } : await supabase.from("booking_slots").select("id, slot_date, slot_start, slot_end, is_blocked").eq("mentor_id", mentorProfile?.id ?? "").gte("slot_date", today).lte("slot_date", end).order("slot_date").order("slot_start");
   const slotIds = (slots ?? []).map((s) => s.id);
-  const { data: bookings } = slotIds.length > 0 ? await supabase.from("bookings").select("slot_id, status, profiles(full_name)").in("slot_id", slotIds).in("status", ["pending","confirmed"]) : { data: [] };
+  const { data: bookings } = slotIds.length > 0 ? await supabase.from("bookings").select("slot_id, status, profiles:profiles!bookings_customer_id_fkey(full_name)").in("slot_id", slotIds).in("status", ["pending","confirmed"]) : { data: [] };
   return (
     <div className="max-w-7xl space-y-6">
       <div><h2 className="text-xl font-extrabold text-slate-900">Jadwal Saya</h2><p className="text-sm text-muted-foreground mt-0.5">Kelola slot waktu tersedia kamu. Klien akan booking berdasarkan slot ini.</p></div>
