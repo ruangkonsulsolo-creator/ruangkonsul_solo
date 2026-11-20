@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════════════════════
--- 037 — Jumlah sesi mentor dihitung otomatis
+-- 037 — Jumlah sesi mentor dihitung otomatis + profil akun Google
 --
 -- mentor_profiles.session_count ditampilkan ke publik ("12 sesi" di kartu
 -- mentor, profil, dan urutan mentor di halaman booking), tetapi tidak ada
@@ -48,3 +48,41 @@ UPDATE public.mentor_profiles m
 DO $$ BEGIN
   RAISE NOTICE '037_hitung_sesi_mentor: selesai.';
 END $$;
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- Bagian 2 — Profil otomatis untuk akun baru (termasuk Login Google)
+--
+-- Google mengirim nama di raw_user_meta_data sebagai 'full_name' dan/atau
+-- 'name'. Versi lama hanya membaca 'full_name' sehingga nama bisa kosong.
+-- search_path dikunci (praktik wajib untuk fungsi SECURITY DEFINER).
+-- ═══════════════════════════════════════════════════════════════════════════
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+DECLARE
+  new_referral_code TEXT;
+BEGIN
+  LOOP
+    new_referral_code := 'RKS-' || upper(substring(md5(random()::text), 1, 5));
+    EXIT WHEN NOT EXISTS (
+      SELECT 1 FROM public.profiles WHERE referral_code = new_referral_code
+    );
+  END LOOP;
+
+  INSERT INTO public.profiles (id, full_name, referral_code)
+  VALUES (
+    NEW.id,
+    left(COALESCE(
+      NULLIF(trim(NEW.raw_user_meta_data->>'full_name'), ''),
+      NULLIF(trim(NEW.raw_user_meta_data->>'name'), ''),
+      ''
+    ), 120),
+    new_referral_code
+  )
+  ON CONFLICT (id) DO NOTHING;
+  RETURN NEW;
+END;
+$$;

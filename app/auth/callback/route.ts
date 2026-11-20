@@ -7,9 +7,20 @@ export async function GET(request: Request) {
   const code = searchParams.get("code");
   const next = safeRedirectPath(searchParams.get("next"));
 
+  // Google/Supabase mengembalikan ?error=... bila user membatalkan atau
+  // provider belum dikonfigurasi. Teruskan ke halaman masuk supaya terlihat.
+  const errProvider = searchParams.get("error");
+  if (errProvider) {
+    const desc = searchParams.get("error_description") ?? errProvider;
+    console.warn("[auth/callback] provider error:", errProvider, desc);
+    const kode = errProvider === "access_denied" ? "dibatalkan" : "provider";
+    return NextResponse.redirect(`${origin}/login?error=${kode}`);
+  }
+
   if (code) {
     const supabase = createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
+    if (error) console.warn("[auth/callback] exchange gagal:", error.message);
 
     if (!error) {
       // Jika ada next parameter yang valid, gunakan itu

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -22,6 +22,19 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+
+  // Pesan dari /auth/callback (mis. Login Google dibatalkan / belum aktif).
+  useEffect(() => {
+    const kode = new URLSearchParams(window.location.search).get("error");
+    if (!kode) return;
+    const pesan: Record<string, string> = {
+      dibatalkan: "Masuk dengan Google dibatalkan.",
+      provider: "Masuk dengan Google sedang tidak tersedia. Coba lagi atau gunakan email.",
+      auth_callback_failed: "Sesi masuk kedaluwarsa. Silakan coba masuk lagi.",
+    };
+    showToast(pesan[kode] ?? "Gagal masuk. Silakan coba lagi.", "error");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function handleEmailLogin(e: React.FormEvent) {
     e.preventDefault();
