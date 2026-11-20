@@ -31,7 +31,7 @@ dibatalkan otomatis dan slot muncul lagi. Daftar sesi customer: `/dashboard/sesi
 | Nama | Nilai | Catatan |
 |---|---|---|
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase → Project Settings → API → `service_role` | **Rahasia**, jangan diberi awalan `NEXT_PUBLIC_` |
-| `NEXT_PUBLIC_APP_URL` | `https://ruangkonsulsolo.id` | untuk link receipt & redirect Midtrans |
+| `NEXT_PUBLIC_APP_URL` | `https://ruangkonsul.id` | untuk link receipt & redirect Midtrans |
 | `MIDTRANS_SERVER_KEY` | Midtrans → Settings → Access Keys | sandbox: `SB-Mid-server-…` |
 | `NEXT_PUBLIC_MIDTRANS_CLIENT_KEY` | idem | sandbox: `SB-Mid-client-…` |
 | `MIDTRANS_ENABLED_PAYMENTS` | `other_qris` (default, hanya QRIS) / `all` / mis. `other_qris,bca_va` | opsional |
@@ -46,7 +46,7 @@ Setelah mengisi, **Redeploy** agar variabel `NEXT_PUBLIC_*` ikut ter-build.
 ## 3. Midtrans Dashboard
 Settings → Payment → **Notification URL**:
 ```
-https://ruangkonsulsolo.id/api/payment/webhook
+https://ruangkonsul.id/api/payment/webhook
 ```
 (Untuk uji di Preview Deployment Vercel, isi dengan URL preview-nya sementara.)
 

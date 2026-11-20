@@ -22,7 +22,7 @@ export const PREVIEW_MODE = false;
 /** Dummy user untuk preview */
 export const PREVIEW_USER = {
   id:    "preview-user-id",
-  email: "preview@ruangkonsulsolo.id",
+  email: "preview@ruangkonsul.id",
 };
 
 /** Dummy profile untuk preview */
