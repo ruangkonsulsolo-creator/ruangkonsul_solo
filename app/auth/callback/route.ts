@@ -14,7 +14,9 @@ export async function GET(request: Request) {
     const desc = searchParams.get("error_description") ?? errProvider;
     console.warn("[auth/callback] provider error:", errProvider, desc);
     const kode = errProvider === "access_denied" ? "dibatalkan" : "provider";
-    return NextResponse.redirect(`${origin}/login?error=${kode}`);
+    // Alasan singkat dari Supabase/Google (tanpa data rahasia) agar mudah didiagnosis.
+    const alasan = encodeURIComponent(desc.slice(0, 160));
+    return NextResponse.redirect(`${origin}/login?error=${kode}&alasan=${alasan}`);
   }
 
   if (code) {

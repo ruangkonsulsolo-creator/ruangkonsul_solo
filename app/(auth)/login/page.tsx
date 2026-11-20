@@ -32,14 +32,16 @@ export default function LoginPage() {
 
   // Pesan dari /auth/callback (mis. Login Google dibatalkan / belum aktif).
   useEffect(() => {
-    const kode = new URLSearchParams(window.location.search).get("error");
+    const q = new URLSearchParams(window.location.search);
+    const kode = q.get("error");
     if (!kode) return;
+    const alasan = (q.get("alasan") ?? "").slice(0, 160);
     const pesan: Record<string, string> = {
       dibatalkan: "Masuk dengan Google dibatalkan.",
       provider: "Masuk dengan Google sedang tidak tersedia. Coba lagi atau gunakan email.",
       auth_callback_failed: "Sesi masuk kedaluwarsa. Silakan coba masuk lagi.",
     };
-    showToast(pesan[kode] ?? "Gagal masuk. Silakan coba lagi.", "error");
+    showToast(`${pesan[kode] ?? "Gagal masuk. Silakan coba lagi."}${alasan ? ` (${alasan})` : ""}`, "error");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
