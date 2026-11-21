@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { safeRedirectPath } from "@/lib/utils/safe-redirect";
+import { ambilStatusProfil, HALAMAN_LENGKAPI } from "@/lib/auth/status-profil";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -25,6 +26,17 @@ export async function GET(request: Request) {
     if (error) console.warn("[auth/callback] exchange gagal:", error.message);
 
     if (!error) {
+      // Akun baru dari Google: wajib lengkapi pendaftaran dulu.
+      const { data: { user: baru } } = await supabase.auth.getUser();
+      if (baru) {
+        const status = await ambilStatusProfil(supabase, baru.id);
+        if (status && !status.registrasi_selesai) {
+          return NextResponse.redirect(
+            `${origin}${HALAMAN_LENGKAPI}?next=${encodeURIComponent(next)}`
+          );
+        }
+      }
+
       // Jika ada next parameter yang valid, gunakan itu
       if (next !== "/dashboard") {
         return NextResponse.redirect(`${origin}${next}`);

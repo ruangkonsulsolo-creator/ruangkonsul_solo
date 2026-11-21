@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { guardFor, homeForRole, type DbRole } from "@/lib/auth/roles";
+import { ambilStatusProfil, HALAMAN_LENGKAPI } from "@/lib/auth/status-profil";
 
 /**
  * Guard route berbasis role.
@@ -72,17 +73,20 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role, is_active")
-    .eq("id", user.id)
-    .single();
+  const profile = await ambilStatusProfil(supabase, user.id);
 
   // Profil belum terbentuk atau akun dinonaktifkan admin.
   if (!profile || profile.is_active === false) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("error", "akun-nonaktif");
     return NextResponse.redirect(loginUrl);
+  }
+
+  // Daftar via Google tapi belum mengisi nama/password/WhatsApp.
+  if (!profile.registrasi_selesai) {
+    const url = new URL(HALAMAN_LENGKAPI, request.url);
+    url.searchParams.set("next", pathname);
+    return NextResponse.redirect(url);
   }
 
   const role = (profile.role ?? "user") as DbRole;
