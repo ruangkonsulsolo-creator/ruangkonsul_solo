@@ -14,7 +14,9 @@ export async function ambilHeroSlides(): Promise<HeroSlide[]> {
       .limit(10);
     if (error || !data || data.length === 0) return SLIDE_BAWAAN;
     return data as HeroSlide[];
-  } catch {
+  } catch (e) {
+    // Biarkan Next menandai halaman sebagai dinamis (pemakaian cookies).
+    if ((e as { digest?: string })?.digest === "DYNAMIC_SERVER_USAGE") throw e;
     return SLIDE_BAWAAN;
   }
 }

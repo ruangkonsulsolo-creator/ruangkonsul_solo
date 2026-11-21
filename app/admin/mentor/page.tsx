@@ -6,6 +6,7 @@ import {
   type CalonMentor,
 } from "@/components/admin/MentorPerformaTable";
 import { formatRupiah } from "@/lib/utils/format-currency";
+import { FotoMentorAdmin, type MentorFoto } from "@/components/admin/FotoMentorAdmin";
 
 export const metadata: Metadata = { title: "Kinerja Mentor" };
 export const dynamic = "force-dynamic";
@@ -31,6 +32,16 @@ export default async function AdminMentorPage() {
     .eq("role", "user")
     .eq("is_active", true)
     .order("full_name");
+
+  const { data: fotoData } = await supabase
+    .from("mentor_profiles")
+    .select("user_id, display_name, avatar_url")
+    .order("display_name");
+  const fotoMentor: MentorFoto[] = (fotoData ?? []).map((m) => ({
+    user_id: m.user_id as string,
+    nama: (m.display_name as string | null) || "Mentor",
+    avatar_url: (m.avatar_url as string | null) || null,
+  }));
 
   const performa = (performaData ?? []) as Performa[];
   const calon = ((calonData ?? []) as Array<{ id: string; full_name: string | null }>)
@@ -94,6 +105,8 @@ export default async function AdminMentorPage() {
           jalankan pembuatan slot dari pola mingguannya.
         </p>
       )}
+
+      {fotoMentor.length > 0 && <FotoMentorAdmin awal={fotoMentor} />}
 
       <MentorPerformaTable performa={performa} calon={calon} />
     </div>

@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Loader2, Plus, Trash2, Save, CheckCircle2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Loader2, Plus, Trash2, Save, CheckCircle2, Camera, UserRound } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 import { formatRupiah } from "@/lib/utils/format-currency";
 
 /**
@@ -64,6 +65,38 @@ export function FormProfilMentor() {
   const [galat, setGalat] = useState<string | null>(null);
   const [sukses, setSukses] = useState(false);
   const [aksi, setAksi] = useState<string | null>(null);
+  const [mengunggah, setMengunggah] = useState(false);
+  const fileFoto = useRef<HTMLInputElement>(null);
+
+  async function unggahFoto(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (!["image/jpeg", "image/png", "image/webp", "image/avif"].includes(file.type)) {
+      setGalat("Foto harus JPG, PNG, WebP, atau AVIF.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setGalat("Ukuran foto maksimal 5 MB.");
+      return;
+    }
+    setMengunggah(true);
+    setGalat(null);
+    try {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Sesi berakhir. Masuk lagi.");
+      const ext = file.name.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+      const path = `mentor/${user.id}/${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from("public-assets").upload(path, file, { contentType: file.type });
+      if (error) throw new Error(`Gagal mengunggah foto: ${error.message}`);
+      ubah("avatar_url", supabase.storage.from("public-assets").getPublicUrl(path).data.publicUrl);
+    } catch (err) {
+      setGalat(err instanceof Error ? err.message : "Gagal mengunggah foto.");
+    } finally {
+      setMengunggah(false);
+    }
+  }
 
   useEffect(() => {
     (async () => {
@@ -97,6 +130,10 @@ export function FormProfilMentor() {
   async function simpan(e: React.FormEvent) {
     e.preventDefault();
     if (!p) return;
+    if (!p.avatar_url) {
+      setGalat("Foto profil wajib diunggah sebelum menyimpan.");
+      return;
+    }
     setMenyimpan(true);
     setGalat(null);
     try {
@@ -176,14 +213,32 @@ export function FormProfilMentor() {
                 placeholder="S.Pd., M.Pd." className={inputKelas} />
             </div>
             <div className="sm:col-span-2">
-              <Label htmlFor="avatar">URL foto</Label>
-              <input id="avatar" value={p.avatar_url ?? ""} maxLength={500}
-                onChange={(e) => ubah("avatar_url", e.target.value)}
-                placeholder="https://…/foto.jpg" className={inputKelas} />
-              <p className="mt-1 text-xs text-slate-500">
-                Unggah fotonya ke Supabase Storage lalu tempel tautannya di sini.
-                Ukuran persegi, minimal 400 × 400 piksel.
-              </p>
+              <Label>Foto profil <span className="text-red-500">*</span></Label>
+              <div className="flex items-center gap-4">
+                <div className="relative h-28 w-[5.6rem] shrink-0 overflow-hidden rounded-xl border bg-brand-50">
+                  {p.avatar_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={p.avatar_url} alt="Foto profil" className="h-full w-full object-cover object-top" />
+                  ) : (
+                    <UserRound className="absolute bottom-0 left-1/2 h-20 w-20 -translate-x-1/2 text-brand-200" strokeWidth={1} />
+                  )}
+                </div>
+                <div>
+                  <input ref={fileFoto} type="file" accept="image/jpeg,image/png,image/webp,image/avif" className="hidden" onChange={unggahFoto} />
+                  <button type="button" onClick={() => fileFoto.current?.click()} disabled={mengunggah}
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:border-brand hover:text-brand disabled:opacity-60">
+                    {mengunggah ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
+                    {p.avatar_url ? "Ganti foto" : "Unggah foto"}
+                  </button>
+                  <p className="mt-1.5 max-w-sm text-xs text-slate-500">
+                    Wajib. Foto formal setengah badan, latar polos, potret 4:5 (mis. 800 × 1000 px), maks 5 MB.
+                    Foto ini tampil di beranda & halaman Mentor Kami.
+                  </p>
+                  {!p.avatar_url && (
+                    <p className="mt-1 text-xs font-semibold text-red-600">Belum ada foto — profilmu tampil tanpa foto.</p>
+                  )}
+                </div>
+              </div>
             </div>
             <div className="sm:col-span-2">
               <Label htmlFor="bio">Biodata</Label>

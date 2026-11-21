@@ -9,6 +9,10 @@ import { Badge } from "@/components/ui/badge";
 import { Logo } from "@/components/ui/logo";
 import { HeroSlider } from "@/components/landing/HeroSlider";
 import { ambilHeroSlides } from "@/lib/landing/hero-slides";
+import { ambilMentorPublik } from "@/lib/mentor/publik";
+import { ambilPaketPromo } from "@/lib/landing/paket-promo";
+import { PaketPromoSlider } from "@/components/landing/PaketPromoSlider";
+import { KartuMentor } from "@/components/mentor/KartuMentor";
 import { HeroBackground } from "@/components/landing/HeroBackground";
 import { BannerStrip } from "@/components/landing/BannerStrip";
 import { LogoKampus } from "@/components/landing/LogoKampus";
@@ -81,73 +85,17 @@ function SectionLabel({ children }: { children: string }) {
 }
 
 /* ─── page ──────────────────────────────────────────────────────────────────── */
-/**
- * Mentor diambil dari basis data, bukan ditulis di kode.
- *
- * Sebelumnya bagian ini memuat tiga mentor tetap dengan rating dan jumlah
- * sesi karangan, sementara basis datanya baru berisi satu mentor sungguhan.
- * Calon klien yang menghubungi "Mentor Ekonomi" tidak akan menemukan siapa
- * pun di sisi lain.
- *
- * rating dan jumlah sesi hanya ditampilkan kalau angkanya memang sudah ada.
- * Mentor baru yang belum punya ulasan lebih baik tidak menampilkan apa-apa
- * daripada menampilkan "0.0 · 0 sesi" — yang membuatnya terlihat buruk
- * padahal cuma belum mulai.
- */
-async function ambilMentor() {
-  try {
-    const { createClient } = await import("@/lib/supabase/server");
-    const supabase = createClient();
-    const { data, error } = await supabase
-      .from("mentor_profiles")
-      .select(
-        `id, gelar, education, specializations, rating_avg, session_count,
-         avatar_url, is_available, headline,
-         profil:profiles!mentor_profiles_user_id_fkey ( full_name )`
-      )
-      .order("rating_avg", { ascending: false })
-      .limit(6);
-
-    if (error) {
-      console.error("[beranda] gagal memuat mentor:", error);
-      return [];
-    }
-
-    return (data ?? []).map((m) => {
-      const pr = m.profil as unknown as { full_name: string | null } | null;
-      const nama = pr?.full_name?.trim() || "Mentor";
-      return {
-        id: m.id as string,
-        nama,
-        gelar: (m.gelar as string | null) ?? "",
-        kampus: (m.education as string | null) ?? "",
-        bidang: ((m.specializations as string[] | null) ?? []).slice(0, 3),
-        rating: Number(m.rating_avg ?? 0),
-        sesi: Number(m.session_count ?? 0),
-        foto: (m.avatar_url as string | null) ?? null,
-        tersedia: Boolean(m.is_available),
-        inisial: nama.split(/\s+/).filter(Boolean).slice(0, 2)
-          .map((x: string) => x[0]).join("").toUpperCase() || "M",
-      };
-    });
-  } catch (e) {
-    // Basis data tidak terjangkau saat build atau saat render. Bagian mentor
-    // disembunyikan, sisa halaman tetap tampil — satu kueri gagal tidak
-    // boleh menjatuhkan seluruh beranda.
-    console.error("[beranda] mentor tidak bisa diambil:", e);
-    return [];
-  }
-}
 
 /** Data mentor berubah jarang; lima menit cukup segar tanpa membebani. */
 export const revalidate = 300;
 
 export default async function LandingPage() {
   const tarifPeriksa = await ambilTarifPeriksa();
-  const [MENTOR, bimbingan, heroSlides] = await Promise.all([
-    ambilMentor(),
+  const [MENTOR, bimbingan, heroSlides, paketPromo] = await Promise.all([
+    ambilMentorPublik({ limit: 8 }),
     ambilEtalase(ETALASE.bimbinganOnline),
     ambilHeroSlides(),
+    ambilPaketPromo(),
   ]);
   const paketHarian = bimbingan.produk;
   return (
@@ -237,6 +185,20 @@ export default async function LandingPage() {
 
       {/* ── Banner Iklan Bimbingan ── */}
       <BannerStrip />
+
+      {/* ── Paket Layanan (dikelola admin) ── */}
+      {paketPromo.length > 0 && (
+        <section id="paket" className="bg-gradient-to-b from-brand-50/60 to-white px-4 py-16">
+          <div className="mx-auto max-w-7xl">
+            <SectionLabel>Paket Layanan</SectionLabel>
+            <h2 className="mb-2 text-3xl font-extrabold text-slate-900 lg:text-4xl">Pilih bantuan yang kamu butuhkan</h2>
+            <p className="mb-8 max-w-xl font-medium text-slate-600">
+              Dari bimbingan per jam sampai cek naskah, harga jelas sejak awal.
+            </p>
+            <PaketPromoSlider paket={paketPromo} />
+          </div>
+        </section>
+      )}
 
       {/* ── Layanan Tab Utama ── */}
       {/*
@@ -391,64 +353,9 @@ export default async function LandingPage() {
             Semua mentor pernah melewati proses yang sedang kamu jalani, dan terbiasa
             membaca draf yang belum rapi tanpa menghakimi.
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {MENTOR.map((m) => (
-              <div key={m.id} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
-                <div className="flex items-start gap-4">
-                  {m.foto ? (
-                    <Image
-                      src={m.foto}
-                      alt={`Foto ${m.nama}`}
-                      width={64}
-                      height={64}
-                      className="h-16 w-16 flex-shrink-0 rounded-full object-cover ring-2 ring-brand-100"
-                    />
-                  ) : (
-                    <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-brand-50 text-xl font-extrabold text-brand ring-2 ring-brand-100">
-                      {m.inisial}
-                    </div>
-                  )}
-                  <div className="min-w-0">
-                    <h3 className="font-bold text-slate-900 leading-tight">
-                      <Link href={`/mentor-kami/${m.id}`} className="hover:text-brand hover:underline">
-                        {m.nama}
-                      </Link>
-                    </h3>
-                    {m.gelar && <p className="text-xs font-medium text-slate-500">{m.gelar}</p>}
-                    {m.kampus && <p className="text-xs text-slate-500 mt-1">{m.kampus}</p>}
-                  </div>
-                </div>
-                <div className="mt-4 flex flex-wrap gap-1.5">
-                  {m.bidang.map((b) => (
-                    <span key={b} className="rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand">{b}</span>
-                  ))}
-                </div>
-                {(m.rating > 0 || m.sesi > 0) && (
-                  <div className="mt-4 flex items-center gap-4 border-t border-slate-100 pt-3 text-sm">
-                    {m.rating > 0 && (
-                      <span className="flex items-center gap-1 font-semibold text-slate-700">
-                        <Star className="h-4 w-4 fill-brand text-brand" aria-hidden="true" />
-                        {m.rating.toFixed(1)}
-                      </span>
-                    )}
-                    {m.sesi > 0 && (
-                      <span className="font-medium text-slate-500">{m.sesi} sesi selesai</span>
-                    )}
-                  </div>
-                )}
-                {m.tersedia ? (
-                  <Link
-                    href={`/booking?mentor=${m.id}`}
-                    className="mt-4 inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-brand py-2.5 text-sm font-bold text-white hover:bg-brand-light transition-colors"
-                  >
-                    Pesan jadwal <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                  </Link>
-                ) : (
-                  <span className="mt-4 inline-flex w-full items-center justify-center rounded-xl border border-slate-200 py-2.5 text-sm font-bold text-slate-400">
-                    Sedang tidak menerima booking
-                  </span>
-                )}
-              </div>
+              <KartuMentor key={m.id} m={m} aksi="booking" />
             ))}
           </div>
           <Link

@@ -141,6 +141,14 @@ export async function PATCH(request: NextRequest) {
       { status: 422 });
   }
 
+  // Foto profil wajib: tidak boleh dikosongkan lewat rute ini.
+  if ("avatar_url" in parsed.data && !parsed.data.avatar_url) {
+    return NextResponse.json({ error: "Foto profil wajib diunggah." }, { status: 422 });
+  }
+  if (parsed.data.avatar_url && !/^https:\/\/([a-z0-9-]+\.supabase\.co\/storage\/|lh3\.googleusercontent\.com\/)/.test(parsed.data.avatar_url) && !parsed.data.avatar_url.startsWith("/")) {
+    return NextResponse.json({ error: "Foto harus diunggah lewat formulir." }, { status: 422 });
+  }
+
   const isi = { ...parsed.data };
   // String kosong disimpan sebagai NULL, bukan "", supaya kueri "belum diisi"
   // cukup memeriksa NULL saja.

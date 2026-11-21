@@ -7,7 +7,8 @@ export const dynamic = "force-dynamic";
 
 const schema = z.object({
   user_id: z.string().uuid(),
-  aksi: z.enum(["angkat", "turunkan", "aktifkan", "nonaktifkan"]),
+  aksi: z.enum(["angkat", "turunkan", "aktifkan", "nonaktifkan", "foto"]),
+  avatar_url: z.string().trim().max(500).regex(/^https:\/\/[a-z0-9-]+\.supabase\.co\/storage\//, "Foto harus dari unggahan.").optional(),
   display_name: z.string().trim().min(2).max(120).optional(),
   price_per_hour: z.coerce.number().int().min(0).max(100_000_000).optional(),
   specializations: z.array(z.string().trim().min(1).max(60)).max(8).optional(),
@@ -38,7 +39,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { user_id, aksi, display_name, price_per_hour, specializations } =
+  const { user_id, aksi, display_name, price_per_hour, specializations, avatar_url } =
     parsed.data;
   const supabase = createClient();
 
@@ -77,6 +78,18 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   };
+
+  if (aksi === "foto") {
+    if (!avatar_url) return NextResponse.json({ error: "Foto belum diunggah." }, { status: 422 });
+    const { data, error } = await admin
+      .from("mentor_profiles")
+      .update({ avatar_url, updated_at: new Date().toISOString() })
+      .eq("user_id", user_id)
+      .select("id");
+    if (error) return tolak(error);
+    if (!data?.length) return NextResponse.json({ error: "Mentor tidak ditemukan." }, { status: 404 });
+    return NextResponse.json({ message: "Foto mentor diperbarui." });
+  }
 
   if (aksi === "angkat") {
     const { error: eRole } = await supabase

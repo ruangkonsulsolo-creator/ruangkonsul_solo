@@ -14,6 +14,7 @@ Migration 018–032 sudah ada di branch katalog Anda. Yang baru hanya:
 - `supabase/migrations/038_registrasi_google.sql` (akun Google baru wajib lengkapi nama, password & WhatsApp; jalankan **setelah** 037)
 - `supabase/migrations/039_kode_mentor.sql` (kode undangan mentor dari admin; jalankan **setelah** 038)
 - `supabase/migrations/040_hero_slides.sql` (banner hero beranda dikelola admin + bucket gambar public-assets; jalankan **setelah** 039)
+- `supabase/migrations/041_paket_promo_foto_mentor.sql` (slide Paket Layanan di beranda + izin mentor unggah foto; jalankan **setelah** 040)
 
 Cara menjalankan (pilih satu):
 - **SQL Editor**: Supabase Dashboard → SQL Editor → tempel isi file 033 → Run, lalu file 034 → Run.

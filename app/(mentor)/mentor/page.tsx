@@ -28,7 +28,7 @@ export default async function DashboardMentorPage() {
 
   const { data: mentor } = await supabase
     .from("mentor_profiles")
-    .select("id, rating_avg, session_count, is_available, price_per_hour")
+    .select("id, rating_avg, session_count, is_available, price_per_hour, avatar_url")
     .eq("user_id", user.id)
     .maybeSingle();
 
@@ -96,6 +96,13 @@ export default async function DashboardMentorPage() {
 
   return (
     <div className="space-y-5">
+      {!mentor.avatar_url && (
+        <Link href="/mentor/profil"
+          className="flex items-center justify-between gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 hover:bg-red-100">
+          <span><b>Foto profil wajib diunggah.</b> Kartu mentormu di beranda masih tampil tanpa foto.</span>
+          <span className="shrink-0 font-bold">Unggah foto →</span>
+        </Link>
+      )}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-xl font-extrabold text-slate-900">

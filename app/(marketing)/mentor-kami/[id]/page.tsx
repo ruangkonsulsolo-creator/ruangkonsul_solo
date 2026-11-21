@@ -23,16 +23,24 @@ type Pendidikan = {
 const KOLOM =
   `id, bio, headline, gelar, education, specializations, experience_years,
    is_available, avatar_url, linkedin_url, pencapaian, pengalaman,
-   pendidikan, rating_avg, session_count,
-   profil:profiles!mentor_profiles_user_id_fkey ( full_name )`;
+   pendidikan, rating_avg, session_count, display_name, user_id`;
 
 async function ambil(id: string) {
   const supabase = createClient();
   const { data } = await supabase
     .from("mentor_profiles").select(KOLOM).eq("id", id).maybeSingle();
   if (!data) return null;
-  const p = data.profil as unknown as { full_name: string | null } | null;
-  return { ...data, nama: p?.full_name?.trim() || "Mentor" };
+  // Nama dari display_name; profiles tidak bisa dibaca publik (RLS), jadi
+  // cadangannya dibaca dengan service role, terbatas pada kolom full_name.
+  let nama = String(data.display_name ?? "").trim();
+  if (!nama && data.user_id) {
+    try {
+      const { createAdminClient } = await import("@/lib/supabase/admin");
+      const { data: pr } = await createAdminClient().from("profiles").select("full_name").eq("id", data.user_id).maybeSingle();
+      nama = pr?.full_name?.trim() ?? "";
+    } catch { /* abaikan */ }
+  }
+  return { ...data, nama: nama || "Mentor" };
 }
 
 export async function generateMetadata({
