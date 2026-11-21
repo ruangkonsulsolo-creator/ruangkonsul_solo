@@ -15,7 +15,7 @@ export function BayarUlangPesanan({
   pesananId: string;
   snapToken: string;
   paymentId: string | null;
-  purpose?: "produk" | "booking";
+  purpose?: "produk" | "booking" | "order";
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);

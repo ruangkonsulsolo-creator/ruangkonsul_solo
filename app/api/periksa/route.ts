@@ -15,6 +15,7 @@ import {
   susunSaran,
 } from "@/lib/periksa/penyedia";
 import { ambilTarifPeriksa } from "@/lib/periksa/tarif";
+import { persenBerubah } from "@/lib/periksa/persen-berubah";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;
@@ -140,8 +141,11 @@ export async function POST(request: NextRequest) {
     const kemiripan =
       jenis === "kemiripan" ? await penyedia.kemiripan(teks) : undefined;
     const ai = jenis === "ai" ? await penyedia.ai(teks) : undefined;
-    const parafrase =
+    const parafraseMentah =
       jenis === "parafrase" ? await penyedia.parafrase(teks) : undefined;
+    const parafrase = parafraseMentah
+      ? { ...parafraseMentah, persenBerubah: persenBerubah(teks, parafraseMentah.teks) }
+      : undefined;
 
     const hasil: HasilPeriksa = {
       id: idPemeriksaan as string,

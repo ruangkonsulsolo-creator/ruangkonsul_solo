@@ -6,6 +6,7 @@ import Image from "next/image";
 import {
   FileSearch, Bot, Wand2, AlertTriangle, CheckCircle2,
   ArrowRight, Loader2, Info, FileText, Upload, Copy, Check, X, FileDown,
+  Download,
 } from "lucide-react";
 import {
   hitungBiaya,
@@ -23,16 +24,21 @@ import {
   ekstrakTeks,
 } from "@/lib/periksa/ekstrak";
 import { formatRupiah } from "@/lib/utils/format-currency";
+import { labelAi, labelKemiripan } from "@/lib/periksa/persen-berubah";
+import { BATAS_KATA_BESAR, FORMAT_LAPORAN } from "@/lib/periksa/manual";
 
 const rupiah = (n: number) => formatRupiah(n);
 
 export function KotakPeriksa({
   tarif = TARIF,
   aktif = { kemiripan: true, ai: true, parafrase: true },
+  manual = { kecil: 15000, besar: 20000, aktif: false },
 }: {
   /** Tarif per 1.000 kata dari Admin > Tarif Pemeriksaan. */
   tarif?: Record<JenisPeriksa, number>;
   aktif?: Record<JenisPeriksa, boolean>;
+  /** Tarif per berkas cek plagiarisme manual (laporan diunggah tim). */
+  manual?: { kecil: number; besar: number; aktif: boolean };
 } = {}) {
   const [teks, setTeks] = useState("");
   const [jenis, setJenis] = useState<JenisPeriksa>(
@@ -44,6 +50,11 @@ export function KotakPeriksa({
   const [hasil, setHasil] = useState<HasilPeriksa | null>(null);
   const [namaBerkas, setNamaBerkas] = useState<string | null>(null);
   const [membaca, setMembaca] = useState(false);
+  const [berkas, setBerkas] = useState<File | null>(null);
+  const [mode, setMode] = useState<"instan" | "manual">("instan");
+  const [formatLaporan, setFormatLaporan] = useState<"baru" | "lama">("baru");
+  const [wa, setWa] = useState("");
+  const [pesananManual, setPesananManual] = useState<{ nomor: string; lunas: boolean } | null>(null);
   const inputBerkas = useRef<HTMLInputElement>(null);
 
   // Logo penyedia hanya muncul kalau penyedianya benar-benar dikonfigurasi.
@@ -104,9 +115,60 @@ export function KotakPeriksa({
     [jumlahKata, jenis, tarif]
   );
 
+  const modeManual = jenis === "kemiripan" && manual.aktif && mode === "manual";
+  const hargaManual = jumlahKata > BATAS_KATA_BESAR ? manual.besar : manual.kecil;
   const terlaluPendek = jumlahKata > 0 && jumlahKata < MIN_KATA;
-  const terlaluPanjang = jumlahKata > MAKS_KATA;
-  const siap = jumlahKata >= MIN_KATA && !terlaluPanjang && !memproses;
+  const terlaluPanjang = !modeManual && jumlahKata > MAKS_KATA;
+  const siap = modeManual
+    ? !!berkas && !memproses
+    : jumlahKata >= MIN_KATA && !terlaluPanjang && !memproses;
+
+  /** Mode manual: unggah berkas asli ke penyimpanan privat, buat pesanan, bayar QRIS. */
+  async function kirimManual() {
+    if (!berkas) return;
+    setMemproses(true);
+    setGalat(null);
+    setAksi(null);
+    setHasil(null);
+    setPesananManual(null);
+    try {
+      const { createClient } = await import("@/lib/supabase/client");
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setAksi("login");
+        throw new Error("Masuk dulu untuk memesan laporan cek plagiarisme.");
+      }
+      const aman = berkas.name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-120);
+      const path = `${user.id}/${Date.now()}_${aman}`;
+      const { error: eUp } = await supabase.storage.from("documents").upload(path, berkas, { contentType: berkas.type, upsert: false });
+      if (eUp) throw new Error(`Gagal mengunggah berkas: ${eUp.message}`);
+
+      const res = await fetch("/api/periksa/manual", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          storage_path: path,
+          nama_berkas: berkas.name,
+          ukuran: berkas.size,
+          mime: berkas.type,
+          jumlah_kata: jumlahKata,
+          format_laporan: formatLaporan,
+          whatsapp: wa,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? "Gagal membuat pesanan.");
+      const { openSnap, syncPaymentStatus } = await import("@/lib/payment/use-snap");
+      const hasilBayar = await openSnap(json.data.snapToken);
+      const status = hasilBayar === "closed" ? null : await syncPaymentStatus({ paymentId: json.data.paymentId });
+      setPesananManual({ nomor: json.data.orderNumber, lunas: hasilBayar === "success" || status === "paid" });
+    } catch (e) {
+      setGalat(e instanceof Error ? e.message : "Gagal membuat pesanan.");
+    } finally {
+      setMemproses(false);
+    }
+  }
 
   async function pilihBerkas(f: File) {
     setMembaca(true);
@@ -121,6 +183,7 @@ export function KotakPeriksa({
       }
       setTeks(isi);
       setNamaBerkas(f.name);
+      setBerkas(f);
       setHasil(null);
     } catch (e) {
       setNamaBerkas(null);
@@ -281,6 +344,7 @@ export function KotakPeriksa({
                 type="button"
                 onClick={() => {
                   setNamaBerkas(null);
+                  setBerkas(null);
                   setTeks("");
                 }}
                 className="flex-shrink-0 rounded p-0.5 text-slate-500 transition-colors hover:text-brand"
@@ -288,6 +352,44 @@ export function KotakPeriksa({
               >
                 <X className="h-3.5 w-3.5" aria-hidden="true" />
               </button>
+            </div>
+          )}
+
+          {jenis === "kemiripan" && manual.aktif && (
+            <div className="space-y-3 border-b border-slate-100 bg-slate-50/60 px-4 py-3">
+              <div role="radiogroup" aria-label="Cara pemeriksaan" className="grid grid-cols-2 gap-2 text-xs font-semibold">
+                {([
+                  ["instan", "Instan (otomatis)", `${rupiah(tarif.kemiripan)}/1.000 kata`],
+                  ["manual", "Laporan oleh tim", `mulai ${rupiah(manual.kecil)}/berkas`],
+                ] as const).map(([v, l, h]) => (
+                  <button key={v} type="button" role="radio" aria-checked={mode === v} onClick={() => setMode(v)}
+                    className={`rounded-xl border-2 px-3 py-2 text-left transition-colors ${mode === v ? "border-brand bg-white text-brand" : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"}`}>
+                    <span className="block">{l}</span>
+                    <span className="block text-[11px] font-medium text-slate-500">{h}</span>
+                  </button>
+                ))}
+              </div>
+              {mode === "manual" && (
+                <>
+                  <div className="flex flex-wrap items-center gap-2 text-xs">
+                    <span className="font-semibold text-slate-600">Format laporan:</span>
+                    {(["baru", "lama"] as const).map((f) => (
+                      <button key={f} type="button" onClick={() => setFormatLaporan(f)} aria-pressed={formatLaporan === f}
+                        className={`rounded-full border px-3 py-1 font-semibold ${formatLaporan === f ? "border-brand bg-brand text-white" : "border-slate-300 bg-white text-slate-600"}`}>
+                        {FORMAT_LAPORAN[f]}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-[11px] leading-relaxed text-slate-500">
+                    Unggah berkas Word/PDF aslimu. Tim memeriksa dan mengirim laporan PDF + persentase kemiripan
+                    (maks. 1×24 jam) ke Riwayat Pesanan. {rupiah(manual.kecil)} s.d. ±100 halaman, {rupiah(manual.besar)} di atasnya.
+                  </p>
+                  <input type="tel" inputMode="tel" value={wa} onChange={(e) => setWa(e.target.value)}
+                    placeholder="No. WhatsApp untuk kabar laporan (0812…)"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs" />
+                  {!berkas && <p className="text-[11px] font-semibold text-amber-700">Mode ini butuh berkas — klik “Unggah berkas” di atas.</p>}
+                </>
+              )}
             </div>
           )}
 
@@ -320,25 +422,26 @@ export function KotakPeriksa({
             </div>
             <span className="text-sm">
               <span className="text-slate-500">Biaya </span>
-              <span className="font-extrabold text-brand">{rupiah(biaya)}</span>
+              <span className="font-extrabold text-brand">{rupiah(modeManual ? hargaManual : biaya)}</span>
+              {modeManual && <span className="text-xs text-slate-500"> /berkas</span>}
             </span>
           </div>
 
           <div className="border-t border-slate-100 px-4 py-3">
             <button
               type="button"
-              onClick={kirim}
+              onClick={modeManual ? kirimManual : kirim}
               disabled={!siap}
               className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-brand-light disabled:cursor-not-allowed disabled:opacity-40"
             >
               {memproses ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                  Memeriksa…
+                  {modeManual ? "Memproses…" : "Memeriksa…"}
                 </>
               ) : (
                 <>
-                  Periksa sekarang
+                  {modeManual ? "Pesan laporan & bayar" : "Periksa sekarang"}
                   <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </>
               )}
@@ -374,6 +477,8 @@ export function KotakPeriksa({
               <PanelMemproses />
             ) : galat ? (
               <PanelGalat pesan={galat} aksi={aksi} />
+            ) : pesananManual ? (
+              <PanelPesananManual nomor={pesananManual.nomor} lunas={pesananManual.lunas} />
             ) : hasil ? (
               <IsiHasil h={hasil} />
             ) : (
@@ -385,10 +490,27 @@ export function KotakPeriksa({
 
       <p className="mt-3 flex items-start gap-1.5 text-xs font-medium text-slate-500">
         <Info className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" aria-hidden="true" />
-        Naskahmu tidak disimpan di server kami — yang tersimpan hanya jumlah
-        kata dan 200 karakter pertama, supaya kamu bisa mengenali kiriman mana
-        ini di riwayat.
+        Naskah aslimu tidak disimpan utuh di server kami — yang tersimpan hanya
+        jumlah kata, 200 karakter pertama, dan hasil pemeriksaan, supaya
+        laporannya bisa kamu unduh lagi dari riwayat.
       </p>
+    </div>
+  );
+}
+
+function PanelPesananManual({ nomor, lunas }: { nomor: string; lunas: boolean }) {
+  return (
+    <div className="flex h-full flex-col items-center justify-center gap-3 px-4 text-center">
+      <CheckCircle2 className={`h-10 w-10 ${lunas ? "text-green-600" : "text-amber-500"}`} aria-hidden="true" />
+      <p className="font-extrabold text-slate-900">{lunas ? "Pesanan diterima" : "Menunggu pembayaran"}</p>
+      <p className="max-w-sm text-sm text-slate-600">
+        {lunas
+          ? `Pesanan ${nomor} sedang diperiksa tim. Persentase kemiripan dan laporan PDF muncul di Riwayat Pesanan (maks. 1×24 jam); kami kabari lewat notifikasi & WhatsApp.`
+          : `Pesanan ${nomor} tersimpan. Selesaikan pembayaran QRIS dari Riwayat Pesanan agar laporan diproses.`}
+      </p>
+      <Link href="/dashboard/riwayat-pesanan" className="inline-flex items-center gap-1.5 rounded-xl bg-brand px-4 py-2 text-sm font-bold text-white hover:bg-brand-light">
+        Buka Riwayat Pesanan <ArrowRight className="h-4 w-4" aria-hidden="true" />
+      </Link>
     </div>
   );
 }
@@ -442,9 +564,53 @@ function PanelGalat({ pesan, aksi }: { pesan: string; aksi: string | null }) {
   );
 }
 
+/** Kartu ringkas di atas hasil: persentase besar + tombol unduh berkas. */
+function RingkasanHasil({ h }: { h: HasilPeriksa }) {
+  const data =
+    h.jenis === "ai" && h.ai
+      ? { label: "Probabilitas tulisan AI", persen: h.ai.skor, vonis: labelAi(h.ai.skor), unduh: "Unduh laporan (PDF)" }
+      : h.jenis === "kemiripan" && h.kemiripan
+        ? { label: "Tingkat kemiripan", persen: h.kemiripan.persen, vonis: labelKemiripan(h.kemiripan.persen), unduh: "Unduh laporan (PDF)" }
+        : h.parafrase
+          ? {
+              label: "Perubahan susunan kata",
+              persen: h.parafrase.persenBerubah ?? null,
+              vonis: "Makna & sitasi dipertahankan — tetap baca ulang sebelum dipakai.",
+              unduh: "Unduh hasil (Word)",
+            }
+          : null;
+  if (!data) return null;
+  const sudut = data.persen == null ? 0 : Math.min(100, Math.max(0, data.persen)) * 3.6;
+  return (
+    <section className="flex flex-col gap-4 rounded-2xl border border-brand-100 bg-gradient-to-br from-brand-50 to-white p-4 sm:flex-row sm:items-center">
+      <div
+        className="relative mx-auto flex h-28 w-28 shrink-0 items-center justify-center rounded-full sm:mx-0"
+        style={{ background: `conic-gradient(#8B0000 ${sudut}deg, #F1E3E3 ${sudut}deg)` }}
+        role="img"
+        aria-label={`${data.label} ${data.persen ?? "-"} persen`}
+      >
+        <div className="flex h-[5.5rem] w-[5.5rem] flex-col items-center justify-center rounded-full bg-white">
+          <span className="text-2xl font-extrabold text-brand">{data.persen == null ? "—" : `${data.persen}%`}</span>
+        </div>
+      </div>
+      <div className="min-w-0 flex-1 text-center sm:text-left">
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{data.label}</p>
+        <p className="mt-0.5 font-extrabold text-slate-900">{data.vonis}</p>
+        <a
+          href={`/api/periksa/${h.id}/unduh`}
+          className="mt-3 inline-flex items-center gap-2 rounded-xl bg-brand px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-brand-light"
+        >
+          <Download className="h-4 w-4" aria-hidden="true" /> {data.unduh}
+        </a>
+      </div>
+    </section>
+  );
+}
+
 function IsiHasil({ h }: { h: HasilPeriksa }) {
   return (
     <div className="space-y-5">
+      <RingkasanHasil h={h} />
       {h.kemiripan && (
         <section>
           <div className="flex items-baseline justify-between gap-3">

@@ -52,7 +52,10 @@ export async function GET(
   }
 
   // Generate signed URL (1 jam)
-  const { data: signedData, error: signedError } = await supabase.storage
+  // Kepemilikan sudah dicek di atas; tanda tangan URL memakai service role
+  // karena bucket "reports" tidak bisa dibaca customer secara langsung.
+  const { createAdminClient } = await import("@/lib/supabase/admin");
+  const { data: signedData, error: signedError } = await createAdminClient().storage
     .from("reports")
     .createSignedUrl(order.report_storage_path, 3600);
 

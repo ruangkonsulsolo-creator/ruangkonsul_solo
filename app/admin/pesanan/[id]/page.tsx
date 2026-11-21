@@ -23,7 +23,7 @@ export default async function AdminPesananDetailPage({
     .select(`
       id, order_number, status, price_idr, payment_method,
       created_at, completed_at, admin_notes,
-      report_storage_path, report_uploaded_at,
+      report_storage_path, report_uploaded_at, format_laporan, persen_kemiripan, jumlah_kata,
       services ( name, slug ),
       profiles:profiles!orders_user_id_fkey ( full_name, whatsapp ),
       uploaded_files ( original_name, storage_path )

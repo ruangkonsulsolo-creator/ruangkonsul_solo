@@ -22,6 +22,9 @@ interface OrderDetailPanelProps {
     admin_notes: string | null;
     report_storage_path: string | null;
     report_uploaded_at: string | null;
+    format_laporan?: "baru" | "lama" | null;
+    persen_kemiripan?: number | null;
+    jumlah_kata?: number | null;
     services: { name: string; slug: string } | null;
     profiles: { full_name: string | null; whatsapp: string | null } | null;
     uploaded_files: { original_name: string; storage_path: string } | null;
@@ -45,29 +48,54 @@ export function OrderDetailPanel({ order, documentDownloadUrl }: OrderDetailPane
   const [cancelReason, setCancelReason] = useState("");
   const [reportFile, setReportFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [persen, setPersen] = useState<string>(order.persen_kemiripan != null ? String(order.persen_kemiripan) : "");
   const [submitting, setSubmitting] = useState<string | null>(null); // status yang sedang diproses
 
   const st = STATUS_CONFIG[order.status] ?? { label: order.status, variant: "secondary" as const };
 
+  /**
+   * PDF diunggah langsung dari browser ke bucket "reports" (tidak lewat server,
+   * supaya tidak terbentur batas ukuran request), lalu persentase disimpan dan
+   * pesanan ditandai selesai.
+   */
   async function uploadReport() {
-    if (!reportFile) return;
+    const nilai = Number(persen.replace(",", "."));
+    if (persen.trim() === "" || Number.isNaN(nilai) || nilai < 0 || nilai > 100) {
+      showToast("Isi persentase kemiripan 0–100.", "error");
+      return;
+    }
+    if (!reportFile && !order.report_storage_path) {
+      showToast("Pilih PDF laporan dulu.", "error");
+      return;
+    }
+    if (reportFile && reportFile.type !== "application/pdf") {
+      showToast("Laporan harus PDF.", "error");
+      return;
+    }
     setUploading(true);
-
-    const fd = new FormData();
-    fd.append("order_id", order.id);
-    fd.append("report", reportFile);
-
-    const res = await fetch("/api/admin/report/upload", { method: "POST", body: fd });
-    const json = await res.json();
-
-    if (!res.ok) {
-      showToast(json.error ?? "Gagal upload laporan.", "error");
-    } else {
-      showToast("Laporan berhasil diupload!", "success");
+    try {
+      if (reportFile) {
+        const { createClient } = await import("@/lib/supabase/client");
+        const { error } = await createClient()
+          .storage.from("reports")
+          .upload(`${order.id}/laporan.pdf`, reportFile, { contentType: "application/pdf", upsert: true });
+        if (error) throw new Error(`Gagal mengunggah PDF: ${error.message}`);
+      }
+      const res = await fetch(`/api/admin/order/${order.id}/laporan`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ persen_kemiripan: nilai, selesaikan: true }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error ?? "Gagal menyimpan laporan.");
+      showToast("Laporan tersimpan & pesanan selesai. Customer sudah diberi tahu.", "success");
       setReportFile(null);
       router.refresh();
+    } catch (e) {
+      showToast(e instanceof Error ? e.message : "Gagal menyimpan laporan.", "error");
+    } finally {
+      setUploading(false);
     }
-    setUploading(false);
   }
 
   async function updateStatus(status: string) {
@@ -164,6 +192,12 @@ export function OrderDetailPanel({ order, documentDownloadUrl }: OrderDetailPane
           {/* Upload laporan */}
           <div className="rounded-lg border p-4">
             <p className="text-sm font-semibold text-slate-800 mb-2">Upload Laporan Hasil</p>
+            {(order.format_laporan || order.jumlah_kata) && (
+              <p className="mb-3 rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                {order.format_laporan && <>Customer minta laporan <b>tampilan {order.format_laporan}</b>. </>}
+                {order.jumlah_kata ? <>Naskah ±{order.jumlah_kata.toLocaleString("id-ID")} kata.</> : null}
+              </p>
+            )}
             {order.report_storage_path && (
               <p className="mb-2 text-xs text-brand flex items-center gap-1">
                 <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
@@ -182,7 +216,17 @@ export function OrderDetailPanel({ order, documentDownloadUrl }: OrderDetailPane
                   onChange={(e) => setReportFile(e.target.files?.[0] ?? null)}
                 />
               </label>
-              {reportFile && (
+              <label className="flex items-center gap-1.5 text-xs text-slate-600">
+                Kemiripan
+                <input
+                  type="number" min={0} max={100} step="0.1" inputMode="decimal"
+                  value={persen} onChange={(e) => setPersen(e.target.value)}
+                  placeholder="0–100"
+                  className="w-20 rounded-md border px-2 py-1 text-sm"
+                />
+                %
+              </label>
+              {(reportFile || order.report_storage_path) && (
                 <Button
                   size="sm"
                   onClick={uploadReport}
@@ -194,7 +238,7 @@ export function OrderDetailPanel({ order, documentDownloadUrl }: OrderDetailPane
                   ) : (
                     <Upload className="h-3.5 w-3.5" aria-hidden="true" />
                   )}
-                  {uploading ? "Mengupload..." : "Upload"}
+                  {uploading ? "Menyimpan..." : "Simpan & selesaikan"}
                 </Button>
               )}
             </div>

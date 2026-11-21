@@ -119,6 +119,28 @@ export default async function RiwayatPesananPage({
     }
   }
 
+  // Lengkapi baris cek plagiarisme manual dengan status laporan.
+  const idOrder = rows.filter((r) => r.purpose === "order").map((r) => r.reference_id);
+  const infoOrder = new Map<string, { status: string; persen: number | null; adaLaporan: boolean; format: string | null; berkas: string | null }>();
+  if (idOrder.length) {
+    const { data: od } = await supabase
+      .from("orders")
+      .select("id, status, persen_kemiripan, report_storage_path, format_laporan, uploaded_files ( original_name )")
+      .in("id", idOrder);
+    for (const o of (od ?? []) as unknown as Array<{
+      id: string; status: string; persen_kemiripan: number | null; report_storage_path: string | null;
+      format_laporan: string | null; uploaded_files: { original_name: string } | null;
+    }>) {
+      infoOrder.set(o.id, {
+        status: o.status,
+        persen: o.persen_kemiripan != null ? Number(o.persen_kemiripan) : null,
+        adaLaporan: o.status === "selesai" && !!o.report_storage_path,
+        format: o.format_laporan,
+        berkas: o.uploaded_files?.original_name ?? null,
+      });
+    }
+  }
+
   const href = (k: string, p = 1) => `/dashboard/riwayat-pesanan?status=${k}&page=${p}`;
 
   return (
@@ -169,7 +191,8 @@ export default async function RiwayatPesananPage({
               const st = STATUS[r.status] ?? { label: r.status, variant: "outline" as const };
               const bk = r.purpose === "booking" ? infoBooking.get(r.reference_id) : undefined;
               const nama = (r.item_snapshot?.[0]?.name ?? j.label).replace(/\s*\(per jam\)\s*$/i, "");
-              const bisaBayar = r.status === "pending" && !!r.snap_token && (r.purpose === "booking" || r.purpose === "produk");
+              const od = r.purpose === "order" ? infoOrder.get(r.reference_id) : undefined;
+              const bisaBayar = r.status === "pending" && !!r.snap_token && (r.purpose === "booking" || r.purpose === "produk" || r.purpose === "order");
               return (
                 <li key={r.id} className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center">
                   <div className="flex min-w-0 flex-1 gap-3">
@@ -183,9 +206,18 @@ export default async function RiwayatPesananPage({
                       </div>
                       <p className="truncate font-semibold text-slate-800">{nama}</p>
                       <p className="text-xs text-muted-foreground">
-                        {[bk?.mentor && `Mentor ${bk.mentor}`, bk?.jadwal, formatTanggal(r.created_at)]
+                        {[bk?.mentor && `Mentor ${bk.mentor}`, bk?.jadwal, od?.berkas, od?.format && `tampilan ${od.format}`, formatTanggal(r.created_at)]
                           .filter(Boolean).join(" · ")}
                       </p>
+                      {od && r.status === "paid" && (
+                        <p className="mt-1 text-xs font-semibold">
+                          {od.adaLaporan ? (
+                            <span className="text-brand">Kemiripan {od.persen ?? "-"}% · laporan siap</span>
+                          ) : (
+                            <span className="text-amber-700">Sedang diperiksa tim (maks. 1×24 jam)</span>
+                          )}
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center justify-between gap-3 sm:justify-end">
@@ -193,10 +225,15 @@ export default async function RiwayatPesananPage({
                     <div className="flex items-center gap-2">
                       {bisaBayar && (
                         <BayarUlangPesanan pesananId={r.reference_id} snapToken={r.snap_token!} paymentId={r.id}
-                          purpose={r.purpose as "booking" | "produk"} />
+                          purpose={r.purpose as "booking" | "produk" | "order"} />
                       )}
                       {r.status === "paid" && (
                         <Link href={`/receipt/${r.id}`} className="text-xs font-semibold text-brand hover:underline">Receipt</Link>
+                      )}
+                      {od?.adaLaporan && (
+                        <a href={`/api/report/${r.reference_id}`} className="inline-flex items-center gap-1 rounded-lg bg-brand px-2.5 py-1 text-xs font-bold text-white hover:bg-brand-light">
+                          Unduh laporan
+                        </a>
                       )}
                       {r.purpose !== "order" && (
                         <Link href={j.detail} className="text-xs font-semibold text-slate-500 hover:text-slate-800">Detail →</Link>

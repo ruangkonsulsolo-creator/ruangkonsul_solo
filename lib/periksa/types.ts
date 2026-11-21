@@ -116,6 +116,8 @@ export type HasilAI = {
 export type HasilParafrase = {
   /** Naskah yang sudah disusun ulang. */
   teks: string;
+  /** 0–100: seberapa banyak susunan kata berubah dibanding naskah asli. */
+  persenBerubah?: number;
   /** Hal yang tetap jadi tanggung jawab penulis setelah parafrase. */
   catatan: string[];
 };
