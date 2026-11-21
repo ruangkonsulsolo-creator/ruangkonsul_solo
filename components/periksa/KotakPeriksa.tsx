@@ -25,7 +25,7 @@ import {
 import { formatRupiah } from "@/lib/utils/format-currency";
 import { labelAi, labelKemiripan } from "@/lib/periksa/persen-berubah";
 import { BATAS_KATA_BESAR, FORMAT_LAPORAN } from "@/lib/periksa/manual";
-import { KartuSkor } from "@/components/periksa/KartuSkor";
+import { StatusPesanan } from "@/components/periksa/StatusPesanan";
 
 const rupiah = (n: number) => formatRupiah(n);
 const angka = (n: number) => n.toLocaleString("id-ID");
@@ -98,9 +98,11 @@ export function KotakPeriksa({
   const [formatLaporan, setFormatLaporan] = useState<"baru" | "lama">("baru");
   const [lebih100Hal, setLebih100Hal] = useState(false);
   const [wa, setWa] = useState("");
-  const [pesananManual, setPesananManual] = useState<{ nomor: string; lunas: boolean } | null>(null);
+  const [pesananManual, setPesananManual] = useState<{ id: string; nomor: string; lunas: boolean; waktu: string } | null>(null);
   const inputBerkas = useRef<HTMLInputElement>(null);
   const panelHasil = useRef<HTMLDivElement>(null);
+  const akar = useRef<HTMLDivElement>(null);
+  const [namaHasil, setNamaHasil] = useState("Teks ditempel");
 
   const instan = tab === "ai" || tab === "parafrase";
   const jenis: JenisPeriksa = tab === "parafrase" ? "parafrase" : "ai";
@@ -140,6 +142,16 @@ export function KotakPeriksa({
     if ((t === "ai" || t === "parafrase") && berkas && !EKSTENSI_DIDUKUNG.includes(ekstensi(berkas.name) as (typeof EKSTENSI_DIDUKUNG)[number])) {
       hapusBerkas();
     }
+  }
+
+  function orderBaru() {
+    setHasil(null);
+    setGalat(null);
+    setAksi(null);
+    setPesananManual(null);
+    setTempel(false);
+    hapusBerkas();
+    akar.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function hapusBerkas() {
@@ -247,7 +259,7 @@ export function KotakPeriksa({
       const { openSnap, syncPaymentStatus } = await import("@/lib/payment/use-snap");
       const hasilBayar = await openSnap(json.data.snapToken);
       const status = hasilBayar === "closed" ? null : await syncPaymentStatus({ paymentId: json.data.paymentId });
-      setPesananManual({ nomor: json.data.orderNumber, lunas: hasilBayar === "success" || status === "paid" });
+      setPesananManual({ id: json.data.orderId, nomor: json.data.orderNumber, lunas: hasilBayar === "success" || status === "paid", waktu: new Date().toISOString() });
     } catch (e) {
       setGalat(e instanceof Error ? e.message : "Gagal membuat pesanan.");
     } finally {
@@ -282,6 +294,7 @@ export function KotakPeriksa({
           throw new Error(json.error ?? "Pemeriksaan gagal.");
         }
       } else {
+        setNamaHasil(berkas?.name ?? "Teks ditempel");
         setHasil(json.data);
       }
     } catch (e) {
@@ -402,9 +415,9 @@ export function KotakPeriksa({
       deskripsi:
         "Susun ulang kalimat dengan bahasa yang berbeda tanpa mengubah makna dan tanpa menghapus sitasi. " +
         "Hasilnya bisa disalin atau diunduh sebagai file Word.",
-      chips: [`${rupiah(tarif.parafrase)} / 1.000 kata`, "Hasil instan", "File Word (.docx)"],
+      chips: [`${rupiah(tarif.parafrase)} / 1.000 kata`, "Hasil 1–5 menit", "File Word (.docx)"],
       rumus: rumusInstan("parafrase"),
-      badge: "Hasil instan",
+      badge: "Hasil 1–5 menit",
       tombol: "Bayar Parafrase (QRIS)",
       format: `${EKSTENSI_DIDUKUNG.join(", ").toUpperCase().replace(/\./g, "")} atau tempel teks`,
     },
@@ -422,7 +435,7 @@ export function KotakPeriksa({
   const nomorKontak = !instan && tab === "plagiasi" ? 3 : 2;
 
   return (
-    <div>
+    <div ref={akar} className="scroll-mt-24">
       {/* ── Tab layanan ── */}
       <div className="-mx-4 overflow-x-auto px-4 pb-1">
         <div role="tablist" aria-label="Layanan cek naskah" className="inline-flex gap-1 rounded-2xl border border-slate-200 bg-white p-1.5 shadow-sm">
@@ -693,50 +706,63 @@ export function KotakPeriksa({
         </div>
       </div>
 
-      {/* ── Hasil ── */}
+      {/* ── Hasil / status pesanan ── */}
       {adaPanel && (
-        <div ref={panelHasil} className="mt-6 scroll-mt-24 rounded-3xl border border-slate-200 bg-white" aria-live="polite">
-          <div className="flex items-center gap-2 border-b border-slate-100 px-5 py-3.5">
-            <CheckCircle2 className="h-4 w-4 text-brand" aria-hidden="true" />
-            <span className="text-sm font-bold text-slate-900">
-              {hasil ? (hasil.jenis === "ai" ? "Hasil Cek AI" : hasil.jenis === "parafrase" ? "Hasil Parafrase" : "Hasil") : "Status"}
-            </span>
-            {hasil && (
-              <span className="ml-auto text-xs font-medium text-slate-400">{angka(hasil.jumlahKata)} kata diperiksa</span>
-            )}
-          </div>
-          <div className="px-5 py-5">
-            {memproses ? (
-              <PanelMemproses />
-            ) : galat ? (
+        <div ref={panelHasil} className="mt-8 scroll-mt-24" aria-live="polite">
+          {memproses ? (
+            <div className="rounded-3xl border border-slate-200 bg-white p-6"><PanelMemproses /></div>
+          ) : galat ? (
+            <div className="rounded-3xl border border-slate-200 bg-white p-6">
               <PanelGalat pesan={galat} aksi={aksi} kurang={kurang} onBayar={() => void bayarLaluPeriksa()} />
-            ) : pesananManual ? (
-              <PanelPesananManual nomor={pesananManual.nomor} lunas={pesananManual.lunas} label={tab === "drillbit" ? "DrillBit Report" : "Similarity Score"} />
-            ) : hasil ? (
-              <IsiHasil h={hasil} />
-            ) : null}
-          </div>
+            </div>
+          ) : pesananManual ? (
+            <StatusPesanan
+              layanan={tab === "drillbit" ? "Cek DrillBit" : "Cek Plagiasi"}
+              waktu={pesananManual.waktu}
+              tahap={pesananManual.lunas ? "dibayar" : "menunggu"}
+              judul={pesananManual.lunas ? "Sedang diperiksa tim" : "Menunggu pembayaran"}
+              namaBerkas={berkas?.name ?? "Naskah"}
+              keterangan="Laporan dikirim maks. 1×24 jam setelah dibayar."
+              kode={pesananManual.nomor}
+              skor={{ label: "Similarity Score", persen: null, vonis: "Skor muncul setelah laporan selesai", jenis: "kemiripan" }}
+              info={
+                pesananManual.lunas
+                  ? { judul: "Pembayaran diterima", teks: "Naskahmu masuk antrean tim. Kami kabari lewat notifikasi & WhatsApp begitu laporan siap." }
+                  : { judul: "Belum dibayar", teks: "Pesanan tersimpan. Selesaikan pembayaran QRIS agar naskahmu diproses." }
+              }
+              lanjut={{ href: `/dashboard/laporan/${pesananManual.id}`, label: pesananManual.lunas ? "Pantau Status Pesanan" : "Bayar Sekarang" }}
+              onOrderBaru={orderBaru}
+            />
+          ) : hasil ? (
+            <>
+              <StatusPesanan
+                layanan={hasil.jenis === "parafrase" ? "Jasa Parafrase" : "Cek AI"}
+                waktu={hasil.diperiksaPada}
+                tahap="selesai"
+                judul={hasil.jenis === "parafrase" ? "Parafrase selesai" : "Hasil Cek AI siap"}
+                namaBerkas={namaHasil}
+                keterangan={`${angka(hasil.jumlahKata)} kata diperiksa${hasil.jenis === "ai" && pAI ? ` · ${pAI.nama}` : ""}`}
+                kode={`RK-${hasil.id.replace(/-/g, "").slice(0, 10).toUpperCase()}`}
+                skor={
+                  hasil.jenis === "parafrase"
+                    ? { label: "Kalimat Berubah", persen: hasil.parafrase?.persenBerubah ?? null, vonis: "Makna & sitasi dipertahankan — baca ulang sebelum dipakai", jenis: "parafrase" }
+                    : { label: "AI Score", persen: hasil.ai?.skor ?? null, vonis: hasil.ai ? labelAi(hasil.ai.skor) : "", jenis: "ai" }
+                }
+                unduh={{
+                  href: `/api/periksa/${hasil.id}/unduh`,
+                  label: hasil.jenis === "parafrase" ? "Unduh Hasil Parafrase (Word)" : "Unduh AI Report (PDF)",
+                }}
+                onOrderBaru={orderBaru}
+              />
+              <section className="mx-auto mt-6 max-w-3xl rounded-3xl border border-slate-200 bg-white p-5 sm:p-6">
+                <h3 className="mb-4 text-lg font-extrabold text-slate-900">Detail hasil</h3>
+                <IsiHasil h={hasil} />
+              </section>
+            </>
+          ) : null}
         </div>
       )}
     </div>
-  );
-}
-
-function PanelPesananManual({ nomor, lunas, label }: { nomor: string; lunas: boolean; label: string }) {
-  return (
-    <KartuSkor
-      label={label}
-      persen={null}
-      menunggu
-      vonis={lunas ? "Pembayaran diterima — laporan sedang diperiksa tim" : "Menunggu pembayaran"}
-      aksi={{ href: "/dashboard/riwayat-pesanan", label: lunas ? "Pantau di Riwayat Pesanan" : "Selesaikan pembayaran" }}
-      catatan={
-        lunas
-          ? `Pesanan ${nomor} · skor & file laporan muncul maks. 1×24 jam, dikabari lewat WhatsApp.`
-          : `Pesanan ${nomor} tersimpan. Bayar QRIS dari Riwayat Pesanan agar diproses.`
-      }
-      pesanWa={`Halo admin, saya mau tanya pesanan ${nomor}.`}
-    />
   );
 }
 
@@ -785,37 +811,9 @@ function PanelGalat({ pesan, aksi, kurang = 0, onBayar }: { pesan: string; aksi:
   );
 }
 
-/** Kartu skor setelah bayar: persentase besar + tombol unduh berkas. */
-function RingkasanHasil({ h }: { h: HasilPeriksa }) {
-  const kata = `${h.jumlahKata.toLocaleString("id-ID")} kata diperiksa`;
-  if (h.jenis === "ai" && h.ai) {
-    return (
-      <KartuSkor label="AI Score" persen={h.ai.skor} vonis={labelAi(h.ai.skor)}
-        aksi={{ href: `/api/periksa/${h.id}/unduh`, label: "Unduh AI Report (PDF)", unduh: true }}
-        catatan={kata} pesanWa={`Halo admin, saya mau tanya hasil Cek AI (ID ${h.id.slice(0, 8)}).`} />
-    );
-  }
-  if (h.jenis === "kemiripan" && h.kemiripan) {
-    return (
-      <KartuSkor label="Similarity Score" persen={h.kemiripan.persen} vonis={labelKemiripan(h.kemiripan.persen)}
-        aksi={{ href: `/api/periksa/${h.id}/unduh`, label: "Unduh Laporan (PDF)", unduh: true }} catatan={kata} />
-    );
-  }
-  if (h.parafrase) {
-    return (
-      <KartuSkor label="Kalimat Berubah" persen={h.parafrase.persenBerubah ?? null}
-        vonis="Makna & sitasi dipertahankan — baca ulang sebelum dipakai."
-        aksi={{ href: `/api/periksa/${h.id}/unduh`, label: "Unduh Hasil Parafrase (Word)", unduh: true }}
-        catatan={kata} pesanWa={`Halo admin, saya mau tanya hasil parafrase (ID ${h.id.slice(0, 8)}).`} />
-    );
-  }
-  return null;
-}
-
 function IsiHasil({ h }: { h: HasilPeriksa }) {
   return (
     <div className="space-y-5">
-      <RingkasanHasil h={h} />
       {h.kemiripan && (
         <section>
           <div className="flex items-baseline justify-between gap-3">
