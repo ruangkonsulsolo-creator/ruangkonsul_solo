@@ -35,6 +35,20 @@ const STATUS_CONFIG: Record<string, { label: string; variant: "success"|"warning
   diproses:            { label: "Diproses",       variant: "info" },
   selesai:             { label: "Selesai",        variant: "success" },
   dibatalkan:          { label: "Dibatalkan",     variant: "destructive" },
+  // status tabel payments
+  pending:             { label: "Menunggu Bayar", variant: "warning" },
+  paid:                { label: "Lunas",          variant: "success" },
+  expired:             { label: "Kedaluwarsa",    variant: "muted" },
+  failed:              { label: "Gagal",          variant: "destructive" },
+  cancelled:           { label: "Dibatalkan",     variant: "destructive" },
+  refunded:            { label: "Dikembalikan",   variant: "muted" },
+};
+
+const LABEL_JENIS: Record<string, string> = {
+  booking: "Sesi Bimbingan",
+  produk: "Produk / Paket",
+  saldo: "Isi Saldo",
+  order: "Cek Naskah",
 };
 
 async function getData() {
@@ -66,7 +80,7 @@ async function getData() {
 
   try {
     const [ordersRes, quotasRes] = await Promise.all([
-      supabase.from("orders").select("id, order_number, status, created_at, services(name)").eq("user_id", user.id).order("created_at", { ascending: false }).limit(5),
+      supabase.from("payments").select("id, purpose, status, amount_idr, item_snapshot, created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(5),
       supabase.from("user_quotas").select("id, quota_remaining, expires_at, services(name)").eq("user_id", user.id).eq("is_expired", false).gt("quota_remaining", 0).order("expires_at", { ascending: true }),
     ]);
     return {
@@ -182,9 +196,11 @@ export default async function CustomerDashboardPage() {
                 return (
                   <div key={order.id} className="flex items-center justify-between px-5 py-3.5 hover:bg-slate-50 transition-colors">
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-slate-900 truncate">{order.order_number}</p>
+                      <p className="text-sm font-semibold text-slate-900 truncate">
+                        {String(order.item_snapshot?.[0]?.name ?? LABEL_JENIS[order.purpose] ?? "Pesanan").replace(/\s*\(per jam\)\s*$/i, "")}
+                      </p>
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        {order.services?.name} · {new Date(order.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
+                        {LABEL_JENIS[order.purpose] ?? "Pesanan"} · {formatRupiah(order.amount_idr)} · {new Date(order.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Jakarta" })}
                       </p>
                     </div>
                     <Badge variant={s.variant} className="ml-3 flex-shrink-0">{s.label}</Badge>
