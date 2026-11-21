@@ -37,7 +37,11 @@ export default async function ReceiptPage({ params }: { params: { id: string } }
     <main className="min-h-screen bg-slate-100 py-8 px-4 print:bg-white print:py-0">
       <div className="mx-auto max-w-2xl">
         <div className="mb-4 flex items-center justify-between print:hidden">
-          <Link href="/dashboard/receipt" className="text-sm font-semibold text-slate-600 hover:underline">← Semua receipt</Link>
+          {res.viewerStaff ? (
+            <Link href="/admin/pesanan-produk" className="text-sm font-semibold text-slate-600 hover:underline">← Panel admin</Link>
+          ) : (
+            <Link href="/dashboard/receipt" className="text-sm font-semibold text-slate-600 hover:underline">← Semua receipt</Link>
+          )}
           <div className="flex gap-2">
             <PrintButton />
             {paid && (

@@ -16,7 +16,7 @@ const navItems = [
   { type: "section" as const, label: "Bimbingan" },
   { label: "Jadwal Saya",     href: "/mentor/jadwal",   icon: CalendarDays },
   { label: "Sesi & Klien",    href: "/mentor/klien",    icon: Users },
-  { label: "Notifikasi",      href: "/dashboard/notifikasi", icon: Bell },
+  { label: "Notifikasi",      href: "/mentor/notifikasi", icon: Bell },
   { label: "Materi & Modul",  href: "/mentor/materi",   icon: BookOpen },
   { type: "section" as const, label: "Komunikasi" },
   { label: "Chat",            href: "/mentor/chat",     icon: MessageCircle },

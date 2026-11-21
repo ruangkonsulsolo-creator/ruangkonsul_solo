@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { wajibStaf } from "@/lib/auth/wajib-staf";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +30,8 @@ export async function POST(request: NextRequest) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Masuk dulu." }, { status: 401 });
+  const ditolak = await wajibStaf(supabase, user.id);
+  if (ditolak) return ditolak;
 
   let raw: unknown;
   try { raw = await request.json(); }
@@ -71,6 +74,8 @@ export async function DELETE(request: NextRequest) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Masuk dulu." }, { status: 401 });
+  const ditolak = await wajibStaf(supabase, user.id);
+  if (ditolak) return ditolak;
 
   const id = request.nextUrl.searchParams.get("id");
   if (!id) return NextResponse.json({ error: "Produk tidak disebut." }, { status: 422 });

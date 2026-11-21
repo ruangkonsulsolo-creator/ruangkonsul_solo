@@ -100,7 +100,7 @@ export const ROUTE_GUARDS: Array<{ prefix: string; allow: DbRole[] }> = [
   { prefix: "/admin/superadmin", allow: ["superadmin"] },
   { prefix: "/admin", allow: ["admin", "superadmin"] },
   { prefix: "/mentor", allow: ["mentor", "admin", "superadmin"] },
-  { prefix: "/dashboard", allow: ["user", "mentor", "admin", "superadmin"] },
+  { prefix: "/dashboard", allow: ["user"] },
 ];
 
 export function guardFor(pathname: string) {

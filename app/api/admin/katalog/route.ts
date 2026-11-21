@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { wajibStaf } from "@/lib/auth/wajib-staf";
 
 export const dynamic = "force-dynamic";
 
@@ -127,6 +128,8 @@ export async function POST(request: NextRequest) {
   } = await supabase.auth.getUser();
   if (!user)
     return NextResponse.json({ error: "Masuk dulu." }, { status: 401 });
+  const ditolak = await wajibStaf(supabase, user.id);
+  if (ditolak) return ditolak;
 
   let mentah: unknown;
   try {
@@ -194,6 +197,8 @@ export async function DELETE(request: NextRequest) {
   } = await supabase.auth.getUser();
   if (!user)
     return NextResponse.json({ error: "Masuk dulu." }, { status: 401 });
+  const ditolak = await wajibStaf(supabase, user.id);
+  if (ditolak) return ditolak;
 
   // Etalase yang masih berisi produk ditolak oleh ON DELETE RESTRICT. Lebih
   // baik ditanyakan lebih dulu supaya pesannya menyebut jumlahnya, bukan

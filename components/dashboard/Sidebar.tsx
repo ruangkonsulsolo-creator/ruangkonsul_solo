@@ -10,6 +10,7 @@ import {
   ClockIcon, PackageOpen, User, LogOut,
   LayoutDashboard, Menu, X, ChevronRight,
   GraduationCap, MessageCircle,
+  Bell, CalendarDays, Wallet, ShoppingBag, Receipt, Package, Ticket,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -34,19 +35,19 @@ const navItems = [
   { type: "section" as const, label: "Layanan" },
 
   { label: "Bimbingan",        href: "/jadwal",          icon: GraduationCap },
-  { label: "Paket Bimbingan",  href: "/bimbingan",       icon: GraduationCap },
-  { label: "Event",            href: "/event",           icon: GraduationCap },
+  { label: "Paket Bimbingan",  href: "/bimbingan",       icon: Package },
+  { label: "Event",            href: "/event",           icon: Ticket },
 
   { type: "section" as const, label: "Akun" },
 
   // Halaman privat — butuh login
   { label: "Chat Mentor",     href: "/dashboard/chat",            icon: MessageCircle },
   { label: "Riwayat Pesanan", href: "/dashboard/riwayat-pesanan", icon: ClockIcon },
-  { label: "Notifikasi",      href: "/dashboard/notifikasi",      icon: ClockIcon },
-  { label: "Sesi Saya",       href: "/dashboard/sesi-saya",       icon: ClockIcon },
-  { label: "Isi Saldo",       href: "/dashboard/isi-saldo",       icon: ClockIcon },
-  { label: "Pesanan Produk", href: "/dashboard/pesanan-produk", icon: ClockIcon },
-  { label: "Receipt", href: "/dashboard/receipt", icon: ClockIcon },
+  { label: "Notifikasi",      href: "/dashboard/notifikasi",      icon: Bell },
+  { label: "Sesi Saya",       href: "/dashboard/sesi-saya",       icon: CalendarDays },
+  { label: "Isi Saldo",       href: "/dashboard/isi-saldo",       icon: Wallet },
+  { label: "Pesanan Produk", href: "/dashboard/pesanan-produk", icon: ShoppingBag },
+  { label: "Receipt", href: "/dashboard/receipt", icon: Receipt },
   { label: "Paket Saya",      href: "/dashboard/paket-saya",      icon: PackageOpen },
   { label: "Profil",          href: "/dashboard/profil",           icon: User },
 ];

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import {
   LayoutDashboard, MessageCircle, Clock, PackageOpen, User,
   LogOut, Loader2, Wallet, ShieldCheck, GraduationCap, ChevronDown,
+  Bell, CalendarDays, ShoppingBag, Receipt, Users, Settings,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { formatRupiah } from "@/lib/utils/format-currency";
@@ -36,13 +37,26 @@ const MENU_MEMBER = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Chat Mentor", href: "/dashboard/chat", icon: MessageCircle },
   { label: "Riwayat Pesanan", href: "/dashboard/riwayat-pesanan", icon: Clock },
-  { label: "Notifikasi", href: "/dashboard/notifikasi", icon: Clock },
-  { label: "Sesi Saya", href: "/dashboard/sesi-saya", icon: Clock },
-  { label: "Isi Saldo", href: "/dashboard/isi-saldo", icon: Clock },
-  { label: "Pesanan Produk", href: "/dashboard/pesanan-produk", icon: Clock },
-  { label: "Receipt", href: "/dashboard/receipt", icon: Clock },
+  { label: "Notifikasi", href: "/dashboard/notifikasi", icon: Bell },
+  { label: "Sesi Saya", href: "/dashboard/sesi-saya", icon: CalendarDays },
+  { label: "Isi Saldo", href: "/dashboard/isi-saldo", icon: Wallet },
+  { label: "Pesanan Produk", href: "/dashboard/pesanan-produk", icon: ShoppingBag },
+  { label: "Receipt", href: "/dashboard/receipt", icon: Receipt },
   { label: "Paket Saya", href: "/dashboard/paket-saya", icon: PackageOpen },
   { label: "Profil", href: "/dashboard/profil", icon: User },
+];
+
+// Halaman /dashboard khusus customer; mentor & staf punya panel sendiri.
+const MENU_MENTOR = [
+  { label: "Jadwal Saya", href: "/mentor/jadwal", icon: CalendarDays },
+  { label: "Sesi & Klien", href: "/mentor/klien", icon: Users },
+  { label: "Chat", href: "/mentor/chat", icon: MessageCircle },
+  { label: "Notifikasi", href: "/mentor/notifikasi", icon: Bell },
+  { label: "Profil Mentor", href: "/mentor/profil", icon: Settings },
+];
+
+const MENU_STAF = [
+  { label: "Notifikasi", href: "/admin/notifikasi", icon: Bell },
 ];
 
 function inisial(nama: string): string {
@@ -248,7 +262,7 @@ export function MenuAkun() {
               </li>
             )}
 
-            {MENU_MEMBER.map((m) => (
+            {(staf ? MENU_STAF : profil.peran === "mentor" ? MENU_MENTOR : MENU_MEMBER).map((m) => (
               <li key={m.href}>
                 <Link
                   href={m.href}
