@@ -1,12 +1,11 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type DragEvent } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import {
-  FileSearch, Bot, Wand2, AlertTriangle, CheckCircle2,
-  ArrowRight, Loader2, Info, FileText, Upload, Copy, Check, X, FileDown,
-  Download,
+  AlertTriangle, CheckCircle2,
+  ArrowRight, Loader2, FileText, Upload, Copy, Check, X, FileDown,
+  Download, Clock, ShieldCheck,
 } from "lucide-react";
 import {
   hitungBiaya,
@@ -28,7 +27,36 @@ import { labelAi, labelKemiripan } from "@/lib/periksa/persen-berubah";
 import { BATAS_KATA_BESAR, FORMAT_LAPORAN } from "@/lib/periksa/manual";
 
 const rupiah = (n: number) => formatRupiah(n);
+const angka = (n: number) => n.toLocaleString("id-ID");
 
+type Tab = "plagiasi" | "ai" | "drillbit" | "parafrase";
+
+/** Berkas yang diterima pesanan laporan manual (sama dengan /api/periksa/manual). */
+const EKSTENSI_MANUAL = [".pdf", ".doc", ".docx"];
+const MIME_MANUAL: Record<string, string> = {
+  ".pdf": "application/pdf",
+  ".doc": "application/msword",
+  ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+};
+const MAKS_UKURAN = 50 * 1024 * 1024;
+
+function ekstensi(nama: string) {
+  const i = nama.lastIndexOf(".");
+  return i < 0 ? "" : nama.slice(i).toLowerCase();
+}
+
+/**
+ * Halaman layanan cek naskah dalam bentuk tab: Cek Plagiasi, Cek AI,
+ * Cek DrillBit, Jasa Parafrase.
+ *
+ * Tiap tab memakai susunan yang sama supaya customer tidak perlu belajar
+ * ulang: judul + ringkasan harga di atas, lalu dua kolom —
+ * kiri unggah dokumen (dengan rumus harga yang jelas), kanan kontak dan
+ * ringkasan pesanan dengan total bayar dan satu tombol bayar.
+ *
+ * Plagiasi & DrillBit = laporan dikerjakan tim (berkas asli diunggah).
+ * AI & Parafrase = instan; dibayar dari saldo, kekurangannya lewat QRIS.
+ */
 export function KotakPeriksa({
   tarif = TARIF,
   aktif = { kemiripan: true, ai: true, parafrase: true },
@@ -43,93 +71,137 @@ export function KotakPeriksa({
   /** Biaya minimum per pemeriksaan instan. */
   minimum?: Record<JenisPeriksa, number>;
 } = {}) {
-  const [teks, setTeks] = useState("");
-  const [jenis, setJenis] = useState<JenisPeriksa>(
-    (["kemiripan", "ai", "parafrase"] as JenisPeriksa[]).find((j) => aktif[j]) ?? "kemiripan"
+  // Nama penyedia hanya tampil kalau penyedianya benar-benar dikonfigurasi.
+  const pAI = penyediaAktif("ai");
+
+  const TABS = (
+    [
+      manual.aktif && { id: "plagiasi", label: "Cek Plagiasi" },
+      aktif.ai && { id: "ai", label: "Cek AI" },
+      manual.drillbitAktif && { id: "drillbit", label: "Cek DrillBit" },
+      aktif.parafrase && { id: "parafrase", label: "Jasa Parafrase" },
+    ].filter(Boolean) as { id: Tab; label: string }[]
   );
+
+  const [tab, setTab] = useState<Tab>(TABS[0]?.id ?? "ai");
+  const [teks, setTeks] = useState("");
+  const [tempel, setTempel] = useState(false);
   const [memproses, setMemproses] = useState(false);
   const [galat, setGalat] = useState<string | null>(null);
   const [aksi, setAksi] = useState<string | null>(null);
   const [kurang, setKurang] = useState<number>(0);
   const [hasil, setHasil] = useState<HasilPeriksa | null>(null);
-  const [namaBerkas, setNamaBerkas] = useState<string | null>(null);
-  const [membaca, setMembaca] = useState(false);
   const [berkas, setBerkas] = useState<File | null>(null);
-  const [mode, setMode] = useState<"instan" | "manual">("instan");
+  const [membaca, setMembaca] = useState(false);
+  const [seret, setSeret] = useState(false);
   const [formatLaporan, setFormatLaporan] = useState<"baru" | "lama">("baru");
-  const [jenisManual, setJenisManual] = useState<"turnitin" | "drillbit">("turnitin");
+  const [lebih100Hal, setLebih100Hal] = useState(false);
   const [wa, setWa] = useState("");
   const [pesananManual, setPesananManual] = useState<{ nomor: string; lunas: boolean } | null>(null);
   const inputBerkas = useRef<HTMLInputElement>(null);
+  const panelHasil = useRef<HTMLDivElement>(null);
 
-  // Logo penyedia hanya muncul kalau penyedianya benar-benar dikonfigurasi.
-  const pKemiripan = penyediaAktif("kemiripan");
-  const pAI = penyediaAktif("ai");
-
-  /**
-   * Tiga pilihan dibuat semirip mungkin dengan kartu produk, bukan sekadar
-   * tombol: warna aksen, judul, satu baris penjelas, dan contoh pertanyaan
-   * yang dijawabnya. Tujuannya supaya pengguna tidak perlu menebak bedanya.
-   *
-   * Pembeda utamanya teks dalam bahasa Indonesia, bukan logo. Logo penyedia
-   * hanya muncul kalau penyedianya memang dikonfigurasi, dan ditaruh kecil
-   * di bawah sebagai keterangan sumber — bukan sebagai penanda jenis.
-   */
-  const PILIHAN = [
-    {
-      nilai: "kemiripan" as const,
-      label: "Cek Plagiarisme",
-      ringkas: "Seberapa mirip tulisanmu dengan karya lain",
-      jawab: "Bagian mana yang perlu sitasi?",
-      harga: rupiah(tarif.kemiripan),
-      icon: FileSearch,
-      aksen: "text-brand",
-      aksenBg: "bg-brand-50",
-      aksenBorder: "border-brand",
-      penyedia: pKemiripan,
-    },
-    {
-      nilai: "ai" as const,
-      label: "Cek Indikasi AI",
-      ringkas: "Seberapa mirip gayanya dengan tulisan mesin",
-      jawab: "Kalimat mana yang terbaca kaku?",
-      harga: rupiah(tarif.ai),
-      icon: Bot,
-      aksen: "text-slate-800",
-      aksenBg: "bg-slate-100",
-      aksenBorder: "border-slate-800",
-      penyedia: pAI,
-    },
-    {
-      nilai: "parafrase" as const,
-      label: "Parafrase",
-      ringkas: "Susun ulang kalimatnya dengan bahasa sendiri",
-      jawab: "Bagaimana menuliskan ini tanpa menyalin?",
-      harga: rupiah(tarif.parafrase),
-      icon: Wand2,
-      aksen: "text-brand-dark",
-      aksenBg: "bg-brand-100",
-      aksenBorder: "border-brand-dark",
-      penyedia: null,
-    },
-  ];
+  const instan = tab === "ai" || tab === "parafrase";
+  const jenis: JenisPeriksa = tab === "parafrase" ? "parafrase" : "ai";
+  const jenisManual = tab === "drillbit" ? "drillbit" : "turnitin";
 
   const jumlahKata = useMemo(() => hitungKata(teks), [teks]);
-  const biaya = useMemo(
-    () => (jumlahKata > 0 ? hitungBiaya(jumlahKata, jenis, tarif, minimum) : 0),
-    [jumlahKata, jenis, tarif, minimum]
-  );
+  // Kata tidak bisa dihitung dari PDF/DOC lama; customer memilih sendiri ukurannya.
+  const kataDiketahui = jumlahKata > 0;
 
-  const modeManual = jenis === "kemiripan" && manual.aktif && mode === "manual";
-  const hargaManual =
-    jenisManual === "drillbit" ? manual.drillbit : jumlahKata > BATAS_KATA_BESAR ? manual.besar : manual.kecil;
+  const biayaInstan = jumlahKata > 0 ? hitungBiaya(jumlahKata, jenis, tarif, minimum) : 0;
+  const besar = kataDiketahui ? jumlahKata > BATAS_KATA_BESAR : lebih100Hal;
+  const hargaManual = jenisManual === "drillbit" ? manual.drillbit : besar ? manual.besar : manual.kecil;
+  const total = instan ? biayaInstan : berkas ? hargaManual : 0;
+
   const terlaluPendek = jumlahKata > 0 && jumlahKata < MIN_KATA;
-  const terlaluPanjang = !modeManual && jumlahKata > MAKS_KATA;
-  const siap = modeManual
-    ? !!berkas && !memproses
-    : jumlahKata >= MIN_KATA && !terlaluPanjang && !memproses;
+  const terlaluPanjang = instan && jumlahKata > MAKS_KATA;
+  const waValid = wa.replace(/\D/g, "").length >= 9;
+  const siap = instan
+    ? jumlahKata >= MIN_KATA && !terlaluPanjang && !memproses && !membaca
+    : !!berkas && waValid && !memproses && !membaca;
 
-  /** Mode manual: unggah berkas asli ke penyimpanan privat, buat pesanan, bayar QRIS. */
+  const adaPanel = memproses || !!galat || !!hasil || !!pesananManual;
+
+  useEffect(() => {
+    if (hasil || pesananManual || galat) {
+      panelHasil.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [hasil, pesananManual, galat]);
+
+  function gantiTab(t: Tab) {
+    setTab(t);
+    setHasil(null);
+    setGalat(null);
+    setAksi(null);
+    setPesananManual(null);
+    // Berkas PDF/DOC tidak bisa dipakai di tab instan (teksnya tidak terbaca).
+    if ((t === "ai" || t === "parafrase") && berkas && !EKSTENSI_DIDUKUNG.includes(ekstensi(berkas.name) as (typeof EKSTENSI_DIDUKUNG)[number])) {
+      hapusBerkas();
+    }
+  }
+
+  function hapusBerkas() {
+    setBerkas(null);
+    setTeks("");
+    setLebih100Hal(false);
+  }
+
+  async function pilihBerkas(f: File) {
+    setGalat(null);
+    setHasil(null);
+    setPesananManual(null);
+    const ext = ekstensi(f.name);
+    const bisaDibaca = (EKSTENSI_DIDUKUNG as readonly string[]).includes(ext);
+
+    if (!instan) {
+      if (!EKSTENSI_MANUAL.includes(ext)) {
+        setGalat(`Format berkas tidak didukung. Unggah ${EKSTENSI_MANUAL.join(", ").toUpperCase()}.`);
+        return;
+      }
+      if (f.size > MAKS_UKURAN) {
+        setGalat("Ukuran berkas maksimal 50 MB.");
+        return;
+      }
+    } else if (!bisaDibaca) {
+      setGalat(
+        `Untuk ${tab === "ai" ? "Cek AI" : "parafrase"}, unggah ${EKSTENSI_DIDUKUNG.join(" / ").toUpperCase()} ` +
+          `atau tempel teksnya langsung. PDF belum bisa dibaca otomatis.`
+      );
+      return;
+    }
+
+    setBerkas(f);
+    setTeks("");
+    setLebih100Hal(false);
+    if (!bisaDibaca) return; // PDF/DOC: cukup berkasnya, tanpa hitung kata.
+
+    setMembaca(true);
+    try {
+      const isi = await ekstrakTeks(f.name, await f.arrayBuffer());
+      if (!isi.trim()) {
+        throw new BerkasTidakDidukung(
+          "Berkasnya terbaca, tapi isinya kosong. Kalau naskahmu berupa hasil " +
+            "pindaian, teksnya perlu diketik atau disalin dulu."
+        );
+      }
+      setTeks(isi);
+    } catch (e) {
+      if (instan) setBerkas(null);
+      setGalat(e instanceof Error ? e.message : "Berkas tidak bisa dibaca.");
+    } finally {
+      setMembaca(false);
+    }
+  }
+
+  function onDrop(e: DragEvent<HTMLLabelElement>) {
+    e.preventDefault();
+    setSeret(false);
+    const f = e.dataTransfer.files?.[0];
+    if (f) void pilihBerkas(f);
+  }
+
+  /** Laporan manual: unggah berkas asli ke penyimpanan privat, buat pesanan, bayar QRIS. */
   async function kirimManual() {
     if (!berkas) return;
     setMemproses(true);
@@ -143,11 +215,15 @@ export function KotakPeriksa({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         setAksi("login");
-        throw new Error("Masuk dulu untuk memesan laporan cek plagiarisme.");
+        throw new Error("Masuk dulu untuk memesan laporan.");
       }
+      const ext = ekstensi(berkas.name);
+      const mime = MIME_MANUAL[ext] ?? berkas.type;
       const aman = berkas.name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-120);
       const path = `${user.id}/${Date.now()}_${aman}`;
-      const { error: eUp } = await supabase.storage.from("documents").upload(path, berkas, { contentType: berkas.type, upsert: false });
+      const { error: eUp } = await supabase.storage
+        .from("documents")
+        .upload(path, berkas, { contentType: mime, upsert: false });
       if (eUp) throw new Error(`Gagal mengunggah berkas: ${eUp.message}`);
 
       const res = await fetch("/api/periksa/manual", {
@@ -157,8 +233,9 @@ export function KotakPeriksa({
           storage_path: path,
           nama_berkas: berkas.name,
           ukuran: berkas.size,
-          mime: berkas.type,
-          jumlah_kata: jumlahKata,
+          mime,
+          // PDF/DOC: kata tak terhitung — pakai pilihan ukuran dari customer.
+          jumlah_kata: kataDiketahui ? jumlahKata : lebih100Hal ? BATAS_KATA_BESAR + 1 : 0,
           jenis_manual: jenisManual,
           format_laporan: jenisManual === "turnitin" ? formatLaporan : undefined,
           whatsapp: wa,
@@ -177,38 +254,16 @@ export function KotakPeriksa({
     }
   }
 
-  async function pilihBerkas(f: File) {
-    setMembaca(true);
-    setGalat(null);
-    try {
-      const isi = await ekstrakTeks(f.name, await f.arrayBuffer());
-      if (!isi.trim()) {
-        throw new BerkasTidakDidukung(
-          "Berkasnya terbaca, tapi isinya kosong. Kalau naskahmu berupa hasil " +
-            "pindaian, teksnya perlu diketik atau disalin dulu."
-        );
-      }
-      setTeks(isi);
-      setNamaBerkas(f.name);
-      setBerkas(f);
-      setHasil(null);
-    } catch (e) {
-      setNamaBerkas(null);
-      setGalat(
-        e instanceof Error ? e.message : "Berkas tidak bisa dibaca."
-      );
-    } finally {
-      setMembaca(false);
-      // Direset supaya memilih berkas yang sama dua kali tetap memicu onChange.
-      if (inputBerkas.current) inputBerkas.current.value = "";
-    }
-  }
-
-  async function kirim() {
+  /**
+   * Pemeriksaan instan. Saldo dipakai lebih dulu; kalau kurang, QRIS untuk
+   * kekurangannya langsung dibuka (satu klik), lalu pemeriksaan diulang.
+   */
+  async function kirim(bolehBayar = true) {
     setMemproses(true);
     setGalat(null);
     setAksi(null);
     setHasil(null);
+    let butuhBayar = 0;
     try {
       const res = await fetch("/api/periksa", {
         method: "POST",
@@ -217,27 +272,34 @@ export function KotakPeriksa({
       });
       const json = await res.json();
       if (!res.ok) {
-        setAksi(json.action ?? null);
-        setKurang(Number(json.kurang ?? 0));
-        throw new Error(json.error ?? "Pemeriksaan gagal.");
+        const kr = Number(json.kurang ?? 0);
+        if (json.action === "isi_saldo" && kr > 0 && bolehBayar) {
+          butuhBayar = kr;
+        } else {
+          setAksi(json.action ?? null);
+          setKurang(kr);
+          throw new Error(json.error ?? "Pemeriksaan gagal.");
+        }
+      } else {
+        setHasil(json.data);
       }
-      setHasil(json.data);
     } catch (e) {
       setGalat(e instanceof Error ? e.message : "Pemeriksaan gagal.");
     } finally {
       setMemproses(false);
     }
+    if (butuhBayar > 0) await bayarLaluPeriksa(butuhBayar);
   }
 
-  /** Saldo kurang: bayar kekurangannya via QRIS, lalu pemeriksaan dijalankan otomatis. */
-  async function bayarLaluPeriksa() {
+  /** Bayar kekurangan saldo via QRIS, lalu pemeriksaan dijalankan otomatis. */
+  async function bayarLaluPeriksa(nominal = kurang) {
     setMemproses(true);
     setGalat(null);
     try {
       const res = await fetch("/api/payment/saldo", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nominal: Math.max(1000, kurang) }),
+        body: JSON.stringify({ nominal: Math.max(1000, nominal) }),
       });
       const json = await res.json();
       if (!res.ok) {
@@ -254,310 +316,407 @@ export function KotakPeriksa({
         lunas = st === "paid";
         if (!lunas) await new Promise((r) => setTimeout(r, 3000));
       }
-      if (!lunas) throw new Error("Pembayaran belum terkonfirmasi. Kalau sudah membayar, tunggu sebentar lalu klik Periksa sekarang lagi.");
+      if (!lunas) {
+        throw new Error(
+          "Pembayaran belum terkonfirmasi. Kalau sudah membayar, tunggu sebentar lalu klik tombol bayar lagi — saldo yang masuk akan dipakai."
+        );
+      }
     } catch (e) {
+      setKurang(nominal);
       setGalat(e instanceof Error ? e.message : "Gagal membuka pembayaran.");
       setMemproses(false);
       return;
     }
     setMemproses(false);
-    await kirim();
+    await kirim(false);
   }
+
+  // ── Isi tiap tab ──────────────────────────────────────────────────────────
+  function rumusInstan(j: JenisPeriksa): string[] {
+    const t = tarif[j];
+    const m = minimum[j];
+    const baris: string[] = [];
+    if (m > t) {
+      const batas = Math.floor(m / t) * 1000;
+      baris.push(`Sampai ${angka(batas)} kata = ${rupiah(m)}.`);
+      baris.push(`Di atas ${angka(batas)} kata, tiap 1.000 kata ${rupiah(t)}.`);
+    } else {
+      baris.push(`Tiap 1.000 kata ${rupiah(t)} (dibulatkan ke atas).`);
+    }
+    baris.push(`Minimal ${angka(MIN_KATA)} kata, maksimal ${angka(MAKS_KATA)} kata sekali cek.`);
+    return baris;
+  }
+
+  const INFO: Record<Tab, {
+    judul: [string, string, string];
+    deskripsi: string;
+    chips: string[];
+    rumus: string[];
+    badge: string;
+    tombol: string;
+    format: string;
+  }> = {
+    plagiasi: {
+      judul: ["Cek ", "Plagiasi", " Turnitin"],
+      deskripsi:
+        "Unggah naskahmu, tim kami memeriksanya dan mengirim laporan similarity dalam bentuk PDF asli " +
+        "beserta persentasenya. Bisa pilih laporan tampilan baru atau lama.",
+      chips: [`${rupiah(manual.kecil)} / file`, "Laporan PDF asli", "Maks. 1×24 jam"],
+      rumus: [
+        `Sampai ${angka(BATAS_KATA_BESAR)} kata (±100 halaman) = ${rupiah(manual.kecil)}.`,
+        `Di atas ${angka(BATAS_KATA_BESAR)} kata = ${rupiah(manual.besar)}.`,
+        "Laporan dikirim ke Riwayat Pesanan dan dikabari lewat WhatsApp.",
+      ],
+      badge: "Maks. 1×24 jam",
+      tombol: "Bayar Cek Plagiasi (QRIS)",
+      format: "PDF, DOCX, DOC · Maks 50 MB",
+    },
+    ai: {
+      judul: ["Cek ", "AI", pAI ? ` ${pAI.nama}` : ""],
+      deskripsi:
+        `Deteksi indikasi tulisan buatan AI pada skripsi, tugas, atau artikel${pAI ? ` memakai ${pAI.nama}` : ""}. ` +
+        "Hasilnya berupa persentase, kalimat yang ditandai, dan laporan PDF yang bisa diunduh.",
+      chips: [`${rupiah(tarif.ai)} / 1.000 kata`, "Hasil instan", "Laporan PDF"],
+      rumus: rumusInstan("ai"),
+      badge: "Hasil instan",
+      tombol: "Bayar Cek AI (QRIS)",
+      format: `${EKSTENSI_DIDUKUNG.join(", ").toUpperCase().replace(/\./g, "")} atau tempel teks`,
+    },
+    drillbit: {
+      judul: ["Cek ", "DrillBit", ""],
+      deskripsi:
+        "Laporan DrillBit untuk cek plagiasi sekaligus indikasi AI. Diperiksa tim kami dan dikirim " +
+        "sebagai PDF asli beserta persentasenya.",
+      chips: [`${rupiah(manual.drillbit)} / file`, "Plagiasi + AI", "Maks. 1×24 jam"],
+      rumus: [
+        `${rupiah(manual.drillbit)} per file, berapa pun jumlah katanya.`,
+        "Laporan dikirim ke Riwayat Pesanan dan dikabari lewat WhatsApp.",
+      ],
+      badge: "Maks. 1×24 jam",
+      tombol: "Bayar Cek DrillBit (QRIS)",
+      format: "PDF, DOCX, DOC · Maks 50 MB",
+    },
+    parafrase: {
+      judul: ["Jasa ", "Parafrase", ""],
+      deskripsi:
+        "Susun ulang kalimat dengan bahasa yang berbeda tanpa mengubah makna dan tanpa menghapus sitasi. " +
+        "Hasilnya bisa disalin atau diunduh sebagai file Word.",
+      chips: [`${rupiah(tarif.parafrase)} / 1.000 kata`, "Hasil instan", "File Word (.docx)"],
+      rumus: rumusInstan("parafrase"),
+      badge: "Hasil instan",
+      tombol: "Bayar Parafrase (QRIS)",
+      format: `${EKSTENSI_DIDUKUNG.join(", ").toUpperCase().replace(/\./g, "")} atau tempel teks`,
+    },
+  };
+
+  if (TABS.length === 0) {
+    return (
+      <p className="rounded-2xl border border-slate-200 bg-white p-6 text-center text-sm font-medium text-slate-600">
+        Layanan cek naskah sedang tidak tersedia. Hubungi admin lewat WhatsApp.
+      </p>
+    );
+  }
+
+  const info = INFO[tab];
+  const nomorKontak = !instan && tab === "plagiasi" ? 3 : 2;
 
   return (
     <div>
-      {/* ── Pilihan jenis ── */}
-      <div
-        role="radiogroup"
-        aria-label="Jenis pemeriksaan"
-        className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3"
-      >
-        {PILIHAN.filter((p) => aktif[p.nilai]).map((p) => {
-          const Icon = p.icon;
-          const aktif = jenis === p.nilai;
-          return (
+      {/* ── Tab layanan ── */}
+      <div className="-mx-4 overflow-x-auto px-4 pb-1">
+        <div role="tablist" aria-label="Layanan cek naskah" className="inline-flex gap-1 rounded-2xl border border-slate-200 bg-white p-1.5 shadow-sm">
+          {TABS.map((t) => (
             <button
-              key={p.nilai}
+              key={t.id}
               type="button"
-              role="radio"
-              aria-checked={aktif}
-              onClick={() => setJenis(p.nilai)}
-              className={`flex flex-col rounded-2xl border-2 p-5 text-left transition-all ${
-                aktif
-                  ? `${p.aksenBorder} ${p.aksenBg} shadow-card`
-                  : "border-slate-200 bg-white hover:border-slate-300"
+              role="tab"
+              aria-selected={tab === t.id}
+              onClick={() => gantiTab(t.id)}
+              className={`whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-bold transition-colors sm:px-5 ${
+                tab === t.id ? "bg-brand text-white shadow-brand-sm" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
               }`}
             >
-              <span className="mb-3 flex items-center justify-between gap-2">
-                <span
-                  className={`flex h-11 w-11 items-center justify-center rounded-xl ${
-                    aktif ? `bg-white ${p.aksen}` : "bg-slate-100 text-slate-400"
-                  }`}
-                >
-                  <Icon className="h-5 w-5" aria-hidden="true" />
-                </span>
-                <span
-                  className={`flex h-5 w-5 items-center justify-center rounded-full border-2 ${
-                    aktif ? `${p.aksenBorder} ${p.aksen}` : "border-slate-300"
-                  }`}
-                >
-                  {aktif && (
-                    <span className="h-2.5 w-2.5 rounded-full bg-current" />
-                  )}
-                </span>
-              </span>
-
-              <span className="block font-extrabold text-slate-900">
-                {p.label}
-              </span>
-              <span className="mt-0.5 block text-xs font-medium text-slate-600">
-                {p.ringkas}
-              </span>
-              <span className="mt-2 block text-xs italic text-slate-500">
-                &ldquo;{p.jawab}&rdquo;
-              </span>
-
-              <span className="mt-3 flex items-end justify-between gap-2 border-t border-slate-200/70 pt-3">
-                <span className="text-sm">
-                  <span className={`font-extrabold ${aktif ? p.aksen : "text-slate-700"}`}>
-                    {p.harga}
-                  </span>
-                  <span className="text-xs font-medium text-slate-500"> / 1.000 kata</span>
-                  {minimum[p.nilai] > 0 && (
-                    <span className="block text-[11px] font-medium text-slate-500">
-                      min. {rupiah(minimum[p.nilai])} (di bawah {Math.round(minimum[p.nilai] / tarif[p.nilai]).toLocaleString("id-ID")}.000 kata)
-                    </span>
-                  )}
-                </span>
-                {p.penyedia?.logo && (
-                  <span className="flex flex-col items-end">
-                    <span className="text-[9px] font-medium uppercase tracking-wide text-slate-400">
-                      via
-                    </span>
-                    <Image
-                      src={p.penyedia.logo}
-                      alt={p.penyedia.nama}
-                      width={112}
-                      height={40}
-                      className="h-4 w-auto object-contain"
-                    />
-                  </span>
-                )}
-              </span>
+              {t.label}
             </button>
-          );
-        })}
+          ))}
+        </div>
       </div>
 
-      {/* ── Dua kolom: input kiri, hasil kanan ── */}
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-        {/* Kiri: naskah */}
-        <div className="flex flex-col rounded-2xl border-2 border-slate-200 bg-white focus-within:border-brand">
-          <div className="flex items-center gap-2 border-b border-slate-100 px-4 py-3">
-            <FileText className="h-4 w-4 text-brand" aria-hidden="true" />
-            <span className="text-sm font-bold text-slate-900">Naskahmu</span>
+      {/* ── Judul layanan ── */}
+      <div className="mt-6">
+        <h3 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+          {info.judul[0]}
+          <span className="text-brand">{info.judul[1]}</span>
+          {info.judul[2]}
+        </h3>
+        <p className="mt-3 max-w-3xl font-medium leading-relaxed text-slate-600">{info.deskripsi}</p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          {info.chips.map((c) => (
+            <span key={c} className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-sm font-semibold text-slate-700">
+              <span className="h-1.5 w-1.5 rounded-full bg-brand" aria-hidden="true" />
+              {c}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Dua kolom ── */}
+      <div className="mt-8 grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
+        {/* Kiri */}
+        <div className="space-y-5">
+          <section className="rounded-3xl border border-slate-200 bg-white p-5 sm:p-7">
+            <h4 className="text-lg font-extrabold text-slate-900">
+              <span className="text-brand">1.</span> Upload Dokumen
+            </h4>
+            <p className="mt-1 text-sm text-slate-500">{info.format}</p>
+
+            <div className="mt-4 rounded-2xl border border-brand-100 bg-brand-50 px-4 py-3.5">
+              <p className="text-sm font-bold text-slate-900">Rumus harga / file:</p>
+              <ul className="mt-1 space-y-0.5 text-sm text-brand-dark">
+                {info.rumus.map((r) => <li key={r}>{r}</li>)}
+              </ul>
+            </div>
 
             <input
               ref={inputBerkas}
+              id="berkas-periksa"
               type="file"
-              accept={EKSTENSI_DIDUKUNG.join(",")}
+              accept={(instan ? [...EKSTENSI_DIDUKUNG] : EKSTENSI_MANUAL).join(",")}
               className="sr-only"
               onChange={(e) => {
                 const f = e.target.files?.[0];
                 if (f) void pilihBerkas(f);
+                e.target.value = "";
               }}
             />
-            <button
-              type="button"
-              onClick={() => inputBerkas.current?.click()}
-              disabled={membaca}
-              className="ml-auto inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-bold text-slate-700 transition-colors hover:border-brand hover:text-brand disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {membaca ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
-              ) : (
-                <Upload className="h-3.5 w-3.5" aria-hidden="true" />
-              )}
-              {membaca ? "Membaca…" : "Unggah berkas"}
-            </button>
-          </div>
 
-          {namaBerkas && (
-            <div className="flex items-center gap-2 border-b border-slate-100 bg-brand-50 px-4 py-2">
-              <FileText className="h-3.5 w-3.5 flex-shrink-0 text-brand" aria-hidden="true" />
-              <span className="min-w-0 flex-1 truncate text-xs font-semibold text-slate-700">
-                {namaBerkas}
-              </span>
-              <button
-                type="button"
-                onClick={() => {
-                  setNamaBerkas(null);
-                  setBerkas(null);
-                  setTeks("");
-                }}
-                className="flex-shrink-0 rounded p-0.5 text-slate-500 transition-colors hover:text-brand"
-                aria-label="Hapus berkas dan kosongkan naskah"
+            {berkas ? (
+              <div className="mt-4 flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-white text-brand">
+                  {membaca ? <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" /> : <FileText className="h-5 w-5" aria-hidden="true" />}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-bold text-slate-900">{berkas.name}</span>
+                  <span className="block text-xs text-slate-500">
+                    {(berkas.size / 1024 / 1024).toFixed(2)} MB
+                    {membaca ? " · menghitung kata…" : kataDiketahui ? ` · ${angka(jumlahKata)} kata` : ""}
+                  </span>
+                </span>
+                <button type="button" onClick={hapusBerkas} aria-label="Hapus berkas"
+                  className="rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-white hover:text-brand">
+                  <X className="h-4 w-4" aria-hidden="true" />
+                </button>
+              </div>
+            ) : !(instan && tempel) ? (
+              <label
+                htmlFor="berkas-periksa"
+                onDragOver={(e) => { e.preventDefault(); setSeret(true); }}
+                onDragLeave={() => setSeret(false)}
+                onDrop={onDrop}
+                className={`mt-4 flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed px-4 py-10 text-center transition-colors ${
+                  seret ? "border-brand bg-brand-50" : "border-brand-200 hover:border-brand hover:bg-brand-50/40"
+                }`}
               >
-                <X className="h-3.5 w-3.5" aria-hidden="true" />
-              </button>
-            </div>
-          )}
+                <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-200 bg-white text-brand shadow-sm">
+                  <Upload className="h-6 w-6" aria-hidden="true" />
+                </span>
+                <span className="mt-4 font-bold text-slate-900">Pilih atau seret file ke sini</span>
+                <span className="mt-3 flex flex-wrap justify-center gap-1.5">
+                  {(instan ? [...EKSTENSI_DIDUKUNG] : EKSTENSI_MANUAL).map((x) => (
+                    <span key={x} className="rounded-md border border-slate-200 bg-white px-2 py-0.5 text-xs font-semibold text-slate-600">
+                      {x.slice(1).toUpperCase()}
+                    </span>
+                  ))}
+                </span>
+                <span className="mt-3 text-xs text-slate-500">{instan ? "Satu file per pemeriksaan" : "Maksimal 50 MB, satu file per pesanan"}</span>
+              </label>
+            ) : null}
 
-          {jenis === "kemiripan" && manual.aktif && (
-            <div className="space-y-3 border-b border-slate-100 bg-slate-50/60 px-4 py-3">
-              <div role="radiogroup" aria-label="Cara pemeriksaan" className="grid grid-cols-2 gap-2 text-xs font-semibold">
-                {([
-                  ["instan", "Instan (otomatis)", `${rupiah(tarif.kemiripan)}/1.000 kata`],
-                  ["manual", "Laporan oleh tim", `mulai ${rupiah(manual.kecil)}/berkas`],
-                ] as const).map(([v, l, h]) => (
-                  <button key={v} type="button" role="radio" aria-checked={mode === v} onClick={() => setMode(v)}
-                    className={`rounded-xl border-2 px-3 py-2 text-left transition-colors ${mode === v ? "border-brand bg-white text-brand" : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"}`}>
-                    <span className="block">{l}</span>
-                    <span className="block text-[11px] font-medium text-slate-500">{h}</span>
+            {instan && !berkas && (
+              <div className="mt-3">
+                <button type="button" onClick={() => setTempel((v) => !v)} className="text-sm font-bold text-brand hover:underline">
+                  {tempel ? "← Unggah file saja" : "+ Atau tempel teks langsung"}
+                </button>
+                {tempel && (
+                  <>
+                    <label htmlFor="naskah" className="sr-only">Tempel naskahmu</label>
+                    <textarea
+                      id="naskah"
+                      value={teks}
+                      onChange={(e) => { setTeks(e.target.value); setHasil(null); }}
+                      placeholder="Tempel naskahmu di sini. Satu bab sekaligus lebih mudah ditindaklanjuti daripada seluruh skripsi."
+                      className="mt-2 min-h-[220px] w-full resize-y rounded-2xl border border-slate-200 px-4 py-3 text-sm leading-relaxed text-slate-900 placeholder:text-slate-400 focus:border-brand focus:outline-none"
+                    />
+                  </>
+                )}
+              </div>
+            )}
+
+            {(terlaluPendek || terlaluPanjang) && (
+              <p className="mt-3 text-sm font-semibold text-amber-700">
+                {terlaluPendek
+                  ? `Naskah terlalu pendek: minimal ${angka(MIN_KATA)} kata (sekarang ${angka(jumlahKata)}).`
+                  : `Naskah terlalu panjang: maksimal ${angka(MAKS_KATA)} kata sekali cek. Pecah per bab.`}
+              </p>
+            )}
+
+            {!instan && berkas && !kataDiketahui && tab === "plagiasi" && (
+              <label className="mt-3 flex items-start gap-2 text-sm text-slate-700">
+                <input type="checkbox" checked={lebih100Hal} onChange={(e) => setLebih100Hal(e.target.checked)} className="mt-0.5 h-4 w-4 accent-[#8B0000]" />
+                <span>Naskahku lebih dari ±100 halaman ({angka(BATAS_KATA_BESAR)} kata)</span>
+              </label>
+            )}
+          </section>
+
+          {tab === "plagiasi" && (
+            <section className="rounded-3xl border border-slate-200 bg-white p-5 sm:p-7">
+              <h4 className="text-lg font-extrabold text-slate-900">
+                <span className="text-brand">2.</span> Tampilan Laporan
+              </h4>
+              <div role="radiogroup" aria-label="Tampilan laporan" className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {(["baru", "lama"] as const).map((f) => (
+                  <button key={f} type="button" role="radio" aria-checked={formatLaporan === f} onClick={() => setFormatLaporan(f)}
+                    className={`flex items-center gap-3 rounded-2xl border-2 px-4 py-3.5 text-left transition-colors ${
+                      formatLaporan === f ? "border-brand bg-brand-50" : "border-slate-200 hover:border-slate-300"
+                    }`}>
+                    <span className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 ${formatLaporan === f ? "border-brand" : "border-slate-300"}`}>
+                      {formatLaporan === f && <span className="h-2.5 w-2.5 rounded-full bg-brand" />}
+                    </span>
+                    <span>
+                      <span className="block text-sm font-bold text-slate-900">{FORMAT_LAPORAN[f]}</span>
+                      <span className="block text-xs text-slate-500">
+                        {f === "baru" ? "Sesuai tampilan laporan terkini" : "Untuk kampus yang masih memakai format lama"}
+                      </span>
+                    </span>
                   </button>
                 ))}
               </div>
-              {mode === "manual" && (
-                <>
-                  {manual.drillbitAktif && (
-                    <div className="flex flex-wrap items-center gap-2 text-xs">
-                      <span className="font-semibold text-slate-600">Jenis laporan:</span>
-                      {([["turnitin", "Turnitin"], ["drillbit", "DrillBit (plagiasi + AI)"]] as const).map(([v, l]) => (
-                        <button key={v} type="button" onClick={() => setJenisManual(v)} aria-pressed={jenisManual === v}
-                          className={`rounded-full border px-3 py-1 font-semibold ${jenisManual === v ? "border-brand bg-brand text-white" : "border-slate-300 bg-white text-slate-600"}`}>
-                          {l}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                  {jenisManual === "turnitin" && (
-                  <div className="flex flex-wrap items-center gap-2 text-xs">
-                    <span className="font-semibold text-slate-600">Format laporan:</span>
-                    {(["baru", "lama"] as const).map((f) => (
-                      <button key={f} type="button" onClick={() => setFormatLaporan(f)} aria-pressed={formatLaporan === f}
-                        className={`rounded-full border px-3 py-1 font-semibold ${formatLaporan === f ? "border-brand bg-brand text-white" : "border-slate-300 bg-white text-slate-600"}`}>
-                        {FORMAT_LAPORAN[f]}
-                      </button>
-                    ))}
-                  </div>
-                  )}
-                  <p className="text-[11px] leading-relaxed text-slate-500">
-                    Unggah berkas Word/PDF aslimu. Tim memeriksa dan mengirim laporan PDF asli + persentase
-                    (maks. 1×24 jam) ke Riwayat Pesanan.{" "}
-                    {jenisManual === "drillbit"
-                      ? `DrillBit ${rupiah(manual.drillbit)} per berkas.`
-                      : `Turnitin ${rupiah(manual.kecil)} s.d. ±100 halaman, ${rupiah(manual.besar)} di atasnya.`}
-                  </p>
-                  <input type="tel" inputMode="tel" value={wa} onChange={(e) => setWa(e.target.value)}
-                    placeholder="No. WhatsApp untuk kabar laporan (0812…)"
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs" />
-                  {!berkas && <p className="text-[11px] font-semibold text-amber-700">Mode ini butuh berkas — klik “Unggah berkas” di atas.</p>}
-                </>
-              )}
-            </div>
+            </section>
+          )}
+        </div>
+
+        {/* Kanan */}
+        <div className="space-y-5 lg:sticky lg:top-24">
+          {!instan && (
+            <section className="rounded-3xl border border-slate-200 bg-white p-5 sm:p-6">
+              <h4 className="text-lg font-extrabold text-slate-900">
+                <span className="text-brand">{nomorKontak}.</span> Kontak
+              </h4>
+              <label htmlFor="wa-periksa" className="mt-4 block text-sm font-bold text-slate-800">
+                Nomor WhatsApp <span className="font-medium text-slate-500">(untuk kabar laporan)</span>
+              </label>
+              <div className="mt-2 flex overflow-hidden rounded-xl border border-slate-200 focus-within:border-brand">
+                <span className="flex items-center border-r border-slate-200 bg-slate-50 px-3 text-sm font-bold text-green-600">WA</span>
+                <input id="wa-periksa" type="tel" inputMode="tel" value={wa} onChange={(e) => setWa(e.target.value)}
+                  placeholder="0812xxxxxxxx" className="min-w-0 flex-1 px-3 py-2.5 text-sm focus:outline-none" />
+              </div>
+              {wa && !waValid && <p className="mt-1.5 text-xs font-semibold text-amber-700">Nomor WhatsApp belum lengkap.</p>}
+            </section>
           )}
 
-          <label htmlFor="naskah" className="sr-only">
-            Tempel naskahmu
-          </label>
-          <textarea
-            id="naskah"
-            value={teks}
-            onChange={(e) => setTeks(e.target.value)}
-            placeholder={`Tempel naskahmu di sini, atau unggah berkas ${EKSTENSI_DIDUKUNG.join(" / ")}.\n\nSatu bab sekaligus lebih baik daripada seluruh skripsi — hasilnya lebih mudah ditindaklanjuti.`}
-            className="min-h-[340px] flex-1 resize-y px-4 py-3 text-sm leading-relaxed text-slate-900 placeholder:text-slate-400 focus:outline-none"
-          />
-
-          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 px-4 py-3">
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-              <span className="font-semibold text-slate-700">
-                {jumlahKata.toLocaleString("id-ID")} kata
+          <section className="rounded-3xl border border-slate-200 bg-white p-5 sm:p-6">
+            <div className="flex items-center justify-between gap-2">
+              <h4 className="text-lg font-extrabold text-slate-900">Ringkasan pesanan</h4>
+              <span className="inline-flex items-center gap-1 rounded-full bg-brand-50 px-2.5 py-1 text-xs font-bold text-brand">
+                <Clock className="h-3 w-3" aria-hidden="true" /> {info.badge}
               </span>
-              {terlaluPendek && (
-                <span className="text-xs font-medium text-amber-700">
-                  min. {MIN_KATA}
-                </span>
-              )}
-              {terlaluPanjang && (
-                <span className="text-xs font-medium text-red-700">
-                  maks. {MAKS_KATA.toLocaleString("id-ID")}
-                </span>
-              )}
             </div>
-            <span className="text-sm">
-              <span className="text-slate-500">Biaya </span>
-              <span className="font-extrabold text-brand">{rupiah(modeManual ? hargaManual : biaya)}</span>
-              {modeManual && <span className="text-xs text-slate-500"> /berkas</span>}
-            </span>
-          </div>
 
-          <div className="border-t border-slate-100 px-4 py-3">
+            <dl className="mt-4 space-y-2.5 text-sm">
+              <div className="flex justify-between gap-3">
+                <dt className="text-slate-500">Tarif</dt>
+                <dd className="text-right font-semibold text-slate-900">
+                  {instan ? `${rupiah(tarif[jenis])} / 1.000 kata` : `${rupiah(jenisManual === "drillbit" ? manual.drillbit : manual.kecil)} / file`}
+                </dd>
+              </div>
+              {instan && minimum[jenis] > 0 && (
+                <div className="flex justify-between gap-3">
+                  <dt className="text-slate-500">Biaya minimum</dt>
+                  <dd className="font-semibold text-slate-900">{rupiah(minimum[jenis])}</dd>
+                </div>
+              )}
+              <div className="flex justify-between gap-3">
+                <dt className="text-slate-500">Jumlah kata</dt>
+                <dd className="font-semibold text-slate-900">{kataDiketahui ? angka(jumlahKata) : "—"}</dd>
+              </div>
+              <div className="flex justify-between gap-3">
+                <dt className="text-slate-500">File</dt>
+                <dd className="min-w-0 truncate font-semibold text-slate-900">
+                  {berkas ? berkas.name : instan && tempel && teks ? "Teks ditempel" : "Belum ada file"}
+                </dd>
+              </div>
+              {tab === "plagiasi" && (
+                <div className="flex justify-between gap-3">
+                  <dt className="text-slate-500">Tampilan</dt>
+                  <dd className="font-semibold text-slate-900">{FORMAT_LAPORAN[formatLaporan]}</dd>
+                </div>
+              )}
+            </dl>
+
+            <div className="mt-4 flex items-end justify-between gap-3 border-t border-dashed border-slate-200 pt-4">
+              <span className="font-bold text-slate-900">Total Bayar</span>
+              <span className="text-3xl font-extrabold text-slate-900">{rupiah(total)}</span>
+            </div>
+
             <button
               type="button"
-              onClick={modeManual ? kirimManual : kirim}
+              onClick={instan ? () => void kirim() : kirimManual}
               disabled={!siap}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-brand-light disabled:cursor-not-allowed disabled:opacity-40"
+              className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-brand px-5 py-3.5 text-base font-bold text-white transition-colors hover:bg-brand-light disabled:cursor-not-allowed disabled:opacity-40"
             >
               {memproses ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                  {modeManual ? "Memproses…" : "Memeriksa…"}
+                  {instan ? "Memproses…" : "Membuat pesanan…"}
                 </>
               ) : (
-                <>
-                  {modeManual ? "Pesan laporan & bayar" : "Periksa sekarang"}
-                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                </>
+                info.tombol
               )}
             </button>
-          </div>
-        </div>
+            <p className="mt-3 text-center text-xs leading-relaxed text-slate-500">
+              {instan
+                ? "Pembayaran QRIS dikonfirmasi otomatis. Kalau saldomu cukup, dipotong dari saldo tanpa QRIS."
+                : "Pembayaran QRIS dikonfirmasi otomatis, lalu pesanan langsung masuk antrean tim."}
+            </p>
+            {!instan && !waValid && berkas && (
+              <p className="mt-2 text-center text-xs font-semibold text-amber-700">Isi nomor WhatsApp dulu.</p>
+            )}
+          </section>
 
-        {/* Kanan: hasil */}
-        <div className="flex flex-col rounded-2xl border-2 border-slate-200 bg-white">
-          <div className="flex items-center gap-2 border-b border-slate-100 px-4 py-3">
+          <p className="flex items-start gap-1.5 px-1 text-xs font-medium leading-relaxed text-slate-500">
+            <ShieldCheck className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" aria-hidden="true" />
+            {instan
+              ? "Naskah aslimu tidak disimpan utuh — yang tersimpan hanya jumlah kata, 200 karakter pertama, dan hasil pemeriksaan."
+              : "Berkasmu disimpan privat dan hanya bisa dibuka olehmu dan tim pemeriksa."}
+          </p>
+        </div>
+      </div>
+
+      {/* ── Hasil ── */}
+      {adaPanel && (
+        <div ref={panelHasil} className="mt-6 scroll-mt-24 rounded-3xl border border-slate-200 bg-white" aria-live="polite">
+          <div className="flex items-center gap-2 border-b border-slate-100 px-5 py-3.5">
             <CheckCircle2 className="h-4 w-4 text-brand" aria-hidden="true" />
             <span className="text-sm font-bold text-slate-900">
-              {hasil
-                ? hasil.jenis === "kemiripan"
-                  ? "Hasil Cek Plagiarisme"
-                  : hasil.jenis === "ai"
-                    ? "Hasil Cek Indikasi AI"
-                    : "Hasil Parafrase"
-                : "Hasil"}
+              {hasil ? (hasil.jenis === "ai" ? "Hasil Cek AI" : hasil.jenis === "parafrase" ? "Hasil Parafrase" : "Hasil") : "Status"}
             </span>
             {hasil && (
-              <span className="ml-auto text-xs font-medium text-slate-400">
-                {hasil.jumlahKata.toLocaleString("id-ID")} kata diperiksa
-              </span>
+              <span className="ml-auto text-xs font-medium text-slate-400">{angka(hasil.jumlahKata)} kata diperiksa</span>
             )}
           </div>
-
-          <div
-            aria-live="polite"
-            className="min-h-[340px] flex-1 overflow-y-auto px-4 py-4"
-          >
+          <div className="px-5 py-5">
             {memproses ? (
               <PanelMemproses />
             ) : galat ? (
-              <PanelGalat pesan={galat} aksi={aksi} kurang={kurang} onBayar={bayarLaluPeriksa} />
+              <PanelGalat pesan={galat} aksi={aksi} kurang={kurang} onBayar={() => void bayarLaluPeriksa()} />
             ) : pesananManual ? (
               <PanelPesananManual nomor={pesananManual.nomor} lunas={pesananManual.lunas} />
             ) : hasil ? (
               <IsiHasil h={hasil} />
-            ) : (
-              <PanelKosong />
-            )}
+            ) : null}
           </div>
         </div>
-      </div>
-
-      <p className="mt-3 flex items-start gap-1.5 text-xs font-medium text-slate-500">
-        <Info className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" aria-hidden="true" />
-        Naskah aslimu tidak disimpan utuh di server kami — yang tersimpan hanya
-        jumlah kata, 200 karakter pertama, dan hasil pemeriksaan, supaya
-        laporannya bisa kamu unduh lagi dari riwayat.
-      </p>
+      )}
     </div>
   );
 }
@@ -575,18 +734,6 @@ function PanelPesananManual({ nomor, lunas }: { nomor: string; lunas: boolean })
       <Link href="/dashboard/riwayat-pesanan" className="inline-flex items-center gap-1.5 rounded-xl bg-brand px-4 py-2 text-sm font-bold text-white hover:bg-brand-light">
         Buka Riwayat Pesanan <ArrowRight className="h-4 w-4" aria-hidden="true" />
       </Link>
-    </div>
-  );
-}
-
-function PanelKosong() {
-  return (
-    <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
-      <FileSearch className="h-10 w-10 text-slate-200" aria-hidden="true" />
-      <p className="max-w-xs text-sm font-medium text-slate-500">
-        Hasil pemeriksaan muncul di sini, lengkap dengan bagian mana yang perlu
-        kamu perbaiki.
-      </p>
     </div>
   );
 }
