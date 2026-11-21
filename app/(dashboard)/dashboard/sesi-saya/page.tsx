@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
-import { CalendarDays, Receipt, Video } from "lucide-react";
+import { CalendarDays, MessageCircle, Receipt, Video } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { formatRupiah } from "@/lib/utils/format-currency";
@@ -26,6 +26,7 @@ type Row = {
   cancel_reason: string | null;
   created_at: string;
   booking_slots: { slot_date: string; slot_start: string; slot_end: string } | null;
+  mentor_id: string | null;
   mentor_profiles: { display_name: string | null } | null;
 };
 
@@ -83,7 +84,7 @@ export default async function SesiSayaPage({
     admin
       .from("bookings")
       .select(
-        "id, booking_number, status, topic, price_idr, paid_at, bayar_sebelum, midtrans_snap_token, meeting_link, cancel_reason, created_at, booking_slots:booking_slots!bookings_slot_id_fkey ( slot_date, slot_start, slot_end ), mentor_profiles ( display_name )"
+        "id, booking_number, mentor_id, status, topic, price_idr, paid_at, bayar_sebelum, midtrans_snap_token, meeting_link, cancel_reason, created_at, booking_slots:booking_slots!bookings_slot_id_fkey ( slot_date, slot_start, slot_end ), mentor_profiles ( display_name )"
       )
       .eq("customer_id", user.id)
       .order("created_at", { ascending: false })
@@ -178,6 +179,14 @@ export default async function SesiSayaPage({
                   )}
                   {b.status === "confirmed" && !b.meeting_link && (
                     <p className="mt-1 text-xs text-slate-500">Link sesi dikirim sebelum jadwal dimulai.</p>
+                  )}
+                  {(b.status === "confirmed" || b.status === "completed") && b.mentor_id && (
+                    <Link
+                      href={`/dashboard/chat?mentor=${b.mentor_id}`}
+                      className="mt-1.5 inline-flex items-center gap-1 rounded-lg border border-brand-200 bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand hover:bg-brand-100"
+                    >
+                      <MessageCircle className="h-3.5 w-3.5" aria-hidden="true" /> Chat mentor
+                    </Link>
                   )}
                   {b.status === "cancelled" && b.cancel_reason && (
                     <p className="mt-1 text-xs text-red-600">{b.cancel_reason}</p>

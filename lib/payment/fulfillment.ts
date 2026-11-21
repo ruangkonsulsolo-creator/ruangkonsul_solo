@@ -6,6 +6,7 @@ import { sendEmail } from "@/lib/notification/email";
 import { formatRupiah } from "@/lib/utils/format-currency";
 import { BRAND } from "@/lib/brand";
 import { classifyStatus, type MidtransNotification, type PaymentOutcome } from "./midtrans";
+import { pastikanPercakapan } from "@/lib/chat/pastikan-percakapan";
 
 type Admin = ReturnType<typeof createAdminClient>;
 
@@ -205,6 +206,8 @@ async function fulfilBooking(admin: Admin, p: PaymentRow) {
     title: "Jadwal Bimbingan Terkonfirmasi",
     body: `${raw.booking_number} lunas. ${item}. Link sesi akan dikirim sebelum jadwal dimulai.`,
   });
+  // Mentor langsung muncul di menu Chat Mentor customer.
+  if (raw.mentor_id) await pastikanPercakapan(admin, raw.mentor_id as string, p.user_id);
   if (mentor?.user_id) {
     await admin.from("notifications").insert({
       user_id: mentor.user_id,

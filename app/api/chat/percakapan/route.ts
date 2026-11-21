@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { pastikanPercakapan } from "@/lib/chat/pastikan-percakapan";
 
 export const dynamic = "force-dynamic";
 
@@ -19,15 +21,23 @@ export async function GET() {
     return NextResponse.json({ error: "Masuk dulu." }, { status: 401 });
   }
 
+  // Sesi yang sudah lunas otomatis membuka percakapan dengan mentornya
+  // (termasuk booking yang dibayar sebelum fitur ini ada).
+  const { data: sesiLunas } = await supabase
+    .from("bookings")
+    .select("mentor_id")
+    .eq("customer_id", user.id)
+    .in("status", ["confirmed", "completed"]);
+  const mentorSesi = Array.from(new Set((sesiLunas ?? []).map((b) => b.mentor_id).filter(Boolean)));
+  for (const m of mentorSesi) await pastikanPercakapan(supabase, m as string, user.id);
+
   const { data: baris, error } = await supabase
     .from("percakapan")
     .select(
       `id, mentor_id, customer_id, pesan_terakhir_pada,
        mentor:mentor_profiles!percakapan_mentor_id_fkey (
-         id, avatar_url, headline,
-         profil:profiles!mentor_profiles_user_id_fkey ( full_name )
-       ),
-       customer:profiles!percakapan_customer_id_fkey ( id, full_name )`
+         id, user_id, avatar_url, headline, display_name
+       )`
     )
     .order("pesan_terakhir_pada", { ascending: false });
 
@@ -67,29 +77,45 @@ export async function GET() {
     }
   }
 
+  // Nama lawan bicara. RLS profiles hanya membuka baris milik sendiri, jadi
+  // nama dibaca dengan service role — terbatas pada peserta percakapan yang
+  // sudah lolos RLS di atas, sehingga tidak membocorkan profil lain.
+  const idNama = new Set<string>();
+  for (const b of baris ?? []) {
+    const m = b.mentor as unknown as { user_id: string | null } | null;
+    idNama.add(b.customer_id);
+    if (m?.user_id) idNama.add(m.user_id);
+  }
+  const nama = new Map<string, string>();
+  if (idNama.size > 0) {
+    const { data: prof } = await createAdminClient()
+      .from("profiles")
+      .select("id, full_name")
+      .in("id", Array.from(idNama));
+    for (const p of prof ?? []) if (p.full_name) nama.set(p.id, p.full_name);
+  }
+
   const data = (baris ?? []).map((b) => {
     const m = b.mentor as unknown as {
       id: string;
+      user_id: string | null;
       avatar_url: string | null;
       headline: string | null;
-      profil: { full_name: string | null } | null;
-    } | null;
-    const c = b.customer as unknown as {
-      id: string;
-      full_name: string | null;
+      display_name: string | null;
     } | null;
 
     // "Lawan bicara" berbeda tergantung siapa yang membuka. Pengguna yang
     // sama tidak boleh melihat namanya sendiri sebagai judul percakapan.
-    const sayaMentor = m?.profil != null && b.customer_id !== user.id;
+    const sayaMentor = b.customer_id !== user.id;
+    const namaMentor = m?.display_name || (m?.user_id ? nama.get(m.user_id) : undefined) || "Mentor";
 
     return {
       id: b.id,
       mentorId: b.mentor_id,
       lawan: {
         nama: sayaMentor
-          ? c?.full_name ?? "Customer"
-          : m?.profil?.full_name ?? "Mentor",
+          ? nama.get(b.customer_id) ?? "Customer"
+          : namaMentor,
         avatar: sayaMentor ? null : m?.avatar_url ?? null,
         keterangan: sayaMentor ? "Customer" : m?.headline ?? "Mentor",
       },

@@ -95,8 +95,15 @@ export function RuangChat({ peran }: { peran: "mentor" | "customer" }) {
       const r = await fetch("/api/chat/percakapan");
       const j = await r.json();
       if (!r.ok) throw new Error(j.error ?? "Gagal memuat percakapan.");
-      setDaftar(j.data ?? []);
+      const isi: Percakapan[] = j.data ?? [];
+      setDaftar(isi);
       setGalat(null);
+      // Dibuka dari tombol "Chat mentor" (?mentor=<id>): langsung pilih percakapannya.
+      const mentorDiminta = new URLSearchParams(window.location.search).get("mentor");
+      if (mentorDiminta) {
+        const cocok = isi.find((x) => x.mentorId === mentorDiminta);
+        if (cocok) setAktif((a) => a ?? cocok.id);
+      }
     } catch (e) {
       setGalat(e instanceof Error ? e.message : "Gagal memuat percakapan.");
     } finally {
