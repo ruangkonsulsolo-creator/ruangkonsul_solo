@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Toast, useToast } from "@/components/ui/toast";
 import { Save, Loader2, ToggleLeft, ToggleRight } from "lucide-react";
+import { formatRupiah } from "@/lib/utils/format-currency";
 
 interface Service {
   id: string;
@@ -86,7 +87,7 @@ export function LayananConfigForm({ services: initial }: { services: Service[] }
             {/* Form fields */}
             <div className="p-5 grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold text-slate-600">Harga (Rp)</Label>
+                <Label className="text-xs font-semibold text-slate-600">Tarif per 1.000 kata (Rp)</Label>
                 <Input
                   type="number"
                   value={service.price_idr}
@@ -94,29 +95,8 @@ export function LayananConfigForm({ services: initial }: { services: Service[] }
                   min={0}
                 />
                 <p className="text-[10px] text-muted-foreground">
-                  = {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(service.price_idr)}
+                  = {formatRupiah(service.price_idr)} / 1.000 kata · naskah 5.000 kata = {formatRupiah(service.price_idr * 5)}
                 </p>
-              </div>
-
-              <div className="space-y-1.5">
-                <Label className="text-xs font-semibold text-slate-600">Estimasi Selesai (jam)</Label>
-                <Input
-                  type="number"
-                  value={service.sla_hours}
-                  onChange={(e) => update(service.id, "sla_hours", parseInt(e.target.value) || 1)}
-                  min={1}
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label className="text-xs font-semibold text-slate-600">Maks. Ukuran File (MB)</Label>
-                <Input
-                  type="number"
-                  value={service.max_file_size_mb}
-                  onChange={(e) => update(service.id, "max_file_size_mb", parseInt(e.target.value) || 1)}
-                  min={1}
-                  max={100}
-                />
               </div>
 
               <div className="space-y-1.5 sm:col-span-3">

@@ -9,7 +9,8 @@ import {
   FileSearch, Bot, BookOpenCheck, PenLine,
   ClockIcon, PackageOpen, User, LogOut,
   LayoutDashboard, Menu, X, ChevronRight,
-  GraduationCap,
+  GraduationCap, MessageCircle,
+  Bell, CalendarDays, Wallet, ShoppingBag, Receipt, Package, Ticket,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -17,7 +18,7 @@ import { useState } from "react";
  * Struktur navigasi Kalibri:
  *
  * Layanan (halaman PUBLIK — bisa diakses tanpa login):
- *   /cek-plagiasi, /cek-ai, /cek-drillbit, /jasa-parafrase, /bimbingan
+ *   /bimbingan, /booking
  *   → User upload file → diminta login hanya saat checkout
  *
  * Akun (halaman PRIVAT — wajib login):
@@ -33,17 +34,20 @@ const navItems = [
 
   { type: "section" as const, label: "Layanan" },
 
-  // Halaman publik — tidak butuh login untuk upload & lihat harga
-  { label: "Cek Plagiasi",     href: "/cek-plagiasi",   icon: FileSearch },
-  { label: "AI Detector",      href: "/cek-ai",          icon: Bot },
-  { label: "DrillBit Checker", href: "/cek-drillbit",    icon: BookOpenCheck },
-  { label: "Jasa Parafrase",   href: "/jasa-parafrase",  icon: PenLine },
-  { label: "Bimbingan",        href: "/bimbingan",       icon: GraduationCap },
+  { label: "Bimbingan",        href: "/jadwal",          icon: GraduationCap },
+  { label: "Paket Bimbingan",  href: "/bimbingan",       icon: Package },
+  { label: "Event",            href: "/event",           icon: Ticket },
 
   { type: "section" as const, label: "Akun" },
 
   // Halaman privat — butuh login
+  { label: "Chat Mentor",     href: "/dashboard/chat",            icon: MessageCircle },
   { label: "Riwayat Pesanan", href: "/dashboard/riwayat-pesanan", icon: ClockIcon },
+  { label: "Notifikasi",      href: "/dashboard/notifikasi",      icon: Bell },
+  { label: "Sesi Saya",       href: "/dashboard/sesi-saya",       icon: CalendarDays },
+  { label: "Isi Saldo",       href: "/dashboard/isi-saldo",       icon: Wallet },
+  { label: "Pesanan Produk", href: "/dashboard/pesanan-produk", icon: ShoppingBag },
+  { label: "Receipt", href: "/dashboard/receipt", icon: Receipt },
   { label: "Paket Saya",      href: "/dashboard/paket-saya",      icon: PackageOpen },
   { label: "Profil",          href: "/dashboard/profil",           icon: User },
 ];
@@ -71,7 +75,7 @@ export function Sidebar() {
   const NavContent = () => (
     <div className="flex h-full flex-col">
       {/* Logo */}
-      <div className="flex items-center gap-3 px-5 py-4 border-b border-brand-800">
+      <div className="flex items-center gap-3 px-5 py-4 border-b border-brand">
         <Logo href="/dashboard" size="sm" showText={false} />
         <div className="flex flex-col leading-tight min-w-0">
           <span className="text-sm font-extrabold text-white truncate">Ruang Konsul</span>
@@ -89,7 +93,7 @@ export function Sidebar() {
             return (
               <p
                 key={i}
-                className="px-3 pt-5 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-brand-300"
+                className="px-3 pt-5 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400"
               >
                 {item.label}
               </p>
@@ -108,7 +112,7 @@ export function Sidebar() {
                 "flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium transition-all",
                 active
                   ? "bg-white text-brand shadow-sm"
-                  : "text-white/70 hover:bg-brand-800 hover:text-white"
+                  : "text-white/70 hover:bg-brand hover:text-white"
               )}
               aria-current={active ? "page" : undefined}
             >
@@ -134,7 +138,7 @@ export function Sidebar() {
       </nav>
 
       {/* Logout */}
-      <div className="border-t border-brand-800 p-3">
+      <div className="border-t border-brand p-3">
         <button
           onClick={handleLogout}
           className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white/60 hover:bg-red-900/40 hover:text-red-300 transition-all"
@@ -150,13 +154,13 @@ export function Sidebar() {
   return (
     <>
       {/* Desktop */}
-      <aside className="hidden lg:flex w-60 flex-shrink-0 flex-col bg-brand-dark">
+      <aside className="hidden lg:flex w-60 flex-shrink-0 flex-col bg-brand">
         <NavContent />
       </aside>
 
       {/* Mobile hamburger */}
       <button
-        className="fixed top-3.5 left-4 z-40 lg:hidden flex h-9 w-9 items-center justify-center rounded-xl bg-brand text-white shadow-brand-sm"
+        className="fixed top-3.5 left-4 z-40 lg:hidden flex h-9 w-9 items-center justify-center rounded-xl bg-brand text-white shadow-card"
         onClick={() => setMobileOpen(true)}
         aria-label="Buka menu navigasi"
       >
@@ -171,9 +175,9 @@ export function Sidebar() {
             onClick={() => setMobileOpen(false)}
             aria-hidden="true"
           />
-          <aside className="fixed left-0 top-0 z-50 h-full w-64 flex flex-col bg-brand-dark lg:hidden shadow-2xl">
+          <aside className="fixed left-0 top-0 z-50 h-full w-64 flex flex-col bg-brand lg:hidden shadow-2xl">
             <button
-              className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-lg bg-brand-800 text-white/70 hover:text-white"
+              className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-lg bg-brand text-white/70 hover:text-white"
               onClick={() => setMobileOpen(false)}
               aria-label="Tutup menu"
             >

@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Toast, useToast } from "@/components/ui/toast";
 import { Plus, Pencil, Trash2, Eye, EyeOff, X, Save, Loader2, ExternalLink } from "lucide-react";
 import { BRAND } from "@/lib/brand";
+import { formatTanggal } from "@/lib/utils/format-tanggal";
 
 interface Post { id: string; slug: string; title: string; category: string; is_published: boolean; published_at: string | null; created_at: string; read_time: string; }
 
@@ -160,7 +161,7 @@ export function BlogAdminTable({ posts: initial }: { posts: Post[] }) {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {posts.length === 0 ? (
-                <tr><td colSpan={6} className="px-4 py-10 text-center text-muted-foreground">Belum ada artikel. Klik "Tulis Artikel" untuk mulai.</td></tr>
+                <tr><td colSpan={6} className="px-4 py-10 text-center text-muted-foreground">Belum ada artikel. Klik &ldquo;Tulis Artikel&rdquo; untuk mulai.</td></tr>
               ) : posts.map((p) => (
                 <tr key={p.id} className="hover:bg-slate-50 transition-colors">
                   <td className="px-4 py-3 max-w-[280px]">
@@ -176,7 +177,7 @@ export function BlogAdminTable({ posts: initial }: { posts: Post[] }) {
                     </button>
                   </td>
                   <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
-                    {new Date(p.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
+                    {formatTanggal(p.created_at)}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1.5">

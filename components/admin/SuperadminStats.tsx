@@ -1,4 +1,5 @@
 import { TrendingUp, ShoppingCart, Users, CalendarDays } from "lucide-react";
+import { formatRupiah } from "@/lib/utils/format-currency";
 
 interface Props {
   totalRevenue: number;
@@ -8,7 +9,7 @@ interface Props {
 }
 
 function fmt(n: number) {
-  return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(n);
+  return formatRupiah(n);
 }
 
 export function SuperadminStats({ totalRevenue, totalOrders, totalUsers, totalBookings }: Props) {

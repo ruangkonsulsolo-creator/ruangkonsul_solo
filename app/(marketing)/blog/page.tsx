@@ -1,160 +1,341 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, CalendarDays, Clock } from "lucide-react";
-import { BRAND } from "@/lib/brand";
 import type { Metadata } from "next";
+import { ArrowRight, CalendarDays, Clock, Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { IkonLini } from "@/components/landing/IkonLini";
+import { BRAND } from "@/lib/brand";
+import { NavbarUtama } from "@/components/ui/NavbarUtama";
 
 export const metadata: Metadata = {
-  title: `Blog | ${BRAND.name}`,
-  description: "Tips skripsi, cara cek plagiasi, panduan akademik, dan artikel seputar dunia mahasiswa Indonesia.",
+  title: "Blog",
+  description:
+    "Panduan menyusun skripsi, memilih metode penelitian, mengolah data, " +
+    "dan menghadapi sidang — ditulis mentor Ruang Konsul Solo.",
 };
 
-const STATIC_ARTICLES = [
-  { slug: "perbedaan-turnitin-repository-no-repository", title: "Perbedaan Turnitin Repository dan No Repository", excerpt: "Banyak mahasiswa bingung soal perbedaan Turnitin Repository vs No Repository.", cover: "/promo-bimbingan.jpeg", category: "Panduan Akademik", readTime: "5 menit", date: "10 Agustus 2026", author: `Tim ${BRAND.shortName}` },
-  { slug: "apa-itu-cek-drillbit-pengertian-fungsi", title: "Apa Itu Cek DrillBit? Pengertian, Fungsi, dan Cara Kerjanya", excerpt: "DrillBit adalah platform deteksi plagiasi yang banyak digunakan universitas di Indonesia.", cover: "/promo-bundling.jpeg", category: "Panduan Layanan", readTime: "4 menit", date: "5 Agustus 2026", author: `Tim ${BRAND.shortName}` },
-  { slug: "cara-membaca-laporan-turnitin-similarity", title: "Cara Membaca Laporan Turnitin agar Tidak Salah Menilai Plagiarisme", excerpt: "Persentase similarity di Turnitin tidak selalu berarti plagiat.", cover: "/promo-konsultasi.jpeg", category: "Tips Skripsi", readTime: "6 menit", date: "1 Agustus 2026", author: `Tim ${BRAND.shortName}` },
-  { slug: "tips-menurunkan-plagiasi-skripsi", title: "7 Tips Efektif Menurunkan Persentase Plagiasi Skripsimu", excerpt: "Nilai similarity masih tinggi? Berikut 7 cara praktis yang bisa kamu lakukan sendiri.", cover: "/promo-parafrase.jpeg", category: "Tips Skripsi", readTime: "7 menit", date: "28 Juli 2026", author: `Tim ${BRAND.shortName}` },
-  { slug: "ai-detector-tools-terbaik-mahasiswa", title: "Rekomendasi AI Detector Terbaik untuk Mahasiswa 2026", excerpt: "Kenali tool AI detector terbaik yang bisa mendeteksi teks buatan AI.", cover: "/promo-bimbingan.jpeg", category: "Teknologi", readTime: "5 menit", date: "22 Juli 2026", author: `Tim ${BRAND.shortName}` },
-  { slug: "persiapan-sidang-skripsi-checklist", title: "Checklist Persiapan Sidang Skripsi yang Wajib Kamu Punya", excerpt: "Gunakan checklist lengkap ini untuk memastikan semua persiapanmu matang.", cover: "/promo-konsultasi.jpeg", category: "Tips Skripsi", readTime: "8 menit", date: "15 Juli 2026", author: `Tim ${BRAND.shortName}` },
+export const dynamic = "force-dynamic";
+
+type Artikel = {
+  slug: string;
+  title: string;
+  excerpt: string;
+  cover: string;
+  category: string;
+  readTime: string;
+  date: string;
+  author: string;
+};
+
+/**
+ * Artikel cadangan saat tabel blog_posts masih kosong.
+ *
+ * Isi sebelumnya seluruhnya tentang Turnitin, plagiasi, dan AI detector —
+ * layanan yang sudah dihapus dari situs. Artikel yang mengarah ke layanan
+ * yang tidak ada akan membawa pengunjung ke jalan buntu, jadi topiknya
+ * diganti ke bimbingan.
+ */
+const ARTIKEL_CADANGAN: Artikel[] = [
+  {
+    slug: "menyusun-rumusan-masalah-yang-tidak-ditolak",
+    title: "Menyusun Rumusan Masalah yang Tidak Ditolak Pembimbing",
+    excerpt:
+      "Kebanyakan proposal ditolak bukan karena topiknya buruk, tapi karena rumusan masalahnya belum menunjukkan ada yang benar-benar perlu dijawab.",
+    cover: "/promo-konsultasi.jpeg",
+    category: "Metodologi",
+    readTime: "7 menit",
+    date: "20 Oktober 2026",
+    author: `Tim ${BRAND.shortName}`,
+  },
+  {
+    slug: "memilih-uji-statistik-sesuai-data",
+    title: "Memilih Uji Statistik yang Sesuai dengan Datamu",
+    excerpt:
+      "Pohon keputusan sederhana: dari jenis variabel dan jumlah kelompok, sampai ke uji yang tepat — lengkap dengan syarat yang sering terlewat.",
+    cover: "/promo-bimbingan.jpeg",
+    category: "Olah Data",
+    readTime: "9 menit",
+    date: "14 Oktober 2026",
+    author: `Tim ${BRAND.shortName}`,
+  },
+  {
+    slug: "menerjemahkan-catatan-dosen-pembimbing",
+    title: "Menerjemahkan Catatan Dosen Pembimbing Jadi Langkah Konkret",
+    excerpt:
+      "“Perdalam lagi” dan “kurang tajam” sebenarnya menunjuk masalah yang spesifik. Begini cara membacanya.",
+    cover: "/promo-bundling.jpeg",
+    category: "Bimbingan",
+    readTime: "6 menit",
+    date: "7 Oktober 2026",
+    author: `Tim ${BRAND.shortName}`,
+  },
+  {
+    slug: "menghindari-jurnal-predator",
+    title: "Cara Mengenali Jurnal Predator Sebelum Naskahmu Terlanjur Masuk",
+    excerpt:
+      "Biaya publikasi murah dan janji terbit seminggu adalah tanda bahaya. Ini daftar periksa sebelum submit.",
+    cover: "/promo-konsultasi.jpeg",
+    category: "Publikasi",
+    readTime: "8 menit",
+    date: "29 September 2026",
+    author: `Tim ${BRAND.shortName}`,
+  },
+  {
+    slug: "menyiapkan-diri-menghadapi-sidang",
+    title: "Menyiapkan Diri Menghadapi Sidang: Pertanyaan yang Hampir Pasti Muncul",
+    excerpt:
+      "Penguji jarang menanyakan hal yang tidak terduga. Sembilan pertanyaan ini muncul di hampir semua sidang.",
+    cover: "/promo-bimbingan.jpeg",
+    category: "Sidang",
+    readTime: "10 menit",
+    date: "21 September 2026",
+    author: `Tim ${BRAND.shortName}`,
+  },
+  {
+    slug: "mengutip-dengan-benar",
+    title: "Mengutip dengan Benar: Parafrase, Kutipan Langsung, dan Sitasi",
+    excerpt:
+      "Kemiripan tinggi biasanya berakar di cara mengutip, bukan di pilihan kata. Ini bedanya dan kapan memakai yang mana.",
+    cover: "/promo-parafrase.jpeg",
+    category: "Penulisan",
+    readTime: "7 menit",
+    date: "12 September 2026",
+    author: `Tim ${BRAND.shortName}`,
+  },
 ];
 
-const CATEGORIES = ["Semua", "Panduan Akademik", "Panduan Layanan", "Tips Skripsi", "Teknologi"];
+const KATEGORI = [
+  "Semua",
+  "Metodologi",
+  "Olah Data",
+  "Bimbingan",
+  "Publikasi",
+  "Sidang",
+  "Penulisan",
+];
 
-async function getArticles(cat?: string) {
+async function ambilArtikel(kategori?: string): Promise<Artikel[]> {
   try {
     const { createClient } = await import("@/lib/supabase/server");
     const supabase = createClient();
     let query = supabase
       .from("blog_posts")
-      .select("slug, title, excerpt, cover_url, category, read_time, published_at, author")
+      .select(
+        "slug, title, excerpt, cover_url, category, read_time, published_at, author"
+      )
       .eq("is_published", true)
       .order("published_at", { ascending: false });
-    if (cat && cat !== "Semua") query = query.eq("category", cat);
-    const { data } = await query;
+    if (kategori && kategori !== "Semua") query = query.eq("category", kategori);
+
+    const { data, error } = await query;
+    if (error) console.error("[blog] gagal memuat artikel:", error.message);
+
     if (data && data.length > 0) {
       return data.map((a) => ({
-        slug: a.slug, title: a.title, excerpt: a.excerpt ?? "",
+        slug: a.slug,
+        title: a.title,
+        excerpt: a.excerpt ?? "",
         cover: a.cover_url ?? "/promo-bimbingan.jpeg",
-        category: a.category, readTime: a.read_time,
-        date: new Date(a.published_at ?? "").toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }),
+        category: a.category,
+        readTime: a.read_time,
+        date: new Date(a.published_at ?? "").toLocaleDateString("id-ID", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        }),
         author: a.author,
       }));
     }
-  } catch { /* fallback */ }
-  return cat && cat !== "Semua"
-    ? STATIC_ARTICLES.filter((a) => a.category === cat)
-    : STATIC_ARTICLES;
+  } catch (e) {
+    console.error("[blog]", e);
+  }
+
+  // Tabel kosong atau tidak terjangkau: pakai artikel cadangan.
+  return kategori && kategori !== "Semua"
+    ? ARTIKEL_CADANGAN.filter((a) => a.category === kategori)
+    : ARTIKEL_CADANGAN;
 }
 
-export default async function BlogPage({ searchParams }: { searchParams: { cat?: string } }) {
-  const activeCat = searchParams.cat ?? "Semua";
-  const articles = await getArticles(activeCat);
-  const [featured, ...rest] = articles;
+export default async function BlogPage({
+  searchParams,
+}: {
+  searchParams: { kategori?: string };
+}) {
+  const kategoriAktif = searchParams.kategori ?? "Semua";
+  const artikel = await ambilArtikel(kategoriAktif);
+  const [utama, ...sisanya] = artikel;
 
   return (
     <div className="min-h-screen bg-white">
-      <nav className="sticky top-0 z-30 border-b border-slate-100 bg-white/95 backdrop-blur-sm shadow-sm">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-          <Link href="/" className="flex items-center gap-2">
-            <Image src={BRAND.logoPng} alt={BRAND.name} width={28} height={28} unoptimized className="object-contain" />
-            <span className="text-lg font-extrabold text-[#8B0000]">{BRAND.shortName}</span>
-          </Link>
-          <div className="hidden sm:flex items-center gap-5 text-sm font-medium text-slate-600">
-            <Link href="/layanan" className="hover:text-[#8B0000] transition-colors">Layanan</Link>
-            <Link href="/blog" className="text-[#8B0000] font-semibold">Blog</Link>
-            <Link href="/paket-hemat" className="hover:text-[#8B0000] transition-colors">Paket Hemat</Link>
-            <Link href="/bimbingan" className="hover:text-[#8B0000] transition-colors">Bimbingan</Link>
-          </div>
-          <div className="flex gap-2">
-            <Link href="/daftar" className="rounded-lg border-2 border-[#8B0000] px-3 py-1.5 text-sm font-semibold text-[#8B0000] hover:bg-brand-50 transition-colors">Daftar</Link>
-            <Link href="/login" className="rounded-lg bg-[#8B0000] px-3 py-1.5 text-sm font-semibold text-white hover:bg-brand-light transition-colors">Login</Link>
-          </div>
-        </div>
-      </nav>
+      <NavbarUtama />
 
-      <section className="hero-gradient px-4 py-14 text-center">
-        <div className="mx-auto max-w-xl">
-          <div className="flex items-center justify-center gap-2 mb-3">
-            <span className="h-0.5 w-8 bg-[#8B0000] rounded-full" />
-            <span className="text-xs font-bold uppercase tracking-widest text-[#8B0000]">Blog</span>
-          </div>
-          <h1 className="text-3xl font-extrabold text-slate-900 mb-2">Blog Kami</h1>
-          <p className="text-slate-500">Tempat bagi-bagi ilmu untuk mahasiswa, tips tugas dan skripsi.</p>
+      {/* ── Hero ── */}
+      <section className="bg-brand-50 px-4 py-12 lg:py-16">
+        <div className="mx-auto max-w-4xl text-center">
+          <IkonLini lini="news" />
+          <h1 className="mt-5 text-3xl font-extrabold leading-tight text-slate-900 lg:text-5xl">
+            Panduan menyusun penelitian,{" "}
+            <span className="text-brand">ditulis mentor kami</span>
+          </h1>
+          <p className="mx-auto mt-4 max-w-xl leading-relaxed text-slate-600">
+            Dari merumuskan masalah sampai menghadapi penguji. Semuanya bisa
+            kamu kerjakan sendiri — artikel ini menunjukkan caranya.
+          </p>
         </div>
       </section>
 
-      <div className="mx-auto max-w-5xl px-4 py-6 flex flex-wrap gap-2" role="group" aria-label="Filter kategori">
-        {CATEGORIES.map((cat) => (
-          <Link key={cat} href={`/blog?cat=${cat}`}
-            className={`rounded-full px-4 py-1.5 text-sm font-medium border transition-colors ${
-              activeCat === cat
-                ? "bg-[#8B0000] text-white border-[#8B0000] shadow-brand-sm"
-                : "bg-white text-slate-600 border-slate-200 hover:border-[#8B0000] hover:text-[#8B0000]"
-            }`}>
-            {cat}
-          </Link>
-        ))}
-      </div>
+      {/* ── Kategori ── */}
+      <section className="border-b border-slate-100 px-4 py-4">
+        <div className="mx-auto max-w-6xl">
+          <ul className="-mx-1 flex gap-2 overflow-x-auto pb-1">
+            {KATEGORI.map((k) => {
+              const aktif = k === kategoriAktif;
+              return (
+                <li key={k} className="shrink-0">
+                  <Link
+                    href={k === "Semua" ? "/blog" : `/blog?kategori=${encodeURIComponent(k)}`}
+                    className={`inline-block rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${
+                      aktif
+                        ? "bg-brand text-white"
+                        : "border border-slate-200 text-slate-600 hover:border-brand hover:text-brand"
+                    }`}
+                  >
+                    {k}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </section>
 
-      <div className="mx-auto max-w-5xl px-4 pb-20 space-y-10">
-        {featured && (
-          <Link href={`/blog/${featured.slug}`} className="group block">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 rounded-3xl overflow-hidden border border-slate-200 shadow-card card-hover">
-              <div className="relative aspect-[16/9] lg:aspect-auto">
-                <Image src={featured.cover} alt={featured.title} fill className="object-cover object-top" sizes="50vw" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-                <span className="absolute top-4 left-4 rounded-full bg-[#8B0000] text-white text-xs font-bold px-3 py-1">{featured.category}</span>
+      {artikel.length === 0 ? (
+        <section className="mx-auto max-w-2xl px-4 py-24 text-center">
+          <Search className="mx-auto mb-3 h-10 w-10 text-slate-300" aria-hidden="true" />
+          <h2 className="mb-2 text-xl font-extrabold text-slate-900">
+            Belum ada artikel di kategori ini
+          </h2>
+          <p className="mb-5 text-sm text-slate-500">
+            Coba kategori lain, atau lihat semua artikel.
+          </p>
+          <Button asChild><Link href="/blog">Lihat semua artikel</Link></Button>
+        </section>
+      ) : (
+        <>
+          {/* ── Artikel utama ── */}
+          <section className="mx-auto max-w-6xl px-4 py-12">
+            <Link
+              href={`/blog/${utama.slug}`}
+              className="group grid grid-cols-1 gap-6 overflow-hidden rounded-2xl border border-slate-200 transition-colors hover:border-brand lg:grid-cols-2"
+            >
+              <div className="relative aspect-[16/10] lg:aspect-auto lg:min-h-[320px]">
+                <Image
+                  src={utama.cover}
+                  alt=""
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  className="object-cover"
+                  priority
+                />
               </div>
-              <div className="flex flex-col justify-center p-8 bg-white">
-                <h2 className="text-xl font-extrabold text-slate-900 group-hover:text-[#8B0000] transition-colors mb-3 leading-snug">{featured.title}</h2>
-                <p className="text-sm text-slate-500 leading-relaxed mb-5">{featured.excerpt}</p>
-                <div className="flex items-center gap-4 text-xs text-muted-foreground mb-5">
-                  <span className="flex items-center gap-1.5"><CalendarDays className="h-3.5 w-3.5" />{featured.date}</span>
-                  <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" />{featured.readTime}</span>
+              <div className="flex flex-col justify-center p-6 lg:p-8">
+                <span className="mb-3 inline-block w-fit rounded-full bg-brand-50 px-3 py-1 text-xs font-bold text-brand">
+                  {utama.category}
+                </span>
+                <h2 className="text-2xl font-extrabold leading-snug text-slate-900 group-hover:text-brand lg:text-3xl">
+                  {utama.title}
+                </h2>
+                <p className="mt-3 leading-relaxed text-slate-600">
+                  {utama.excerpt}
+                </p>
+                <div className="mt-5 flex flex-wrap items-center gap-4 text-xs font-medium text-slate-500">
+                  <span className="flex items-center gap-1.5">
+                    <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" />
+                    {utama.date}
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <Clock className="h-3.5 w-3.5" aria-hidden="true" />
+                    {utama.readTime}
+                  </span>
+                  <span>{utama.author}</span>
                 </div>
-                <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#8B0000] group-hover:gap-2.5 transition-all">
-                  Baca selengkapnya <ArrowRight className="h-4 w-4" />
+                <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-bold text-brand">
+                  Baca selengkapnya{" "}
+                  <ArrowRight
+                    className="h-4 w-4 transition-transform group-hover:translate-x-1"
+                    aria-hidden="true"
+                  />
                 </span>
               </div>
-            </div>
-          </Link>
-        )}
+            </Link>
+          </section>
 
-        {rest.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {rest.map((article) => (
-              <Link key={article.slug} href={`/blog/${article.slug}`}
-                className="group flex flex-col rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-card card-hover">
-                <div className="relative aspect-[16/9] overflow-hidden">
-                  <Image src={article.cover} alt={article.title} fill className="object-cover object-top group-hover:scale-105 transition-transform duration-500" sizes="33vw" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                  <span className="absolute bottom-3 left-3 rounded-full bg-[#8B0000] text-white text-[11px] font-bold px-2.5 py-0.5">{article.category}</span>
-                </div>
-                <div className="flex flex-col flex-1 p-5">
-                  <h3 className="font-bold text-slate-900 text-sm leading-snug mb-2 group-hover:text-[#8B0000] transition-colors line-clamp-2">{article.title}</h3>
-                  <p className="text-xs text-slate-500 leading-relaxed mb-4 line-clamp-2 flex-1">{article.excerpt}</p>
-                  <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-                    <span className="flex items-center gap-1"><CalendarDays className="h-3 w-3" />{article.date}</span>
-                    <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{article.readTime}</span>
-                  </div>
-                </div>
-              </Link>
-            ))}
+          {/* ── Artikel lain ── */}
+          {sisanya.length > 0 && (
+            <section className="mx-auto max-w-6xl px-4 pb-20">
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {sisanya.map((a) => (
+                  <Link
+                    key={a.slug}
+                    href={`/blog/${a.slug}`}
+                    className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 transition-colors hover:border-brand"
+                  >
+                    <div className="relative aspect-[16/10]">
+                      <Image
+                        src={a.cover}
+                        alt=""
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        className="object-cover"
+                      />
+                      <span className="absolute left-3 top-3 rounded-full bg-white/95 px-2.5 py-1 text-xs font-bold text-brand backdrop-blur-sm">
+                        {a.category}
+                      </span>
+                    </div>
+                    <div className="flex flex-1 flex-col p-5">
+                      <h3 className="font-extrabold leading-snug text-slate-900 group-hover:text-brand">
+                        {a.title}
+                      </h3>
+                      <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-500">
+                        {a.excerpt}
+                      </p>
+                      <div className="mt-4 flex items-center gap-3 border-t border-slate-100 pt-3 text-xs font-medium text-slate-500">
+                        <span className="flex items-center gap-1">
+                          <CalendarDays className="h-3 w-3" aria-hidden="true" />
+                          {a.date}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" aria-hidden="true" />
+                          {a.readTime}
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
+        </>
+      )}
+
+      {/* ── CTA ── */}
+      <section className="px-4 pb-16">
+        <div className="mx-auto flex max-w-4xl flex-col items-center justify-between gap-5 rounded-3xl bg-brand p-10 shadow-card sm:flex-row">
+          <div className="text-center sm:text-left">
+            <h2 className="mb-1.5 text-2xl font-extrabold text-white">
+              Masih buntu setelah membaca?
+            </h2>
+            <p className="text-sm text-white/75">
+              Bawa draf dan kendalamu ke satu sesi bimbingan.
+            </p>
           </div>
-        )}
-
-        {articles.length === 0 && (
-          <div className="py-20 text-center text-muted-foreground">Belum ada artikel di kategori ini.</div>
-        )}
-
-        <div className="rounded-3xl bg-brand-gradient p-10 text-center shadow-brand">
-          <h2 className="text-xl font-extrabold text-white mb-2">Siap cek dokumenmu? 🐦</h2>
-          <p className="text-white/75 text-sm mb-5">Upload sekarang, laporan bisa kamu unduh dalam hitungan jam.</p>
-          <Link href="/daftar" className="inline-flex items-center gap-2 rounded-xl bg-white text-[#8B0000] px-6 py-2.5 text-sm font-extrabold hover:bg-brand-50 transition-colors shadow-md">
-            Cek Plagiasi Sekarang <ArrowRight className="h-4 w-4" />
-          </Link>
+          <Button variant="dark" size="lg" asChild className="flex-shrink-0">
+            <Link href="/booking" className="gap-2">
+              Pesan jadwal <ArrowRight className="h-4 w-4" />
+            </Link>
+          </Button>
         </div>
-      </div>
+      </section>
     </div>
   );
 }

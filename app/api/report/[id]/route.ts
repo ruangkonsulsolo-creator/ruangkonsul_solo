@@ -19,7 +19,7 @@ export async function GET(
     .eq("id", user.id)
     .single();
 
-  const isAdmin = profile?.role === "admin" || profile?.role === "super_admin";
+  const isAdmin = profile?.role === "admin" || profile?.role === "superadmin";
 
   const query = supabase
     .from("orders")

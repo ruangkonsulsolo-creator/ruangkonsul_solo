@@ -1,255 +1,484 @@
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { ArrowLeft, CalendarDays, Clock, ArrowRight } from "lucide-react";
+import {
+  ArrowLeft, CalendarDays, Clock, ArrowRight, MessageCircle, Sparkles,
+} from "lucide-react";
 import type { Metadata } from "next";
-import { BRAND } from "@/lib/brand";
+import { NavbarUtama } from "@/components/ui/NavbarUtama";
+import { createClient } from "@/lib/supabase/server";
+import { BRAND, waLink } from "@/lib/brand";
+
+export const revalidate = 120;
 
 /* ─── Same seed data ─── */
 const articles: Record<string, {
   title: string; excerpt: string; cover: string; category: string;
   readTime: string; date: string; author: string; content: string;
 }> = {
-  "perbedaan-turnitin-repository-no-repository": {
-    title: "Perbedaan Turnitin Repository dan No Repository, Mana yang Harus Dipilih?",
-    excerpt: "Banyak mahasiswa bingung soal perbedaan Turnitin Repository vs No Repository.",
-    cover: "/promo-bimbingan.jpeg",
-    category: "Panduan Akademik",
-    readTime: "5 menit",
-    date: "10 Agustus 2026",
-    author: "Tim Ruang Konsul Solo",
-    content: `
-## Apa Itu Turnitin Repository?
-
-Turnitin Repository adalah fitur di mana dokumen yang kamu submit akan **disimpan secara permanen** di database Turnitin. Artinya, karya tulismu bisa menjadi referensi pembanding untuk cek plagiasi mahasiswa lain di masa depan.
-
-### Kapan Menggunakan Repository?
-
-- Saat kampusmu **mewajibkan** submit ke repository untuk sidang
-- Untuk karya ilmiah yang sudah **final dan dipublikasikan**
-- Saat kamu ingin karya tulismu terdaftar sebagai referensi
-
-## Apa Itu No Repository?
-
-**No Repository** berarti dokumenmu dicek similaritynya **tanpa disimpan** ke database Turnitin. Hasilnya tetap akurat, tapi tidak meninggalkan jejak di sistem.
-
-### Kapan Menggunakan No Repository?
-
-- Saat kamu masih dalam **tahap revisi** dan tidak ingin dokumenmu tersimpan
-- Untuk **cek awal** sebelum submit resmi ke kampus
-- Jika kampusmu tidak mewajibkan repository
-
-## Mana yang Harus Dipilih?
-
-Ruang Konsul Solo menggunakan **No Repository** untuk semua layanan cek plagiasi. Ini berarti:
-
-✅ Dokumenmu tidak tersimpan di database  
-✅ Bisa dicek berkali-kali tanpa khawatir terdeteksi self-plagiarism  
-✅ Tetap mendapat laporan similarity yang akurat dan detail  
-
-Kalau kampusmu membutuhkan submit ke repository untuk sidang resmi, kamu tetap bisa melakukannya melalui portal kampus setelah revisi selesai.
-    `,
-  },
-  "apa-itu-cek-drillbit-pengertian-fungsi": {
-    title: "Apa Itu Cek DrillBit? Pengertian, Fungsi, dan Cara Kerjanya",
-    excerpt: "DrillBit adalah platform deteksi plagiasi yang banyak digunakan universitas di Indonesia.",
-    cover: "/promo-bundling.jpeg",
-    category: "Panduan Layanan",
-    readTime: "4 menit",
-    date: "5 Agustus 2026",
-    author: "Tim Ruang Konsul Solo",
-    content: `
-## Apa Itu DrillBit?
-
-DrillBit adalah platform deteksi plagiasi berbasis cloud yang dikembangkan khusus untuk institusi akademik di Asia Tenggara, termasuk Indonesia.
-
-## Mengapa Kampus Menggunakan DrillBit?
-
-Berbeda dengan Turnitin yang berbasis di AS, DrillBit:
-
-- Memiliki **database konten lokal** yang lebih relevan untuk karya ilmiah Indonesia
-- Mendukung **Bahasa Indonesia** lebih baik
-- Harga langganan yang lebih **terjangkau** untuk universitas
-- Laporan yang diakui oleh banyak kampus di Indonesia
-
-## Cara Kerja DrillBit
-
-1. Dokumen diupload ke sistem DrillBit
-2. Teks dipecah dan dianalisis menggunakan algoritma NLP
-3. Dibandingkan dengan database jurnal, artikel, dan karya ilmiah
-4. Laporan similarity dihasilkan dengan highlight sumber
-
-## Layanan Ruang Konsul Solo untuk DrillBit
-
-Ruang Konsul Solo menyediakan **Cek DrillBit** dengan akses ke sistem DrillBit institusi. Kamu mendapat laporan resmi yang sama dengan yang dihasilkan oleh portal kampus, sehingga bisa langsung digunakan untuk keperluan sidang.
-    `,
-  },
-  "cara-membaca-laporan-turnitin-similarity": {
-    title: "Cara Membaca Laporan Turnitin agar Tidak Salah Menilai Plagiarisme",
-    excerpt: "Persentase similarity di Turnitin tidak selalu berarti plagiat.",
+  "menyusun-rumusan-masalah-yang-tidak-ditolak": {
+    title: "Menyusun Rumusan Masalah yang Tidak Ditolak Pembimbing",
+    excerpt: "Kebanyakan proposal ditolak bukan karena topiknya buruk, tapi karena rumusan masalahnya belum menunjukkan ada yang benar-benar perlu dijawab.",
     cover: "/promo-konsultasi.jpeg",
-    category: "Tips Skripsi",
-    readTime: "6 menit",
-    date: "1 Agustus 2026",
-    author: "Tim Ruang Konsul Solo",
-    content: `
-## Similarity Score ≠ Plagiat
-
-Ini kesalahpahaman paling umum. Turnitin hanya mengukur **kemiripan teks** (similarity), bukan plagiarisme. Perbedaannya:
-
-- **Similarity tinggi** bisa karena kutipan resmi, terminologi baku, atau referensi daftar pustaka
-- **Plagiarisme** adalah mengambil karya orang lain tanpa atribusi yang tepat
-
-## Warna di Laporan Turnitin
-
-Turnitin menggunakan sistem warna untuk menunjukkan similarity:
-
-- 🔵 **Biru (0%)** — Tidak ada similarity
-- 🟢 **Hijau (1–24%)** — Similarity rendah, umumnya aman
-- 🟡 **Kuning (25–49%)** — Perlu diperiksa lebih lanjut
-- 🟠 **Oranye (50–74%)** — Perhatikan sumber kutipan
-- 🔴 **Merah (75–100%)** — Perlu revisi serius
-
-## Berapa Batas Aman Similarity?
-
-Setiap kampus punya kebijakan berbeda, tapi umumnya:
-- **S1 (Skripsi):** ≤ 25–30%
-- **S2 (Tesis):** ≤ 20–25%  
-- **Jurnal ilmiah:** ≤ 15–20%
-
-## Tips Menurunkan Similarity
-
-1. **Parafrase** kutipan langsung menggunakan kata-katamu sendiri
-2. **Hapus atau kurangi** daftar pustaka yang panjang berulang
-3. **Gunakan kutipan tidak langsung** daripada kutipan langsung
-4. **Exclude bibliography** saat submit ke Turnitin
-    `,
-  },
-  "tips-menurunkan-plagiasi-skripsi": {
-    title: "7 Tips Efektif Menurunkan Persentase Plagiasi Skripsimu",
-    excerpt: "Nilai similarity masih tinggi? Berikut 7 cara praktis yang bisa kamu lakukan sendiri.",
-    cover: "/promo-parafrase.jpeg",
-    category: "Tips Skripsi",
+    category: "Metodologi",
     readTime: "7 menit",
-    date: "28 Juli 2026",
+    date: "20 Oktober 2026",
     author: "Tim Ruang Konsul Solo",
     content: `
-## 7 Tips Menurunkan Plagiasi Skripsi
+## Kenapa proposal ditolak
 
-### 1. Parafrase Setiap Kutipan
+Pembimbing jarang menolak topik. Yang ditolak biasanya rumusan masalah yang
+belum menunjukkan adanya persoalan nyata — hanya menyebut sebuah tema.
 
-Alih-alih menyalin langsung, tulis ulang dengan gaya bahasamu sendiri sambil mempertahankan makna aslinya.
+"Pengaruh media sosial terhadap perilaku konsumen" itu tema, bukan masalah.
+Tidak ada ketegangan di dalamnya, tidak ada yang mengganjal, tidak ada yang
+perlu dijawab.
 
-### 2. Gunakan Kutipan Tidak Langsung
+## Tiga bahan yang harus ada
 
-Ubah kutipan langsung menjadi kutipan tidak langsung dengan menambahkan interpretasimu.
+**Kesenjangan.** Ada yang belum diketahui, atau ada temuan yang saling
+bertentangan. Dari mana tahu? Dari membaca bagian "saran penelitian
+selanjutnya" di lima sampai sepuluh skripsi dan jurnal terbaru di bidangmu.
+Penulis sebelumnya sudah menunjukkan lubangnya.
 
-### 3. Exclude Daftar Pustaka
+**Alasan kenapa penting.** Kalau pertanyaanmu terjawab, siapa yang terbantu
+dan apa yang berubah? Kalau tidak ada jawaban untuk ini, pertanyaannya
+mungkin memang belum layak diteliti.
 
-Saat submit ke Turnitin, aktifkan opsi "Exclude Bibliography" agar daftar pustaka tidak dihitung.
+**Kemungkinan dikerjakan.** Datanya bisa kamu ambil, dalam waktu yang kamu
+punya, dengan biaya yang kamu sanggupi. Rumusan masalah paling bagus pun
+tidak berguna kalau datanya mustahil diperoleh.
 
-### 4. Exclude Kutipan Langsung
+## Pola yang bisa dipakai
 
-Aktifkan "Exclude Quoted" untuk mengecualikan teks yang sudah menggunakan tanda kutip.
+Satu kalimat: "Meskipun [yang sudah diketahui], belum diketahui [yang belum
+terjawab], padahal [kenapa itu penting]."
 
-### 5. Perhatikan Terminologi Teknis
+Contoh: "Meskipun banyak penelitian menunjukkan media sosial meningkatkan
+minat beli, belum diketahui apakah pola yang sama berlaku pada produk dengan
+nilai transaksi tinggi, padahal justru di segmen itu keputusan konsumen
+paling sulit diprediksi."
 
-Terminologi baku tidak perlu diparafrase. Tapi pastikan tidak mengulangnya terlalu sering.
+Perhatikan bedanya dengan tema tadi: ada yang menggantung, dan terasa perlu
+dijawab.
 
-### 6. Cek Per Bab
+## Uji sendiri sebelum maju
 
-Identifikasi bab mana yang paling tinggi similaritynya dan fokus revisi di sana.
+Bacakan rumusan masalahmu ke teman yang bukan satu jurusan. Kalau dia bisa
+mengulanginya dengan kalimatnya sendiri, rumusannya sudah jelas. Kalau dia
+bingung, pembimbingmu juga akan bingung.
 
-### 7. Gunakan Jasa Parafrase Profesional
-
-Kalau sudah maksimal tapi similarity masih tinggi, pertimbangkan [jasa parafrase Ruang Konsul Solo](/dashboard/jasa-parafrase) yang dikerjakan oleh tim berpengalaman.
-    `,
+Satu pertanyaan terakhir: apakah jawabannya sudah bisa kamu tebak sekarang?
+Kalau ya, itu bukan pertanyaan penelitian — itu pernyataan yang tinggal
+dibuktikan.
+`,
   },
-  "ai-detector-tools-terbaik-mahasiswa": {
-    title: "Rekomendasi AI Detector Terbaik untuk Mahasiswa 2026",
-    excerpt: "Kenali tool AI detector terbaik yang bisa mendeteksi teks buatan AI dalam karya ilmiahmu.",
+
+  "memilih-uji-statistik-sesuai-data": {
+    title: "Memilih Uji Statistik yang Sesuai dengan Datamu",
+    excerpt: "Pohon keputusan sederhana: dari jenis variabel dan jumlah kelompok, sampai ke uji yang tepat — lengkap dengan syarat yang sering terlewat.",
     cover: "/promo-bimbingan.jpeg",
-    category: "Teknologi",
-    readTime: "5 menit",
-    date: "22 Juli 2026",
+    category: "Olah Data",
+    readTime: "9 menit",
+    date: "14 Oktober 2026",
     author: "Tim Ruang Konsul Solo",
     content: `
-## Kenapa AI Detector Makin Penting?
+## Mulai dari pertanyaanmu, bukan dari ujinya
 
-Sejak ChatGPT dan AI writing tools meledak, banyak dosen dan institusi akademik mulai menggunakan AI detector untuk memastikan keaslian karya mahasiswa.
+Kesalahan paling umum: memilih uji lebih dulu karena pernah dipakai senior,
+baru memaksa data menyesuaikan. Urutannya terbalik.
 
-## AI Detector Terpopuler 2026
+Mulailah dari pertanyaan: kamu ingin **membandingkan kelompok**, melihat
+**hubungan antarvariabel**, atau **memprediksi** sesuatu?
 
-### GPTZero
-Tool paling populer untuk deteksi teks AI. Memberikan skor "perplexity" dan "burstiness" yang mengindikasikan apakah teks ditulis manusia atau AI.
+## Kalau membandingkan kelompok
 
-### Turnitin AI Detection
-Turnitin kini memiliki modul AI detection bawaan yang terintegrasi langsung dengan laporan similarity.
+Dua kelompok yang tidak berhubungan, data numerik dan sebarannya normal:
+**uji t sampel bebas**. Sebarannya tidak normal: **Mann-Whitney**.
 
-### Originality.ai
-Cocok untuk blogger dan akademisi. Memberikan persentase teks AI per paragraf.
+Dua pengukuran pada orang yang sama, misalnya sebelum dan sesudah perlakuan:
+**uji t berpasangan**, atau **Wilcoxon** kalau tidak normal.
 
-## Layanan AI Detector Ruang Konsul Solo
+Tiga kelompok atau lebih: **ANOVA satu arah**, atau **Kruskal-Wallis** untuk
+data yang tidak normal. Kalau ANOVA-mu signifikan, lanjutkan dengan uji
+lanjutan seperti Tukey untuk tahu kelompok mana yang sebenarnya berbeda —
+ANOVA sendiri hanya bilang "ada beda", bukan "di mana bedanya".
 
-Ruang Konsul Solo menggunakan mesin AI detector yang setara dengan GPTZero untuk memberikan laporan lengkap:
+## Kalau melihat hubungan
 
-✅ Skor AI per paragraf  
-✅ Overall AI percentage  
-✅ Laporan PDF siap pakai  
-✅ Harga mulai Rp 25.000/file  
-    `,
+Dua variabel numerik: **korelasi Pearson** bila keduanya normal, **Spearman**
+bila tidak atau bila datanya berupa peringkat.
+
+Dua variabel kategorik: **chi-square**. Syaratnya frekuensi harapan minimal 5
+di sebagian besar sel; kalau tidak terpenuhi, pakai **Fisher exact**.
+
+## Kalau memprediksi
+
+Variabel terikat numerik: **regresi linear**. Variabel terikat berupa dua
+kategori, misalnya lulus dan tidak lulus: **regresi logistik**.
+
+Model dengan variabel laten dan banyak jalur: **SEM**. Pakai **SmartPLS**
+untuk sampel kecil dan tujuan prediksi, **AMOS** atau **Lisrel** untuk sampel
+besar dan pengujian teori.
+
+## Syarat yang sering dilewati
+
+Uji normalitas dilakukan pada **residual**, bukan pada data mentah — ini
+kekeliruan yang sangat sering muncul di bab 4.
+
+Untuk regresi, periksa juga multikolinearitas lewat nilai VIF (di bawah 10,
+lebih aman di bawah 5) dan heteroskedastisitas lewat pola sebaran residual.
+
+Dan satu hal yang sering dilupakan: nilai signifikansi hanya memberi tahu
+apakah ada efek, bukan seberapa besar. Laporkan juga ukuran efeknya —
+Cohen's d, eta kuadrat, atau R² — karena itu yang menjawab "jadi, seberapa
+berpengaruh?"
+
+## Kalau masih ragu
+
+Hal yang paling mahal bukan salah memilih uji, tapi menyadarinya setelah
+seluruh bab 4 selesai ditulis. Cek pilihanmu sebelum mulai mengolah.
+`,
   },
-  "persiapan-sidang-skripsi-checklist": {
-    title: "Checklist Persiapan Sidang Skripsi yang Wajib Kamu Punya",
-    excerpt: "Jangan sampai ada yang terlewat. Gunakan checklist lengkap ini untuk memastikan semua persiapanmu matang.",
-    cover: "/promo-konsultasi.jpeg",
-    category: "Tips Skripsi",
-    readTime: "8 menit",
-    date: "15 Juli 2026",
+
+  "menerjemahkan-catatan-dosen-pembimbing": {
+    title: "Menerjemahkan Catatan Dosen Pembimbing Jadi Langkah Konkret",
+    excerpt: "\u201cPerdalam lagi\u201d dan \u201ckurang tajam\u201d sebenarnya menunjuk masalah yang spesifik. Begini cara membacanya.",
+    cover: "/promo-bundling.jpeg",
+    category: "Bimbingan",
+    readTime: "6 menit",
+    date: "7 Oktober 2026",
     author: "Tim Ruang Konsul Solo",
     content: `
-## Checklist Dokumen
+## Catatan singkat bukan berarti tidak jelas
 
-- [ ] Naskah skripsi final (sudah di-ACC pembimbing)
-- [ ] Laporan cek plagiasi (Turnitin / DrillBit)
-- [ ] Laporan cek AI (jika diminta)
-- [ ] Lembar persetujuan pembimbing
-- [ ] Form pendaftaran sidang
-- [ ] Hardcover / softcover sesuai ketentuan kampus
+Dosen pembimbing menulis singkat karena waktunya terbatas, bukan karena
+masalahnya samar. Hampir selalu ada persoalan spesifik di balik catatan yang
+terasa umum.
 
-## Checklist Presentasi
+## Beberapa yang paling sering muncul
 
-- [ ] File PowerPoint/Keynote siap dan sudah dibackup
-- [ ] Latihan presentasi minimal 3 kali
-- [ ] Siapkan jawaban untuk pertanyaan umum penguji
-- [ ] Cek durasi presentasi (biasanya 15–20 menit)
+**"Perdalam lagi."** Biasanya berarti kamu menyebut sebuah konsep tanpa
+menjelaskan cara kerjanya, atau mengutip satu sumber untuk klaim yang
+seharusnya ditopang beberapa sumber. Periksa paragraf yang ditandai: ada
+berapa sitasi di situ?
 
-## Checklist Teknis
+**"Kurang tajam."** Argumenmu melebar ke mana-mana. Satu paragraf
+seharusnya membawa satu gagasan. Kalau ada tiga gagasan berdesakan, pecah
+jadi tiga paragraf.
 
-- [ ] Laptop + charger
-- [ ] Flashdisk berisi file presentasi
-- [ ] Dress code sesuai aturan kampus
-- [ ] Datang minimal 30 menit sebelum jadwal
+**"Kaitkan dengan teori."** Kamu melaporkan temuan tanpa menjelaskannya.
+"Hasil menunjukkan X" perlu dilanjutkan dengan "ini sejalan dengan teori Y
+karena…" atau "ini bertentangan dengan Z, kemungkinan karena…".
 
-## Tips Hari-H Sidang
+**"Metodenya belum pas."** Ini yang paling berat karena bisa berarti
+perombakan besar. Jangan ditunda — temui pembimbing dan minta penjelasan
+sebelum menulis lebih jauh.
 
-1. **Tidur cukup** malam sebelumnya
-2. **Sarapan** — jangan sidang dalam keadaan lapar
-3. **Bawa air minum** ke ruang sidang
-4. **Tenang dan percaya diri** — kamu sudah persiapkan segalanya
+**"Perbaiki sitasi."** Bisa soal gaya penulisan yang tidak konsisten, bisa
+juga soal sumber yang terlalu tua atau tidak kredibel.
 
-## Setelah Sidang
+## Cara bertanya yang membuahkan jawaban
 
-Jika ada revisi, jangan tunda. Segera kerjakan dan manfaatkan [konsultasi Ruang Konsul Solo](/daftar) untuk membantu proses revisi lebih cepat.
-    `,
+Jangan datang dengan "Pak, maksudnya bagaimana ya?" Datanglah dengan
+tafsiranmu sendiri:
+
+"Pak, catatan 'perdalam' di bagian 2.3 saya tafsirkan sebagai kurangnya
+dukungan empiris. Saya berencana menambah tiga penelitian terbaru tentang
+ini. Apakah arahnya sudah benar?"
+
+Pertanyaan seperti itu menunjukkan kamu sudah berpikir, dan jauh lebih mudah
+dijawab.
+
+## Catat, jangan mengandalkan ingatan
+
+Setelah tiap sesi bimbingan, tulis ulang catatannya jadi daftar tindakan
+dengan tenggat. Bawa daftar itu di pertemuan berikutnya dan tunjukkan mana
+yang sudah selesai. Pembimbing akan melihat kamu bergerak, dan itu mengubah
+suasana bimbingan.
+`,
+  },
+
+  "menghindari-jurnal-predator": {
+    title: "Cara Mengenali Jurnal Predator Sebelum Naskahmu Terlanjur Masuk",
+    excerpt: "Biaya publikasi murah dan janji terbit seminggu adalah tanda bahaya. Ini daftar periksa sebelum submit.",
+    cover: "/promo-konsultasi.jpeg",
+    category: "Publikasi",
+    readTime: "8 menit",
+    date: "29 September 2026",
+    author: "Tim Ruang Konsul Solo",
+    content: `
+## Kenapa ini penting
+
+Naskah yang sudah terbit di jurnal predator tidak bisa ditarik lalu
+dikirimkan ke jurnal lain — itu terhitung publikasi ganda. Satu keputusan
+keliru bisa menghanguskan naskah yang kamu kerjakan berbulan-bulan.
+
+Sebagian kampus juga tidak mengakui publikasi di jurnal semacam itu untuk
+syarat kelulusan, jadi uang dan waktumu habis tanpa hasil.
+
+## Tanda yang perlu diwaspadai
+
+**Dikirimi ajakan lewat surel.** Jurnal bereputasi tidak memburu penulis.
+Kalau ada surel memuji "penelitian Anda yang luar biasa" padahal kamu belum
+pernah berhubungan dengan mereka, curigai.
+
+**Janji terbit sangat cepat.** Telaah sejawat yang sungguh-sungguh butuh
+waktu berminggu-minggu sampai berbulan-bulan. "Terbit dalam 3 hari" berarti
+tidak ada telaah sama sekali.
+
+**Cakupan yang terlalu luas.** Satu jurnal yang menerima naskah kedokteran,
+teknik, sastra, dan ekonomi sekaligus tidak mungkin punya penelaah yang
+kompeten di semuanya.
+
+**Biaya diminta di awal.** Jurnal yang sehat menagih biaya pemrosesan
+setelah naskah diterima, bukan sebagai syarat agar naskah dibaca.
+
+**Dewan redaksi yang tidak bisa ditelusuri.** Cari nama-namanya di Google
+Scholar. Kalau tidak ditemukan, atau afiliasinya tidak cocok, itu pertanda
+buruk.
+
+**Situs yang serampangan.** Banyak salah ketik, tautan mati, atau alamat
+kantor yang tidak jelas.
+
+## Cara memeriksa
+
+Untuk jurnal nasional, cari di **SINTA** (sinta.kemdikbud.go.id) — kalau
+terindeks, nomor akreditasinya terlihat di sana.
+
+Untuk jurnal internasional, periksa di **DOAJ** (doaj.org) untuk jurnal
+akses terbuka, atau di **Scopus** lewat laman Sources. Jangan percaya logo
+"Indexed in Scopus" yang dipajang di situs jurnalnya — selalu periksa dari
+sisi Scopus.
+
+Tanyakan juga ke perpustakaan kampus atau dosen pembimbingmu. Banyak kampus
+punya daftar jurnal yang direkomendasikan dan yang dihindari.
+
+## Kalau terlanjur
+
+Hubungi redaksi dan minta pencabutan secara tertulis sebelum naskah terbit.
+Setelah terbit, pilihannya jauh lebih sempit — bicarakan dengan pembimbing
+dan bagian akademik kampusmu.
+`,
+  },
+
+  "menyiapkan-diri-menghadapi-sidang": {
+    title: "Menyiapkan Diri Menghadapi Sidang: Pertanyaan yang Hampir Pasti Muncul",
+    excerpt: "Penguji jarang menanyakan hal yang tidak terduga. Sembilan pertanyaan ini muncul di hampir semua sidang.",
+    cover: "/promo-bimbingan.jpeg",
+    category: "Sidang",
+    readTime: "10 menit",
+    date: "21 September 2026",
+    author: "Tim Ruang Konsul Solo",
+    content: `
+## Penguji tidak sedang mencari celah
+
+Tugas penguji memastikan kamu paham apa yang kamu tulis. Pertanyaan yang
+terasa menyudutkan biasanya hanya cara menguji apakah kamu benar-benar
+mengerjakannya sendiri.
+
+## Sembilan yang hampir selalu ditanyakan
+
+**"Coba jelaskan penelitian Anda dalam tiga menit."** Latih sampai lancar.
+Ini membentuk kesan pertama, dan kesan pertama memengaruhi sisa sidang.
+
+**"Kenapa topik ini penting?"** Jawab dari sisi manfaatnya, bukan dari sisi
+"karena belum ada yang meneliti". Belum diteliti saja bukan alasan.
+
+**"Kenapa memakai metode ini, bukan yang lain?"** Sebutkan alternatif yang
+kamu pertimbangkan dan kenapa tidak dipilih. Ini menunjukkan kamu memilih,
+bukan sekadar mengikuti.
+
+**"Dari mana sampel ini, dan kenapa jumlahnya segitu?"** Siapkan dasar
+perhitungannya — rumus Slovin, tabel Krejcie-Morgan, atau analisis daya.
+
+**"Apa keterbatasan penelitian Anda?"** Jangan menjawab "tidak ada".
+Penelitian tanpa keterbatasan tidak ada, dan jawaban itu justru menandakan
+kamu belum memahami kerjamu sendiri.
+
+**"Apa bedanya dengan penelitian X?"** Kuasai tiga sampai lima penelitian
+terdekat dengan topikmu, dan bisa sebutkan bedanya.
+
+**"Kenapa hasilnya begini?"** Terutama kalau temuanmu bertentangan dengan
+teori. Siapkan penjelasan yang masuk akal — hasil yang berbeda bukan berarti
+salah.
+
+**"Apa sumbangan penelitian ini?"** Pisahkan sumbangan teoretis dan praktis.
+
+**"Kalau mengulang, apa yang akan Anda ubah?"** Jawaban jujur lebih baik
+daripada jawaban yang terdengar sempurna.
+
+## Yang perlu disiapkan selain jawaban
+
+Cetak naskahmu dan beri penanda di bagian-bagian penting, supaya bisa
+langsung dibuka saat ditanya.
+
+Kuasai bab 3 dan 4 lebih dalam dari bab lain — di situ pertanyaan paling
+banyak muncul.
+
+Siapkan slide cadangan berisi tabel detail yang tidak masuk presentasi
+utama. Kalau penguji menanyakan angka tertentu, kamu bisa langsung
+menunjukkannya.
+
+## Saat tidak tahu jawabannya
+
+Katakan terus terang: "Saya belum memeriksa hal itu, tapi menurut saya
+arahnya ke sana karena…" Jauh lebih baik daripada mengarang. Penguji hampir
+selalu tahu kalau sedang dikarang.
+`,
+  },
+
+  "mengutip-dengan-benar": {
+    title: "Mengutip dengan Benar: Parafrase, Kutipan Langsung, dan Sitasi",
+    excerpt: "Kemiripan tinggi biasanya berakar di cara mengutip, bukan di pilihan kata. Ini bedanya dan kapan memakai yang mana.",
+    cover: "/promo-parafrase.jpeg",
+    category: "Penulisan",
+    readTime: "7 menit",
+    date: "12 September 2026",
+    author: "Tim Ruang Konsul Solo",
+    content: `
+## Akar masalahnya bukan pilihan kata
+
+Banyak yang mengira angka kemiripan tinggi bisa diturunkan dengan mengganti
+kata demi kata dengan padanannya. Hasilnya biasanya dua-duanya buruk:
+angkanya tetap tinggi, dan tulisannya jadi janggal.
+
+Kemiripan tinggi hampir selalu berarti sesuatu yang lebih mendasar — terlalu
+banyak mengambil dari sumber dan terlalu sedikit menyuarakan analisis
+sendiri.
+
+## Parafrase yang sebenarnya
+
+Parafrase bukan mengganti kata. Parafrase adalah memahami gagasan lalu
+menuliskannya ulang dengan susunan pikiranmu sendiri.
+
+Caranya: baca paragraf sumbernya, **tutup sumbernya**, lalu tulis apa yang
+kamu pahami. Setelah itu baru bandingkan — bukan untuk menyalin, tapi untuk
+memastikan kamu tidak salah menangkap.
+
+Tetap wajib mencantumkan sitasi. Parafrase mengubah kalimatnya, bukan
+kepemilikan gagasannya.
+
+## Kapan memakai kutipan langsung
+
+Kutipan langsung hanya untuk tiga keadaan: definisi baku yang tidak boleh
+diubah, pernyataan yang kekuatannya justru ada pada susunan katanya, dan
+kalimat yang hendak kamu bantah sehingga perlu dikutip persis.
+
+Di luar itu, parafrase lebih baik. Naskah yang penuh kutipan langsung
+terbaca seperti kumpulan tempelan, bukan karya yang dipikirkan.
+
+## Mengatur sitasi sejak awal
+
+Pakai Mendeley atau Zotero sejak hari pertama membaca, bukan setelah naskah
+jadi. Merapikan 60 sitasi secara manual di akhir adalah pekerjaan berhari-hari
+yang sebenarnya bisa dihindari.
+
+## Memeriksa keseimbangan tulisanmu
+
+Ambil satu halaman bab 2. Tandai dengan warna berbeda: mana yang berasal dari
+sumber, mana analisismu sendiri.
+
+Kalau hampir seluruh halaman satu warna — warna sumber — di situlah
+persoalannya. Yang perlu ditambah bukan sinonim, melainkan suaramu sendiri:
+membandingkan temuan antarsumber, menunjukkan yang bertentangan, menarik
+simpulan sementara.
+
+## Catatan
+
+Memeriksa kemiripan untuk memperbaiki cara mengutip itu wajar dan sehat.
+Yang tidak kami layani adalah jasa menurunkan angka tanpa memperbaiki
+tulisannya — itu menyiasati pemeriksaan, bukan belajar menulis.
+`,
   },
 };
 
+type Artikel = {
+  title: string; excerpt: string; cover: string; category: string;
+  readTime: string; date: string; author: string; content: string;
+};
+
+function tanggalId(nilai: string | null): string {
+  if (!nilai) return "";
+  const d = new Date(nilai);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("id-ID", {
+    day: "numeric", month: "long", year: "numeric",
+  });
+}
+
+/**
+ * Artikel dari basis data lebih dulu, baru artikel bawaan.
+ *
+ * Sebelumnya halaman ini sama sekali tidak menyentuh blog_posts — isinya
+ * hanya objek `articles` di berkas ini. Akibatnya artikel yang ditulis admin
+ * muncul di daftar /blog tapi halamannya 404: daftarnya baca basis data,
+ * halamannya tidak. Artikel bawaan tetap dipertahankan sebagai cadangan
+ * supaya /blog tidak kosong sebelum ada tulisan sungguhan.
+ */
+async function ambilArtikel(slug: string): Promise<Artikel | null> {
+  try {
+    const supabase = createClient();
+    const { data } = await supabase
+      .from("blog_posts")
+      .select("title, excerpt, content, cover_url, category, read_time, author, published_at")
+      .eq("slug", slug)
+      .eq("is_published", true)
+      .maybeSingle();
+
+    if (data) {
+      return {
+        title: data.title,
+        excerpt: data.excerpt ?? "",
+        cover: data.cover_url ?? "/promo-bimbingan.jpeg",
+        category: data.category,
+        readTime: data.read_time,
+        date: tanggalId(data.published_at),
+        author: data.author,
+        content: data.content,
+      };
+    }
+  } catch (e) {
+    console.error("[blog]", e);
+  }
+  return articles[slug] ?? null;
+}
+
+/** Artikel lain untuk sidebar: basis data dulu, lalu dilengkapi bawaan. */
+async function ambilLainnya(kecuali: string, batas = 4) {
+  const hasil: { slug: string; title: string; category: string; date: string }[] = [];
+  try {
+    const supabase = createClient();
+    const { data } = await supabase
+      .from("blog_posts")
+      .select("slug, title, category, published_at")
+      .eq("is_published", true)
+      .neq("slug", kecuali)
+      .order("published_at", { ascending: false })
+      .limit(batas);
+    for (const a of data ?? []) {
+      hasil.push({
+        slug: a.slug, title: a.title, category: a.category,
+        date: tanggalId(a.published_at),
+      });
+    }
+  } catch {
+    // Basis data tidak terjangkau — cukup pakai artikel bawaan di bawah.
+  }
+
+  for (const [slug, a] of Object.entries(articles)) {
+    if (hasil.length >= batas) break;
+    if (slug === kecuali || hasil.some((h) => h.slug === slug)) continue;
+    hasil.push({ slug, title: a.title, category: a.category, date: a.date });
+  }
+  return hasil;
+}
+
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const article = articles[params.slug];
-  if (!article) return { title: "Artikel tidak ditemukan | Ruang Konsul Solo" };
+  const article = await ambilArtikel(params.slug);
+  if (!article) return { title: `Artikel tidak ditemukan | ${BRAND.name}` };
   return {
-    title: `${article.title} | Blog Ruang Konsul Solo`,
+    title: `${article.title} | Blog ${BRAND.name}`,
     description: article.excerpt,
   };
 }
@@ -273,123 +502,178 @@ function renderMarkdown(md: string): string {
     );
 }
 
-export default function BlogPostPage({ params }: { params: { slug: string } }) {
-  const article = articles[params.slug];
-  if (!article) notFound();
+export default async function BlogPostPage({
+  params,
+}: { params: { slug: string } }) {
+  const article = await ambilArtikel(params.slug);
+  if (!article) return notFound();
 
-  const otherArticles = Object.entries(articles)
-    .filter(([slug]) => slug !== params.slug)
-    .slice(0, 3);
+  const lainnya = await ambilLainnya(params.slug);
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Navbar */}
-      <nav className="sticky top-0 z-30 border-b border-slate-100 bg-white/95 backdrop-blur-sm shadow-sm">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-          <Link href="/" className="flex items-center gap-2">
-            <Image src="/logo-rks.png" alt="Ruang Konsul Solo" width={28} height={28} />
-            <span className="text-lg font-extrabold text-brand">{BRAND.shortName}</span>
-          </Link>
-          <div className="flex gap-2">
-            <Link href="/daftar" className="rounded-lg border-2 border-brand px-3 py-1.5 text-sm font-semibold text-brand hover:bg-brand-50 transition-colors">Daftar</Link>
-            <Link href="/login" className="rounded-lg bg-brand px-3 py-1.5 text-sm font-semibold text-white hover:bg-brand-light transition-colors">Login</Link>
-          </div>
-        </div>
-      </nav>
+      <NavbarUtama />
 
-      <article className="mx-auto max-w-2xl px-4 py-12">
-        {/* Breadcrumb */}
-        <Link href="/blog" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-brand mb-6 transition-colors">
-          <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
-          Kembali ke Blog
-        </Link>
+      {/*
+        Dua kolom: isi artikel dan sisi kanan yang ikut menggulir.
 
-        {/* Category + meta */}
-        <div className="flex flex-wrap items-center gap-3 mb-4">
-          <span className="rounded-full bg-brand text-white text-xs font-bold px-3 py-1">
-            {article.category}
-          </span>
-          <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" /> {article.date}
-          </span>
-          <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Clock className="h-3.5 w-3.5" aria-hidden="true" /> {article.readTime}
-          </span>
-        </div>
-
-        {/* Title */}
-        <h1 className="text-2xl lg:text-3xl font-extrabold text-slate-900 leading-snug mb-4">
-          {article.title}
-        </h1>
-
-        {/* Author */}
-        <div className="flex items-center gap-2 mb-6 pb-6 border-b border-slate-100">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand text-white text-xs font-bold">
-            K
-          </div>
-          <span className="text-sm font-medium text-slate-700">{article.author}</span>
-        </div>
-
-        {/* Cover image */}
-        <div className="relative aspect-[16/9] rounded-2xl overflow-hidden mb-8 shadow-card">
-          <Image
-            src={article.cover}
-            alt={article.title}
-            fill
-            className="object-cover object-top"
-            sizes="(max-width: 768px) 100vw, 672px"
-            priority
-          />
-        </div>
-
-        {/* Content */}
-        <div
-          className="prose-kalibri text-slate-600 leading-relaxed"
-          dangerouslySetInnerHTML={{ __html: renderMarkdown(article.content) }}
-        />
-
-        {/* CTA in-article */}
-        <div className="mt-10 rounded-2xl bg-brand-gradient p-6 text-center shadow-brand">
-          <p className="text-white font-extrabold text-lg mb-1">Siap cek dokumenmu sekarang?</p>
-          <p className="text-white/75 text-sm mb-4">Laporan siap dalam hitungan jam. Mulai dari Rp 25.000.</p>
+        Satu kolom sempit di tengah membuat seluruh ajakan — bimbingan,
+        konsultasi, artikel lain — baru muncul setelah pembaca sampai ke
+        dasar halaman, dan sebagian besar pembaca tidak sampai ke sana.
+        Sisi kanan yang lengket membuatnya terlihat sepanjang bacaan tanpa
+        memotong tulisannya.
+      */}
+      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-10 lg:grid-cols-[minmax(0,1fr)_19rem]">
+        <article className="min-w-0">
           <Link
-            href="/daftar"
-            className="inline-flex items-center gap-2 rounded-xl bg-white text-brand text-sm font-extrabold px-5 py-2.5 hover:bg-brand-50 transition-colors shadow-md"
+            href="/blog"
+            className="mb-6 inline-flex items-center gap-1.5 text-sm text-slate-500 transition-colors hover:text-brand"
           >
-            Mulai Cek Sekarang <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+            Kembali ke Blog
           </Link>
-        </div>
-      </article>
 
-      {/* Related articles */}
-      <section className="bg-slate-50 px-4 py-12">
-        <div className="mx-auto max-w-5xl">
-          <h2 className="text-lg font-extrabold text-slate-900 mb-6">Artikel Lainnya</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-            {otherArticles.map(([slug, a]) => (
-              <Link
-                key={slug}
-                href={`/blog/${slug}`}
-                className="group flex flex-col rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-card card-hover"
-              >
-                <div className="relative aspect-[16/9]">
-                  <Image src={a.cover} alt={a.title} fill className="object-cover object-top" sizes="33vw" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-                  <span className="absolute bottom-2 left-2 rounded-full bg-brand text-white text-[10px] font-bold px-2 py-0.5">
-                    {a.category}
-                  </span>
-                </div>
-                <div className="p-4">
-                  <h3 className="text-sm font-bold text-slate-900 group-hover:text-brand transition-colors line-clamp-2 mb-1">
-                    {a.title}
-                  </h3>
-                  <p className="text-[11px] text-muted-foreground">{a.date}</p>
-                </div>
-              </Link>
-            ))}
+          <div className="mb-4 flex flex-wrap items-center gap-3">
+            <span className="rounded-full bg-brand px-3 py-1 text-xs font-bold text-white">
+              {article.category}
+            </span>
+            {article.date && (
+              <span className="flex items-center gap-1.5 text-xs text-slate-500">
+                <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" /> {article.date}
+              </span>
+            )}
+            <span className="flex items-center gap-1.5 text-xs text-slate-500">
+              <Clock className="h-3.5 w-3.5" aria-hidden="true" /> {article.readTime}
+            </span>
           </div>
-        </div>
-      </section>
+
+          <h1 className="mb-4 text-2xl font-extrabold leading-snug text-slate-900 lg:text-4xl">
+            {article.title}
+          </h1>
+
+          {article.excerpt && (
+            <p className="mb-6 text-lg leading-relaxed text-slate-600">
+              {article.excerpt}
+            </p>
+          )}
+
+          <div className="mb-6 flex items-center gap-2 border-b border-slate-100 pb-6">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand text-xs font-bold text-white">
+              {article.author.trim().charAt(0).toUpperCase() || "R"}
+            </span>
+            <span className="text-sm font-medium text-slate-700">{article.author}</span>
+          </div>
+
+          <div className="relative mb-8 aspect-[16/9] overflow-hidden rounded-2xl shadow-card">
+            <Image
+              src={article.cover}
+              alt={article.title}
+              fill
+              className="object-cover object-top"
+              sizes="(max-width: 1023px) 100vw, 760px"
+              priority
+            />
+          </div>
+
+          <div
+            className="prose-kalibri leading-relaxed text-slate-600"
+            dangerouslySetInnerHTML={{ __html: renderMarkdown(article.content) }}
+          />
+
+          <div className="mt-10 rounded-2xl bg-brand p-6 text-center shadow-card">
+            <p className="mb-1 text-lg font-extrabold text-white">
+              Mentok di bagian yang dibahas tadi?
+            </p>
+            <p className="mb-4 text-sm text-white/75">
+              Bimbingan privat per jam, mulai Rp60.000. Ambil hanya bagian yang
+              sedang kamu butuhkan.
+            </p>
+            <Link
+              href="/jadwal"
+              className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-extrabold text-brand shadow-md transition-colors hover:bg-brand-50"
+            >
+              Lihat paket bimbingan <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </Link>
+          </div>
+        </article>
+
+        {/* ── Sisi kanan ── */}
+        <aside className="lg:sticky lg:top-20 lg:self-start">
+          <div className="space-y-5">
+            <div className="rounded-2xl border border-brand-200 bg-brand-50 p-5">
+              <span className="mb-2 flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-brand">
+                <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+                Bimbingan
+              </span>
+              <p className="font-extrabold leading-snug text-slate-900">
+                Dibimbing sampai sanggup menulisnya sendiri
+              </p>
+              <p className="mt-1.5 text-sm leading-relaxed text-slate-600">
+                Skripsi, tesis, dan disertasi. Privat per jam atau langganan
+                sebulan penuh.
+              </p>
+              <Link
+                href="/jadwal"
+                className="mt-4 inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-brand px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-brand-light"
+              >
+                Lihat paket <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+              </Link>
+            </div>
+
+            <a
+              href={waLink(`Halo ${BRAND.name}, saya mau konsultasi.`)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 rounded-2xl border border-slate-200 p-4 transition-colors hover:border-brand"
+            >
+              <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-brand-50">
+                <MessageCircle className="h-5 w-5 text-brand" aria-hidden="true" />
+              </span>
+              <span>
+                <span className="block text-sm font-bold text-slate-900">
+                  Konsultasi awal gratis
+                </span>
+                <span className="block text-xs text-slate-500">
+                  Tanya dulu lewat WhatsApp
+                </span>
+              </span>
+            </a>
+
+            {lainnya.length > 0 && (
+              <div className="rounded-2xl border border-slate-200 p-5">
+                <h2 className="mb-3 text-sm font-extrabold text-slate-900">
+                  Artikel lainnya
+                </h2>
+                <ul className="space-y-3">
+                  {lainnya.map((a) => (
+                    <li key={a.slug}>
+                      <Link href={`/blog/${a.slug}`} className="group block">
+                        <span className="text-[11px] font-bold uppercase tracking-wide text-brand">
+                          {a.category}
+                        </span>
+                        <span className="mt-0.5 block text-sm font-semibold leading-snug text-slate-800 transition-colors group-hover:text-brand">
+                          {a.title}
+                        </span>
+                        {a.date && (
+                          <span className="mt-0.5 block text-[11px] text-slate-400">
+                            {a.date}
+                          </span>
+                        )}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href="/blog"
+                  className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-brand hover:underline"
+                >
+                  Lihat semua artikel <ArrowRight className="h-3 w-3" aria-hidden="true" />
+                </Link>
+              </div>
+            )}
+          </div>
+        </aside>
+      </div>
     </div>
   );
 }

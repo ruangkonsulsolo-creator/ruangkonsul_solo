@@ -35,7 +35,7 @@ export default async function PromoPage() {
   const credits = await getCredits();
 
   return (
-    <div className="space-y-7 max-w-4xl">
+    <div className="space-y-7 max-w-7xl">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-xl font-extrabold text-slate-900">Promo & Bonus</h2>

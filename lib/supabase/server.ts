@@ -2,7 +2,6 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
 // Types akan di-generate setelah `supabase gen types typescript` dijalankan.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createClient() {
   const cookieStore = cookies();
 

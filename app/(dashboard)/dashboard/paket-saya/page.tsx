@@ -7,10 +7,11 @@ import { PackageOpen, ArrowRight, Clock, AlertTriangle } from "lucide-react";
 import { BRAND } from "@/lib/brand";
 import { PREVIEW_MODE, PREVIEW_USER } from "@/lib/utils/preview-mode";
 import type { Metadata } from "next";
+import { formatRupiah } from "@/lib/utils/format-currency";
 export const metadata: Metadata = { title: `Paket Saya | ${BRAND.name}` };
 
 function daysLeft(expiresAt: string) { return Math.ceil((new Date(expiresAt).getTime() - Date.now()) / 86400000); }
-function fmt(n: number) { return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(n); }
+function fmt(n: number) { return formatRupiah(n); }
 
 export default async function PaketSayaPage() {
   const supabase = createClient();
@@ -22,7 +23,7 @@ export default async function PaketSayaPage() {
   const expired = expiredQuotas ?? [];
 
   return (
-    <div className="space-y-7 max-w-3xl">
+    <div className="space-y-7 max-w-7xl">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-extrabold text-slate-900">Paket Saya</h2>
         <Button asChild size="sm" className="gap-2"><Link href="/paket-hemat">Beli Paket Baru <ArrowRight className="h-3.5 w-3.5" /></Link></Button>

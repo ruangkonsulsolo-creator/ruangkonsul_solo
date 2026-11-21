@@ -30,14 +30,6 @@ const slides = [
     cta: "Mulai Konsultasi",
     href: "/daftar",
   },
-  {
-    src: "/promo-parafrase.jpeg",
-    alt: `Jasa Parafrase Profesional — ${BRAND.name}`,
-    badge: "✍️ Jasa Parafrase",
-    hook: "Turunkan Plagiasi!",
-    cta: "Order Parafrase",
-    href: "/jasa-parafrase",
-  },
 ];
 
 const INTERVAL = 3500;
@@ -54,7 +46,7 @@ export function HeroSlider() {
 
   return (
     <div className="relative w-full max-w-sm lg:max-w-md xl:max-w-lg flex-shrink-0" aria-label="Promo slide">
-      <div className="relative overflow-hidden rounded-3xl shadow-brand aspect-[4/5]">
+      <div className="relative overflow-hidden rounded-3xl shadow-card aspect-[4/5]">
         {slides.map((slide, i) => (
           <div
             key={slide.src}
@@ -72,7 +64,7 @@ export function HeroSlider() {
               </span>
               <p className="text-white font-extrabold text-xl leading-snug mb-3 drop-shadow-lg">{slide.hook}</p>
               <Link href={slide.href}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-white text-[#8B0000] text-sm font-extrabold px-4 py-2 hover:bg-brand-50 transition-colors shadow-md">
+                className="inline-flex items-center gap-1.5 rounded-xl bg-white text-brand text-sm font-extrabold px-4 py-2 hover:bg-brand-50 transition-colors shadow-md">
                 {slide.cta} →
               </Link>
             </div>
@@ -86,7 +78,7 @@ export function HeroSlider() {
           <button key={i} onClick={() => setCurrent(i)} role="tab"
             aria-selected={i === current} aria-label={`Slide ${i + 1}`}
             className={`h-2 rounded-full transition-all duration-300 ${
-              i === current ? "w-7 bg-[#8B0000] shadow-brand-sm" : "w-2 bg-slate-300 hover:bg-brand-300"
+              i === current ? "w-7 bg-brand" : "w-2 bg-slate-200 hover:bg-brand-300"
             }`} />
         ))}
       </div>

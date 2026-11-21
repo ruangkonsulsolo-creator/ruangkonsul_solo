@@ -27,11 +27,20 @@ async function getLeads() {
   }
   try {
     const supabase = createClient();
-    const { data, count } = await supabase
+    // Kolom nyata tabel booking_leads (tidak ada "sesi"/"status"): jadwal dari
+    // tanggal + jam, status dari is_processed. Query lama meminta kolom yang
+    // tidak ada sehingga halaman ini selalu kosong.
+    const { data, count, error } = await supabase
       .from("booking_leads")
-      .select("id, nama, prodi, sesi, kebutuhan, whatsapp, status, created_at", { count: "exact" })
+      .select("id, nama, prodi, tanggal, jam, kebutuhan, catatan, whatsapp, is_processed, created_at", { count: "exact" })
       .order("created_at", { ascending: false });
-    return { data, count };
+    if (error) console.error("[booking-leads]", error.message);
+    const rows = (data ?? []).map((l) => ({
+      ...l,
+      sesi: l.tanggal ? `${l.tanggal}${l.jam ? ` · ${String(l.jam).slice(0, 5)}` : ""}` : "Belum memilih jadwal",
+      status: l.is_processed ? "dihubungi" : "baru",
+    }));
+    return { data: rows, count };
   } catch {
     return [];
   }
@@ -93,7 +102,7 @@ export default async function AdminBookingLeadsPage() {
               <tr className="border-b bg-slate-50 text-left text-xs font-bold uppercase tracking-wide text-muted-foreground">
                 <th className="px-4 py-3">Nama</th>
                 <th className="px-4 py-3">Prodi</th>
-                <th className="px-4 py-3">Sesi</th>
+                <th className="px-4 py-3">Jadwal diminta</th>
                 <th className="px-4 py-3">Kebutuhan</th>
                 <th className="px-4 py-3">Kontak</th>
                 <th className="px-4 py-3">Status</th>

@@ -6,27 +6,46 @@ import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/ui/logo";
 import {
+  KeyRound, Bell,
   LayoutDashboard, ClipboardList, Users,
   BarChart3, Settings, Package, LogOut, ChevronRight,
-  GraduationCap, FileText, ShieldCheck, Phone,
-} from "lucide-react";
+  GraduationCap, FileText, ShieldCheck, Phone, ShoppingBag, Store, Quote, CalendarDays } from "lucide-react";
 
 const navItems = [
   { label: "Dashboard",       href: "/admin",              icon: LayoutDashboard, exact: true },
   { label: "Pesanan",         href: "/admin/pesanan",      icon: ClipboardList },
+  { label: "Pesanan Produk",  href: "/admin/pesanan-produk", icon: ShoppingBag },
+  { label: "Sesi Bimbingan",  href: "/admin/sesi",         icon: CalendarDays },
+  { label: "Notifikasi",      href: "/admin/notifikasi",   icon: Bell },
   { label: "Booking Leads",   href: "/admin/booking-leads",icon: Phone },
   { label: "Users",           href: "/admin/users",        icon: Users },
+  { label: "Kinerja Mentor",  href: "/admin/mentor",       icon: GraduationCap },
+  { label: "Kode Mentor",     href: "/admin/kode-mentor",  icon: KeyRound },
   { label: "Laporan",         href: "/admin/laporan",      icon: BarChart3 },
+  // Semua yang dijual — merchandise, bimbingan, layanan utama, paket hemat —
+  // dikelola di satu tempat: Katalog Produk. Entri "Kelas Bimbingan" dan
+  // pengelolaan produk di "Merchandise" sudah dihapus dari sini karena
+  // keduanya membaca tabel yang sudah dipensiunkan dan selalu menampilkan
+  // nol. Dua pintu ke barang yang sama, satu di antaranya kosong, adalah
+  // cara tercepat membuat orang mengira datanya hilang.
+  { type: "section" as const, label: "Katalog" },
+  { label: "Katalog Produk",   href: "/admin/katalog",     icon: Store },
+  { label: "Penjualan Merch",  href: "/admin/merchandise", icon: ShoppingBag },
   { type: "section" as const, label: "Konten" },
-  { label: "Kelas Bimbingan", href: "/admin/bimbingan",    icon: GraduationCap },
-  { label: "Blog",            href: "/admin/blog",         icon: FileText },
+  { label: "Blog",             href: "/admin/blog",        icon: FileText },
+  { label: "Testimoni",        href: "/admin/testimoni",   icon: Quote },
+  // Dua entri di bawah bukan bagian katalog: keduanya mengatur fitur periksa
+  // naskah (tabel services dan quota_packages), yang masih dipakai alur
+  // pesanan di /api/order. Namanya diperjelas supaya tidak tertukar dengan
+  // etalase "Layanan Utama" dan "Paket Hemat" di katalog.
+  { type: "section" as const, label: "Periksa Naskah" },
+  { label: "Tarif Pemeriksaan", href: "/admin/layanan",    icon: Settings },
+  { label: "Paket Isi Saldo",   href: "/admin/paket",      icon: Package },
   { type: "section" as const, label: "Konfigurasi" },
-  { label: "Layanan & Harga", href: "/admin/layanan",      icon: Settings },
-  { label: "Paket Hemat",     href: "/admin/paket",        icon: Package },
-  { label: "⚡ Superadmin",   href: "/admin/superadmin",   icon: ShieldCheck },
+  { label: "Superadmin",       href: "/admin/superadmin",  icon: ShieldCheck },
 ];
 
-export function AdminSidebar() {
+export function AdminSidebar({ role = "admin" }: { role?: string }) {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
@@ -53,7 +72,7 @@ export function AdminSidebar() {
 
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-0.5" aria-label="Admin navigation">
-        {navItems.map((item, i) => {
+        {navItems.filter((item) => item.href !== "/admin/superadmin" || role === "superadmin").map((item, i) => {
           if (item.type === "section") {
             return (
               <p key={i} className="px-3 pt-5 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-white/40">

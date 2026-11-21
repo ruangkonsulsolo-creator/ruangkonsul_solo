@@ -1,159 +1,149 @@
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { CalendarDays, Users, Clock, TrendingUp, ArrowRight } from "lucide-react";
-import { BRAND } from "@/lib/brand";
-import { PREVIEW_MODE } from "@/lib/utils/preview-mode";
 import type { Metadata } from "next";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { CalendarDays, MessageSquare, Star, Users } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
+import { KalenderJadwal, type SesiJadwal } from "@/components/mentor/KalenderJadwal";
+import { BRAND } from "@/lib/brand";
+
 export const metadata: Metadata = { title: `Dashboard Mentor | ${BRAND.name}` };
+export const dynamic = "force-dynamic";
 
-async function getData() {
-  if (PREVIEW_MODE) {
-    return {
-      nama: "Preview Mentor",
-      isAvailable: true,
-      stats: { sessionCount: 47, ratingAvg: 4.9, todayBookings: 3, pricePerHour: 150000 },
-      todayBookings: [
-        { id: "b1", slot_start: "09:00", slot_end: "10:00", customer: "Rizky Aditya", whatsapp: "62882007483223", status: "confirmed" },
-        { id: "b2", slot_start: "11:00", slot_end: "12:00", customer: "Siti Mariyam",  whatsapp: null,            status: "pending" },
-        { id: "b3", slot_start: "14:00", slot_end: "15:00", customer: "Budi Santoso",  whatsapp: "62881234567",   status: "confirmed" },
-      ],
-      upcomingBookings: [
-        { id: "u1", customer: "Dewi Rahayu",    date: "Senin, 20 Okt",   time: "10:00", topic: "Bimbingan BAB 3", status: "confirmed" },
-        { id: "u2", customer: "Ahmad Fauzi",    date: "Selasa, 21 Okt",  time: "13:00", topic: "Konsultasi Judul", status: "pending" },
-        { id: "u3", customer: "Linda Sari",     date: "Rabu, 22 Okt",    time: "15:00", topic: "Review BAB 4",    status: "confirmed" },
-      ],
-    };
-  }
-  try {
-    const { createClient } = await import("@/lib/supabase/server");
-    const { redirect } = await import("next/navigation");
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) redirect("/login");
-    const { data: profile } = await supabase.from("profiles").select("role, full_name").eq("id", user!.id).single();
-    if (!profile || !["mentor","admin","superadmin"].includes(profile.role)) redirect("/dashboard");
-    const { data: mp } = await supabase.from("mentor_profiles").select("id, session_count, rating_avg, is_available, price_per_hour").eq("user_id", user!.id).single();
-    const today = new Date().toISOString().slice(0, 10);
-    const { data: todayB } = await supabase.from("bookings").select("id, status, booking_slots(slot_start, slot_end), profiles(full_name, whatsapp)").eq("mentor_id", mp?.id ?? "").in("status", ["confirmed","pending"]).limit(10);
-    return {
-      nama: profile!.full_name?.split(" ")[0] ?? "Mentor",
-      isAvailable: mp?.is_available ?? false,
-      stats: { sessionCount: mp?.session_count ?? 0, ratingAvg: mp?.rating_avg ?? 0, todayBookings: todayB?.length ?? 0, pricePerHour: mp?.price_per_hour ?? 0 },
-      todayBookings: (todayB ?? []).map((b: any) => ({ id: b.id, slot_start: b.booking_slots?.slot_start?.slice(0,5), slot_end: b.booking_slots?.slot_end?.slice(0,5), customer: b.profiles?.full_name ?? "Klien", whatsapp: b.profiles?.whatsapp, status: b.status })),
-      upcomingBookings: [],
-    };
-  } catch {
-    return { nama: "Mentor", isAvailable: true, stats: { sessionCount: 0, ratingAvg: 0, todayBookings: 0, pricePerHour: 0 }, todayBookings: [], upcomingBookings: [] };
-  }
-}
+/**
+ * Dashboard mentor.
+ *
+ * Jadwalnya berbentuk kalender, bukan daftar memanjang: pertanyaan yang
+ * paling sering muncul sebelum menyetujui booking adalah "hari apa saya
+ * masih kosong", dan daftar tidak pernah menjawab itu sekali lihat.
+ *
+ * Semua angka di sini dihitung dari baris yang benar-benar ada. Tidak ada
+ * nilai contoh yang ditanam di kode — panel yang menampilkan "47 sesi" pada
+ * mentor yang belum punya klien membuat seluruh panel kehilangan kepercayaan.
+ */
+export default async function DashboardMentorPage() {
+  const supabase = createClient();
 
-export default async function MentorDashboardPage() {
-  const { nama, isAvailable, stats, todayBookings, upcomingBookings } = await getData();
-  const statCards = [
-    { icon: Users,       label: "Total Sesi",     value: stats.sessionCount },
-    { icon: TrendingUp,  label: "Rating",          value: `${stats.ratingAvg}★` },
-    { icon: CalendarDays,label: "Booking Hari Ini",value: stats.todayBookings },
-    { icon: Clock,       label: "Jam/Sesi",        value: `Rp ${(stats.pricePerHour/1000).toFixed(0)}K` },
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { data: mentor } = await supabase
+    .from("mentor_profiles")
+    .select("id, rating_avg, session_count, is_available, price_per_hour")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  const { data: profil } = await supabase
+    .from("profiles").select("full_name").eq("id", user.id).maybeSingle();
+
+  if (!mentor) {
+    return (
+      <div className="mx-auto max-w-xl rounded-2xl border border-amber-200 bg-amber-50 p-6">
+        <h2 className="font-extrabold text-amber-900">Profil mentor belum aktif</h2>
+        <p className="mt-2 text-sm leading-relaxed text-amber-800">
+          Akun ini punya peran mentor, tapi belum punya baris profil mentor.
+          Admin perlu membuatkannya lebih dulu lewat panel Kinerja Mentor.
+        </p>
+      </div>
+    );
+  }
+
+  const { data: booking } = await supabase
+    .from("bookings")
+    .select(
+      `id, status, notes,
+       slot:booking_slots!bookings_slot_id_fkey ( slot_date, slot_start, slot_end ),
+       klien:profiles!bookings_customer_id_fkey ( full_name )`
+    )
+    .eq("mentor_id", mentor.id)
+    .order("created_at", { ascending: false })
+    .limit(400);
+
+  const sesi: SesiJadwal[] = (booking ?? [])
+    .map((b): SesiJadwal | null => {
+      const s = b.slot as unknown as {
+        slot_date: string; slot_start: string; slot_end: string;
+      } | null;
+      const k = b.klien as unknown as { full_name: string | null } | null;
+      if (!s) return null;
+      // Slot disimpan sebagai tanggal dan jam lokal WIB, jadi offset +07:00
+      // ditulis eksplisit. Tanpa itu, Date menafsirkannya sebagai UTC dan
+      // seluruh jadwal bergeser tujuh jam.
+      return {
+        id: b.id,
+        mulai: `${s.slot_date}T${s.slot_start}+07:00`,
+        selesai: `${s.slot_date}T${s.slot_end}+07:00`,
+        namaKlien: k?.full_name ?? "Klien",
+        status: b.status as SesiJadwal["status"],
+        catatan: b.notes ?? undefined,
+      };
+    })
+    .filter((x): x is SesiJadwal => x !== null);
+
+  const kiniWib = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Jakarta", year: "numeric", month: "2-digit", day: "2-digit",
+  }).format(new Date());
+
+  const hariIni = sesi.filter((s) => s.mulai.slice(0, 10) === kiniWib).length;
+  const menunggu = sesi.filter((s) => s.status === "pending").length;
+  const klienUnik = new Set(sesi.map((s) => s.namaKlien)).size;
+
+  const kartu = [
+    { icon: CalendarDays, nilai: String(hariIni), label: "Sesi hari ini" },
+    { icon: Users, nilai: String(klienUnik), label: "Klien" },
+    { icon: Star, nilai: mentor.rating_avg > 0 ? Number(mentor.rating_avg).toFixed(1) : "—", label: "Rating" },
+    { icon: MessageSquare, nilai: String(menunggu), label: "Menunggu konfirmasi" },
   ];
 
   return (
-    <div className="space-y-7 max-w-4xl">
-      <div className="flex items-center justify-between flex-wrap gap-3">
+    <div className="space-y-5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-extrabold text-slate-900">Halo, {nama}! 👋</h2>
-          <p className="text-sm text-muted-foreground mt-0.5">Dashboard Mentor — {BRAND.name}</p>
+          <h2 className="text-xl font-extrabold text-slate-900">
+            Halo, {profil?.full_name ?? "Mentor"}
+          </h2>
+          <p className="mt-0.5 text-sm text-slate-500">
+            {sesi.length === 0
+              ? "Belum ada sesi terjadwal."
+              : `${sesi.length} sesi tercatat sejauh ini.`}
+          </p>
         </div>
-        <div className={`flex items-center gap-2 rounded-2xl px-4 py-2 border ${isAvailable ? "bg-green-50 border-green-200" : "bg-slate-50 border-slate-200"}`}>
-          <div className={`h-2 w-2 rounded-full ${isAvailable ? "bg-green-500" : "bg-slate-400"}`} />
-          <span className={`text-xs font-bold ${isAvailable ? "text-green-700" : "text-slate-500"}`}>{isAvailable ? "Tersedia" : "Tidak Tersedia"}</span>
-        </div>
+        <span
+          className={`rounded-full px-3 py-1 text-xs font-bold ${
+            mentor.is_available
+              ? "bg-green-50 text-green-700"
+              : "bg-slate-100 text-slate-600"
+          }`}
+        >
+          {mentor.is_available ? "Menerima booking" : "Tidak menerima booking"}
+        </span>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {statCards.map((s) => {
-          const Icon = s.icon;
-          return (
-            <div key={s.label} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-50 mb-3">
-                <Icon className="h-5 w-5 text-[#8B0000]" />
-              </div>
-              <p className="text-2xl font-extrabold text-slate-900">{s.value}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{s.label}</p>
-            </div>
-          );
-        })}
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {kartu.map((k) => (
+          <div key={k.label} className="rounded-2xl border border-slate-200 bg-white p-4">
+            <span className="mb-2 flex h-9 w-9 items-center justify-center rounded-xl bg-brand-50">
+              <k.icon className="h-4 w-4 text-brand" aria-hidden="true" />
+            </span>
+            <p className="text-2xl font-extrabold text-slate-900">{k.nilai}</p>
+            <p className="text-xs text-slate-500">{k.label}</p>
+          </div>
+        ))}
       </div>
 
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Jadwal Hari Ini</h3>
-          <Link href="/mentor/jadwal" className="text-xs font-semibold text-[#8B0000] hover:underline flex items-center gap-1">
-            Kelola Jadwal <ArrowRight className="h-3 w-3" />
+      <KalenderJadwal sesi={sesi} />
+
+      <div className="flex flex-wrap gap-2">
+        {[
+          ["Kelola jadwal", "/mentor/jadwal"],
+          ["Chat klien", "/mentor/chat"],
+          ["Ulasan", "/mentor/ulasan"],
+          ["Profil mentor", "/mentor/profil"],
+        ].map(([label, href]) => (
+          <Link key={href} href={href}
+            className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 transition-colors hover:border-brand hover:text-brand">
+            {label}
           </Link>
-        </div>
-        {todayBookings.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-slate-200 bg-white py-10 text-center">
-            <CalendarDays className="h-8 w-8 text-slate-200 mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground">Tidak ada sesi hari ini</p>
-            <Link href="/mentor/jadwal" className="mt-2 inline-block text-xs text-[#8B0000] hover:underline">Atur slot tersedia →</Link>
-          </div>
-        ) : (
-          <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-card">
-            <div className="divide-y divide-slate-100">
-              {todayBookings.map((b: any) => (
-                <div key={b.id} className="flex items-center gap-4 px-5 py-4">
-                  <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-brand-50">
-                    <span className="text-xs font-bold text-[#8B0000]">{b.slot_start ?? "--"}</span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-slate-900">{b.customer}</p>
-                    <p className="text-xs text-muted-foreground">{b.slot_start} – {b.slot_end} WIB</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant={b.status === "confirmed" ? "success" : "warning"}>
-                      {b.status === "confirmed" ? "Konfirmasi" : "Pending"}
-                    </Badge>
-                    {b.whatsapp && (
-                      <a href={`https://wa.me/${b.whatsapp}`} target="_blank" rel="noopener noreferrer"
-                        className="text-xs text-[#8B0000] hover:underline">Chat</a>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {upcomingBookings.length > 0 && (
-        <div>
-          <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">Upcoming</h3>
-          <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-card">
-            <div className="divide-y divide-slate-100">
-              {upcomingBookings.map((b: any) => (
-                <div key={b.id} className="flex items-center gap-4 px-5 py-3.5 hover:bg-slate-50 transition-colors">
-                  <div className="text-center flex-shrink-0 w-20">
-                    <p className="text-xs font-bold text-[#8B0000]">{b.date.split(",")[0]}</p>
-                    <p className="text-xs text-slate-500">{b.time} WIB</p>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-slate-900">{b.customer}</p>
-                    {b.topic && <p className="text-xs text-muted-foreground">{b.topic}</p>}
-                  </div>
-                  <Badge variant={b.status === "confirmed" ? "success" : "warning"} className="flex-shrink-0">
-                    {b.status === "confirmed" ? "Terkonfirmasi" : "Menunggu"}
-                  </Badge>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="grid grid-cols-2 gap-3">
-        <Button asChild className="gap-2"><Link href="/mentor/jadwal"><CalendarDays className="h-4 w-4" />Atur Jadwal</Link></Button>
-        <Button variant="outline" asChild className="gap-2"><Link href="/mentor/klien"><Users className="h-4 w-4" />Daftar Klien</Link></Button>
+        ))}
       </div>
     </div>
   );

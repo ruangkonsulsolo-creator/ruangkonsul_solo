@@ -20,7 +20,7 @@ export async function PATCH(
     .eq("id", user.id)
     .single();
 
-  if (!profile || !["admin", "super_admin"].includes(profile.role)) {
+  if (!profile || !["admin", "superadmin"].includes(profile.role)) {
     return NextResponse.json({ error: "Akses ditolak." }, { status: 403 });
   }
 

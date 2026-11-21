@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Toast, useToast } from "@/components/ui/toast";
 import { Plus, Pencil, Trash2, ToggleLeft, ToggleRight, Loader2, X, Save, Image as ImageIcon, Star } from "lucide-react";
+import { formatRupiah } from "@/lib/utils/format-currency";
 
 interface Kelas { id: string; tab: string; tag: string; title: string; subtitle: string | null; harga: number; is_active: boolean; sort_order: number; rating: number; review_count: number; image_url: string | null; }
 
@@ -31,7 +32,7 @@ const EMPTY_FORM = {
 };
 
 function fmt(n: number) {
-  return n === 0 ? "Gratis" : new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(n);
+  return n === 0 ? "Gratis" : formatRupiah(n);
 }
 
 export function KelasAdminTable({ kelas: initial }: { kelas: Kelas[] }) {
@@ -214,12 +215,12 @@ export function KelasAdminTable({ kelas: initial }: { kelas: Kelas[] }) {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {kelas.length === 0 ? (
-                <tr><td colSpan={7} className="px-4 py-10 text-center text-muted-foreground">Belum ada kelas. Klik "Tambah Kelas" untuk mulai.</td></tr>
+                <tr><td colSpan={7} className="px-4 py-10 text-center text-muted-foreground">Belum ada kelas. Klik &ldquo;Tambah Kelas&rdquo; untuk mulai.</td></tr>
               ) : kelas.map((k) => (
                 <tr key={k.id} className="hover:bg-slate-50 transition-colors">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      {k.image_url ? <img src={k.image_url} alt="" className="h-10 w-14 rounded-lg object-cover border border-slate-100 flex-shrink-0" /> : <div className="h-10 w-14 rounded-lg bg-brand-50 flex items-center justify-center flex-shrink-0"><ImageIcon className="h-4 w-4 text-brand-200" /></div>}
+                      {k.image_url ? <img src={k.image_url} alt="" className="h-10 w-14 rounded-lg object-cover border border-slate-100 flex-shrink-0" /> : <div className="h-10 w-14 rounded-lg bg-brand-50 flex items-center justify-center flex-shrink-0"><ImageIcon className="h-4 w-4 text-slate-400" /></div>}
                       <div><p className="font-semibold text-slate-900 max-w-[200px] truncate">{k.title}</p><p className="text-xs text-muted-foreground">{k.subtitle ?? ""}</p></div>
                     </div>
                   </td>

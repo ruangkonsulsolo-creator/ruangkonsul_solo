@@ -5,9 +5,10 @@ import Link from "next/link";
 import { ClipboardList, Users, TrendingUp, Clock } from "lucide-react";
 import { BRAND } from "@/lib/brand";
 import type { Metadata } from "next";
+import { formatRupiah } from "@/lib/utils/format-currency";
 export const metadata: Metadata = { title: `Admin Dashboard | ${BRAND.name}` };
 
-function fmt(n: number) { return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(n); }
+function fmt(n: number) { return formatRupiah(n); }
 
 const STATUS_BADGE: Record<string, { label: string; variant: "success"|"warning"|"info"|"destructive"|"secondary" }> = {
   menunggu_pembayaran: { label: "Menunggu", variant: "warning" },
@@ -26,7 +27,7 @@ export default async function AdminDashboardPage() {
     supabase.from("orders").select("*", { count: "exact", head: true }).gte("created_at", `${today}T00:00:00Z`),
     supabase.from("profiles").select("*", { count: "exact", head: true }).eq("role", "user"),
     supabase.from("transactions").select("amount_idr").eq("type", "order_payment").gte("created_at", `${today}T00:00:00Z`),
-    supabase.from("orders").select("id, order_number, status, created_at, services(name), profiles(full_name)").order("created_at", { ascending: false }).limit(8),
+    supabase.from("orders").select("id, order_number, status, created_at, services(name), profiles:profiles!orders_user_id_fkey(full_name)").order("created_at", { ascending: false }).limit(8),
   ]);
   const todayRevenue = (revenueResult.data ?? []).reduce((s, t) => s + (t.amount_idr ?? 0), 0);
   const stats = [

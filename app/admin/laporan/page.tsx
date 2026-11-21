@@ -3,9 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp, ShoppingCart, Users, PackageOpen } from "lucide-react";
 import { BRAND } from "@/lib/brand";
 import type { Metadata } from "next";
+import { formatRupiah } from "@/lib/utils/format-currency";
 export const metadata: Metadata = { title: `Laporan Revenue | Admin ${BRAND.name}` };
 
-function fmt(n: number) { return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(n); }
+function fmt(n: number) { return formatRupiah(n); }
 
 export default async function AdminLaporanPage() {
   const supabase = createClient();

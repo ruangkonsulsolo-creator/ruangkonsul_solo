@@ -85,7 +85,7 @@ export default async function SubscriptionPage() {
   const activeSub = await getActiveSubscription();
 
   return (
-    <div className="space-y-7 max-w-4xl">
+    <div className="space-y-7 max-w-7xl">
       <div>
         <h2 className="text-xl font-extrabold text-slate-900">Subscription Bimbingan</h2>
         <p className="text-sm text-muted-foreground mt-0.5">

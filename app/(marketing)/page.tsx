@@ -1,8 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import {
-  FileSearch, Bot, BookOpenCheck, PenLine, GraduationCap,
-  ArrowRight, CheckCircle2, Star, ChevronDown,
+  GraduationCap, ArrowRight, CheckCircle2, Star, ChevronDown,
   MapPin, Clock, MessageCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,21 +10,45 @@ import { Logo } from "@/components/ui/logo";
 import { HeroSlider } from "@/components/landing/HeroSlider";
 import { HeroBackground } from "@/components/landing/HeroBackground";
 import { BannerStrip } from "@/components/landing/BannerStrip";
+import { LogoKampus } from "@/components/landing/LogoKampus";
+import { KartuTool, TOOLS } from "@/components/landing/KartuTool";
+import { KotakPeriksa } from "@/components/periksa/KotakPeriksa";
+import { ambilTarifPeriksa } from "@/lib/periksa/tarif";
+import { TestimoniWhatsApp } from "@/components/landing/TestimoniWhatsApp";
 import { BRAND, waLink } from "@/lib/brand";
 import type { Metadata } from "next";
+import { NavbarUtama } from "@/components/ui/NavbarUtama";
+import { ambilEtalase } from "@/lib/katalog/baca";
+import { ETALASE } from "@/lib/katalog/tipe";
+import { formatRupiah } from "@/lib/utils/format-currency";
 
 export const metadata: Metadata = {
   title: `${BRAND.name} — Bimbingan Skripsi & Tesis Solo`,
   description:
-    "Layanan bimbingan skripsi, tesis, cek plagiasi Turnitin, AI Detector, parafrase, dan jasa akademik terpercaya di Solo. Hubungi kami via WhatsApp.",
+    "Bimbingan skripsi dan tesis bersama mentor berpengalaman di Solo, Jogja, "
+    + "Jakarta dan Bekasi. Pilih mentor, pesan jadwal, kerjakan tulisanmu sendiri "
+    + "dengan arahan yang jelas.",
 };
 
 /* ─── data ──────────────────────────────────────────────────────────────────── */
-const LAYANAN = [
-  { icon: FileSearch,    name: "Cek Turnitin",   sub: "Laporan Similarity",  harga: "Rp 35.000", href: "/cek-plagiasi",  featured: false },
-  { icon: Bot,           name: "AI Detector",    sub: "GPT Zero Detector",   harga: "Rp 25.000", href: "/cek-ai",        featured: true  },
-  { icon: BookOpenCheck, name: "Cek DrillBit",   sub: "Plagiasi + AI",       harga: "Rp 45.000", href: "/cek-drillbit",  featured: false },
-  { icon: PenLine,       name: "Jasa Parafrase", sub: "Turunkan Plagiasi",   harga: "Rp 75.000", href: "/jasa-parafrase",featured: false },
+// Paket bimbingan harian kini datang dari tabel produk (etalase
+// bimbingan-online), disunting lewat panel admin. Daftar yang dulu
+// ditulis di sini sudah dihapus supaya tidak ada dua sumber harga.
+
+
+// Ganti dengan data mentor sungguhan. Foto menyusul — untuk sekarang
+// dipakai inisial supaya tidak ada wajah palsu di situs.
+// Taruh foto mentor di /public/mentor/ lalu isi `foto` dengan nama berkasnya,
+// misal "/mentor/azarel.jpg". Kalau `foto` null, kartu memakai inisial.
+
+// Promo berjalan. Atur tanggal berakhirnya supaya tidak basi di halaman.
+const PROMO = [
+  { judul: "Diskon 20% Sesi Pertama", syarat: "Untuk pendaftar baru, berlaku sekali",
+    kode: "MULAI20", sampai: "30 November 2026" },
+  { judul: "Paket Berdua Hemat 15%", syarat: "Daftar bersama satu teman seangkatan",
+    kode: "BARENG15", sampai: "31 Desember 2026" },
+  { judul: "Gratis 1 Sesi Revisi", syarat: "Pembelian paket bulanan pertama",
+    kode: "REVISIFREE", sampai: "31 Desember 2026" },
 ];
 
 const JASA = [
@@ -35,60 +58,111 @@ const JASA = [
 
 const TESTIMONIALS = [
   { name: "Rizky A.",    univ: "UNS",  text: "Bimbingan skripsinya sangat sabar dan detail. BAB 1-5 selesai 6 minggu, langsung ACC!",  init: "RA", star: 5 },
-  { name: "Dita S.",     univ: "UGM",  text: "Harga terjangkau, laporan Turnitin cepat dan akurat. Recommended banget!",               init: "DS", star: 5 },
+  { name: "Dita S.",     univ: "UGM",  text: "Rumusan masalahku diputar balik sampai akhirnya masuk akal. Proposal ACC sekali maju.", init: "DS", star: 5 },
   { name: "Budi W.",     univ: "ITS",  text: "Bimbingan SPSS beres 2 sesi, interpretasi BAB 4 jadi jauh lebih mudah dipahami.",        init: "BW", star: 5 },
 ];
 
 const FAQS = [
-  { q: "Berapa lama proses cek Turnitin?",        a: "Hasil cek Turnitin siap dalam 24 jam kerja setelah pembayaran dikonfirmasi." },
+  { q: "Satu sesi berapa lama?",                  a: "Enam puluh menit, daring atau tatap muka di Solo. Bisa diperpanjang kalau slot mentor berikutnya kosong." },
   { q: "Apakah bisa konsultasi dulu sebelum bayar?", a: "Bisa! Hubungi kami via WhatsApp untuk konsultasi gratis sebelum memutuskan layanan." },
-  { q: "Format file apa yang diterima?",           a: "PDF, DOCX, dan DOC dengan ukuran maksimum 50 MB." },
-  { q: "Apakah dokumen saya aman?",                a: "Ya. Dokumen disimpan di server terenkripsi dan hanya diakses oleh tim kami." },
+  { q: "Apakah skripsi saya dikerjakan tim kalian?", a: "Tidak. Kamu yang menulis; mentor membantu menajamkan arah, metode, dan argumenmu. Kami tidak menerima pesanan naskah jadi." },
+  { q: "Apakah draf saya aman?",                   a: "Draf hanya dibaca mentor yang menangani sesimu, disimpan di penyimpanan terenkripsi, dan tidak pernah dibagikan ke pihak lain." },
   { q: "Bagaimana cara booking bimbingan?",        a: "Daftar akun, pilih mentor, pilih slot jadwal, lakukan pembayaran — selesai." },
 ];
 
 function SectionLabel({ children }: { children: string }) {
   return (
     <div className="flex items-center gap-2 mb-3">
-      <span className="h-0.5 w-8 bg-[#8B0000] rounded-full" />
-      <span className="text-xs font-bold uppercase tracking-widest text-[#8B0000]">{children}</span>
+      <span className="h-0.5 w-8 bg-brand rounded-full" />
+      <span className="text-xs font-bold uppercase tracking-widest text-brand">{children}</span>
     </div>
   );
 }
 
 /* ─── page ──────────────────────────────────────────────────────────────────── */
-export default function LandingPage() {
+/**
+ * Mentor diambil dari basis data, bukan ditulis di kode.
+ *
+ * Sebelumnya bagian ini memuat tiga mentor tetap dengan rating dan jumlah
+ * sesi karangan, sementara basis datanya baru berisi satu mentor sungguhan.
+ * Calon klien yang menghubungi "Mentor Ekonomi" tidak akan menemukan siapa
+ * pun di sisi lain.
+ *
+ * rating dan jumlah sesi hanya ditampilkan kalau angkanya memang sudah ada.
+ * Mentor baru yang belum punya ulasan lebih baik tidak menampilkan apa-apa
+ * daripada menampilkan "0.0 · 0 sesi" — yang membuatnya terlihat buruk
+ * padahal cuma belum mulai.
+ */
+async function ambilMentor() {
+  try {
+    const { createClient } = await import("@/lib/supabase/server");
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from("mentor_profiles")
+      .select(
+        `id, gelar, education, specializations, rating_avg, session_count,
+         avatar_url, is_available, headline,
+         profil:profiles!mentor_profiles_user_id_fkey ( full_name )`
+      )
+      .order("rating_avg", { ascending: false })
+      .limit(6);
+
+    if (error) {
+      console.error("[beranda] gagal memuat mentor:", error);
+      return [];
+    }
+
+    return (data ?? []).map((m) => {
+      const pr = m.profil as unknown as { full_name: string | null } | null;
+      const nama = pr?.full_name?.trim() || "Mentor";
+      return {
+        id: m.id as string,
+        nama,
+        gelar: (m.gelar as string | null) ?? "",
+        kampus: (m.education as string | null) ?? "",
+        bidang: ((m.specializations as string[] | null) ?? []).slice(0, 3),
+        rating: Number(m.rating_avg ?? 0),
+        sesi: Number(m.session_count ?? 0),
+        foto: (m.avatar_url as string | null) ?? null,
+        tersedia: Boolean(m.is_available),
+        inisial: nama.split(/\s+/).filter(Boolean).slice(0, 2)
+          .map((x: string) => x[0]).join("").toUpperCase() || "M",
+      };
+    });
+  } catch (e) {
+    // Basis data tidak terjangkau saat build atau saat render. Bagian mentor
+    // disembunyikan, sisa halaman tetap tampil — satu kueri gagal tidak
+    // boleh menjatuhkan seluruh beranda.
+    console.error("[beranda] mentor tidak bisa diambil:", e);
+    return [];
+  }
+}
+
+/** Data mentor berubah jarang; lima menit cukup segar tanpa membebani. */
+export const revalidate = 300;
+
+export default async function LandingPage() {
+  const tarifPeriksa = await ambilTarifPeriksa();
+  const [MENTOR, bimbingan] = await Promise.all([
+    ambilMentor(),
+    ambilEtalase(ETALASE.bimbinganOnline),
+  ]);
+  const paketHarian = bimbingan.produk;
   return (
     <div className="min-h-screen bg-white text-slate-900">
 
       {/* ── WA Banner ── */}
-      <div className="bg-[#8B0000] text-white text-sm py-2.5 px-4 text-center flex flex-wrap items-center justify-center gap-3">
+      <div className="bg-brand text-white text-sm py-2.5 px-4 text-center flex flex-wrap items-center justify-center gap-3">
         <Image src={BRAND.iconWhatsapp} alt="WhatsApp" width={20} height={20} unoptimized className="rounded flex-shrink-0" />
         <span>Gabung saluran WhatsApp untuk update layanan, promo, dan info terbaru dari {BRAND.name}!</span>
         <a href={waLink("Halo, saya ingin info layanan Ruang Konsul Solo")} target="_blank" rel="noopener noreferrer"
-          className="rounded-full border border-white/60 px-3 py-0.5 text-xs font-semibold hover:bg-white hover:text-[#8B0000] transition-colors">
+          className="rounded-full border border-white/60 px-3 py-0.5 text-xs font-semibold hover:bg-white hover:text-brand transition-colors">
           Gabung Disini
         </a>
       </div>
 
       {/* ── Navbar ── */}
-      <nav className="sticky top-0 z-30 border-b border-slate-100 bg-white/95 backdrop-blur-sm shadow-sm">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-          <Logo size="md" />
-          <div className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-600">
-            <Link href="/layanan"    className="hover:text-[#8B0000] transition-colors">Layanan</Link>
-            <Link href="/blog"       className="hover:text-[#8B0000] transition-colors">Blog</Link>
-            <Link href="/dashboard/riwayat-pesanan" className="hover:text-[#8B0000] transition-colors">Cek Pesanan</Link>
-            <Link href="/paket-hemat" className="hover:text-[#8B0000] transition-colors">Paket Hemat</Link>
-            <Link href="/bimbingan"  className="hover:text-[#8B0000] transition-colors font-semibold">Bimbingan</Link>
-            <Link href="/referral"   className="hover:text-[#8B0000] transition-colors">Referral</Link>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" asChild><Link href="/daftar">Daftar</Link></Button>
-            <Button size="sm" asChild><Link href="/login">Login</Link></Button>
-          </div>
-        </div>
-      </nav>
+      <NavbarUtama />
 
       {/* ── Hero ── */}
       <section className="relative overflow-hidden hero-gradient">
@@ -98,49 +172,59 @@ export default function LandingPage() {
           {/* Kiri */}
           <div className="flex-1 text-center lg:text-left">
             <Badge variant="secondary" className="mb-5 text-xs px-3 py-1">
-              🎓 Dipercaya 1.000+ Mahasiswa di Solo & Seluruh Indonesia
+              🎓 Solo · Jogja · Jakarta · Bekasi
             </Badge>
-            <h1 className="text-4xl lg:text-5xl xl:text-6xl font-extrabold leading-tight text-slate-900">
-              Cek{" "}
-              <span className="text-[#8B0000]">Turnitin</span>
-              <br />
-              dan{" "}
-              <span className="text-[#8B0000]">AI Detector</span>
-              <br />
-              <span className="text-slate-700">No Repository</span>
+            {/*
+              Catatan: "no. 1 di Indonesia" adalah klaim superlatif. UU No. 8
+              Tahun 1999 tentang Perlindungan Konsumen Pasal 9 ayat (1)
+              melarang menyatakan suatu jasa sebagai yang nomor satu atau
+              paling unggul tanpa bukti yang bisa dipertanggungjawabkan, dan
+              Etika Pariwara Indonesia mengatur hal serupa. Pemilik sudah
+              diberi tahu risikonya dan memutuskan memakainya. Siapkan bukti
+              pendukung kalau suatu saat ditanya.
+            */}
+            <h1 className="text-4xl lg:text-5xl xl:text-6xl font-extrabold leading-[1.1] tracking-tight text-brand">
+              Jasa Bimbingan Skripsi, Tesis &amp; Disertasi no. 1 di Indonesia
             </h1>
-            <p className="mt-4 text-lg text-slate-500 max-w-lg mx-auto lg:mx-0 leading-relaxed">
-              Jasa Cek Turnitin, AI, Drillbit, dan Parafrase. Cuma upload dokumen dan
-              langsung terima laporan. Jaminan No Repository dan dapat diakses kapan saja!
+
+            <p className="mt-5 text-xl lg:text-2xl font-bold text-slate-900 max-w-xl mx-auto lg:mx-0 leading-snug">
+              Dibimbing Mentor Berpengalaman sampai Paham dan Lulus Tepat Waktu.{" "}
+              <span className="text-brand">No molor-molor!</span>
+            </p>
+
+            <p className="mt-3 text-base font-medium text-slate-600 max-w-lg mx-auto lg:mx-0 leading-relaxed">
+              Pilih mentor sesuai bidangmu, pesan jadwal sendiri, dan selesaikan bab
+              yang terkendala minggu ini. Mulai Rp50.000 per sesi.
             </p>
 
             {/* Stats */}
             <div className="mt-7 flex flex-wrap justify-center lg:justify-start gap-6 text-sm">
               {[
-                { val: "Rp 25.000", label: "Per Dokumen" },
-                { val: "24 Jam",    label: "Estimasi Selesai" },
-                { val: "24 Jam",    label: "Akses Laporan" },
+                // Ganti dengan angka sungguhan sebelum publish.
+                { val: "10.000+", label: "Mahasiswa Dibimbing" },
+                { val: "10+",     label: "Mentor Available" },
+                { val: "4,9/5",   label: "Rata-rata Penilaian" },
               ].map((s, i) => (
                 <div key={i} className="flex flex-col">
-                  <span className="text-2xl font-extrabold text-[#8B0000]">{s.val}</span>
-                  <span className="text-xs text-slate-400 uppercase tracking-wide">{s.label}</span>
+                  <span className="text-2xl font-extrabold text-brand">{s.val}</span>
+                  <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wide">{s.label}</span>
                 </div>
               ))}
             </div>
 
             <div className="mt-7 flex flex-wrap justify-center lg:justify-start gap-3">
-              <Button size="lg" asChild className="shadow-brand gap-2">
-                <Link href="/daftar">Mulai Cek Sekarang <ArrowRight className="h-4 w-4" /></Link>
+              <Button size="lg" asChild className="shadow-card gap-2">
+                <Link href="/booking">Pesan Jadwal Bimbingan <ArrowRight className="h-4 w-4" /></Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <Link href="#layanan">Lihat Layanan</Link>
+                <Link href="#mentor">Lihat Mentor</Link>
               </Button>
             </div>
 
-            <div className="mt-6 flex flex-wrap justify-center lg:justify-start gap-4 text-xs text-slate-500">
-              {["📄 Laporan dalam hitungan jam", "🔒 Dokumen aman & privat", "✅ Hasil akurat & terpercaya"].map((t) => (
-                <span key={t}>{t}</span>
-              ))}
+            {/* Bukti sosial menggantikan baris emoji: logo kampus asal peserta
+                lebih meyakinkan daripada tiga janji tanpa bukti. */}
+            <div className="mt-7 flex justify-center lg:justify-start">
+              <LogoKampus jumlahPeserta="10.000++" rating="4,9" />
             </div>
           </div>
 
@@ -153,38 +237,84 @@ export default function LandingPage() {
       <BannerStrip />
 
       {/* ── Layanan Tab Utama ── */}
-      <section id="layanan" className="mx-auto max-w-6xl px-4 py-20">
-        <SectionLabel>Layanan Utama</SectionLabel>
-        <h2 className="text-3xl lg:text-4xl font-extrabold text-slate-900 mb-2">
-          Layanan Cek Turnitin, Cek AI,<br className="hidden sm:block" /> Drillbit, dan Parafrase
-        </h2>
-        <p className="text-slate-500 max-w-xl mb-10">
-          Ruang Konsul Solo hadir untuk mendukung setiap kebutuhan akademikmu — dari tugas kuliah,
-          skripsi, tesis, hingga artikel ilmiah.
-        </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          {LAYANAN.map((l) => {
-            const Icon = l.icon;
-            return (
-              <div key={l.name} className={`group relative rounded-2xl border p-6 card-hover cursor-pointer transition-all ${
-                l.featured
-                  ? "border-[#8B0000] bg-[#8B0000] text-white shadow-brand"
-                  : "border-slate-200 bg-white hover:border-brand-200"
-              }`}>
-                <div className={`inline-flex h-10 w-10 items-center justify-center rounded-xl mb-4 ${l.featured ? "bg-white/20" : "bg-brand-50"}`}>
-                  <Icon className={`h-5 w-5 ${l.featured ? "text-white" : "text-[#8B0000]"}`} aria-hidden="true" />
+      {/*
+        Paket bimbingan harian, dibaca dari katalog (etalase bimbingan-online).
+        Sebelumnya bagian ini berisi enam layanan dengan harga yang tidak
+        pernah ada di daftar harga mana pun — Rp150.000 per sesi dan
+        seterusnya. Sekarang yang tampil di sini sama persis dengan yang
+        disunting admin di panel katalog.
+      */}
+      {paketHarian.length > 0 && (
+        <section id="layanan" className="mx-auto max-w-6xl px-4 py-20">
+          <SectionLabel>Bimbingan Online</SectionLabel>
+          <h2 className="text-3xl lg:text-4xl font-extrabold text-slate-900 mb-2">
+            Bimbingan yang membuatmu<br className="hidden sm:block" /> sanggup menulisnya sendiri
+          </h2>
+          <p className="text-slate-600 font-medium max-w-xl mb-10">
+            Privat per jam bersama mentor, tersedia untuk Skripsi, Tesis, dan
+            Disertasi. Ambil hanya bagian yang sedang kamu butuhkan.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {paketHarian.map((l, i) => {
+              const unggulan = i === 0;
+              return (
+                <div
+                  key={l.id}
+                  className={`group relative flex flex-col rounded-2xl border p-6 card-hover transition-all ${
+                    unggulan
+                      ? "border-brand bg-brand text-white shadow-card"
+                      : "border-slate-200 bg-white hover:border-brand-200"
+                  }`}
+                >
+                  <div className={`inline-flex h-10 w-10 items-center justify-center rounded-xl mb-4 ${unggulan ? "bg-white/20" : "bg-brand-50"}`}>
+                    <GraduationCap className={`h-5 w-5 ${unggulan ? "text-white" : "text-brand"}`} aria-hidden="true" />
+                  </div>
+                  <h3 className={`text-lg font-bold mb-0.5 leading-snug ${unggulan ? "text-white" : "text-slate-900"}`}>
+                    {l.nama}
+                  </h3>
+                  {l.subjudul && (
+                    <p className={`text-sm mb-3 ${unggulan ? "text-white/80" : "text-slate-500"}`}>
+                      {l.subjudul}
+                    </p>
+                  )}
+                  <p className={`text-sm font-semibold mb-4 ${unggulan ? "text-white" : "text-brand"}`}>
+                    {formatRupiah(l.harga)}
+                    {l.satuan && (
+                      <span className={`text-xs font-medium ${unggulan ? "text-white/75" : "text-slate-500"}`}>
+                        {" "}{l.satuan}
+                      </span>
+                    )}
+                  </p>
+                  <ul className="mb-5 space-y-2">
+                    {l.fitur.map((f) => (
+                      <li key={f} className={`flex items-start gap-2 text-sm ${unggulan ? "text-white/90" : "text-slate-600"}`}>
+                        <CheckCircle2 className={`h-4 w-4 flex-shrink-0 mt-0.5 ${unggulan ? "text-white/80" : "text-brand"}`} aria-hidden="true" />
+                        <span>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Link
+                    href={`/produk/${l.slug}`}
+                    className={`mt-auto inline-flex w-full items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-bold transition-colors ${
+                      unggulan ? "bg-white text-brand hover:bg-brand-50" : "bg-brand text-white hover:bg-brand-light"
+                    }`}
+                  >
+                    Selengkapnya <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                  </Link>
                 </div>
-                <h3 className={`text-lg font-bold mb-0.5 ${l.featured ? "text-white" : "text-slate-900"}`}>{l.name}</h3>
-                <p className={`text-sm mb-3 ${l.featured ? "text-white/70" : "text-slate-400"}`}>{l.sub}</p>
-                <p className={`text-sm font-semibold mb-4 ${l.featured ? "text-white" : "text-[#8B0000]"}`}>{l.harga}<span className={`text-xs font-normal ${l.featured ? "text-white/60" : "text-slate-400"}`}> / file</span></p>
-                <Link href={l.href} className={`inline-flex items-center gap-1.5 text-sm font-semibold transition-colors ${l.featured ? "text-white hover:text-white/80" : "text-[#8B0000] hover:text-brand-light"}`}>
-                  Klik di sini <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                </Link>
-              </div>
-            );
-          })}
-        </div>
-      </section>
+              );
+            })}
+          </div>
+          <div className="mt-8 text-center">
+            <Link
+              href={`/etalase/${ETALASE.bimbinganBulanan}`}
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand hover:underline"
+            >
+              Mau sebulan penuh? Lihat paket bulanan <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </Link>
+          </div>
+        </section>
+      )}
 
       {/* ── Jasa Akademik ── */}
       <section className="bg-brand-50 px-4 py-16">
@@ -193,23 +323,167 @@ export default function LandingPage() {
           <h2 className="text-2xl font-extrabold text-slate-900 mb-8">Semua Kebutuhan Akademik Tersedia</h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {JASA.map((j) => (
-              <Link key={j} href="/layanan" className="flex items-center gap-2 rounded-xl border border-brand-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 hover:border-[#8B0000] hover:text-[#8B0000] transition-colors card-hover">
-                <CheckCircle2 className="h-4 w-4 text-[#8B0000] flex-shrink-0" aria-hidden="true" />
+              <Link key={j} href="/layanan" className="flex items-center gap-2 rounded-xl border border-brand-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 hover:border-brand hover:text-brand transition-colors card-hover">
+                <CheckCircle2 className="h-4 w-4 text-brand flex-shrink-0" aria-hidden="true" />
                 {j}
               </Link>
             ))}
           </div>
           <div className="mt-6 text-center">
-            <Link href="/layanan" className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#8B0000] hover:underline">
+            <Link href="/layanan" className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand hover:underline">
               Lihat semua layanan <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         </div>
       </section>
 
+      {/* ── Perangkat yang dipakai ── */}
+      <section className="mx-auto max-w-6xl px-4 py-16">
+        <SectionLabel>Perangkat</SectionLabel>
+        <h2 className="text-3xl lg:text-4xl font-extrabold text-slate-900 mb-2">
+          Mentor mengajarimu memakainya,<br className="hidden sm:block" /> bukan menjalankannya untukmu
+        </h2>
+        <p className="text-slate-600 font-medium max-w-xl mb-10">
+          Keluar dari sesi, kamu bisa mengulang analisisnya sendiri. Itu yang menyelamatkanmu
+          saat penguji bertanya &ldquo;ini bagaimana cara dapatnya?&rdquo;
+        </p>
+        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {TOOLS.map((tool) => (
+            <KartuTool key={tool.slug} t={tool} />
+          ))}
+        </ul>
+      </section>
+
+      {/* ── Periksa naskah ── */}
+      <section id="periksa" className="bg-slate-50 px-4 py-16">
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-3 flex items-center justify-center gap-2">
+            <span className="h-0.5 w-8 rounded-full bg-brand" />
+            <span className="text-xs font-bold uppercase tracking-widest text-brand">
+              AI Checking Proposal
+            </span>
+            <span className="h-0.5 w-8 rounded-full bg-brand" />
+          </div>
+          <h2 className="text-center text-2xl font-extrabold text-slate-900 lg:text-3xl">
+            Cek tulisanmu sebelum diserahkan
+          </h2>
+          <p className="mx-auto mt-3 mb-10 max-w-2xl text-center font-medium text-slate-600">
+            Tempel naskahmu, lihat bagian mana yang perlu sitasi atau perlu
+            ditulis ulang dengan kalimatmu sendiri. Tujuannya memperbaiki cara
+            mengutip — bukan mengakali pemeriksaan kampus.
+          </p>
+
+          <KotakPeriksa tarif={tarifPeriksa.tarif} aktif={tarifPeriksa.aktif} />
+        </div>
+      </section>
+
+      {/* ── Mentor ── */}
+      {MENTOR.length > 0 && (
+      <section id="mentor" className="bg-slate-50 px-4 py-16">
+        <div className="mx-auto max-w-6xl">
+          <SectionLabel>Mentor Kami</SectionLabel>
+          <h2 className="text-3xl lg:text-4xl font-extrabold text-slate-900 mb-2">
+            Yang akan duduk bersamamu
+          </h2>
+          <p className="text-slate-600 font-medium max-w-xl mb-10">
+            Semua mentor pernah melewati proses yang sedang kamu jalani, dan terbiasa
+            membaca draf yang belum rapi tanpa menghakimi.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {MENTOR.map((m) => (
+              <div key={m.id} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
+                <div className="flex items-start gap-4">
+                  {m.foto ? (
+                    <Image
+                      src={m.foto}
+                      alt={`Foto ${m.nama}`}
+                      width={64}
+                      height={64}
+                      className="h-16 w-16 flex-shrink-0 rounded-full object-cover ring-2 ring-brand-100"
+                    />
+                  ) : (
+                    <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-brand-50 text-xl font-extrabold text-brand ring-2 ring-brand-100">
+                      {m.inisial}
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <h3 className="font-bold text-slate-900 leading-tight">
+                      <Link href={`/mentor-kami/${m.id}`} className="hover:text-brand hover:underline">
+                        {m.nama}
+                      </Link>
+                    </h3>
+                    {m.gelar && <p className="text-xs font-medium text-slate-500">{m.gelar}</p>}
+                    {m.kampus && <p className="text-xs text-slate-500 mt-1">{m.kampus}</p>}
+                  </div>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-1.5">
+                  {m.bidang.map((b) => (
+                    <span key={b} className="rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand">{b}</span>
+                  ))}
+                </div>
+                {(m.rating > 0 || m.sesi > 0) && (
+                  <div className="mt-4 flex items-center gap-4 border-t border-slate-100 pt-3 text-sm">
+                    {m.rating > 0 && (
+                      <span className="flex items-center gap-1 font-semibold text-slate-700">
+                        <Star className="h-4 w-4 fill-brand text-brand" aria-hidden="true" />
+                        {m.rating.toFixed(1)}
+                      </span>
+                    )}
+                    {m.sesi > 0 && (
+                      <span className="font-medium text-slate-500">{m.sesi} sesi selesai</span>
+                    )}
+                  </div>
+                )}
+                {m.tersedia ? (
+                  <Link
+                    href={`/booking?mentor=${m.id}`}
+                    className="mt-4 inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-brand py-2.5 text-sm font-bold text-white hover:bg-brand-light transition-colors"
+                  >
+                    Pesan jadwal <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                  </Link>
+                ) : (
+                  <span className="mt-4 inline-flex w-full items-center justify-center rounded-xl border border-slate-200 py-2.5 text-sm font-bold text-slate-400">
+                    Sedang tidak menerima booking
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+          <Link
+            href="/mentor-kami"
+            className="mt-6 inline-flex items-center gap-1.5 text-sm font-bold text-brand hover:underline"
+          >
+            Lihat profil lengkap semua mentor <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          </Link>
+        </div>
+      </section>
+      )}
+
+      {/* ── Promo ── */}
+      <section className="mx-auto max-w-6xl px-4 py-16">
+        <SectionLabel>Promo Berjalan</SectionLabel>
+        <h2 className="text-3xl lg:text-4xl font-extrabold text-slate-900 mb-10">
+          Tunjukkan kodenya saat konfirmasi
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          {PROMO.map((pr) => (
+            <div key={pr.kode} className="relative overflow-hidden rounded-2xl border-2 border-dashed border-brand-200 bg-brand-50 p-6">
+              <h3 className="text-lg font-extrabold text-slate-900">{pr.judul}</h3>
+              <p className="mt-1 text-sm text-slate-600">{pr.syarat}</p>
+              <div className="mt-4 inline-block rounded-lg border border-brand bg-white px-3 py-1.5">
+                <span className="font-mono text-sm font-bold tracking-wider text-brand">{pr.kode}</span>
+              </div>
+              <p className="mt-3 flex items-center gap-1.5 text-xs text-slate-500">
+                <Clock className="h-3.5 w-3.5" aria-hidden="true" /> Sampai {pr.sampai}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* ── Bimbingan CTA ── */}
       <section className="mx-auto max-w-5xl px-4 py-20">
-        <div className="rounded-3xl bg-brand-gradient overflow-hidden shadow-brand">
+        <div className="rounded-3xl bg-brand overflow-hidden shadow-card">
           <div className="flex flex-col lg:flex-row items-center gap-8 p-8 lg:p-12">
             <div className="flex-1 text-center lg:text-left">
               <SectionLabel>Program Bimbingan</SectionLabel>
@@ -222,8 +496,8 @@ export default function LandingPage() {
               </p>
               <div className="flex flex-wrap gap-3 justify-center lg:justify-start">
                 <Button variant="dark" size="lg" asChild>
-                  <Link href="/bimbingan" className="gap-2">
-                    Lihat Program <ArrowRight className="h-4 w-4" />
+                  <Link href="/jadwal" className="gap-2">
+                    Pilih Mentor &amp; Jadwal <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
                 <a href={waLink("Halo, saya ingin konsultasi bimbingan skripsi")} target="_blank" rel="noopener noreferrer"
@@ -251,27 +525,90 @@ export default function LandingPage() {
 
       {/* ── Cara Kerja ── */}
       <section className="bg-slate-50 px-4 py-16">
-        <div className="mx-auto max-w-4xl text-center">
+        <div className="mx-auto max-w-5xl text-center">
           <SectionLabel>Cara Kerja</SectionLabel>
-          <h2 className="text-2xl font-extrabold text-slate-900 mb-10">Cuma 3 Langkah Mudah</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+          <h2 className="text-2xl lg:text-3xl font-extrabold text-slate-900 mb-3">
+            Cuma 3 Langkah Mudah
+          </h2>
+          <p className="text-slate-600 font-medium max-w-xl mx-auto mb-12">
+            Dari kirim kendala sampai selesai sesi, semuanya bisa kamu urus
+            sendiri lewat dashboard.
+          </p>
+
+          <div className="relative grid grid-cols-1 sm:grid-cols-3 gap-8">
+            {/* Garis penghubung antarlangkah, hanya di layar lebar. */}
+            <div
+              aria-hidden="true"
+              className="hidden sm:block absolute top-11 left-[16.67%] right-[16.67%] h-0.5 bg-brand-200"
+            />
             {[
-              { num: "01", emoji: "📤", title: "Upload Dokumen", desc: "Upload file PDF, DOCX, atau DOC ke dashboard Ruang Konsul Solo." },
-              { num: "02", emoji: "💳", title: "Pilih & Bayar",  desc: "Pilih layanan dan bayar via transfer, QRIS, atau e-wallet favorit." },
-              { num: "03", emoji: "✅", title: "Terima Laporan", desc: "Tim kami proses dan laporan dikirim ke dashboardmu + notifikasi WA!" },
+              {
+                num: "01", logo: "/alur/upload.png", title: "Kirim Kebutuhanmu",
+                desc: "Pilih mentor dan jadwal, lalu ceritakan bab mana yang sedang macet. Bisa sekalian unggah drafmu.",
+              },
+              {
+                num: "02", logo: "/alur/payment.png", title: "Bayar",
+                desc: "Transfer bank, QRIS, atau e-wallet. Jadwalmu terkunci begitu pembayaran dikonfirmasi.",
+              },
+              {
+                num: "03", logo: "/alur/result.png", title: "Sesi Bimbingan",
+                desc: "Mentor mendampingi sesuai kebutuhanmu. Catatan dan tindak lanjut masuk ke dashboard, plus pengingat lewat WhatsApp.",
+              },
             ].map((s) => (
-              <div key={s.num} className="flex flex-col items-center text-center">
-                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#8B0000] shadow-brand text-2xl">
-                  {s.emoji}
+              <div key={s.num} className="relative flex flex-col items-center text-center">
+                <div className="mb-4 flex h-24 w-24 items-center justify-center rounded-2xl border-2 border-brand-100 bg-white p-4 shadow-card">
+                  <Image
+                    src={s.logo}
+                    alt=""
+                    width={160}
+                    height={160}
+                    className="h-14 w-14 object-contain"
+                  />
                 </div>
-                <span className="text-xs font-bold text-[#8B0000] mb-1">{s.num}</span>
-                <h3 className="text-base font-bold text-slate-900 mb-2">{s.title}</h3>
-                <p className="text-sm text-slate-500 leading-relaxed">{s.desc}</p>
+                <span className="mb-1 text-xs font-extrabold tracking-widest text-brand">
+                  {s.num}
+                </span>
+                <h3 className="mb-2 text-lg font-extrabold text-slate-900">{s.title}</h3>
+                <p className="max-w-xs text-sm leading-relaxed text-slate-600">{s.desc}</p>
               </div>
             ))}
           </div>
+
+          {/* ── Metode pembayaran ── */}
+          <div className="mt-14 rounded-2xl border border-slate-200 bg-white px-6 py-7">
+            <p className="mb-5 text-xs font-bold uppercase tracking-widest text-slate-500">
+              Metode Pembayaran
+            </p>
+            <ul className="flex flex-wrap items-center justify-center gap-x-8 gap-y-5">
+              {[
+                { nama: "ShopeePay", file: "/bayar/shopeepay.png" },
+                { nama: "GoPay",     file: "/bayar/gopay.png" },
+                { nama: "OVO",       file: "/bayar/ovo.png" },
+                { nama: "BCA",       file: "/bayar/bca.png" },
+                { nama: "BRI",       file: "/bayar/bri.png" },
+                { nama: "QRIS",      file: "/bayar/qris.png" },
+              ].map((m) => (
+                <li key={m.nama}>
+                  <Image
+                    src={m.file}
+                    alt={m.nama}
+                    width={160}
+                    height={80}
+                    className="h-7 w-auto object-contain"
+                  />
+                </li>
+              ))}
+            </ul>
+            <p className="mt-5 text-xs font-medium text-slate-500">
+              Pembayaran diproses lewat Midtrans. Kami tidak menyimpan data
+              kartu atau rekeningmu.
+            </p>
+          </div>
         </div>
       </section>
+
+      {/* ── Testimoni WhatsApp ── */}
+      <TestimoniWhatsApp />
 
       {/* ── Testimoni ── */}
       <section className="mx-auto max-w-5xl px-4 py-16">
@@ -285,9 +622,9 @@ export default function LandingPage() {
                   <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" aria-hidden="true" />
                 ))}
               </div>
-              <p className="text-sm text-slate-700 leading-relaxed mb-4">"{t.text}"</p>
+              <p className="text-sm text-slate-700 leading-relaxed mb-4">&ldquo;{t.text}&rdquo;</p>
               <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#8B0000] text-white text-xs font-bold">{t.init}</div>
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand text-white text-xs font-bold">{t.init}</div>
                 <div>
                   <p className="text-sm font-semibold">{t.name}</p>
                   <p className="text-xs text-muted-foreground">{t.univ}</p>
@@ -332,39 +669,39 @@ export default function LandingPage() {
 
             {/* WhatsApp */}
             <a href={waLink()} target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-card hover:border-[#8B0000] hover:shadow-brand-sm transition-all group">
+              className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-card hover:border-brand hover:shadow-card transition-all group">
               <Image src={BRAND.iconWhatsapp} alt="WhatsApp" width={36} height={36} className="flex-shrink-0 rounded-xl" unoptimized />
               <div className="flex-1 min-w-0">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">WhatsApp</p>
-                <p className="text-base font-bold text-[#8B0000] group-hover:underline">{BRAND.whatsappDisplay}</p>
+                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">WhatsApp</p>
+                <p className="text-base font-bold text-brand group-hover:underline">{BRAND.whatsappDisplay}</p>
               </div>
             </a>
 
             {/* Instagram */}
             <a href={BRAND.instagramUrl} target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-card hover:border-[#8B0000] hover:shadow-brand-sm transition-all group">
+              className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-card hover:border-brand hover:shadow-card transition-all group">
               <Image src={BRAND.iconInstagram} alt="Instagram" width={36} height={36} className="flex-shrink-0 rounded-xl" unoptimized />
               <div className="flex-1 min-w-0">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Instagram</p>
-                <p className="text-base font-bold text-[#8B0000] group-hover:underline">{BRAND.instagram}</p>
+                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Instagram</p>
+                <p className="text-base font-bold text-brand group-hover:underline">{BRAND.instagram}</p>
               </div>
             </a>
 
             {/* TikTok */}
             <a href={BRAND.tiktokUrl} target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-card hover:border-[#8B0000] hover:shadow-brand-sm transition-all group">
+              className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-card hover:border-brand hover:shadow-card transition-all group">
               <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-black overflow-hidden">
                 <Image src={BRAND.iconTiktok} alt="TikTok" width={36} height={36} className="object-contain" unoptimized />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">TikTok</p>
-                <p className="text-base font-bold text-[#8B0000] group-hover:underline">{BRAND.tiktok}</p>
+                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">TikTok</p>
+                <p className="text-base font-bold text-brand group-hover:underline">{BRAND.tiktok}</p>
               </div>
             </a>
 
             {/* Gmail */}
             <a href={`mailto:${BRAND.email}`}
-              className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-card hover:border-[#8B0000] hover:shadow-brand-sm transition-all group">
+              className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-card hover:border-brand hover:shadow-card transition-all group">
               <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-red-50">
                 {/* Gmail icon SVG */}
                 <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none">
@@ -374,30 +711,30 @@ export default function LandingPage() {
                 </svg>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Gmail</p>
-                <p className="text-base font-bold text-[#8B0000] group-hover:underline truncate">{BRAND.email}</p>
+                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Gmail</p>
+                <p className="text-base font-bold text-brand group-hover:underline truncate">{BRAND.email}</p>
               </div>
             </a>
 
             {/* Alamat */}
             <a href={BRAND.mapsUrl} target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-card hover:border-[#8B0000] hover:shadow-brand-sm transition-all group">
+              className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-card hover:border-brand hover:shadow-card transition-all group">
               <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-brand-50">
-                <MapPin className="h-5 w-5 text-[#8B0000]" aria-hidden="true" />
+                <MapPin className="h-5 w-5 text-brand" aria-hidden="true" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Alamat</p>
-                <p className="text-sm font-medium text-slate-700 group-hover:text-[#8B0000] leading-snug">{BRAND.address}</p>
+                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Alamat</p>
+                <p className="text-sm font-medium text-slate-700 group-hover:text-brand leading-snug">{BRAND.address}</p>
               </div>
             </a>
 
             {/* Jam operasional */}
             <div className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-card">
               <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-brand-50">
-                <Clock className="h-5 w-5 text-[#8B0000]" aria-hidden="true" />
+                <Clock className="h-5 w-5 text-brand" aria-hidden="true" />
               </div>
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Jam Operasional</p>
+                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Jam Operasional</p>
                 <p className="text-sm font-medium text-slate-700">Senin–Minggu, 09.00–21.00 WIB</p>
               </div>
             </div>
@@ -421,14 +758,14 @@ export default function LandingPage() {
 
       {/* ── CTA Final ── */}
       <section className="px-4 py-8 mb-0">
-        <div className="mx-auto max-w-4xl rounded-3xl bg-brand-gradient p-10 lg:p-14 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-brand">
+        <div className="mx-auto max-w-4xl rounded-3xl bg-brand p-10 lg:p-14 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-card">
           <div className="text-center sm:text-left">
-            <h2 className="text-2xl lg:text-3xl font-extrabold text-white mb-2">Siap cek dokumenmu? 📚</h2>
-            <p className="text-white/75 text-sm">Upload sekarang, laporan bisa kamu unduh dalam hitungan jam.</p>
+            <h2 className="text-2xl lg:text-3xl font-extrabold text-white mb-2">Mulai dari satu sesi</h2>
+            <p className="text-white/75 text-sm">Pilih mentor dan jam yang cocok. Tidak ada pembayaran sebelum jadwalmu dikonfirmasi.</p>
           </div>
           <Button variant="dark" size="lg" asChild className="flex-shrink-0">
-            <Link href="/daftar" className="gap-2">
-              Cek Sekarang <ArrowRight className="h-4 w-4" />
+            <Link href="/booking" className="gap-2">
+              Lihat jadwal mentor <ArrowRight className="h-4 w-4" />
             </Link>
           </Button>
         </div>
@@ -447,7 +784,7 @@ export default function LandingPage() {
               <Link href="/" className="flex items-center gap-2.5 mb-4">
                 <Image src={BRAND.logoPng} alt={BRAND.name} width={38} height={38} unoptimized className="object-contain flex-shrink-0" />
                 <div className="flex flex-col leading-tight">
-                  <span className="text-base font-extrabold text-[#8B0000]">{BRAND.name}</span>
+                  <span className="text-base font-extrabold text-brand">{BRAND.name}</span>
                   <span className="text-[10px] font-medium text-slate-400">{BRAND.taglineShort}</span>
                 </div>
               </Link>
@@ -455,12 +792,12 @@ export default function LandingPage() {
               <p className="text-xs text-slate-500 leading-relaxed mb-5">{BRAND.tagline}</p>
 
               {/* Call center / Hubungi bantuan */}
-              <div className="rounded-2xl border border-brand-100 bg-brand-50 px-4 py-3.5 space-y-2.5">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-[#8B0000]">Hubungi Bantuan</p>
+              <div className="rounded-2xl border border-brand-200 bg-brand-50 px-4 py-3.5 space-y-2.5">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-brand">Hubungi Bantuan</p>
                 <a href={waLink("Halo, saya butuh bantuan")} target="_blank" rel="noopener noreferrer"
                   className="flex items-center gap-2.5 group">
                   <Image src={BRAND.iconWhatsapp} alt="WA" width={24} height={24} unoptimized className="rounded-lg flex-shrink-0" />
-                  <span className="text-sm font-bold text-[#8B0000] group-hover:underline">{BRAND.whatsappDisplay}</span>
+                  <span className="text-sm font-bold text-brand group-hover:underline">{BRAND.whatsappDisplay}</span>
                 </a>
                 <a href={`mailto:${BRAND.email}`}
                   className="flex items-center gap-2.5 group">
@@ -470,19 +807,20 @@ export default function LandingPage() {
                       <path d="M1 6l9 6 9-6" stroke="#EA4335" strokeWidth="1.5" strokeLinecap="round"/>
                     </svg>
                   </div>
-                  <span className="text-xs font-semibold text-slate-600 group-hover:text-[#8B0000] truncate">{BRAND.email}</span>
+                  <span className="text-xs font-semibold text-slate-600 group-hover:text-brand truncate">{BRAND.email}</span>
                 </a>
               </div>
             </div>
 
             {/* Kolom 2 — Navigasi */}
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-widest text-[#8B0000] mb-4">Navigasi</p>
+              <p className="text-[11px] font-bold uppercase tracking-widest text-brand mb-4">Navigasi</p>
               <ul className="space-y-2.5">
                 {[
                   { label: "Beranda",     href: "/" },
                   { label: "Layanan",     href: "/layanan" },
-                  { label: "Bimbingan",   href: "/bimbingan" },
+                  { label: "Bimbingan",   href: "/jadwal" },
+                { label: "Paket Bimbingan", href: "/bimbingan" },
                   { label: "Paket Hemat", href: "/paket-hemat" },
                   { label: "Blog",        href: "/blog" },
                   { label: "Referral",    href: "/referral" },
@@ -490,8 +828,8 @@ export default function LandingPage() {
                 ].map((m) => (
                   <li key={m.label}>
                     <Link href={m.href}
-                      className="text-sm text-slate-600 hover:text-[#8B0000] hover:font-semibold transition-all flex items-center gap-1.5 group">
-                      <span className="h-1 w-1 rounded-full bg-brand-200 group-hover:bg-[#8B0000] transition-colors" />
+                      className="text-sm text-slate-600 hover:text-brand hover:font-semibold transition-all flex items-center gap-1.5 group">
+                      <span className="h-1 w-1 rounded-full bg-brand-100 group-hover:bg-brand transition-colors" />
                       {m.label}
                     </Link>
                   </li>
@@ -501,25 +839,21 @@ export default function LandingPage() {
 
             {/* Kolom 3 — Produk & Fitur */}
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-widest text-[#8B0000] mb-4">Produk &amp; Fitur</p>
+              <p className="text-[11px] font-bold uppercase tracking-widest text-brand mb-4">Produk &amp; Fitur</p>
               <ul className="space-y-2.5">
                 {[
-                  { label: "Cek Turnitin",       href: "/cek-plagiasi" },
-                  { label: "AI Detector",         href: "/cek-ai" },
-                  { label: "Cek DrillBit",        href: "/cek-drillbit" },
-                  { label: "Jasa Parafrase",      href: "/jasa-parafrase" },
                   { label: "Jasa Revisi",         href: "/layanan" },
                   { label: "Jasa PowerPoint",     href: "/layanan" },
-                  { label: "Bimbingan Skripsi",   href: "/bimbingan" },
-                  { label: "Bimbingan Tesis",     href: "/bimbingan" },
-                  { label: "Bimbingan Lomba",     href: "/bimbingan" },
-                  { label: "Bimbingan Olah Data", href: "/bimbingan" },
+                  { label: "Bimbingan Skripsi",   href: "/jadwal" },
+                  { label: "Bimbingan Tesis",     href: "/jadwal" },
+                  { label: "Bimbingan Lomba",     href: "/jadwal" },
+                  { label: "Bimbingan Olah Data", href: "/jadwal" },
                   { label: "Merchandise",         href: "/merchandise" },
                 ].map((l) => (
                   <li key={l.label}>
                     <Link href={l.href}
-                      className="text-sm text-slate-600 hover:text-[#8B0000] hover:font-semibold transition-all flex items-center gap-1.5 group">
-                      <span className="h-1 w-1 rounded-full bg-brand-200 group-hover:bg-[#8B0000] transition-colors" />
+                      className="text-sm text-slate-600 hover:text-brand hover:font-semibold transition-all flex items-center gap-1.5 group">
+                      <span className="h-1 w-1 rounded-full bg-brand-100 group-hover:bg-brand transition-colors" />
                       {l.label}
                     </Link>
                   </li>
@@ -529,7 +863,7 @@ export default function LandingPage() {
 
             {/* Kolom 4 — Informasi + Lokasi */}
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-widest text-[#8B0000] mb-4">Informasi</p>
+              <p className="text-[11px] font-bold uppercase tracking-widest text-brand mb-4">Informasi</p>
               <ul className="space-y-2.5 mb-5">
                 {[
                   { label: "Syarat & Ketentuan",  href: "/syarat" },
@@ -539,8 +873,8 @@ export default function LandingPage() {
                 ].map((l) => (
                   <li key={l.label}>
                     <Link href={l.href}
-                      className="text-sm text-slate-600 hover:text-[#8B0000] hover:font-semibold transition-all flex items-center gap-1.5 group">
-                      <span className="h-1 w-1 rounded-full bg-brand-200 group-hover:bg-[#8B0000] transition-colors" />
+                      className="text-sm text-slate-600 hover:text-brand hover:font-semibold transition-all flex items-center gap-1.5 group">
+                      <span className="h-1 w-1 rounded-full bg-brand-100 group-hover:bg-brand transition-colors" />
                       {l.label}
                     </Link>
                   </li>
@@ -549,8 +883,8 @@ export default function LandingPage() {
 
               {/* Alamat */}
               <a href={BRAND.mapsUrl} target="_blank" rel="noopener noreferrer"
-                className="flex items-start gap-2 text-xs text-slate-500 hover:text-[#8B0000] transition-colors leading-relaxed group">
-                <MapPin className="h-3.5 w-3.5 text-[#8B0000] flex-shrink-0 mt-0.5" aria-hidden="true" />
+                className="flex items-start gap-2 text-xs text-slate-500 hover:text-brand transition-colors leading-relaxed group">
+                <MapPin className="h-3.5 w-3.5 text-brand flex-shrink-0 mt-0.5" aria-hidden="true" />
                 <span>{BRAND.address}</span>
               </a>
             </div>
@@ -559,11 +893,11 @@ export default function LandingPage() {
           {/* Row bawah — copyright */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-6">
             <p className="text-xs text-slate-400">
-              © {BRAND.year} <span className="font-semibold text-[#8B0000]">{BRAND.name}</span>. Semua hak dilindungi.
+              © {BRAND.year} <span className="font-semibold text-brand">{BRAND.name}</span>. Semua hak dilindungi.
             </p>
             <div className="flex items-center gap-5 text-xs text-slate-400">
-              <Link href="/syarat" className="hover:text-[#8B0000] transition-colors">Syarat &amp; Ketentuan</Link>
-              <Link href="/kebijakan-privasi" className="hover:text-[#8B0000] transition-colors">Kebijakan Privasi</Link>
+              <Link href="/syarat" className="hover:text-brand transition-colors">Syarat &amp; Ketentuan</Link>
+              <Link href="/kebijakan-privasi" className="hover:text-brand transition-colors">Kebijakan Privasi</Link>
             </div>
           </div>
         </div>

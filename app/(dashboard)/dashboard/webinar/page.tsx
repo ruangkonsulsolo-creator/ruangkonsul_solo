@@ -26,7 +26,7 @@ function formatDate(iso: string) {
 
 export default async function WebinarPage() {
   return (
-    <div className="space-y-7 max-w-4xl">
+    <div className="space-y-7 max-w-7xl">
       <div>
         <h2 className="text-xl font-extrabold text-slate-900">Webinar & Seminar</h2>
         <p className="text-sm text-muted-foreground mt-0.5">Ikuti webinar gratis dan提升 kualitas skripsi-mu.</p>

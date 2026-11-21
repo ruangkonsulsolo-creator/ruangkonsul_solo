@@ -89,3 +89,78 @@ h1, h2, h3, h4, h5, h6 {
     to   { opacity: 1; transform: translateX(0); }
   }
 }
+
+/* ── Transisi antarhalaman ──────────────────────────────────────────────── */
+/*
+   Dipasang lewat app/template.tsx, yang dibuat ulang Next.js pada setiap
+   navigasi. Satu gerak naik tipis disertai pudar masuk, 260 ms.
+
+   will-change sengaja TIDAK dipakai: animasinya berjalan sekali lalu
+   selesai, dan membiarkan elemen tetap di lapisan komposit sesudahnya
+   justru memakan memori tanpa guna.
+*/
+.transisi-halaman {
+  animation: halamanMasuk 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes halamanMasuk {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Transisi bawaan peramban untuk navigasi, di peramban yang mendukungnya.
+   Dibungkus @supports supaya peramban lama mengabaikannya tanpa galat. */
+@supports (view-transition-name: none) {
+  ::view-transition-old(root) {
+    animation: pudarKeluar 180ms ease-out both;
+  }
+  ::view-transition-new(root) {
+    animation: halamanMasuk 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  @keyframes pudarKeluar {
+    to { opacity: 0; }
+  }
+}
+
+/* Hormati preferensi sistem: tanpa gerak sama sekali, langsung tampil. */
+@media (prefers-reduced-motion: reduce) {
+  .transisi-halaman {
+    animation: none;
+  }
+  @supports (view-transition-name: none) {
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+      animation: none;
+    }
+  }
+}
+
+/* ── Cetak laporan pemeriksaan ──────────────────────────────────────────── */
+/* Dialog cetak peramban dipakai untuk menghasilkan PDF, jadi aturan di sini
+   yang menentukan rupa berkasnya: tanpa latar abu, tanpa tombol, dan tanpa
+   bagian yang terpotong di pergantian halaman. */
+@media print {
+  @page {
+    margin: 16mm 14mm;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+  }
+
+  /* Peramban membuang warna latar saat mencetak; ini memaksanya tetap ada
+     supaya kotak peringatan tidak hilang jadi teks polos tanpa konteks. */
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .break-inside-avoid {
+    break-inside: avoid;
+  }
+
+  a[href]::after {
+    content: "";
+  }
+}

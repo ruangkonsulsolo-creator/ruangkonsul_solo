@@ -61,7 +61,6 @@ async function getData() {
       { id: "bnr-1", title: "Kelas Bimbingan Private Skripsi",  image_url: "/promo-bimbingan.jpeg",  link_url: "/bimbingan",      sort_order: 0, is_active: true  },
       { id: "bnr-2", title: "Paket Bundling Hemat",             image_url: "/promo-bundling.jpeg",   link_url: "/paket-hemat",    sort_order: 1, is_active: true  },
       { id: "bnr-3", title: "Konsultasi Proposal & Skripsi",    image_url: "/promo-konsultasi.jpeg", link_url: "/bimbingan",      sort_order: 2, is_active: true  },
-      { id: "bnr-4", title: "Jasa Parafrase Profesional",       image_url: "/promo-parafrase.jpeg",  link_url: "/jasa-parafrase", sort_order: 3, is_active: false },
     ],
     kelas: [
       { id: "kls-1", tab: "seminar", title: "Seminar: Tips Lolos Sidang",         harga: 0,       is_active: true,  sort_order: 0 },
@@ -80,7 +79,7 @@ export default async function SuperadminPage() {
   const data = await getData();
 
   return (
-    <div className="space-y-6 max-w-5xl">
+    <div className="space-y-6 max-w-7xl">
 
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
@@ -99,8 +98,8 @@ export default async function SuperadminPage() {
             <span className={`h-1.5 w-1.5 rounded-full ${data.isLive ? "bg-green-500" : "bg-amber-400"}`} />
             {data.isLive ? "Live — DB Aktif" : "Preview — Data Dummy"}
           </span>
-          <span className="rounded-full bg-[#8B0000] text-white px-3 py-1 text-xs font-extrabold">
-            ⚡ Superadmin
+          <span className="rounded-full bg-brand text-white px-3 py-1 text-xs font-extrabold">
+            Superadmin
           </span>
         </div>
       </div>
