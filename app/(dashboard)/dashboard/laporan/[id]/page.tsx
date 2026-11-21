@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
-import { ArrowLeft, Download, ExternalLink, FileText } from "lucide-react";
+import { ArrowLeft, ExternalLink } from "lucide-react";
+import { KartuSkor } from "@/components/periksa/KartuSkor";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { labelKemiripan } from "@/lib/periksa/persen-berubah";
@@ -43,6 +44,9 @@ export default async function LaporanPage({ params }: { params: { id: string } }
   const { data: tanda } = await createAdminClient().storage.from("reports").createSignedUrl(o.report_storage_path, 3600);
   const url = tanda?.signedUrl ?? null;
   const persen = o.persen_kemiripan != null ? Number(o.persen_kemiripan) : null;
+  const drillbit = o.mesin_laporan === "DrillBit";
+  const mesin = o.mesin_laporan && o.mesin_laporan !== "Lainnya" ? o.mesin_laporan : null;
+  const namaFile = mesin ? `File ${mesin} (PDF)` : "Laporan (PDF)";
   const format = o.format_laporan ? FORMAT_LAPORAN[o.format_laporan as "baru" | "lama"] : null;
 
   return (
@@ -51,35 +55,24 @@ export default async function LaporanPage({ params }: { params: { id: string } }
         <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Riwayat Pesanan
       </Link>
 
-      <section className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 sm:flex-row sm:items-center">
-        <div className="flex h-24 w-24 shrink-0 flex-col items-center justify-center rounded-2xl bg-brand text-white">
-          <span className="text-3xl font-extrabold leading-none">{persen ?? "—"}{persen != null && "%"}</span>
-          <span className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-white/80">Similarity</span>
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="flex items-center gap-1.5 truncate text-sm font-semibold text-slate-500">
-            <FileText className="h-4 w-4 shrink-0" aria-hidden="true" /> {berkas}
-          </p>
-          <h1 className="mt-0.5 text-xl font-extrabold text-slate-900">
-            Laporan Cek Plagiarisme{o.mesin_laporan && o.mesin_laporan !== "Lainnya" ? ` · ${o.mesin_laporan}` : ""}
-          </h1>
-          <p className="text-sm text-slate-600">
-            {persen != null && labelKemiripan(persen)}
-            {format && ` · ${format}`} · {o.order_number}
-          </p>
-        </div>
-        {url && (
-          <div className="flex flex-wrap gap-2">
-            <a href={`/api/report/${o.id}`} className="inline-flex items-center gap-1.5 rounded-xl bg-brand px-4 py-2 text-sm font-bold text-white hover:bg-brand-light">
-              <Download className="h-4 w-4" aria-hidden="true" /> Unduh PDF
-            </a>
-            <a href={url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-xl border px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50">
-              <ExternalLink className="h-4 w-4" aria-hidden="true" /> Buka di tab baru
-            </a>
-          </div>
-        )}
-      </section>
+      <KartuSkor
+        label={drillbit ? "DrillBit Report" : "Similarity Score"}
+        persen={persen}
+        vonis={persen != null ? labelKemiripan(persen) : "Laporan sudah siap"}
+        aksi={{ href: `/api/report/${o.id}`, label: `Unduh ${namaFile}`, unduh: true }}
+        catatan={`${berkas}${format ? ` · ${format}` : ""} · ${o.order_number} · tersimpan, bisa diunduh lagi kapan saja`}
+        pesanWa={`Halo admin, saya mau tanya laporan pesanan ${o.order_number}.`}
+      />
 
+      {url && (
+        <div className="flex justify-center">
+          <a href={url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50">
+            <ExternalLink className="h-4 w-4" aria-hidden="true" /> Buka laporan di tab baru
+          </a>
+        </div>
+      )}
+
+      <h1 className="pt-2 text-lg font-extrabold text-slate-900">Pratinjau laporan</h1>
       {url ? (
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-100">
           <iframe src={`${url}#view=FitH`} title={`Laporan ${o.order_number}`} className="h-[80vh] w-full" />

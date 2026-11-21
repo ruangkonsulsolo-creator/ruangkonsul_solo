@@ -36,8 +36,8 @@ export function labelAi(skor: number): string {
 
 /** Label tingkat untuk persentase kemiripan. */
 export function labelKemiripan(persen: number): string {
-  if (persen <= 10) return "Sangat rendah";
-  if (persen <= 20) return "Rendah — umumnya lolos batas kampus";
-  if (persen <= 30) return "Sedang — periksa bagian yang ditandai";
-  return "Tinggi — perlu parafrase & sitasi";
+  if (persen <= 10) return "Similarity rendah — Bagus!";
+  if (persen <= 20) return "Similarity aman — umumnya lolos batas kampus";
+  if (persen <= 30) return "Similarity sedang — periksa bagian yang ditandai";
+  return "Similarity tinggi — perlu parafrase & sitasi";
 }

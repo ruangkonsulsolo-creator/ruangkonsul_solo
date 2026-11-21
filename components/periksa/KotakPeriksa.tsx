@@ -5,7 +5,7 @@ import Link from "next/link";
 import {
   AlertTriangle, CheckCircle2,
   ArrowRight, Loader2, FileText, Upload, Copy, Check, X, FileDown,
-  Download, Clock, ShieldCheck,
+  Clock, ShieldCheck,
 } from "lucide-react";
 import {
   hitungBiaya,
@@ -25,6 +25,7 @@ import {
 import { formatRupiah } from "@/lib/utils/format-currency";
 import { labelAi, labelKemiripan } from "@/lib/periksa/persen-berubah";
 import { BATAS_KATA_BESAR, FORMAT_LAPORAN } from "@/lib/periksa/manual";
+import { KartuSkor } from "@/components/periksa/KartuSkor";
 
 const rupiah = (n: number) => formatRupiah(n);
 const angka = (n: number) => n.toLocaleString("id-ID");
@@ -710,7 +711,7 @@ export function KotakPeriksa({
             ) : galat ? (
               <PanelGalat pesan={galat} aksi={aksi} kurang={kurang} onBayar={() => void bayarLaluPeriksa()} />
             ) : pesananManual ? (
-              <PanelPesananManual nomor={pesananManual.nomor} lunas={pesananManual.lunas} />
+              <PanelPesananManual nomor={pesananManual.nomor} lunas={pesananManual.lunas} label={tab === "drillbit" ? "DrillBit Report" : "Similarity Score"} />
             ) : hasil ? (
               <IsiHasil h={hasil} />
             ) : null}
@@ -721,20 +722,21 @@ export function KotakPeriksa({
   );
 }
 
-function PanelPesananManual({ nomor, lunas }: { nomor: string; lunas: boolean }) {
+function PanelPesananManual({ nomor, lunas, label }: { nomor: string; lunas: boolean; label: string }) {
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-3 px-4 text-center">
-      <CheckCircle2 className={`h-10 w-10 ${lunas ? "text-green-600" : "text-amber-500"}`} aria-hidden="true" />
-      <p className="font-extrabold text-slate-900">{lunas ? "Pesanan diterima" : "Menunggu pembayaran"}</p>
-      <p className="max-w-sm text-sm text-slate-600">
-        {lunas
-          ? `Pesanan ${nomor} sedang diperiksa tim. Persentase kemiripan dan laporan PDF muncul di Riwayat Pesanan (maks. 1×24 jam); kami kabari lewat notifikasi & WhatsApp.`
-          : `Pesanan ${nomor} tersimpan. Selesaikan pembayaran QRIS dari Riwayat Pesanan agar laporan diproses.`}
-      </p>
-      <Link href="/dashboard/riwayat-pesanan" className="inline-flex items-center gap-1.5 rounded-xl bg-brand px-4 py-2 text-sm font-bold text-white hover:bg-brand-light">
-        Buka Riwayat Pesanan <ArrowRight className="h-4 w-4" aria-hidden="true" />
-      </Link>
-    </div>
+    <KartuSkor
+      label={label}
+      persen={null}
+      menunggu
+      vonis={lunas ? "Pembayaran diterima — laporan sedang diperiksa tim" : "Menunggu pembayaran"}
+      aksi={{ href: "/dashboard/riwayat-pesanan", label: lunas ? "Pantau di Riwayat Pesanan" : "Selesaikan pembayaran" }}
+      catatan={
+        lunas
+          ? `Pesanan ${nomor} · skor & file laporan muncul maks. 1×24 jam, dikabari lewat WhatsApp.`
+          : `Pesanan ${nomor} tersimpan. Bayar QRIS dari Riwayat Pesanan agar diproses.`
+      }
+      pesanWa={`Halo admin, saya mau tanya pesanan ${nomor}.`}
+    />
   );
 }
 
@@ -783,47 +785,31 @@ function PanelGalat({ pesan, aksi, kurang = 0, onBayar }: { pesan: string; aksi:
   );
 }
 
-/** Kartu ringkas di atas hasil: persentase besar + tombol unduh berkas. */
+/** Kartu skor setelah bayar: persentase besar + tombol unduh berkas. */
 function RingkasanHasil({ h }: { h: HasilPeriksa }) {
-  const data =
-    h.jenis === "ai" && h.ai
-      ? { label: "Probabilitas tulisan AI", persen: h.ai.skor, vonis: labelAi(h.ai.skor), unduh: "Unduh laporan (PDF)" }
-      : h.jenis === "kemiripan" && h.kemiripan
-        ? { label: "Tingkat kemiripan", persen: h.kemiripan.persen, vonis: labelKemiripan(h.kemiripan.persen), unduh: "Unduh laporan (PDF)" }
-        : h.parafrase
-          ? {
-              label: "Perubahan susunan kata",
-              persen: h.parafrase.persenBerubah ?? null,
-              vonis: "Makna & sitasi dipertahankan — tetap baca ulang sebelum dipakai.",
-              unduh: "Unduh hasil (Word)",
-            }
-          : null;
-  if (!data) return null;
-  const sudut = data.persen == null ? 0 : Math.min(100, Math.max(0, data.persen)) * 3.6;
-  return (
-    <section className="flex flex-col gap-4 rounded-2xl border border-brand-100 bg-gradient-to-br from-brand-50 to-white p-4 sm:flex-row sm:items-center">
-      <div
-        className="relative mx-auto flex h-28 w-28 shrink-0 items-center justify-center rounded-full sm:mx-0"
-        style={{ background: `conic-gradient(#8B0000 ${sudut}deg, #F1E3E3 ${sudut}deg)` }}
-        role="img"
-        aria-label={`${data.label} ${data.persen ?? "-"} persen`}
-      >
-        <div className="flex h-[5.5rem] w-[5.5rem] flex-col items-center justify-center rounded-full bg-white">
-          <span className="text-2xl font-extrabold text-brand">{data.persen == null ? "—" : `${data.persen}%`}</span>
-        </div>
-      </div>
-      <div className="min-w-0 flex-1 text-center sm:text-left">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{data.label}</p>
-        <p className="mt-0.5 font-extrabold text-slate-900">{data.vonis}</p>
-        <a
-          href={`/api/periksa/${h.id}/unduh`}
-          className="mt-3 inline-flex items-center gap-2 rounded-xl bg-brand px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-brand-light"
-        >
-          <Download className="h-4 w-4" aria-hidden="true" /> {data.unduh}
-        </a>
-      </div>
-    </section>
-  );
+  const kata = `${h.jumlahKata.toLocaleString("id-ID")} kata diperiksa`;
+  if (h.jenis === "ai" && h.ai) {
+    return (
+      <KartuSkor label="AI Score" persen={h.ai.skor} vonis={labelAi(h.ai.skor)}
+        aksi={{ href: `/api/periksa/${h.id}/unduh`, label: "Unduh AI Report (PDF)", unduh: true }}
+        catatan={kata} pesanWa={`Halo admin, saya mau tanya hasil Cek AI (ID ${h.id.slice(0, 8)}).`} />
+    );
+  }
+  if (h.jenis === "kemiripan" && h.kemiripan) {
+    return (
+      <KartuSkor label="Similarity Score" persen={h.kemiripan.persen} vonis={labelKemiripan(h.kemiripan.persen)}
+        aksi={{ href: `/api/periksa/${h.id}/unduh`, label: "Unduh Laporan (PDF)", unduh: true }} catatan={kata} />
+    );
+  }
+  if (h.parafrase) {
+    return (
+      <KartuSkor label="Kalimat Berubah" persen={h.parafrase.persenBerubah ?? null}
+        vonis="Makna & sitasi dipertahankan — baca ulang sebelum dipakai."
+        aksi={{ href: `/api/periksa/${h.id}/unduh`, label: "Unduh Hasil Parafrase (Word)", unduh: true }}
+        catatan={kata} pesanWa={`Halo admin, saya mau tanya hasil parafrase (ID ${h.id.slice(0, 8)}).`} />
+    );
+  }
+  return null;
 }
 
 function IsiHasil({ h }: { h: HasilPeriksa }) {
