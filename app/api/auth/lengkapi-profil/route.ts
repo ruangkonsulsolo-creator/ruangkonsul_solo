@@ -14,12 +14,25 @@ const schema = z
     password: z.string().min(8, "Password minimal 8 karakter.").max(72, "Password maksimal 72 karakter."),
     password_confirm: z.string(),
     whatsapp: whatsappSchema,
+    sebagai: z.enum(["customer", "mentor"]).default("customer"),
+    kode_mentor: z.string().trim().toUpperCase().optional(),
     next: z.string().optional(),
   })
   .refine((d) => d.password === d.password_confirm, {
     message: "Konfirmasi password tidak sama.",
     path: ["password_confirm"],
+  })
+  .refine((d) => d.sebagai !== "mentor" || /^MTR-[A-Z0-9]{6}$/.test(d.kode_mentor ?? ""), {
+    message: "Kode mentor tidak valid (format: MTR-XXXXXX).",
+    path: ["kode_mentor"],
   });
+
+const PESAN_KODE: Record<string, string> = {
+  tidak_ditemukan: "Kode mentor tidak ditemukan. Periksa lagi atau minta kode ke admin.",
+  terpakai: "Kode mentor ini sudah dipakai akun lain.",
+  kedaluwarsa: "Kode mentor sudah kedaluwarsa. Minta kode baru ke admin.",
+  nonaktif: "Kode mentor sudah dinonaktifkan admin.",
+};
 
 /** Selesaikan pendaftaran akun yang dibuat lewat Google. */
 export async function POST(request: Request) {
@@ -43,6 +56,25 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: first?.message ?? "Data tidak valid.", field: first?.path[0] }, { status: 400 });
   }
   const d = parsed.data;
+  const admin = createAdminClient();
+  const jadiMentor = d.sebagai === "mentor";
+
+  // Cek kode lebih dulu supaya tidak memasang password bila kode salah.
+  if (jadiMentor) {
+    const { data: k } = await admin
+      .from("kode_mentor")
+      .select("aktif, kedaluwarsa_at, dipakai_oleh")
+      .eq("kode", d.kode_mentor)
+      .maybeSingle();
+    const alasan = !k ? "tidak_ditemukan"
+      : k.dipakai_oleh && k.dipakai_oleh !== user.id ? "terpakai"
+      : !k.dipakai_oleh && !k.aktif ? "nonaktif"
+      : !k.dipakai_oleh && k.kedaluwarsa_at && new Date(k.kedaluwarsa_at) < new Date() ? "kedaluwarsa"
+      : null;
+    if (alasan) {
+      return NextResponse.json({ error: PESAN_KODE[alasan], field: "kode_mentor" }, { status: 400 });
+    }
+  }
 
   // Password dipasang pada akun yang sama, jadi nanti bisa masuk lewat email
   // + password maupun Google.
@@ -59,7 +91,23 @@ export async function POST(request: Request) {
     );
   }
 
-  const admin = createAdminClient();
+  let role = status.role;
+  if (jadiMentor) {
+    const { data: hasil, error: kErr } = await admin.rpc("pakai_kode_mentor", {
+      p_kode: d.kode_mentor,
+      p_user: user.id,
+      p_nama: d.full_name,
+    });
+    if (kErr || hasil !== "ok") {
+      if (kErr) console.error("[lengkapi-profil] pakai_kode_mentor:", kErr.message);
+      return NextResponse.json(
+        { error: PESAN_KODE[hasil as string] ?? "Gagal memakai kode mentor. Coba lagi.", field: "kode_mentor" },
+        { status: 400 }
+      );
+    }
+    role = "mentor";
+  }
+
   const { error: upErr } = await admin
     .from("profiles")
     .update({ full_name: d.full_name, whatsapp: d.whatsapp, registrasi_selesai: true })
@@ -69,7 +117,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Gagal menyimpan data. Coba lagi." }, { status: 500 });
   }
 
+  const home = homeForRole(role as Role);
+  if (jadiMentor) return NextResponse.json({ redirect: "/mentor" });
   const next = safeRedirectPath(d.next ?? null);
-  const home = homeForRole(status.role as Role);
-  return NextResponse.json({ redirect: next !== "/dashboard" ? next : home });
+  // Customer tidak diarahkan ke area mentor/admin meskipun next menunjuk ke sana.
+  const bolehNext = next !== "/dashboard" && !next.startsWith("/mentor") && !next.startsWith("/admin");
+  return NextResponse.json({ redirect: bolehNext ? next : home });
 }

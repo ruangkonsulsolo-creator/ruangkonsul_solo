@@ -137,7 +137,7 @@ export default function LoginPage() {
           </h2>
           {sebagai === "mentor" ? (
             <p className="mt-1.5 text-sm text-muted-foreground">
-              Akun mentor dibuat oleh admin. Belum punya?{" "}
+              Mentor baru? Masuk dengan Google lalu isi kode mentor dari admin. Belum punya kode?{" "}
               <a
                 href={`https://wa.me/${BRAND.whatsapp}?text=${encodeURIComponent("Halo, saya ingin bergabung sebagai mentor Ruang Konsul Solo.")}`}
                 target="_blank"

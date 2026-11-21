@@ -38,6 +38,7 @@ export default async function LengkapiProfilPage({
       waAwal={wa}
       avatar={(meta.avatar_url || meta.picture || null) as string | null}
       next={safeRedirectPath(searchParams.next ?? null)}
+      modeAwal={(searchParams.next ?? "").startsWith("/mentor") ? "mentor" : "customer"}
     />
   );
 }

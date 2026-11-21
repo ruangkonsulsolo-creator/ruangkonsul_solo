@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/ui/logo";
 import {
+  KeyRound,
   LayoutDashboard, ClipboardList, Users,
   BarChart3, Settings, Package, LogOut, ChevronRight,
   GraduationCap, FileText, ShieldCheck, Phone, ShoppingBag, Store, Quote, CalendarDays } from "lucide-react";
@@ -18,6 +19,7 @@ const navItems = [
   { label: "Booking Leads",   href: "/admin/booking-leads",icon: Phone },
   { label: "Users",           href: "/admin/users",        icon: Users },
   { label: "Kinerja Mentor",  href: "/admin/mentor",       icon: GraduationCap },
+  { label: "Kode Mentor",     href: "/admin/kode-mentor",  icon: KeyRound },
   { label: "Laporan",         href: "/admin/laporan",      icon: BarChart3 },
   // Semua yang dijual — merchandise, bimbingan, layanan utama, paket hemat —
   // dikelola di satu tempat: Katalog Produk. Entri "Kelas Bimbingan" dan

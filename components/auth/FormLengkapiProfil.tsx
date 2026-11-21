@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Toast, useToast } from "@/components/ui/toast";
-import { Eye, EyeOff, Mail, Lock, User, MessageCircle, BadgeCheck } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, MessageCircle, BadgeCheck, KeyRound } from "lucide-react";
+import { BRAND } from "@/lib/brand";
 import { normalizeWhatsApp } from "@/lib/validators/whatsapp";
 
 interface Props {
@@ -16,11 +17,13 @@ interface Props {
   waAwal: string;
   avatar: string | null;
   next: string;
+  modeAwal: "customer" | "mentor";
 }
 
-type Field = "full_name" | "password" | "password_confirm" | "whatsapp";
+type Field = "full_name" | "password" | "password_confirm" | "whatsapp" | "kode_mentor";
+const POLA_KODE = /^MTR-[A-Z0-9]{6}$/;
 
-export function FormLengkapiProfil({ email, namaAwal, waAwal, avatar, next }: Props) {
+export function FormLengkapiProfil({ email, namaAwal, waAwal, avatar, next, modeAwal }: Props) {
   const router = useRouter();
   const { toast, showToast, hideToast } = useToast();
 
@@ -29,6 +32,8 @@ export function FormLengkapiProfil({ email, namaAwal, waAwal, avatar, next }: Pr
   const [konfirmasi, setKonfirmasi] = useState("");
   const [wa, setWa] = useState(waAwal);
   const [lihat, setLihat] = useState(false);
+  const [sebagai, setSebagai] = useState<"customer" | "mentor">(modeAwal);
+  const [kode, setKode] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<Field, string>>>({});
 
@@ -38,6 +43,7 @@ export function FormLengkapiProfil({ email, namaAwal, waAwal, avatar, next }: Pr
     if (password.length < 8) e.password = "Password minimal 8 karakter.";
     if (konfirmasi !== password) e.password_confirm = "Konfirmasi password tidak sama.";
     if (!normalizeWhatsApp(wa)) e.whatsapp = "Format nomor tidak valid (contoh: 0812xxxxxxxx).";
+    if (sebagai === "mentor" && !POLA_KODE.test(kode.trim().toUpperCase())) e.kode_mentor = "Kode mentor tidak valid (format: MTR-XXXXXX).";
     setErrors(e);
     return Object.keys(e).length === 0;
   }
@@ -55,6 +61,8 @@ export function FormLengkapiProfil({ email, namaAwal, waAwal, avatar, next }: Pr
           password,
           password_confirm: konfirmasi,
           whatsapp: wa,
+          sebagai,
+          kode_mentor: sebagai === "mentor" ? kode.trim().toUpperCase() : undefined,
           next,
         }),
       });
@@ -106,7 +114,40 @@ export function FormLengkapiProfil({ email, namaAwal, waAwal, avatar, next }: Pr
           </div>
         </div>
 
+        <div role="tablist" aria-label="Daftar sebagai" className="mb-5 grid grid-cols-2 rounded-xl bg-slate-100 p-1 text-sm font-semibold">
+          {(["customer", "mentor"] as const).map((k) => (
+            <button key={k} type="button" role="tab" aria-selected={sebagai === k}
+              onClick={() => { setSebagai(k); setErrors({}); }}
+              className={`rounded-lg px-3 py-2 transition-colors ${sebagai === k ? "bg-white text-[#8B0000] shadow-sm" : "text-slate-500 hover:text-slate-700"}`}>
+              {k === "customer" ? "Customer" : "Mentor"}
+            </button>
+          ))}
+        </div>
+
         <form onSubmit={kirim} className="space-y-4" noValidate>
+          {sebagai === "mentor" && (
+            <div className="space-y-1.5 rounded-xl border border-amber-200 bg-amber-50 p-3">
+              <Label htmlFor="kode" className="text-sm font-semibold text-slate-700">
+                Kode Mentor <span className="text-red-500">*</span>
+              </Label>
+              <div className="relative">
+                <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-amber-600" aria-hidden="true" />
+                <Input id="kode" value={kode} onChange={(e) => setKode(e.target.value.toUpperCase())}
+                  placeholder="MTR-XXXXXX" className="pl-9 bg-white font-mono tracking-wider uppercase"
+                  autoComplete="off" maxLength={10} disabled={loading} aria-invalid={!!errors.kode_mentor} />
+              </div>
+              {err("kode_mentor") ?? (
+                <p className="text-[11px] text-slate-600">
+                  Kode sekali pakai dari admin. Belum punya?{" "}
+                  <a href={`https://wa.me/${BRAND.whatsapp}?text=${encodeURIComponent("Halo admin, saya ingin meminta kode pendaftaran mentor Ruang Konsul Solo.")}`}
+                    target="_blank" rel="noopener noreferrer" className="font-semibold text-[#8B0000] hover:underline">
+                    Minta ke admin
+                  </a>
+                </p>
+              )}
+            </div>
+          )}
+
           <div className="space-y-1.5">
             <Label htmlFor="email" className="text-sm font-semibold text-slate-700">Email</Label>
             <div className="relative">
@@ -184,7 +225,7 @@ export function FormLengkapiProfil({ email, namaAwal, waAwal, avatar, next }: Pr
                 <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
                 Menyimpan...
               </span>
-            ) : "Selesaikan Pendaftaran"}
+            ) : sebagai === "mentor" ? "Daftar sebagai Mentor" : "Selesaikan Pendaftaran"}
           </Button>
         </form>
 
