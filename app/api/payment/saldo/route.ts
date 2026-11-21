@@ -5,7 +5,11 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { startPayment, getCustomerDetails, findReusablePayment } from "@/lib/payment/checkout";
 import { rateLimit } from "@/lib/security/rate-limit";
 
-const Body = z.object({ paket_id: z.string().uuid() });
+const Body = z.union([
+  z.object({ paket_id: z.string().uuid() }),
+  // Bayar langsung sebesar kekurangan biaya cek naskah (tanpa memilih paket).
+  z.object({ nominal: z.number().int().min(1000).max(5_000_000) }),
+]);
 
 /**
  * Beli paket isi saldo → Snap QRIS. Saldo ditambahkan oleh webhook / sinkron
@@ -21,6 +25,28 @@ export async function POST(req: NextRequest) {
 
   if (!(await rateLimit(`saldo:${user.id}`, 60, 6))) {
     return NextResponse.json({ error: "Terlalu banyak percobaan. Coba lagi sebentar." }, { status: 429 });
+  }
+
+  if ("nominal" in parsed.data) {
+    const nominal = Math.ceil(parsed.data.nominal / 500) * 500;
+    try {
+      const payment = await startPayment({
+        purpose: "saldo",
+        referenceId: crypto.randomUUID(),
+        displayRef: `CEK${nominal}`,
+        userId: user.id,
+        amountIdr: nominal,
+        items: [{ id: "saldo-cek", price: nominal, quantity: 1, name: "Saldo cek naskah" }],
+        itemSnapshot: [{ id: "saldo-cek", price: nominal, quantity: 1, name: "Saldo cek naskah (bayar langsung)", saldo_idr: nominal }],
+        customer: await getCustomerDetails(user.id, user.email),
+        finishPath: "/",
+        expiryMinutes: 30,
+      });
+      return NextResponse.json({ data: { payment_id: payment.paymentId, snap_token: payment.snapToken, nominal } });
+    } catch (err) {
+      console.error("[payment/saldo] Midtrans error:", err);
+      return NextResponse.json({ error: "Gagal membuat transaksi pembayaran. Coba lagi." }, { status: 502 });
+    }
   }
 
   // Harga & saldo dari DB, tidak pernah dari klien.

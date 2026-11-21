@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/ui/logo";
 import {
-  KeyRound, Bell, Image as ImageIcon, LayoutGrid,
+  KeyRound, Bell, Image as ImageIcon, LayoutGrid, FileCheck2,
   LayoutDashboard, ClipboardList, Users,
   BarChart3, Settings, Package, LogOut, ChevronRight,
   GraduationCap, FileText, ShieldCheck, Phone, ShoppingBag, Store, Quote, CalendarDays } from "lucide-react";
@@ -14,6 +14,7 @@ import {
 const navItems = [
   { label: "Dashboard",       href: "/admin",              icon: LayoutDashboard, exact: true },
   { label: "Pesanan",         href: "/admin/pesanan",      icon: ClipboardList },
+  { label: "Cek Turnitin & DrillBit", href: "/admin/cek-manual", icon: FileCheck2 },
   { label: "Pesanan Produk",  href: "/admin/pesanan-produk", icon: ShoppingBag },
   { label: "Sesi Bimbingan",  href: "/admin/sesi",         icon: CalendarDays },
   { label: "Notifikasi",      href: "/admin/notifikasi",   icon: Bell },

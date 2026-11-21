@@ -12,8 +12,8 @@ export default async function AdminLayananPage() {
   // Layanan lama (plagiasi, ai-detector, drillbit) tidak lagi dibaca alur mana pun.
   const { data: services } = await supabase
     .from("services")
-    .select("id, slug, name, description, price_idr, sla_hours, max_file_size_mb, is_active")
-    .in("slug", [...Object.values(SLUG_PERIKSA), SLUG_MANUAL.kecil, SLUG_MANUAL.besar])
+    .select("*")
+    .in("slug", [...Object.values(SLUG_PERIKSA), SLUG_MANUAL.kecil, SLUG_MANUAL.besar, SLUG_MANUAL.drillbit])
     .order("created_at", { ascending: true });
   return (
     <div className="space-y-6 max-w-7xl">

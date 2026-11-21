@@ -5,6 +5,7 @@ import Link from "next/link";
 import { BRAND } from "@/lib/brand";
 import type { Metadata } from "next";
 import { formatRupiah } from "@/lib/utils/format-currency";
+import { idLayananManual } from "@/lib/periksa/layanan-manual";
 export const metadata: Metadata = { title: `Manajemen Pesanan | Admin ${BRAND.name}` };
 
 const STATUS_CONFIG: Record<string, { label: string; variant: "success"|"warning"|"info"|"destructive"|"secondary" }> = {
@@ -23,6 +24,9 @@ export default async function AdminPesananPage({ searchParams }: { searchParams:
   const statusFilter = searchParams.status;
   const search = searchParams.q?.trim();
   let query = supabase.from("orders").select("id, order_number, status, price_idr, payment_method, created_at, services(name), profiles:profiles!orders_user_id_fkey(full_name, whatsapp), uploaded_files(original_name)", { count: "exact" }).order("created_at", { ascending: false }).range((page - 1) * pageSize, page * pageSize - 1);
+  // Pesanan Turnitin/DrillBit punya halaman sendiri (Admin › Cek Turnitin & DrillBit).
+  const idManual = await idLayananManual(supabase);
+  if (idManual.length) query = query.not("service_id", "in", `(${idManual.join(",")})`);
   if (statusFilter && statusFilter !== "semua") query = query.eq("status", statusFilter);
   if (search) query = query.ilike("order_number", `%${search}%`);
   const { data: orders, count } = await query;

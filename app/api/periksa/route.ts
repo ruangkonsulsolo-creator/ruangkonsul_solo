@@ -63,14 +63,14 @@ export async function POST(request: NextRequest) {
   }
 
   // Tarif dari Admin > Tarif Pemeriksaan (per 1.000 kata), bukan dari klien.
-  const { tarif, aktif } = await ambilTarifPeriksa();
+  const { tarif, aktif, minimum } = await ambilTarifPeriksa();
   if (!aktif[jenis]) {
     return NextResponse.json(
       { error: "Layanan ini sedang dinonaktifkan admin. Coba jenis pemeriksaan lain." },
       { status: 409 }
     );
   }
-  const biaya = hitungBiaya(jumlahKata, jenis, tarif);
+  const biaya = hitungBiaya(jumlahKata, jenis, tarif, minimum);
   const supabase = createClient();
 
   const {
@@ -121,11 +121,15 @@ export async function POST(request: NextRequest) {
   if (eMulai) {
     // P0001 dipakai fungsi untuk saldo kurang.
     if (eMulai.code === "P0001" || eMulai.message?.includes("Saldo tidak cukup")) {
+      const { data: pr } = await supabase.from("profiles").select("credit_balance").eq("id", user.id).maybeSingle();
+      const saldo = Number(pr?.credit_balance ?? 0);
       return NextResponse.json(
         {
           error: `Saldo kreditmu belum cukup. Pemeriksaan ini butuh Rp${biaya.toLocaleString("id-ID")}.`,
           action: "isi_saldo",
           biaya,
+          saldo,
+          kurang: Math.max(0, biaya - saldo),
         },
         { status: 402 }
       );

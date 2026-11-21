@@ -12,8 +12,14 @@ export const SLUG_PERIKSA: Record<JenisPeriksa, string> = {
 };
 
 export type TarifPeriksa = Record<JenisPeriksa, number>;
-export type TarifManual = { kecil: number; besar: number; aktif: boolean };
-export type StatusPeriksa = { tarif: TarifPeriksa; aktif: Record<JenisPeriksa, boolean>; manual: TarifManual };
+export type TarifManual = { kecil: number; besar: number; aktif: boolean; drillbit: number; drillbitAktif: boolean };
+export type StatusPeriksa = {
+  tarif: TarifPeriksa;
+  aktif: Record<JenisPeriksa, boolean>;
+  manual: TarifManual;
+  /** Biaya minimum per pemeriksaan instan. */
+  minimum: Record<JenisPeriksa, number>;
+};
 
 /**
  * Tarif per 1.000 kata dari Admin > Tarif Pemeriksaan (tabel services).
@@ -27,18 +33,21 @@ export async function ambilTarifPeriksa(): Promise<StatusPeriksa> {
   const tarif: TarifPeriksa = { ...TARIF };
   const aktif: Record<JenisPeriksa, boolean> = { kemiripan: true, ai: true, parafrase: true };
   // Mode manual baru aktif bila migration 042 sudah menambah layanannya.
-  const manual: TarifManual = { kecil: 15000, besar: 20000, aktif: false };
+  const manual: TarifManual = { kecil: 15000, besar: 20000, aktif: false, drillbit: 10000, drillbitAktif: false };
+  const minimum: Record<JenisPeriksa, number> = { kemiripan: 0, ai: 0, parafrase: 0 };
   try {
-    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return { tarif, aktif, manual };
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return { tarif, aktif, manual, minimum };
     const { data } = await createAdminClient()
       .from("services")
-      .select("slug, price_idr, is_active")
-      .in("slug", [...Object.values(SLUG_PERIKSA), SLUG_MANUAL.kecil, SLUG_MANUAL.besar]);
+      .select("*")
+      .in("slug", [...Object.values(SLUG_PERIKSA), SLUG_MANUAL.kecil, SLUG_MANUAL.besar, SLUG_MANUAL.drillbit]);
     for (const jenis of Object.keys(SLUG_PERIKSA) as JenisPeriksa[]) {
       const row = data?.find((r) => r.slug === SLUG_PERIKSA[jenis]);
       if (!row) continue;
       if (Number.isFinite(row.price_idr) && row.price_idr > 0) tarif[jenis] = row.price_idr;
       aktif[jenis] = row.is_active !== false;
+      // Kolom harga_minimum_idr ada setelah migration 044.
+      if (Number(row.harga_minimum_idr) > 0) minimum[jenis] = Number(row.harga_minimum_idr);
     }
     const kecil = data?.find((r) => r.slug === SLUG_MANUAL.kecil);
     const besar = data?.find((r) => r.slug === SLUG_MANUAL.besar);
@@ -47,8 +56,13 @@ export async function ambilTarifPeriksa(): Promise<StatusPeriksa> {
       manual.besar = besar?.price_idr ?? kecil.price_idr;
       manual.aktif = kecil.is_active !== false;
     }
+    const db = data?.find((r) => r.slug === SLUG_MANUAL.drillbit);
+    if (db) {
+      manual.drillbit = db.price_idr;
+      manual.drillbitAktif = db.is_active !== false;
+    }
   } catch (err) {
     console.warn("[periksa] tarif dari DB gagal dibaca, pakai bawaan:", err);
   }
-  return { tarif, aktif, manual };
+  return { tarif, aktif, manual, minimum };
 }

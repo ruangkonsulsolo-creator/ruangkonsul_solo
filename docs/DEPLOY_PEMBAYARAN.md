@@ -17,6 +17,7 @@ Migration 018–032 sudah ada di branch katalog Anda. Yang baru hanya:
 - `supabase/migrations/041_paket_promo_foto_mentor.sql` (slide Paket Layanan di beranda + izin mentor unggah foto; jalankan **setelah** 040)
 - `supabase/migrations/042_cek_plagiarisme_manual.sql` (cek plagiarisme manual: layanan per berkas, kolom laporan, bucket documents & reports; jalankan **setelah** 041)
 - `supabase/migrations/043_mesin_laporan.sql` (nama mesin pemeriksa pada laporan manual; jalankan **setelah** 042)
+- `supabase/migrations/044_harga_minimum_drillbit.sql` (biaya minimum per cek; cek AI Rp1.000/1.000 kata min Rp5.000; layanan DrillBit manual; jalankan **setelah** 043)
 
 Cara menjalankan (pilih satu):
 - **SQL Editor**: Supabase Dashboard → SQL Editor → tempel isi file 033 → Run, lalu file 034 → Run.

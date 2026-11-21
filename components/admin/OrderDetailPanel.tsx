@@ -221,7 +221,7 @@ export function OrderDetailPanel({ order, documentDownloadUrl }: OrderDetailPane
               <label className="flex items-center gap-1.5 text-xs text-slate-600">
                 Mesin
                 <select value={mesin} onChange={(e) => setMesin(e.target.value)} className="rounded-md border px-2 py-1 text-sm">
-                  {["Turnitin", "iThenticate", "Copyleaks", "Lainnya"].map((m) => <option key={m} value={m}>{m}</option>)}
+                  {["Turnitin", "DrillBit", "iThenticate", "Copyleaks", "Lainnya"].map((m) => <option key={m} value={m}>{m}</option>)}
                 </select>
               </label>
               <label className="flex items-center gap-1.5 text-xs text-slate-600">

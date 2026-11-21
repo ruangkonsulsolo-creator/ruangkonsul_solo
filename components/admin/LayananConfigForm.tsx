@@ -18,7 +18,11 @@ interface Service {
   sla_hours: number;
   max_file_size_mb: number;
   is_active: boolean;
+  /** Ada setelah migration 044. */
+  harga_minimum_idr?: number;
 }
+
+const perBerkas = (slug: string) => slug.startsWith("plagiasi-manual") || slug === "drillbit-manual";
 
 export function LayananConfigForm({ services: initial }: { services: Service[] }) {
   const supabase = createClient();
@@ -40,6 +44,7 @@ export function LayananConfigForm({ services: initial }: { services: Service[] }
         max_file_size_mb: service.max_file_size_mb,
         description: service.description,
         is_active: service.is_active,
+        ...(service.harga_minimum_idr !== undefined ? { harga_minimum_idr: service.harga_minimum_idr } : {}),
         updated_at: new Date().toISOString(),
       })
       .eq("id", service.id);
@@ -87,7 +92,7 @@ export function LayananConfigForm({ services: initial }: { services: Service[] }
             {/* Form fields */}
             <div className="p-5 grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold text-slate-600">{service.slug.startsWith("plagiasi-manual") ? "Tarif per berkas (Rp)" : "Tarif per 1.000 kata (Rp)"}</Label>
+                <Label className="text-xs font-semibold text-slate-600">{perBerkas(service.slug) ? "Tarif per berkas (Rp)" : "Tarif per 1.000 kata (Rp)"}</Label>
                 <Input
                   type="number"
                   value={service.price_idr}
@@ -95,11 +100,28 @@ export function LayananConfigForm({ services: initial }: { services: Service[] }
                   min={0}
                 />
                 <p className="text-[10px] text-muted-foreground">
-                  {service.slug.startsWith("plagiasi-manual")
+                  {perBerkas(service.slug)
                     ? <>= {formatRupiah(service.price_idr)} per berkas (dibayar QRIS)</>
                     : <>= {formatRupiah(service.price_idr)} / 1.000 kata · naskah 5.000 kata = {formatRupiah(service.price_idr * 5)}</>}
                 </p>
               </div>
+
+              {!perBerkas(service.slug) && service.harga_minimum_idr !== undefined && (
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-slate-600">Biaya minimum (Rp)</Label>
+                  <Input
+                    type="number"
+                    value={service.harga_minimum_idr}
+                    onChange={(e) => update(service.id, "harga_minimum_idr", parseInt(e.target.value) || 0)}
+                    min={0}
+                  />
+                  <p className="text-[10px] text-muted-foreground">
+                    {service.harga_minimum_idr > 0
+                      ? `Naskah pendek tetap ${formatRupiah(service.harga_minimum_idr)}`
+                      : "0 = tanpa minimum"}
+                  </p>
+                </div>
+              )}
 
               <div className="space-y-1.5 sm:col-span-3">
                 <Label className="text-xs font-semibold text-slate-600">Deskripsi</Label>

@@ -32,13 +32,16 @@ const rupiah = (n: number) => formatRupiah(n);
 export function KotakPeriksa({
   tarif = TARIF,
   aktif = { kemiripan: true, ai: true, parafrase: true },
-  manual = { kecil: 15000, besar: 20000, aktif: false },
+  manual = { kecil: 15000, besar: 20000, aktif: false, drillbit: 10000, drillbitAktif: false },
+  minimum = { kemiripan: 0, ai: 0, parafrase: 0 },
 }: {
   /** Tarif per 1.000 kata dari Admin > Tarif Pemeriksaan. */
   tarif?: Record<JenisPeriksa, number>;
   aktif?: Record<JenisPeriksa, boolean>;
   /** Tarif per berkas cek plagiarisme manual (laporan diunggah tim). */
-  manual?: { kecil: number; besar: number; aktif: boolean };
+  manual?: { kecil: number; besar: number; aktif: boolean; drillbit: number; drillbitAktif: boolean };
+  /** Biaya minimum per pemeriksaan instan. */
+  minimum?: Record<JenisPeriksa, number>;
 } = {}) {
   const [teks, setTeks] = useState("");
   const [jenis, setJenis] = useState<JenisPeriksa>(
@@ -47,12 +50,14 @@ export function KotakPeriksa({
   const [memproses, setMemproses] = useState(false);
   const [galat, setGalat] = useState<string | null>(null);
   const [aksi, setAksi] = useState<string | null>(null);
+  const [kurang, setKurang] = useState<number>(0);
   const [hasil, setHasil] = useState<HasilPeriksa | null>(null);
   const [namaBerkas, setNamaBerkas] = useState<string | null>(null);
   const [membaca, setMembaca] = useState(false);
   const [berkas, setBerkas] = useState<File | null>(null);
   const [mode, setMode] = useState<"instan" | "manual">("instan");
   const [formatLaporan, setFormatLaporan] = useState<"baru" | "lama">("baru");
+  const [jenisManual, setJenisManual] = useState<"turnitin" | "drillbit">("turnitin");
   const [wa, setWa] = useState("");
   const [pesananManual, setPesananManual] = useState<{ nomor: string; lunas: boolean } | null>(null);
   const inputBerkas = useRef<HTMLInputElement>(null);
@@ -111,12 +116,13 @@ export function KotakPeriksa({
 
   const jumlahKata = useMemo(() => hitungKata(teks), [teks]);
   const biaya = useMemo(
-    () => (jumlahKata > 0 ? hitungBiaya(jumlahKata, jenis, tarif) : 0),
-    [jumlahKata, jenis, tarif]
+    () => (jumlahKata > 0 ? hitungBiaya(jumlahKata, jenis, tarif, minimum) : 0),
+    [jumlahKata, jenis, tarif, minimum]
   );
 
   const modeManual = jenis === "kemiripan" && manual.aktif && mode === "manual";
-  const hargaManual = jumlahKata > BATAS_KATA_BESAR ? manual.besar : manual.kecil;
+  const hargaManual =
+    jenisManual === "drillbit" ? manual.drillbit : jumlahKata > BATAS_KATA_BESAR ? manual.besar : manual.kecil;
   const terlaluPendek = jumlahKata > 0 && jumlahKata < MIN_KATA;
   const terlaluPanjang = !modeManual && jumlahKata > MAKS_KATA;
   const siap = modeManual
@@ -153,7 +159,8 @@ export function KotakPeriksa({
           ukuran: berkas.size,
           mime: berkas.type,
           jumlah_kata: jumlahKata,
-          format_laporan: formatLaporan,
+          jenis_manual: jenisManual,
+          format_laporan: jenisManual === "turnitin" ? formatLaporan : undefined,
           whatsapp: wa,
         }),
       });
@@ -211,6 +218,7 @@ export function KotakPeriksa({
       const json = await res.json();
       if (!res.ok) {
         setAksi(json.action ?? null);
+        setKurang(Number(json.kurang ?? 0));
         throw new Error(json.error ?? "Pemeriksaan gagal.");
       }
       setHasil(json.data);
@@ -219,6 +227,41 @@ export function KotakPeriksa({
     } finally {
       setMemproses(false);
     }
+  }
+
+  /** Saldo kurang: bayar kekurangannya via QRIS, lalu pemeriksaan dijalankan otomatis. */
+  async function bayarLaluPeriksa() {
+    setMemproses(true);
+    setGalat(null);
+    try {
+      const res = await fetch("/api/payment/saldo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nominal: Math.max(1000, kurang) }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setAksi(json.action ?? null);
+        throw new Error(json.error ?? "Gagal membuka pembayaran.");
+      }
+      const { openSnap, syncPaymentStatus } = await import("@/lib/payment/use-snap");
+      const hasilBayar = await openSnap(json.data.snap_token);
+      if (hasilBayar === "closed") throw new Error("Pembayaran dibatalkan. Naskahmu belum diperiksa.");
+      // Tunggu konfirmasi lunas (QRIS biasanya beberapa detik).
+      let lunas = hasilBayar === "success";
+      for (let i = 0; i < 10 && !lunas; i++) {
+        const st = await syncPaymentStatus({ paymentId: json.data.payment_id });
+        lunas = st === "paid";
+        if (!lunas) await new Promise((r) => setTimeout(r, 3000));
+      }
+      if (!lunas) throw new Error("Pembayaran belum terkonfirmasi. Kalau sudah membayar, tunggu sebentar lalu klik Periksa sekarang lagi.");
+    } catch (e) {
+      setGalat(e instanceof Error ? e.message : "Gagal membuka pembayaran.");
+      setMemproses(false);
+      return;
+    }
+    setMemproses(false);
+    await kirim();
   }
 
   return (
@@ -280,6 +323,11 @@ export function KotakPeriksa({
                     {p.harga}
                   </span>
                   <span className="text-xs font-medium text-slate-500"> / 1.000 kata</span>
+                  {minimum[p.nilai] > 0 && (
+                    <span className="block text-[11px] font-medium text-slate-500">
+                      min. {rupiah(minimum[p.nilai])} (di bawah {Math.round(minimum[p.nilai] / tarif[p.nilai]).toLocaleString("id-ID")}.000 kata)
+                    </span>
+                  )}
                 </span>
                 {p.penyedia?.logo && (
                   <span className="flex flex-col items-end">
@@ -371,6 +419,18 @@ export function KotakPeriksa({
               </div>
               {mode === "manual" && (
                 <>
+                  {manual.drillbitAktif && (
+                    <div className="flex flex-wrap items-center gap-2 text-xs">
+                      <span className="font-semibold text-slate-600">Jenis laporan:</span>
+                      {([["turnitin", "Turnitin"], ["drillbit", "DrillBit (plagiasi + AI)"]] as const).map(([v, l]) => (
+                        <button key={v} type="button" onClick={() => setJenisManual(v)} aria-pressed={jenisManual === v}
+                          className={`rounded-full border px-3 py-1 font-semibold ${jenisManual === v ? "border-brand bg-brand text-white" : "border-slate-300 bg-white text-slate-600"}`}>
+                          {l}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {jenisManual === "turnitin" && (
                   <div className="flex flex-wrap items-center gap-2 text-xs">
                     <span className="font-semibold text-slate-600">Format laporan:</span>
                     {(["baru", "lama"] as const).map((f) => (
@@ -380,9 +440,13 @@ export function KotakPeriksa({
                       </button>
                     ))}
                   </div>
+                  )}
                   <p className="text-[11px] leading-relaxed text-slate-500">
-                    Unggah berkas Word/PDF aslimu. Tim memeriksa dan mengirim laporan PDF + persentase kemiripan
-                    (maks. 1×24 jam) ke Riwayat Pesanan. {rupiah(manual.kecil)} s.d. ±100 halaman, {rupiah(manual.besar)} di atasnya.
+                    Unggah berkas Word/PDF aslimu. Tim memeriksa dan mengirim laporan PDF asli + persentase
+                    (maks. 1×24 jam) ke Riwayat Pesanan.{" "}
+                    {jenisManual === "drillbit"
+                      ? `DrillBit ${rupiah(manual.drillbit)} per berkas.`
+                      : `Turnitin ${rupiah(manual.kecil)} s.d. ±100 halaman, ${rupiah(manual.besar)} di atasnya.`}
                   </p>
                   <input type="tel" inputMode="tel" value={wa} onChange={(e) => setWa(e.target.value)}
                     placeholder="No. WhatsApp untuk kabar laporan (0812…)"
@@ -476,7 +540,7 @@ export function KotakPeriksa({
             {memproses ? (
               <PanelMemproses />
             ) : galat ? (
-              <PanelGalat pesan={galat} aksi={aksi} />
+              <PanelGalat pesan={galat} aksi={aksi} kurang={kurang} onBayar={bayarLaluPeriksa} />
             ) : pesananManual ? (
               <PanelPesananManual nomor={pesananManual.nomor} lunas={pesananManual.lunas} />
             ) : hasil ? (
@@ -538,7 +602,7 @@ function PanelMemproses() {
   );
 }
 
-function PanelGalat({ pesan, aksi }: { pesan: string; aksi: string | null }) {
+function PanelGalat({ pesan, aksi, kurang = 0, onBayar }: { pesan: string; aksi: string | null; kurang?: number; onBayar?: () => void }) {
   return (
     <div role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3">
       <p className="text-sm font-medium text-red-800">{pesan}</p>
@@ -548,9 +612,17 @@ function PanelGalat({ pesan, aksi }: { pesan: string; aksi: string | null }) {
         </Link>
       )}
       {aksi === "isi_saldo" && (
-        <Link href="/dashboard/isi-saldo" className="mt-1 inline-block text-sm font-bold text-red-900 underline">
-          Isi saldo
-        </Link>
+        <div className="mt-3 flex flex-wrap items-center gap-3">
+          {onBayar && kurang > 0 && (
+            <button type="button" onClick={onBayar}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-brand px-4 py-2 text-sm font-bold text-white hover:bg-brand-light">
+              Bayar {formatRupiah(Math.max(1000, Math.ceil(kurang / 500) * 500))} via QRIS & periksa
+            </button>
+          )}
+          <Link href="/dashboard/isi-saldo" className="text-sm font-bold text-red-900 underline">
+            atau isi saldo paket (ada bonus)
+          </Link>
+        </div>
       )}
       {aksi === "belum_aktif" && (
         <a

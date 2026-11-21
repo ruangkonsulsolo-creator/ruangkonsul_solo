@@ -62,10 +62,12 @@ export const MAKS_KATA = 20_000;
 export function hitungBiaya(
   jumlahKata: number,
   jenis: JenisPeriksa,
-  tarif: Record<JenisPeriksa, number> = TARIF
+  tarif: Record<JenisPeriksa, number> = TARIF,
+  /** Biaya minimum per pemeriksaan (mis. cek AI Rp5.000 di bawah 5.000 kata). */
+  minimum?: Partial<Record<JenisPeriksa, number>>
 ): number {
   const satuan = Math.max(1, Math.ceil(jumlahKata / 1000));
-  return satuan * tarif[jenis];
+  return Math.max(minimum?.[jenis] ?? 0, satuan * tarif[jenis]);
 }
 
 export function hitungKata(teks: string): number {

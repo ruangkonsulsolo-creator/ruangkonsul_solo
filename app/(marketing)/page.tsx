@@ -337,7 +337,7 @@ export default async function LandingPage() {
             mengutip — bukan mengakali pemeriksaan kampus.
           </p>
 
-          <KotakPeriksa tarif={tarifPeriksa.tarif} aktif={tarifPeriksa.aktif} manual={tarifPeriksa.manual} />
+          <KotakPeriksa tarif={tarifPeriksa.tarif} aktif={tarifPeriksa.aktif} manual={tarifPeriksa.manual} minimum={tarifPeriksa.minimum} />
         </div>
       </section>
 

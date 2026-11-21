@@ -5,7 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { startPayment, requireWhatsApp } from "@/lib/payment/checkout";
 import { rateLimit } from "@/lib/security/rate-limit";
 import { generateOrderNumber } from "@/lib/utils/generate-order-number";
-import { BATAS_KATA_BESAR, SLUG_MANUAL } from "@/lib/periksa/manual";
+import { BATAS_KATA_BESAR, JENIS_MANUAL, SLUG_MANUAL } from "@/lib/periksa/manual";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +22,8 @@ const skema = z.object({
   ukuran: z.number().int().min(1).max(50 * 1024 * 1024),
   mime: z.enum(MIME),
   jumlah_kata: z.number().int().min(0).max(2_000_000),
-  format_laporan: z.enum(["baru", "lama"]),
+  jenis_manual: z.enum(JENIS_MANUAL).default("turnitin"),
+  format_laporan: z.enum(["baru", "lama"]).optional(),
   whatsapp: z.string().optional(),
 });
 
@@ -61,14 +62,16 @@ export async function POST(request: NextRequest) {
   const wa = await requireWhatsApp(user.id, d.whatsapp);
   if (!wa.ok) return NextResponse.json({ error: wa.error, field: "whatsapp" }, { status: 400 });
 
-  const slug = d.jumlah_kata > BATAS_KATA_BESAR ? SLUG_MANUAL.besar : SLUG_MANUAL.kecil;
+  const drillbit = d.jenis_manual === "drillbit";
+  const slug = drillbit ? SLUG_MANUAL.drillbit : d.jumlah_kata > BATAS_KATA_BESAR ? SLUG_MANUAL.besar : SLUG_MANUAL.kecil;
+  const formatLaporan = drillbit ? null : d.format_laporan ?? "baru";
   const { data: layanan } = await admin
     .from("services")
     .select("id, name, price_idr, is_active")
     .eq("slug", slug)
     .maybeSingle();
   if (!layanan || !layanan.is_active) {
-    return NextResponse.json({ error: "Cek plagiarisme manual sedang tidak tersedia." }, { status: 409 });
+    return NextResponse.json({ error: drillbit ? "Cek DrillBit sedang tidak tersedia." : "Cek plagiarisme manual sedang tidak tersedia." }, { status: 409 });
   }
 
   const { data: berkas, error: eBerkas } = await admin
@@ -101,8 +104,9 @@ export async function POST(request: NextRequest) {
       file_id: berkas.id,
       price_idr: layanan.price_idr,
       payment_method: "midtrans",
-      format_laporan: d.format_laporan,
+      format_laporan: formatLaporan,
       jumlah_kata: d.jumlah_kata,
+      mesin_laporan: drillbit ? "DrillBit" : "Turnitin",
     })
     .select("id, order_number")
     .single();
@@ -112,7 +116,7 @@ export async function POST(request: NextRequest) {
   }
 
   const { data: prof } = await admin.from("profiles").select("full_name").eq("id", user.id).maybeSingle();
-  const namaItem = `${layanan.name} — tampilan ${d.format_laporan}`;
+  const namaItem = formatLaporan ? `${layanan.name} — tampilan ${formatLaporan}` : layanan.name;
   try {
     const bayar = await startPayment({
       purpose: "order",
