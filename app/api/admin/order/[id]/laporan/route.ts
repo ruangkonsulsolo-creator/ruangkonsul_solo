@@ -3,12 +3,14 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { wajibStaf } from "@/lib/auth/wajib-staf";
+import { MESIN_LAPORAN } from "@/lib/periksa/manual";
 
 export const dynamic = "force-dynamic";
 
 const skema = z.object({
   persen_kemiripan: z.number().min(0, "Persentase 0–100.").max(100, "Persentase 0–100."),
   selesaikan: z.boolean().optional().default(true),
+  mesin_laporan: z.enum(MESIN_LAPORAN).optional(),
 });
 
 /**
@@ -47,6 +49,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       report_storage_path: path,
       report_uploaded_at: now,
       persen_kemiripan: parsed.data.persen_kemiripan,
+      ...(parsed.data.mesin_laporan ? { mesin_laporan: parsed.data.mesin_laporan } : {}),
       assigned_admin_id: user.id,
       ...(parsed.data.selesaikan ? { status: "selesai", completed_at: now } : {}),
     })
@@ -62,7 +65,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       order_id: order.id,
       channel: "in_app",
       title: "Laporan Cek Plagiarisme Siap",
-      body: `Laporan ${order.order_number} sudah siap: kemiripan ${parsed.data.persen_kemiripan}%. Unduh di Riwayat Pesanan.`,
+      body: `Laporan ${order.order_number} sudah siap: kemiripan ${parsed.data.persen_kemiripan}%${parsed.data.mesin_laporan && parsed.data.mesin_laporan !== "Lainnya" ? ` (${parsed.data.mesin_laporan})` : ""}. Lihat & unduh di Riwayat Pesanan.`,
     });
   }
   return NextResponse.json({ ok: true });

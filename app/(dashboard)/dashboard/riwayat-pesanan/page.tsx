@@ -231,9 +231,9 @@ export default async function RiwayatPesananPage({
                         <Link href={`/receipt/${r.id}`} className="text-xs font-semibold text-brand hover:underline">Receipt</Link>
                       )}
                       {od?.adaLaporan && (
-                        <a href={`/api/report/${r.reference_id}`} className="inline-flex items-center gap-1 rounded-lg bg-brand px-2.5 py-1 text-xs font-bold text-white hover:bg-brand-light">
-                          Unduh laporan
-                        </a>
+                        <Link href={`/dashboard/laporan/${r.reference_id}`} className="inline-flex items-center gap-1 rounded-lg bg-brand px-2.5 py-1 text-xs font-bold text-white hover:bg-brand-light">
+                          Lihat laporan
+                        </Link>
                       )}
                       {r.purpose !== "order" && (
                         <Link href={j.detail} className="text-xs font-semibold text-slate-500 hover:text-slate-800">Detail →</Link>

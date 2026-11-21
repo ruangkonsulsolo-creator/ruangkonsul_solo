@@ -25,6 +25,7 @@ interface OrderDetailPanelProps {
     format_laporan?: "baru" | "lama" | null;
     persen_kemiripan?: number | null;
     jumlah_kata?: number | null;
+    mesin_laporan?: string | null;
     services: { name: string; slug: string } | null;
     profiles: { full_name: string | null; whatsapp: string | null } | null;
     uploaded_files: { original_name: string; storage_path: string } | null;
@@ -48,6 +49,7 @@ export function OrderDetailPanel({ order, documentDownloadUrl }: OrderDetailPane
   const [cancelReason, setCancelReason] = useState("");
   const [reportFile, setReportFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [mesin, setMesin] = useState<string>(order.mesin_laporan ?? "Turnitin");
   const [persen, setPersen] = useState<string>(order.persen_kemiripan != null ? String(order.persen_kemiripan) : "");
   const [submitting, setSubmitting] = useState<string | null>(null); // status yang sedang diproses
 
@@ -84,7 +86,7 @@ export function OrderDetailPanel({ order, documentDownloadUrl }: OrderDetailPane
       const res = await fetch(`/api/admin/order/${order.id}/laporan`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ persen_kemiripan: nilai, selesaikan: true }),
+        body: JSON.stringify({ persen_kemiripan: nilai, selesaikan: true, mesin_laporan: mesin }),
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(json.error ?? "Gagal menyimpan laporan.");
@@ -205,7 +207,7 @@ export function OrderDetailPanel({ order, documentDownloadUrl }: OrderDetailPane
                 {order.report_uploaded_at && ` (${new Date(order.report_uploaded_at).toLocaleDateString("id-ID")})`}
               </p>
             )}
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <label className="cursor-pointer rounded-md border px-3 py-1.5 text-xs hover:bg-slate-50 flex items-center gap-1.5">
                 <Upload className="h-3.5 w-3.5" aria-hidden="true" />
                 {reportFile ? reportFile.name : "Pilih PDF"}
@@ -215,6 +217,12 @@ export function OrderDetailPanel({ order, documentDownloadUrl }: OrderDetailPane
                   className="sr-only"
                   onChange={(e) => setReportFile(e.target.files?.[0] ?? null)}
                 />
+              </label>
+              <label className="flex items-center gap-1.5 text-xs text-slate-600">
+                Mesin
+                <select value={mesin} onChange={(e) => setMesin(e.target.value)} className="rounded-md border px-2 py-1 text-sm">
+                  {["Turnitin", "iThenticate", "Copyleaks", "Lainnya"].map((m) => <option key={m} value={m}>{m}</option>)}
+                </select>
               </label>
               <label className="flex items-center gap-1.5 text-xs text-slate-600">
                 Kemiripan
