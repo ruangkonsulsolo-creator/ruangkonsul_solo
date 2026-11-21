@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/ui/logo";
 import {
-  KeyRound, Bell,
+  KeyRound, Bell, Image as ImageIcon,
   LayoutDashboard, ClipboardList, Users,
   BarChart3, Settings, Package, LogOut, ChevronRight,
   GraduationCap, FileText, ShieldCheck, Phone, ShoppingBag, Store, Quote, CalendarDays } from "lucide-react";
@@ -33,6 +33,7 @@ const navItems = [
   { label: "Penjualan Merch",  href: "/admin/merchandise", icon: ShoppingBag },
   { type: "section" as const, label: "Konten" },
   { label: "Blog",             href: "/admin/blog",        icon: FileText },
+  { label: "Banner Beranda",   href: "/admin/banner",      icon: ImageIcon },
   { label: "Testimoni",        href: "/admin/testimoni",   icon: Quote },
   // Dua entri di bawah bukan bagian katalog: keduanya mengatur fitur periksa
   // naskah (tabel services dan quota_packages), yang masih dipakai alur

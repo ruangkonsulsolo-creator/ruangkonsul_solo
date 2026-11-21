@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Logo } from "@/components/ui/logo";
 import { HeroSlider } from "@/components/landing/HeroSlider";
+import { ambilHeroSlides } from "@/lib/landing/hero-slides";
 import { HeroBackground } from "@/components/landing/HeroBackground";
 import { BannerStrip } from "@/components/landing/BannerStrip";
 import { LogoKampus } from "@/components/landing/LogoKampus";
@@ -143,9 +144,10 @@ export const revalidate = 300;
 
 export default async function LandingPage() {
   const tarifPeriksa = await ambilTarifPeriksa();
-  const [MENTOR, bimbingan] = await Promise.all([
+  const [MENTOR, bimbingan, heroSlides] = await Promise.all([
     ambilMentor(),
     ambilEtalase(ETALASE.bimbinganOnline),
+    ambilHeroSlides(),
   ]);
   const paketHarian = bimbingan.produk;
   return (
@@ -229,7 +231,7 @@ export default async function LandingPage() {
           </div>
 
           {/* Kanan — slider */}
-          <HeroSlider />
+          <HeroSlider slides={heroSlides} />
         </div>
       </section>
 

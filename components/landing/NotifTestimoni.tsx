@@ -164,13 +164,13 @@ export function NotifTestimoni() {
       aria-live="polite"
       style={{
         // Di iPhone, bagian bawah layar tertutup batang gestur Safari.
-        bottom: "max(1.25rem, env(safe-area-inset-bottom))",
+        bottom: "max(1rem, env(safe-area-inset-bottom))",
       }}
-      className="fixed left-5 z-50 w-[min(21rem,calc(100vw-2.5rem))] overflow-hidden rounded-2xl bg-brand text-white shadow-2xl ring-1 ring-black/10 animate-in fade-in slide-in-from-bottom-4 duration-500"
+      className="fixed left-4 z-50 w-[min(16.5rem,calc(100vw-2rem))] overflow-hidden rounded-xl bg-brand text-white shadow-2xl ring-1 ring-black/10 animate-in fade-in slide-in-from-bottom-4 duration-500"
     >
-      <div className="flex items-start gap-2 px-4 pt-3.5">
-        <span className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-white/80">
-          <Quote className="h-3.5 w-3.5" aria-hidden="true" />
+      <div className="flex items-center gap-2 px-3 pt-2.5">
+        <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-white/80">
+          <Quote className="h-3 w-3" aria-hidden="true" />
           Testimoni
         </span>
         <button
@@ -179,19 +179,19 @@ export function NotifTestimoni() {
           aria-label="Tutup notifikasi testimoni"
           className="ml-auto -mr-1 rounded-lg p-1 text-white/70 transition-colors hover:bg-white/15 hover:text-white"
         >
-          <X className="h-4 w-4" aria-hidden="true" />
+          <X className="h-3.5 w-3.5" aria-hidden="true" />
         </button>
       </div>
 
-      <div className="px-4 pb-4 pt-2">
-        <p className="text-sm leading-relaxed text-white">&ldquo;{t.isi}&rdquo;</p>
+      <div className="px-3 pb-2.5 pt-1.5">
+        <p className="line-clamp-3 text-[13px] leading-snug text-white">&ldquo;{t.isi}&rdquo;</p>
         {keterangan && (
-          <p className="mt-2 text-xs text-white/70">— {keterangan}</p>
+          <p className="mt-1 truncate text-[11px] text-white/70">— {keterangan}</p>
         )}
 
         <Link
           href={t.tautan || "/bimbingan"}
-          className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-white underline-offset-2 hover:underline"
+          className="mt-1.5 inline-flex items-center gap-1 text-[11px] font-bold text-white underline-offset-2 hover:underline"
         >
           Lihat layanannya
           <ArrowRight className="h-3 w-3" aria-hidden="true" />
@@ -199,11 +199,11 @@ export function NotifTestimoni() {
       </div>
 
       {daftar.length > 1 && (
-        <div className="flex gap-1 px-4 pb-3">
+        <div className="flex gap-1 px-3 pb-2">
           {daftar.map((x, i) => (
             <span
               key={x.id}
-              className={`h-1 flex-1 rounded-full transition-colors ${
+              className={`h-0.5 flex-1 rounded-full transition-colors ${
                 i === indeks ? "bg-white" : "bg-white/30"
               }`}
             />
