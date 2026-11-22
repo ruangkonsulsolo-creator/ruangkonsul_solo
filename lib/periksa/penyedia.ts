@@ -6,6 +6,7 @@ import type {
 } from "./types";
 import { CATATAN_PARAFRASE, PERINGATAN_AI } from "./types";
 import { periksaAIGptZero } from "./penyedia-gptzero";
+import { periksaAIZeroGpt } from "./penyedia-zerogpt";
 import { parafraseLlm } from "./penyedia-parafrase";
 
 /**
@@ -159,11 +160,16 @@ class PenyediaGabungan implements Penyedia {
   }
 
   async ai(teks: string): Promise<HasilAI> {
-    if (process.env.PERIKSA_PENYEDIA_AI !== "gptzero") {
-      throw new PenyediaBelumSiap();
+    const pilihan = (process.env.PERIKSA_PENYEDIA_AI ?? "").toLowerCase();
+    if (pilihan === "gptzero") {
+      if (!process.env.GPTZERO_API_KEY) throw new PenyediaBelumSiap();
+      return periksaAIGptZero(teks);
     }
-    if (!process.env.GPTZERO_API_KEY) throw new PenyediaBelumSiap();
-    return periksaAIGptZero(teks);
+    if (pilihan === "zerogpt") {
+      if (!process.env.ZEROGPT_API_KEY) throw new PenyediaBelumSiap();
+      return periksaAIZeroGpt(teks);
+    }
+    throw new PenyediaBelumSiap();
   }
 
   async parafrase(teks: string): Promise<HasilParafrase> {

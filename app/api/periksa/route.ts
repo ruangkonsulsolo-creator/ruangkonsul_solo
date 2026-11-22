@@ -151,6 +151,17 @@ export async function POST(request: NextRequest) {
       ? { ...parafraseMentah, persenBerubah: persenBerubah(teks, parafraseMentah.teks) }
       : undefined;
 
+    // Nama mesin yang benar-benar dipakai (untuk laporan PDF), bukan "gabungan".
+    const PROFIL_AI: Record<string, string> = { gptzero: "GPTZero", zerogpt: "ZeroGPT" };
+    const namaMesin =
+      penyedia.nama !== "gabungan"
+        ? penyedia.nama
+        : jenis === "ai"
+          ? PROFIL_AI[(process.env.PERIKSA_PENYEDIA_AI ?? "").toLowerCase()] ?? "Detektor AI"
+          : jenis === "parafrase"
+            ? "Model bahasa AI"
+            : process.env.KEMIRIPAN_NAMA ?? "Mesin kemiripan";
+
     const hasil: HasilPeriksa = {
       id: idPemeriksaan as string,
       jumlahKata,
@@ -161,13 +172,13 @@ export async function POST(request: NextRequest) {
       parafrase,
       saran: susunSaran(jenis, kemiripan, ai, parafrase),
       diperiksaPada: new Date().toISOString(),
-      penyedia: penyedia.nama,
+      penyedia: namaMesin,
     };
 
     await supabase.rpc("selesaikan_pemeriksaan", {
       p_id: idPemeriksaan,
       p_hasil: hasil,
-      p_penyedia: penyedia.nama,
+      p_penyedia: namaMesin,
     });
 
     return NextResponse.json({ data: hasil });

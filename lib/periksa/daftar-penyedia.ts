@@ -34,6 +34,12 @@ export const PENYEDIA_DIKENAL: Record<string, ProfilPenyedia> = {
     logo: "/penyedia/gptzero.png",
     untuk: ["ai"],
   },
+  zerogpt: {
+    kunci: "zerogpt",
+    nama: "ZeroGPT",
+    logo: null, // bukan GPTZero; taruh /public/penyedia/zerogpt.png kalau ada izin pakai logonya
+    untuk: ["ai"],
+  },
   copyleaks: {
     kunci: "copyleaks",
     nama: "Copyleaks",

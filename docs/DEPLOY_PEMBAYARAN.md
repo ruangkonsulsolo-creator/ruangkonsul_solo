@@ -54,6 +54,10 @@ dibatalkan otomatis dan slot muncul lagi. Daftar sesi customer: `/dashboard/sesi
 | `FONNTE_API_KEY` | token device di fonnte.com | WhatsApp ke customer (pesanan masuk, laporan siap, komisi referral). Kosong = WA tidak dikirim, sistem tetap jalan |
 | `CRON_SECRET` | string acak panjang (mis. `openssl rand -hex 32`) | wajib agar cron harian (`vercel.json`, 00:00 WIB) bisa jalan |
 | `REFERRAL_COMMISSION_PERCENT` | `10` | opsional; persen komisi referral (maks 50) |
+| `PERIKSA_PENYEDIA_AI` | `gptzero` atau `zerogpt` | mesin Cek AI yang dipakai |
+| `NEXT_PUBLIC_PERIKSA_PENYEDIA_AI` | sama dengan di atas | supaya nama mesin tampil di halaman (jujur ke customer) |
+| `GPTZERO_API_KEY` | dasbor API GPTZero | bila memakai GPTZero |
+| `ZEROGPT_API_KEY` | dasbor API Business zerogpt.com | bila memakai ZeroGPT. Opsional: `ZEROGPT_API_URL`, `ZEROGPT_AUTH_HEADER` (bawaan `ApiKey`) bila dokumentasinya berbeda |
 
 Setelah mengisi, **Redeploy** agar variabel `NEXT_PUBLIC_*` ikut ter-build.
 
