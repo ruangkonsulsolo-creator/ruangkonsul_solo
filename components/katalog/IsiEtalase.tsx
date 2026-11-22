@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft, MessageCircle } from "lucide-react";
 import { KartuProduk } from "@/components/katalog/KartuProduk";
+import { AlurJasa } from "@/components/katalog/AlurJasa";
 import { BRAND, waLink } from "@/lib/brand";
 import type { Etalase, Kategori, Produk } from "@/lib/katalog/tipe";
 
@@ -32,8 +33,15 @@ export function IsiEtalase({
       nama: k.nama,
       isi: produk.filter((p) => p.kategori_id === k.id),
     })),
-    { nama: "Lainnya", isi: produk.filter((p) => p.kategori_id === null) },
+    {
+      nama: kategori.length === 0 && produk.length > 0 && produk.every((p) => p.jasa_berkas) ? "Pilihan jasa" : "Lainnya",
+      isi: produk.filter((p) => p.kategori_id === null),
+    },
   ].filter((g) => g.isi.length > 0);
+
+  // Etalase berisi jasa berkas → tampil sebagai halaman "Keterangan & daftar jasa".
+  const jasa = produk.filter((p) => p.jasa_berkas);
+  const etalaseJasa = produk.length > 0 && jasa.length === produk.length;
 
   return (
     <>
@@ -43,21 +51,27 @@ export function IsiEtalase({
           <div className="mb-3 flex items-center gap-2">
             <span className="h-0.5 w-8 rounded-full bg-brand" />
             <span className="text-xs font-bold uppercase tracking-widest text-brand">
-              Katalog
+              {etalaseJasa ? "Layanan Jasa" : "Katalog"}
             </span>
           </div>
           <h1 className="text-3xl font-extrabold leading-tight text-slate-900 lg:text-4xl">
             {etalase.nama}
           </h1>
           {etalase.deskripsi && (
-            <p className="mt-3 max-w-2xl leading-relaxed text-slate-600">
+            <p className="mt-3 max-w-2xl whitespace-pre-line leading-relaxed text-slate-600">
               {etalase.deskripsi}
             </p>
           )}
           {produk.length > 0 && (
             <p className="mt-4 text-sm font-semibold text-slate-500">
-              {produk.length} produk
+              {produk.length} {etalaseJasa ? "pilihan jasa" : "produk"}
             </p>
+          )}
+          {jasa.length > 0 && (
+            <div className="mt-6">
+              <p className="mb-2 text-xs font-bold uppercase tracking-widest text-slate-500">Cara pesan</p>
+              <AlurJasa estimasi={jasa[0].estimasi_proses} />
+            </div>
           )}
         </div>
       </section>

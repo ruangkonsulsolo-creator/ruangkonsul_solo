@@ -3,6 +3,8 @@ import { formatRupiah } from "@/lib/utils/format-currency";
 import { formatWhatsApp } from "@/lib/validators/whatsapp";
 import { STATUS_PESANAN } from "@/lib/katalog/status-pesanan";
 import { AksiPesananAdmin } from "@/components/katalog/AksiPesananAdmin";
+import { BerkasJasaAdmin } from "@/components/katalog/BerkasJasaAdmin";
+import { bacaBerkas } from "@/lib/katalog/berkas-jasa";
 import { BRAND } from "@/lib/brand";
 import type { Metadata } from "next";
 
@@ -17,7 +19,7 @@ export default async function AdminPesananProdukPage({ searchParams }: { searchP
 
   let q = supabase
     .from("pesanan_produk")
-    .select("id, nomor, nama_produk, satuan, jumlah, total, ongkir, status, whatsapp, catatan, nama_penerima, alamat, kota, kode_pos, kurir, no_resi, paid_at, created_at, profiles!pesanan_produk_user_id_fkey(full_name)")
+    .select("*, profiles!pesanan_produk_user_id_fkey(full_name)") // "*": kolom jasa (048) mungkin belum ada
     .order("created_at", { ascending: false })
     .limit(100);
   if (status !== "semua") q = q.eq("status", status);
@@ -32,7 +34,7 @@ export default async function AdminPesananProdukPage({ searchParams }: { searchP
     <div className="space-y-5">
       <div>
         <h2 className="text-xl font-extrabold text-slate-900">Pesanan Produk (Katalog)</h2>
-        <p className="text-sm text-slate-500">Pesanan yang dibayar langsung via Midtrans dari halaman produk.</p>
+        <p className="text-sm text-slate-500">Pesanan yang dibayar langsung via Midtrans dari halaman produk. Pesanan berlabel <b>JASA</b>: unduh naskah, unggah file hasil, lalu selesaikan.</p>
       </div>
       <div className="flex flex-wrap gap-2 text-xs">
         {FILTER.map((s) => (
@@ -51,7 +53,11 @@ export default async function AdminPesananProdukPage({ searchParams }: { searchP
             <div key={o.id} className="grid gap-3 px-5 py-4 md:grid-cols-[1.2fr_1fr_auto]">
               <div>
                 <p className="font-semibold text-slate-900">{o.jumlah}× {o.nama_produk}{o.satuan ? <span className="font-normal text-slate-500"> · {o.satuan}</span> : null}</p>
-                <p className="font-mono text-xs text-slate-500">{o.nomor}</p>
+                <p className="font-mono text-xs text-slate-500">
+                  {o.nomor}
+                  {o.jasa_berkas === true && <span className="ml-1.5 rounded bg-brand px-1.5 py-0.5 font-sans text-[10px] font-bold text-white">JASA</span>}
+                  {" · "}<a href={`/dashboard/pesanan-produk/${o.id}`} className="font-sans font-semibold text-brand hover:underline">lihat sebagai customer</a>
+                </p>
                 <p className="mt-1 text-sm font-bold">{formatRupiah(o.total)}{o.ongkir > 0 && <span className="text-xs font-normal text-slate-500"> (ongkir {formatRupiah(o.ongkir)})</span>}</p>
                 <span className={`mt-1 inline-block rounded-full border px-2 py-0.5 text-[11px] font-bold ${st.cls}`}>{st.label}</span>
                 {o.catatan && <p className="mt-1 text-xs text-amber-700">Catatan: {o.catatan}</p>}
@@ -63,7 +69,16 @@ export default async function AdminPesananProdukPage({ searchParams }: { searchP
                 {o.no_resi && <p className="mt-1 font-semibold">Resi {o.kurir}: {o.no_resi}</p>}
                 {rc && <a href={`/receipt/${rc.id}`} className="mt-1 block font-mono font-semibold text-brand hover:underline">{rc.receipt_number}</a>}
               </div>
-              <AksiPesananAdmin id={o.id} status={o.status} fisik={!!o.alamat} />
+              <AksiPesananAdmin id={o.id} status={o.status} fisik={!!o.alamat} jasa={o.jasa_berkas === true} />
+              {o.jasa_berkas === true && (
+                <BerkasJasaAdmin
+                  id={o.id}
+                  status={o.status}
+                  estimasi={o.estimasi_proses || "1x24 jam"}
+                  naskah={bacaBerkas(o.berkas_pelanggan).map((b) => ({ nama: b.nama, ukuran: b.ukuran }))}
+                  hasilAwal={bacaBerkas(o.berkas_hasil)}
+                />
+              )}
             </div>
           );
         })}

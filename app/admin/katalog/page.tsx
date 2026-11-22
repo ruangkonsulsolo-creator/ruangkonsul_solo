@@ -3,7 +3,7 @@ import { Store, Tags, Package, ImageOff } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { KelolaKatalog } from "@/components/admin/KelolaKatalog";
 import {
-  KOLOM_ETALASE, KOLOM_KATEGORI, KOLOM_PRODUK,
+  KOLOM_ETALASE, KOLOM_KATEGORI, KOLOM_PRODUK, lengkapiProduk,
   type Etalase, type Kategori, type Produk,
 } from "@/lib/katalog/tipe";
 import { BRAND } from "@/lib/brand";
@@ -58,7 +58,7 @@ export default async function AdminKatalogPage() {
   const etalase = (etalaseRes.data ?? []) as Etalase[];
   const kategori = (kategoriRes.data ?? []) as Kategori[];
   const produk = ((produkRes.data ?? []) as Record<string, unknown>[]).map((p) => ({
-    ...p,
+    ...lengkapiProduk(p),
     spesifikasi: Array.isArray(p.spesifikasi) ? p.spesifikasi : [],
     fitur: Array.isArray(p.fitur) ? p.fitur : [],
     gambar: Array.isArray(p.gambar) ? p.gambar : [],

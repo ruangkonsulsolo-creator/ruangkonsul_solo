@@ -22,15 +22,9 @@ export function GaleriProduk({
 
   if (foto.length === 0) {
     return (
-      <div className="flex aspect-square w-full flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 p-6 text-center">
-        <ImagePlus className="h-10 w-10 text-slate-300" aria-hidden="true" />
-        <p className="text-sm font-semibold text-slate-600">
-          Foto produk belum dipasang
-        </p>
-        <p className="text-xs leading-relaxed text-slate-500">
-          Taruh foto persegi 1000 × 1000 px di folder produk ini, lalu
-          jalankan ulang <code className="font-mono">npm run dev</code>.
-        </p>
+      <div className="flex aspect-[4/3] w-full flex-col items-center justify-center gap-3 rounded-2xl bg-gradient-to-br from-brand-50 to-brand-100 p-6 text-center lg:aspect-square">
+        <ImagePlus className="h-10 w-10 text-brand-200" aria-hidden="true" />
+        <p className="max-w-xs text-lg font-extrabold leading-snug text-brand">{nama}</p>
       </div>
     );
   }

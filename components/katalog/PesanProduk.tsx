@@ -10,6 +10,7 @@ import { bisaDibayarLangsung, jadwalViaWhatsApp, ongkirFlat, perluPilihJadwal } 
 import { useSnapCheckout } from "@/lib/payment/use-snap";
 import { WhatsAppField, isValidWhatsApp } from "@/components/payment/WhatsAppField";
 import type { Produk } from "@/lib/katalog/tipe";
+import { PilihNaskah, unggahNaskahJasa } from "@/components/katalog/NaskahJasa";
 
 /**
  * Pemesanan produk katalog.
@@ -28,11 +29,13 @@ export function PesanProduk({ produk }: { produk: Produk }) {
   const [waError, setWaError] = useState<string | null>(null);
   const [catatan, setCatatan] = useState("");
   const [kirim, setKirim] = useState({ nama_penerima: "", alamat: "", kota: "", kode_pos: "" });
+  const [naskah, setNaskah] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const habis = produk.stok === 0;
-  const fisik = produk.berat_gram !== null;
+  const jasa = produk.jasa_berkas;
+  const habis = !jasa && produk.stok === 0;
+  const fisik = !jasa && produk.berat_gram !== null;
   const bayarLangsung = bisaDibayarLangsung(produk);
   const ongkir = fisik ? ongkirFlat() : 0;
   const subtotal = produk.harga * jumlah;
@@ -58,6 +61,17 @@ export function PesanProduk({ produk }: { produk: Produk }) {
 
     setLoading(true);
     try {
+      let berkas: { path: string; nama: string; ukuran: number }[] = [];
+      if (jasa && naskah.length > 0) {
+        const up = await unggahNaskahJasa(naskah);
+        if (up.perluLogin) {
+          router.push(`/login?next=${encodeURIComponent(`/produk/${produk.slug}`)}`);
+          return;
+        }
+        if (up.error || !up.berkas) { setError(up.error ?? "Gagal mengunggah naskah."); return; }
+        berkas = up.berkas;
+      }
+
       const res = await fetch("/api/payment/produk", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -67,6 +81,7 @@ export function PesanProduk({ produk }: { produk: Produk }) {
           whatsapp,
           catatan: catatan.trim() || undefined,
           ...(fisik ? kirim : {}),
+          ...(jasa ? { berkas } : {}),
         }),
       });
       const json = await res.json().catch(() => ({}));
@@ -83,7 +98,11 @@ export function PesanProduk({ produk }: { produk: Produk }) {
 
       setLoading(false);
       const { outcome, status } = await pay(json.data.snap_token, json.data.payment_id);
-      if (status === "paid" || outcome === "success") {
+      const halamanPesanan = `/dashboard/pesanan-produk/${json.data.pesanan_id}`;
+      if (jasa && (status === "paid" || outcome === "success" || outcome === "pending" || status === "pending")) {
+        // Jasa berkas → halaman status: diproses, Hubungi Admin, unduh hasil.
+        router.push(status === "paid" || outcome === "success" ? `${halamanPesanan}?baru=1` : `${halamanPesanan}?pending=1`);
+      } else if (status === "paid" || outcome === "success") {
         // Lunas → receipt + tombol "Konfirmasi via WhatsApp"
         router.push(`/receipt/${json.data.payment_id}`);
       } else if (outcome === "pending" || status === "pending") {
@@ -142,7 +161,7 @@ export function PesanProduk({ produk }: { produk: Produk }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-3">
+      <div className={`flex items-center gap-3 ${jasa ? "hidden" : ""}`}>
         <span className="text-sm font-bold text-slate-700">Jumlah</span>
         <div className="flex items-center rounded-xl border border-slate-200">
           <button type="button" onClick={() => setJumlah((j) => Math.max(1, j - 1))} disabled={jumlah <= 1}
@@ -189,8 +208,10 @@ export function PesanProduk({ produk }: { produk: Produk }) {
             </div>
           )}
 
+          {jasa && <PilihNaskah files={naskah} ubah={setNaskah} onGalat={setError} />}
+
           <textarea className={input} rows={2} maxLength={500} value={catatan} onChange={(e) => setCatatan(e.target.value)}
-            placeholder={fisik ? "Catatan (ukuran, warna, dll.) — opsional" : "Catatan untuk kami (jenjang, topik, jadwal yang diinginkan) — opsional"} />
+            placeholder={jasa ? "Detail permintaan: jurusan, gaya sitasi, target similarity, bagian yang dikerjakan, dll. — opsional" : fisik ? "Catatan (ukuran, warna, dll.) — opsional" : "Catatan untuk kami (jenjang, topik, jadwal yang diinginkan) — opsional"} />
 
           <div className="space-y-1 rounded-xl bg-slate-50 px-4 py-3 text-sm">
             <div className="flex justify-between text-slate-600">

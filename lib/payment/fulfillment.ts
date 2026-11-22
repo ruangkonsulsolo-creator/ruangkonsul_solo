@@ -1,7 +1,7 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { runDetectionPipeline } from "@/lib/detection/pipeline";
-import { sendWhatsApp, waTemplates } from "@/lib/notification/whatsapp";
+import { appUrl, sendWhatsApp, waTemplates } from "@/lib/notification/whatsapp";
 import { SEMUA_SLUG_MANUAL } from "@/lib/periksa/manual";
 import { kreditReferral } from "@/lib/referral";
 import { sendEmail } from "@/lib/notification/email";
@@ -236,9 +236,11 @@ async function fulfilProduk(admin: Admin, p: PaymentRow) {
     .update({ status: "dibayar", paid_at: new Date().toISOString() })
     .eq("id", p.reference_id)
     .eq("status", "menunggu_pembayaran")
-    .select("id, nomor, nama_produk, jumlah, satuan, whatsapp, alamat");
+    .select("*"); // "*": kolom jasa_berkas (migration 048) mungkin belum ada
   if (error) throw new Error(`Gagal update pesanan produk: ${error.message}`);
-  const o = updated?.[0];
+  const o = updated?.[0] as
+    | { id: string; nomor: string; nama_produk: string; jumlah: number; satuan: string | null; whatsapp: string; alamat: string | null; jasa_berkas?: boolean; estimasi_proses?: string | null }
+    | undefined;
   if (!o) return;
 
   const item = `${o.jumlah}× ${o.nama_produk}${o.satuan ? ` (${o.satuan})` : ""}`;
@@ -251,6 +253,30 @@ async function fulfilProduk(admin: Admin, p: PaymentRow) {
     gateway_ref: p.midtrans_order_id,
     notes: `Pembayaran produk ${o.nomor}: ${item}`,
   });
+  if (o.jasa_berkas) {
+    const estimasi = o.estimasi_proses || "1x24 jam";
+    const link = `${appUrl()}/dashboard/pesanan-produk/${o.id}`;
+    await admin.from("notifications").insert({
+      user_id: p.user_id,
+      channel: "in_app",
+      title: "Pembayaran Berhasil — Sedang Diproses",
+      body: `Pesanan ${o.nomor} (${o.nama_produk}) diproses maksimal ${estimasi}. File hasil akan muncul di menu Pesanan Produk.`,
+    });
+    sendWhatsApp({
+      to: o.whatsapp,
+      message:
+        `✅ *${BRAND.name}* — Pembayaran *${o.nomor}* (${o.nama_produk}) sudah kami terima.\n\n` +
+        `File diproses maksimal *${estimasi}*. Pantau status & unduh hasilnya di:\n${link}\n\n` +
+        `Kalau naskah belum dikirim, unggah di halaman itu atau balas chat ini.`,
+    }).catch(() => undefined);
+    sendWhatsApp({
+      to: BRAND.whatsapp,
+      message: `🆕 Pesanan jasa *${o.nomor}* — ${o.nama_produk} sudah lunas. Kerjakan maks ${estimasi}, unggah hasil di Admin → Pesanan Produk.`,
+    }).catch(() => undefined);
+    await sendReceipt(admin, p, item);
+    return;
+  }
+
   await admin.from("notifications").insert({
     user_id: p.user_id,
     channel: "in_app",

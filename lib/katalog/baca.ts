@@ -4,6 +4,7 @@ import {
   KOLOM_ETALASE,
   KOLOM_KATEGORI,
   KOLOM_PRODUK,
+  lengkapiProduk,
   type Etalase,
   type Kategori,
   type Produk,
@@ -35,7 +36,7 @@ function rapikan(baris: Record<string, unknown>[]): Produk[] {
   return baris.map((b) => {
     const gambar = Array.isArray(b.gambar) ? (b.gambar as string[]) : [];
     return {
-      ...b,
+      ...lengkapiProduk(b),
       spesifikasi: Array.isArray(b.spesifikasi) ? b.spesifikasi : [],
       fitur: Array.isArray(b.fitur) ? b.fitur : [],
       // Kolom "Foto" di panel admin menang. Kalau kosong, folder

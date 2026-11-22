@@ -64,6 +64,8 @@ const skemaProduk = z.object({
   wa_pesan: opsional(500),
   is_active: z.boolean().optional(),
   urutan: z.number().int().min(0).max(9999).optional(),
+  jasa_berkas: z.boolean().optional(),
+  estimasi_proses: opsional(40),
 });
 
 const skemaTestimoni = z.object({
@@ -162,9 +164,26 @@ export async function POST(request: NextRequest) {
 
   const { id, ...isi } = hasil.data as { id?: string } & Record<string, unknown>;
 
-  const { error } = id
-    ? await supabase.from(TABEL[jenis]).update(isi).eq("id", id)
-    : await supabase.from(TABEL[jenis]).insert(isi);
+  const tulis = (data: Record<string, unknown>) =>
+    id
+      ? supabase.from(TABEL[jenis]).update(data).eq("id", id)
+      : supabase.from(TABEL[jenis]).insert(data);
+
+  let { error } = await tulis(isi);
+
+  // Kolom jasa (migration 048) belum ada: produk biasa tetap bisa disimpan,
+  // tapi produk yang ditandai jasa butuh migrasinya.
+  if (error && jenis === "produk" && /jasa_berkas|estimasi_proses/.test(error.message)) {
+    if (isi.jasa_berkas === true) {
+      return NextResponse.json(
+        { error: "Fitur jasa dengan file hasil butuh migration 048_jasa_berkas.sql. Jalankan dulu di Supabase SQL Editor." },
+        { status: 409 }
+      );
+    }
+    const { jasa_berkas: _j, estimasi_proses: _e, ...lama } = isi;
+    void _j; void _e;
+    ({ error } = await tulis(lama));
+  }
 
   if (error) {
     const ramah = pesanGalat(error.code, error.message);

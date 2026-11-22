@@ -34,6 +34,7 @@ const PRODUK_KOSONG = {
   harga_mulai: false, satuan: "", gambar: [] as string[],
   berat_gram: null as number | null, stok: null as number | null,
   badge: "", catatan: "", wa_pesan: "", is_active: true, urutan: 0,
+  jasa_berkas: false, estimasi_proses: "",
 };
 
 export function KelolaKatalog({ etalase, kategori, produk }: Props) {
@@ -327,6 +328,7 @@ export function KelolaKatalog({ etalase, kategori, produk }: Props) {
                                 badge: p.badge ?? "",
                                 catatan: p.catatan ?? "",
                                 wa_pesan: p.wa_pesan ?? "",
+                                estimasi_proses: p.estimasi_proses ?? "",
                               })
                             }
                             className="rounded p-1 text-slate-400 hover:text-brand"
@@ -532,6 +534,8 @@ export function KelolaKatalog({ etalase, kategori, produk }: Props) {
                 wa_pesan: f.wa_pesan || null,
                 is_active: f.is_active,
                 urutan: f.urutan,
+                jasa_berkas: f.jasa_berkas,
+                estimasi_proses: f.jasa_berkas ? f.estimasi_proses || null : null,
               });
               if (ok) setFormProduk(null);
             }}
@@ -972,6 +976,36 @@ function FormProduk({
           value={nilai.catatan}
           onChange={(e) => set({ catatan: e.target.value })}
         />
+      </div>
+
+      <div className="rounded-xl border border-brand/20 bg-brand-50/50 p-3 sm:col-span-2">
+        <label className="flex items-start gap-2 text-sm font-semibold text-slate-800">
+          <input
+            type="checkbox"
+            className="mt-0.5"
+            checked={nilai.jasa_berkas}
+            onChange={(e) => set({ jasa_berkas: e.target.checked, berat_gram: e.target.checked ? null : nilai.berat_gram })}
+          />
+          <span>
+            Jasa dengan file hasil
+            <span className="block text-xs font-normal text-slate-600">
+              Customer bayar → boleh unggah naskah → status &ldquo;diproses&rdquo; dengan tombol Hubungi Admin →
+              kamu unggah file hasil di menu Pesanan Produk → customer mengunduhnya.
+            </span>
+          </span>
+        </label>
+        {nilai.jasa_berkas && (
+          <div className="mt-2 max-w-xs">
+            <span className={label}>Estimasi pengerjaan</span>
+            <input
+              className={input}
+              value={nilai.estimasi_proses}
+              maxLength={40}
+              placeholder="1x24 jam"
+              onChange={(e) => set({ estimasi_proses: e.target.value })}
+            />
+          </div>
+        )}
       </div>
 
       <label className="flex items-center gap-2 text-sm text-slate-700 sm:col-span-2">

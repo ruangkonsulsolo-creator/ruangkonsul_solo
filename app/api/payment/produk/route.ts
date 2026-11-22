@@ -6,6 +6,8 @@ import { startPayment, getCustomerDetails, requireWhatsApp } from "@/lib/payment
 import { rateLimit } from "@/lib/security/rate-limit";
 import { nomorUnik } from "@/lib/utils/nomor-unik";
 import { ongkirFlat, bisaDibayarLangsung, perluPilihJadwal } from "@/lib/katalog/checkout";
+import { skemaBerkas, periksaNaskah, MAKS_NASKAH } from "@/lib/katalog/berkas-jasa";
+import { ESTIMASI_BAWAAN } from "@/lib/katalog/tipe";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +20,7 @@ const schema = z.object({
   alamat: z.string().trim().max(500).optional(),
   kota: z.string().trim().max(100).optional(),
   kode_pos: z.string().trim().max(10).optional(),
+  berkas: z.array(skemaBerkas).max(MAKS_NASKAH).optional(),
 });
 
 /**
@@ -42,7 +45,7 @@ export async function POST(request: NextRequest) {
   const admin = createAdminClient();
   const { data: produk } = await admin
     .from("produk")
-    .select("id, slug, nama, harga, harga_mulai, satuan, stok, berat_gram, is_active")
+    .select("*") // "*": kolom jasa_berkas (048) mungkin belum ada
     .eq("id", input.produk_id)
     .maybeSingle();
 
@@ -56,12 +59,20 @@ export async function POST(request: NextRequest) {
       { status: 409 }
     );
   }
-  if (produk.stok !== null && produk.stok < input.jumlah) {
+  const jasa = produk.jasa_berkas === true;
+  if (jasa && input.jumlah !== 1) return NextResponse.json({ error: "Jasa dipesan satu per transaksi." }, { status: 422 });
+  if (!jasa && input.berkas?.length) return NextResponse.json({ error: "Produk ini tidak menerima unggahan berkas." }, { status: 422 });
+  if (jasa && input.berkas?.length) {
+    const galat = await periksaNaskah(admin, user.id, input.berkas);
+    if (galat) return NextResponse.json({ error: galat }, { status: 422 });
+  }
+
+  if (!jasa && produk.stok !== null && produk.stok < input.jumlah) {
     return NextResponse.json({ error: produk.stok === 0 ? "Stok habis." : `Stok tersisa ${produk.stok}.` }, { status: 409 });
   }
 
   // Produk fisik wajib alamat kirim
-  const fisik = produk.berat_gram !== null;
+  const fisik = !jasa && produk.berat_gram !== null;
   if (fisik) {
     if (!input.nama_penerima || input.nama_penerima.length < 2) return NextResponse.json({ error: "Nama penerima wajib diisi." }, { status: 422 });
     if (!input.alamat || input.alamat.length < 10) return NextResponse.json({ error: "Alamat lengkap wajib diisi." }, { status: 422 });
@@ -79,7 +90,7 @@ export async function POST(request: NextRequest) {
 
   // Reservasi stok (hanya produk berstok terhitung)
   let stokDireservasi = false;
-  if (produk.stok !== null) {
+  if (!jasa && produk.stok !== null) {
     const { data, error } = await admin.rpc("reservasi_stok_produk", { p_produk_id: produk.id, p_jumlah: input.jumlah });
     if (error) return NextResponse.json({ error: "Stok baru saja habis. Kurangi jumlah." }, { status: 409 });
     stokDireservasi = data === true;
@@ -106,6 +117,9 @@ export async function POST(request: NextRequest) {
       kota: fisik ? input.kota : null,
       kode_pos: fisik ? input.kode_pos : null,
       stok_direservasi: stokDireservasi,
+      ...(jasa
+        ? { jasa_berkas: true, estimasi_proses: produk.estimasi_proses || ESTIMASI_BAWAAN, berkas_pelanggan: input.berkas ?? [] }
+        : {}),
     })
     .select("id, nomor")
     .single();
@@ -131,7 +145,7 @@ export async function POST(request: NextRequest) {
         ...(ongkir > 0 ? [{ id: "ongkir", price: ongkir, quantity: 1, name: "Ongkos kirim" }] : []),
       ],
       customer: { ...(await getCustomerDetails(user.id, user.email)), phone: wa.whatsapp },
-      finishPath: `/dashboard/pesanan-produk?pesanan=${pesanan.id}`,
+      finishPath: jasa ? `/dashboard/pesanan-produk/${pesanan.id}` : `/dashboard/pesanan-produk?pesanan=${pesanan.id}`,
     });
 
     await admin

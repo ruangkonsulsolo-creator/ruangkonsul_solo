@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { ArrowLeft, Check, ChevronRight, Package, Scale, Truck } from "lucide-react";
+import { ArrowLeft, Check, ChevronRight, Clock, FileDown, Package, Scale, Truck } from "lucide-react";
+import { AlurJasa } from "@/components/katalog/AlurJasa";
+import { ESTIMASI_BAWAAN } from "@/lib/katalog/tipe";
 import { NavbarUtama } from "@/components/ui/NavbarUtama";
 import { GaleriProduk } from "@/components/merchandise/GaleriProduk";
 import { PesanProduk } from "@/components/katalog/PesanProduk";
@@ -142,6 +144,18 @@ export default async function HalamanProduk({
             </div>
 
             <ul className="mt-5 flex flex-wrap gap-x-6 gap-y-2 border-y border-slate-100 py-4 text-sm text-slate-600">
+              {p.jasa_berkas ? (
+                <>
+                  <li className="flex items-center gap-1.5">
+                    <Clock className="h-4 w-4 text-slate-400" aria-hidden="true" />
+                    Diproses maks {p.estimasi_proses || ESTIMASI_BAWAAN}
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <FileDown className="h-4 w-4 text-slate-400" aria-hidden="true" />
+                    Hasil berupa file, diunduh di halaman pesanan
+                  </li>
+                </>
+              ) : (
               <li className="flex items-center gap-1.5">
                 <Package className="h-4 w-4 text-slate-400" aria-hidden="true" />
                 {p.stok === null
@@ -150,6 +164,7 @@ export default async function HalamanProduk({
                     ? "Stok habis"
                     : `Siap kirim · ${p.stok} tersedia`}
               </li>
+              )}
               {p.berat_gram && (
                 <li className="flex items-center gap-1.5">
                   <Scale className="h-4 w-4 text-slate-400" aria-hidden="true" />
@@ -168,6 +183,12 @@ export default async function HalamanProduk({
               <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm leading-relaxed text-amber-900">
                 {p.catatan}
               </p>
+            )}
+
+            {p.jasa_berkas && (
+              <div className="mt-5">
+                <AlurJasa estimasi={p.estimasi_proses} ringkas />
+              </div>
             )}
 
             <div className="mt-6">

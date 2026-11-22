@@ -5,7 +5,7 @@ import Link from "next/link";
 import { AjakSimpanWa } from "@/components/periksa/AjakSimpanWa";
 import { Check, Copy, Download, ExternalLink, MessageCircle, Plus, Clock } from "lucide-react";
 
-const WA_ADMIN = "62882007483223";
+export const WA_ADMIN = "62882007483223";
 
 export type TahapPesanan = "menunggu" | "dibayar" | "diproses" | "selesai" | "batal" | "gagal";
 type JenisSkor = "kemiripan" | "ai" | "parafrase";
@@ -68,6 +68,8 @@ export function StatusPesanan({
   onOrderBaru,
   kembali,
   ajakSimpanWa = false,
+  children,
+  hubungiKecil = true,
 }: {
   layanan: string;
   /** ISO timestamp pesanan dibuat. */
@@ -77,7 +79,11 @@ export function StatusPesanan({
   namaBerkas: string;
   keterangan: string;
   kode: string;
-  skor: { label: string; persen: number | null; vonis: string; jenis: JenisSkor };
+  /** Tanpa skor (mis. pesanan jasa) → kartu skor diganti `children`. */
+  skor?: { label: string; persen: number | null; vonis: string; jenis: JenisSkor };
+  children?: React.ReactNode;
+  /** Tampilkan tautan kecil "Hubungi Admin" di bawah (default ya). */
+  hubungiKecil?: boolean;
   /** Kotak keterangan di bawah skor, mis. "laporan sedang diperiksa". */
   info?: { judul: string; teks: string };
   unduh?: { href: string; label: string };
@@ -93,7 +99,7 @@ export function StatusPesanan({
   const [tersalin, setTersalin] = useState(false);
   const posisi = URUTAN[tahap];
   const lencana = LENCANA[tahap];
-  const w = skor.persen != null ? warna(skor.jenis, skor.persen) : null;
+  const w = skor && skor.persen != null ? warna(skor.jenis, skor.persen) : null;
 
   async function salin() {
     try {
@@ -175,6 +181,8 @@ export function StatusPesanan({
 
       {/* ── Skor & unduh ── */}
       <section className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 sm:p-6">
+        {children}
+        {skor && (
         <div className="rounded-2xl bg-slate-50 px-6 py-7 text-center">
           <p className="text-base font-semibold uppercase tracking-[0.12em] text-slate-600">{skor.label}</p>
           {skor.persen != null && w ? (
@@ -191,6 +199,7 @@ export function StatusPesanan({
           </div>
           <p className="mt-4 text-slate-600">{skor.vonis}</p>
         </div>
+        )}
 
         {info && (
           <div className="rounded-2xl border border-brand-100 bg-brand-50 px-5 py-4">
@@ -233,14 +242,14 @@ export function StatusPesanan({
           </Link>
         ) : null}
 
-        <a
+        {hubungiKecil && <a
           href={`https://wa.me/${WA_ADMIN}?text=${encodeURIComponent(`Halo admin, saya mau tanya pesanan ${kode}.`)}`}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center justify-center gap-1.5 pt-1 text-sm font-bold text-slate-700 hover:text-brand"
         >
           <MessageCircle className="h-4 w-4 text-green-600" aria-hidden="true" /> Hubungi Admin
-        </a>
+        </a>}
       </section>
     </div>
   );

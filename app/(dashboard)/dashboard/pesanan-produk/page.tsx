@@ -20,7 +20,7 @@ export default async function PesananProdukPage({ searchParams }: { searchParams
   const [{ data: pesanan }, { data: payments }] = await Promise.all([
     supabase
       .from("pesanan_produk")
-      .select("id, nomor, nama_produk, satuan, jumlah, total, status, no_resi, kurir, midtrans_snap_token, created_at")
+      .select("*") // "*": kolom jasa_berkas (048) mungkin belum ada
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(50),
@@ -76,7 +76,10 @@ export default async function PesananProdukPage({ searchParams }: { searchParams
                   {o.status === "menunggu_pembayaran" && o.midtrans_snap_token && (
                     <BayarUlangPesanan pesananId={o.id} snapToken={o.midtrans_snap_token} paymentId={pay?.id ?? null} />
                   )}
-                  {pay && pay.status === "paid" && (
+                  <Link href={`/dashboard/pesanan-produk/${o.id}`} className="text-xs font-bold text-brand hover:underline">
+                    {o.jasa_berkas ? (o.status === "selesai" ? "Unduh hasil →" : "Lihat status →") : "Detail →"}
+                  </Link>
+                  {pay && pay.status === "paid" && !o.jasa_berkas && (
                     <Link href={`/receipt/${pay.id}`} className="text-xs font-semibold text-brand hover:underline">Receipt & konfirmasi WA →</Link>
                   )}
                 </div>

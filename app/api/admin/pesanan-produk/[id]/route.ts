@@ -4,6 +4,8 @@ import { requireUser, STAFF_ROLES } from "@/lib/auth/require-user";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendWhatsApp } from "@/lib/notification/whatsapp";
 import { BRAND } from "@/lib/brand";
+import { appUrl } from "@/lib/notification/whatsapp";
+import { bacaBerkas, MAKS_HASIL, skemaBerkas } from "@/lib/katalog/berkas-jasa";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +14,8 @@ const schema = z.discriminatedUnion("aksi", [
   z.object({ aksi: z.literal("kirim"), kurir: z.string().trim().min(2).max(40), no_resi: z.string().trim().min(4).max(60) }),
   z.object({ aksi: z.literal("selesai") }),
   z.object({ aksi: z.literal("batal"), alasan: z.string().trim().min(3).max(200) }),
+  // Jasa berkas: simpan daftar file hasil (pengganti penuh). selesaikan=true → status selesai + kabari customer.
+  z.object({ aksi: z.literal("hasil"), berkas: z.array(skemaBerkas).max(MAKS_HASIL), selesaikan: z.boolean() }),
 ]);
 
 const DARI: Record<string, string[]> = {
@@ -19,6 +23,7 @@ const DARI: Record<string, string[]> = {
   kirim: ["dibayar", "diproses", "dikirim"],
   selesai: ["dibayar", "diproses", "dikirim"],
   batal: ["dibayar", "diproses"],
+  hasil: ["dibayar", "diproses", "dikirim", "selesai"],
 };
 
 /** Admin memproses pesanan produk: proses → kirim (resi) → selesai, atau batal (refund manual). */
@@ -30,9 +35,52 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
   const input = parsed.data;
 
   const admin = createAdminClient();
-  const { data: o } = await admin.from("pesanan_produk").select("id, nomor, user_id, status, whatsapp, nama_produk").eq("id", params.id).maybeSingle();
+  const { data: o } = await admin.from("pesanan_produk").select("*").eq("id", params.id).maybeSingle();
   if (!o) return NextResponse.json({ error: "Pesanan tidak ditemukan." }, { status: 404 });
   if (!DARI[input.aksi].includes(o.status)) return NextResponse.json({ error: `Tidak bisa dari status "${o.status}".` }, { status: 409 });
+
+  if (input.aksi === "hasil") {
+    if (o.jasa_berkas !== true) return NextResponse.json({ error: "Pesanan ini bukan jasa berkas." }, { status: 400 });
+    // Setiap file harus berada di hasil-jasa/<id pesanan>/ dan benar-benar ada.
+    const { data: ada } = await admin.storage.from("hasil-jasa").list(o.id, { limit: 100 });
+    const nama = new Set((ada ?? []).map((x) => x.name));
+    for (const b of input.berkas) {
+      const [folder, file, ...lebih] = b.path.split("/");
+      if (folder !== o.id || !file || lebih.length || !nama.has(file)) {
+        return NextResponse.json({ error: `File "${b.nama}" belum terunggah dengan benar.` }, { status: 422 });
+      }
+    }
+    if (input.selesaikan && input.berkas.length === 0) {
+      return NextResponse.json({ error: "Unggah minimal satu file hasil sebelum menyelesaikan." }, { status: 422 });
+    }
+
+    // File yang dihapus dari daftar ikut dihapus dari storage.
+    const tetap = new Set(input.berkas.map((b) => b.path));
+    const dibuang = bacaBerkas(o.berkas_hasil).map((b) => b.path).filter((p) => !tetap.has(p));
+    if (dibuang.length) await admin.storage.from("hasil-jasa").remove(dibuang);
+
+    const now = new Date().toISOString();
+    const patchHasil: Record<string, unknown> = { berkas_hasil: input.berkas };
+    const jadiSelesai = input.selesaikan && o.status !== "selesai";
+    if (jadiSelesai) Object.assign(patchHasil, { status: "selesai", selesai_at: now, hasil_at: now });
+    else if (input.berkas.length && o.status === "dibayar") patchHasil.status = "diproses";
+
+    const { error: eH } = await admin.from("pesanan_produk").update(patchHasil).eq("id", o.id);
+    if (eH) return NextResponse.json({ error: "Gagal menyimpan file hasil." }, { status: 500 });
+
+    if (jadiSelesai) {
+      const link = `${appUrl()}/dashboard/pesanan-produk/${o.id}`;
+      await admin.from("notifications").insert({
+        user_id: o.user_id, channel: "in_app", title: "File Hasil Siap Diunduh",
+        body: `Pesanan ${o.nomor} (${o.nama_produk}) selesai. Unduh file hasilnya di menu Pesanan Produk.`,
+      });
+      sendWhatsApp({
+        to: o.whatsapp,
+        message: `🎉 *${BRAND.name}* — Pesanan *${o.nomor}* (${o.nama_produk}) sudah selesai!\n\nUnduh file hasilnya di sini (login dulu):\n${link}\n\nTerima kasih sudah memakai layanan kami 🙏`,
+      }).catch(() => undefined);
+    }
+    return NextResponse.json({ data: "ok" });
+  }
 
   const now = new Date().toISOString();
   let patch: Record<string, unknown>;

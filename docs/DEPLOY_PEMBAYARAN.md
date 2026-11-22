@@ -21,6 +21,7 @@ Migration 018–032 sudah ada di branch katalog Anda. Yang baru hanya:
 - `supabase/migrations/045_referral_aktif.sql` (program referral: catat pengajak + komisi 10% pembayaran pertama ke saldo)
 - `supabase/migrations/046_ringkasan_omzet.sql` (ringkasan revenue admin dari semua pembayaran lunas, tanggal WIB)
 - `supabase/migrations/047_pesanan_multi_berkas.sql` (Cek Plagiasi/DrillBit hingga 5 file dalam satu QRIS)
+- `supabase/migrations/048_jasa_berkas.sql` (jasa dengan file hasil: unggah naskah, status diproses, admin unggah hasil; bucket `hasil-jasa`)
 
 Cara menjalankan (pilih satu):
 - **SQL Editor**: Supabase Dashboard → SQL Editor → tempel isi file 033 → Run, lalu file 034 → Run.

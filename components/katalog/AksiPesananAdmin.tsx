@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
 /** Tombol aksi admin untuk satu pesanan produk. */
-export function AksiPesananAdmin({ id, status, fisik }: { id: string; status: string; fisik: boolean }) {
+export function AksiPesananAdmin({ id, status, fisik, jasa = false }: { id: string; status: string; fisik: boolean; jasa?: boolean }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [kurir, setKurir] = useState("JNE");
@@ -36,7 +36,7 @@ export function AksiPesananAdmin({ id, status, fisik }: { id: string; status: st
             <button disabled={busy || resi.length < 4} onClick={() => aksi({ aksi: "kirim", kurir, no_resi: resi })} className={`${btn} bg-blue-600 text-white`}>Kirim</button>
           </>
         )}
-        {["dibayar", "diproses", "dikirim"].includes(status) && (
+        {!jasa && ["dibayar", "diproses", "dikirim"].includes(status) && (
           <button disabled={busy} onClick={() => aksi({ aksi: "selesai" })} className={`${btn} bg-green-600 text-white`}>Selesai</button>
         )}
         {["dibayar", "diproses"].includes(status) && (

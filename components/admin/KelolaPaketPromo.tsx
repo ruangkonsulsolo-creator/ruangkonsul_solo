@@ -55,7 +55,11 @@ function Kolom({ label, children, lebar }: { label: string; children: React.Reac
   );
 }
 
-function Formulir({ d, set }: { d: Draf; set: (f: keyof Draf, v: unknown) => void }) {
+export type Tujuan = { label: string; href: string; grup: string };
+
+function Formulir({ d, set, tujuan }: { d: Draf; set: (f: keyof Draf, v: unknown) => void; tujuan: Tujuan[] }) {
+  const grup = Array.from(new Set(tujuan.map((t) => t.grup)));
+  const cocok = tujuan.some((t) => t.href === d.cta_href);
   return (
     <div className="grid flex-1 gap-2 sm:grid-cols-2">
       <Kolom label="Judul paket" lebar>
@@ -73,9 +77,25 @@ function Formulir({ d, set }: { d: Draf; set: (f: keyof Draf, v: unknown) => voi
       <Kolom label="Teks tombol">
         <input value={d.cta_label} maxLength={40} onChange={(e) => set("cta_label", e.target.value)} placeholder="Pilih Jadwal" className={INPUT} />
       </Kolom>
-      <Kolom label="Link tombol" lebar>
-        <input value={d.cta_href} maxLength={300} onChange={(e) => set("cta_href", e.target.value)} placeholder="/jadwal, /produk/…, atau https://…" className={INPUT} />
+      <Kolom label="Tombol mengarah ke" lebar>
+        <select value={cocok ? d.cta_href : "__lain"} className={INPUT}
+          onChange={(e) => { if (e.target.value !== "__lain") set("cta_href", e.target.value); }}>
+          {grup.map((g) => (
+            <optgroup key={g} label={g}>
+              {tujuan.filter((t) => t.grup === g).map((t) => <option key={t.href} value={t.href}>{t.label}</option>)}
+            </optgroup>
+          ))}
+          <option value="__lain">Link lain (ketik di bawah)…</option>
+        </select>
+        <span className="block font-normal text-slate-400">
+          Untuk alur jasa: pilih <b>etalase</b> (halaman keterangan &amp; daftar jasa). Isi jasanya di Katalog Produk.
+        </span>
       </Kolom>
+      {!cocok && (
+        <Kolom label="Link tombol" lebar>
+          <input value={d.cta_href} maxLength={300} onChange={(e) => set("cta_href", e.target.value)} placeholder="/jadwal, /produk/…, atau https://…" className={INPUT} />
+        </Kolom>
+      )}
       <Kolom label="Poin keunggulan (satu per baris, maks 8)" lebar>
         <textarea rows={4} value={d.fiturTeks ?? ""} onChange={(e) => set("fiturTeks", e.target.value)}
           placeholder={"Untuk skripsi, tesis & disertasi\nPilih mentor sesuai bidang"} className={INPUT} />
@@ -104,7 +124,7 @@ function Poster({ url, onGanti, sibuk }: { url: string; onGanti: () => void; sib
 }
 
 /** Hak akses ditegakkan API (wajibStaf) + RLS paket_promo & storage. */
-export function KelolaPaketPromo({ awal }: { awal: Paket[] }) {
+export function KelolaPaketPromo({ awal, tujuan = [] }: { awal: Paket[]; tujuan?: Tujuan[] }) {
   const supabase = createClient();
   const [rows, setRows] = useState<Draf[]>(awal.map(keDraf));
   const [draf, setDraf] = useState<Draf | null>(null);
@@ -212,7 +232,7 @@ export function KelolaPaketPromo({ awal }: { awal: Paket[] }) {
                   className="rounded-md border p-1.5 text-red-600 hover:bg-red-50 disabled:opacity-50"><Trash2 className="h-4 w-4" /></button>
               </div>
             </div>
-            <Formulir d={d} set={(f, v) => ubah(d.id!, f, v)} />
+            <Formulir d={d} tujuan={tujuan} set={(f, v) => ubah(d.id!, f, v)} />
             <div>
               <button type="button" onClick={() => simpan(d)} disabled={busy === d.id}
                 className="inline-flex items-center gap-1.5 rounded-md bg-[#8B0000] px-3 py-1.5 text-sm font-semibold text-white hover:bg-[#6B0000] disabled:opacity-60">
@@ -228,7 +248,7 @@ export function KelolaPaketPromo({ awal }: { awal: Paket[] }) {
           <Poster url={draf.image_url} onGanti={() => pilih("draf")} sibuk={busy === "unggah-draf"} />
           <div className="flex flex-1 flex-col gap-3">
             <span className="text-xs font-bold text-[#8B0000]">Paket baru</span>
-            <Formulir d={draf} set={(f, v) => setDraf((x) => (x ? { ...x, [f]: v } : x))} />
+            <Formulir d={draf} tujuan={tujuan} set={(f, v) => setDraf((x) => (x ? { ...x, [f]: v } : x))} />
             <div className="flex gap-2">
               <button type="button" onClick={() => (draf.image_url ? simpan(draf) : info("Unggah poster dulu.", false))} disabled={busy === "draf"}
                 className="inline-flex items-center gap-1.5 rounded-md bg-[#8B0000] px-3 py-1.5 text-sm font-semibold text-white hover:bg-[#6B0000] disabled:opacity-60">

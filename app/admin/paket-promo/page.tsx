@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { KelolaPaketPromo, type Paket } from "@/components/admin/KelolaPaketPromo";
+import { KelolaPaketPromo, type Paket, type Tujuan } from "@/components/admin/KelolaPaketPromo";
 import { BRAND } from "@/lib/brand";
 import type { Metadata } from "next";
 
@@ -8,10 +8,25 @@ export const metadata: Metadata = { title: `Paket Promo | Admin ${BRAND.name}` }
 
 export default async function AdminPaketPromoPage() {
   const supabase = createClient();
-  const { data, error } = await supabase
-    .from("paket_promo")
-    .select("id, judul, harga_mulai, satuan, kategori, image_url, fitur, cta_label, cta_href, sort_order, is_active")
-    .order("sort_order", { ascending: true });
+  const [{ data, error }, { data: etalase }, { data: produk }] = await Promise.all([
+    supabase
+      .from("paket_promo")
+      .select("id, judul, harga_mulai, satuan, kategori, image_url, fitur, cta_label, cta_href, sort_order, is_active")
+      .order("sort_order", { ascending: true }),
+    supabase.from("etalase").select("slug, nama").order("urutan"),
+    supabase.from("produk").select("slug, nama").eq("is_active", true).order("nama"),
+  ]);
+
+  const tujuan: Tujuan[] = [
+    ...(etalase ?? []).map((e) => ({ grup: "Etalase (keterangan & daftar jasa)", label: e.nama, href: `/etalase/${e.slug}` })),
+    ...[
+      ["Pilih jadwal bimbingan", "/jadwal"],
+      ["Cek Turnitin / AI / Parafrase", "/layanan"],
+      ["Paket hemat", "/paket-hemat"],
+      ["Merchandise", "/merchandise"],
+    ].map(([label, href]) => ({ grup: "Halaman lain", label, href })),
+    ...(produk ?? []).map((p) => ({ grup: "Satu produk langsung", label: p.nama, href: `/produk/${p.slug}` })),
+  ];
 
   return (
     <div className="max-w-5xl space-y-6">
@@ -27,7 +42,7 @@ export default async function AdminPaketPromoPage() {
           Tabel paket promo belum ada. Jalankan migration 041 di Supabase SQL Editor.
         </p>
       )}
-      <KelolaPaketPromo awal={(data ?? []) as Paket[]} />
+      <KelolaPaketPromo awal={(data ?? []) as Paket[]} tujuan={tujuan} />
     </div>
   );
 }

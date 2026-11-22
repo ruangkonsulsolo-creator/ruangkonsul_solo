@@ -38,7 +38,7 @@ export async function sendWhatsApp(params: {
   }
 }
 
-function appUrl() {
+export function appUrl() {
   return (process.env.NEXT_PUBLIC_APP_URL ?? `https://${BRAND.domain}`).replace(/\/$/, "");
 }
 
