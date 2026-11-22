@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Plus, Pencil, Trash2, X, Loader2, Save, AlertCircle, Store,
-  Tags, Package, EyeOff,
+  Tags, Package, EyeOff, Upload, ChevronLeft, ChevronRight, Link2, ImagePlus,
 } from "lucide-react";
+import { TIPE_GAMBAR, unggahGambarPublik } from "@/lib/admin/unggah-gambar";
 import { formatRupiah } from "@/lib/utils/format-currency";
 import { keSlug, type Etalase, type Kategori, type Produk, type Spesifikasi } from "@/lib/katalog/tipe";
 
@@ -640,6 +641,112 @@ function DaftarTeks({
   );
 }
 
+/**
+ * Galeri foto produk: unggah dari perangkat (boleh beberapa sekaligus),
+ * hapus, dan atur urutan. Foto pertama jadi sampul di kartu produk.
+ * Tetap bisa menempel URL untuk gambar yang sudah ada di /public.
+ */
+function DaftarFoto({ nilai, ubah }: { nilai: string[]; ubah: (v: string[]) => void }) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [sibuk, setSibuk] = useState(false);
+  const [galat, setGalat] = useState<string | null>(null);
+  const [url, setUrl] = useState("");
+  const [bukaUrl, setBukaUrl] = useState(false);
+  const foto = nilai.filter(Boolean);
+  const sisa = 10 - foto.length;
+
+  async function onPilih(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []).slice(0, Math.max(0, sisa));
+    e.target.value = "";
+    if (files.length === 0) return;
+    setSibuk(true);
+    setGalat(null);
+    const baru: string[] = [];
+    for (const f of files) {
+      const r = await unggahGambarPublik(f, "produk");
+      if (r.url) baru.push(r.url);
+      else setGalat(r.error ?? "Gagal mengunggah.");
+    }
+    if (baru.length) ubah([...foto, ...baru]);
+    setSibuk(false);
+  }
+
+  function geser(i: number, arah: -1 | 1) {
+    const j = i + arah;
+    if (j < 0 || j >= foto.length) return;
+    const b = [...foto];
+    [b[i], b[j]] = [b[j], b[i]];
+    ubah(b);
+  }
+
+  function tambahUrl() {
+    const v = url.trim();
+    if (!v) return;
+    if (!v.startsWith("/") && !/^https:\/\//.test(v)) return setGalat("URL harus diawali / atau https://");
+    ubah([...foto, v]);
+    setUrl("");
+    setBukaUrl(false);
+    setGalat(null);
+  }
+
+  return (
+    <div>
+      <span className={label}>Foto produk (maks 10 · foto pertama jadi sampul)</span>
+      <input ref={fileRef} type="file" multiple accept={TIPE_GAMBAR.join(",")} className="hidden" onChange={onPilih} />
+      <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+        {foto.map((src, i) => (
+          <div key={`${src}-${i}`} className="group relative aspect-square overflow-hidden rounded-lg border bg-slate-50">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={src} alt={`Foto ${i + 1}`} className="h-full w-full object-cover" />
+            {i === 0 && (
+              <span className="absolute left-1 top-1 rounded bg-brand px-1.5 py-0.5 text-[10px] font-bold text-white">Sampul</span>
+            )}
+            <div className="absolute inset-x-0 bottom-0 flex justify-between bg-black/55 p-1">
+              <div className="flex gap-0.5">
+                <button type="button" onClick={() => geser(i, -1)} disabled={i === 0} aria-label="Geser ke kiri"
+                  className="rounded p-0.5 text-white hover:bg-white/20 disabled:opacity-30">
+                  <ChevronLeft className="h-3.5 w-3.5" />
+                </button>
+                <button type="button" onClick={() => geser(i, 1)} disabled={i === foto.length - 1} aria-label="Geser ke kanan"
+                  className="rounded p-0.5 text-white hover:bg-white/20 disabled:opacity-30">
+                  <ChevronRight className="h-3.5 w-3.5" />
+                </button>
+              </div>
+              <button type="button" onClick={() => ubah(foto.filter((_, j) => j !== i))} aria-label="Hapus foto"
+                className="rounded p-0.5 text-white hover:bg-red-500/80">
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </div>
+        ))}
+        {sisa > 0 && (
+          <button type="button" onClick={() => fileRef.current?.click()} disabled={sibuk}
+            className="flex aspect-square flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-slate-300 text-xs font-semibold text-slate-500 hover:border-brand hover:text-brand disabled:opacity-60">
+            {sibuk ? <Loader2 className="h-5 w-5 animate-spin" /> : foto.length ? <Upload className="h-5 w-5" /> : <ImagePlus className="h-5 w-5" />}
+            {sibuk ? "Mengunggah…" : "Unggah foto"}
+          </button>
+        )}
+      </div>
+      <p className="mt-1.5 text-[11px] text-slate-500">JPG/PNG/WebP, maks 5 MB per foto. Bisa pilih beberapa foto sekaligus.</p>
+      {galat && <p className="mt-1 text-xs font-semibold text-red-600">{galat}</p>}
+      {bukaUrl ? (
+        <div className="mt-2 flex gap-1.5">
+          <input className={input} value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://… atau /merchandise/foto.jpg"
+            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); tambahUrl(); } }} />
+          <button type="button" onClick={tambahUrl} className="rounded-lg bg-brand px-3 text-xs font-bold text-white">Tambah</button>
+        </div>
+      ) : (
+        sisa > 0 && (
+          <button type="button" onClick={() => setBukaUrl(true)}
+            className="mt-1.5 inline-flex items-center gap-1 text-xs font-bold text-brand hover:underline">
+            <Link2 className="h-3 w-3" aria-hidden="true" /> Atau tempel URL gambar
+          </button>
+        )
+      )}
+    </div>
+  );
+}
+
 function FormProduk({
   nilai, ubah, etalase, kategori,
 }: {
@@ -801,12 +908,7 @@ function FormProduk({
       </div>
 
       <div className="sm:col-span-2">
-        <DaftarTeks
-          judul="Foto (URL, boleh lebih dari satu)"
-          nilai={nilai.gambar}
-          ubah={(v) => set({ gambar: v })}
-          contoh="/merchandise/buket-satin/1.jpg"
-        />
+        <DaftarFoto nilai={nilai.gambar} ubah={(v) => set({ gambar: v })} />
       </div>
 
       <div className="sm:col-span-2">

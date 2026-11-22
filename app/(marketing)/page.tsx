@@ -183,7 +183,7 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* ── Banner Iklan Bimbingan ── */}
+      {/* ── Banner strip (dikelola di /admin/banner bagian 2) ── */}
       <BannerStrip />
 
       {/* ── Paket Layanan (dikelola admin) ── */}
