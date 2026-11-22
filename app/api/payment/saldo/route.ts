@@ -4,6 +4,35 @@ import { requireUser } from "@/lib/auth/require-user";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { startPayment, getCustomerDetails, findReusablePayment } from "@/lib/payment/checkout";
 import { rateLimit } from "@/lib/security/rate-limit";
+import { getTransactionStatus } from "@/lib/payment/midtrans";
+import { applyMidtransStatus } from "@/lib/payment/fulfillment";
+
+/**
+ * Pembayaran saldo yang sudah lunas di Midtrans tapi belum tercatat (webhook
+ * terlambat/tidak sampai, atau popup ditutup sebelum sinkron). Disinkronkan
+ * dulu sebelum menagih lagi, supaya customer tidak bayar dua kali.
+ */
+async function pulihkanSaldoTertunda(userId: string): Promise<boolean> {
+  const admin = createAdminClient();
+  const sejak = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+  const { data } = await admin
+    .from("payments")
+    .select("midtrans_order_id")
+    .eq("user_id", userId)
+    .eq("purpose", "saldo")
+    .eq("status", "pending")
+    .gte("created_at", sejak)
+    .order("created_at", { ascending: false })
+    .limit(5);
+  let ada = false;
+  for (const p of data ?? []) {
+    const remote = await getTransactionStatus(p.midtrans_order_id).catch(() => null);
+    if (!remote) continue;
+    const r = await applyMidtransStatus(remote).catch(() => null);
+    if (r?.outcome === "paid") ada = true;
+  }
+  return ada;
+}
 
 const Body = z.union([
   z.object({ paket_id: z.string().uuid() }),
@@ -28,6 +57,9 @@ export async function POST(req: NextRequest) {
   }
 
   if ("nominal" in parsed.data) {
+    if (await pulihkanSaldoTertunda(user.id)) {
+      return NextResponse.json({ data: { sudah_lunas: true } });
+    }
     const nominal = Math.ceil(parsed.data.nominal / 500) * 500;
     try {
       const payment = await startPayment({

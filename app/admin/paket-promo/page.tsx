@@ -21,7 +21,7 @@ export default async function AdminPaketPromoPage() {
     ...(etalase ?? []).map((e) => ({ grup: "Etalase (keterangan & daftar jasa)", label: e.nama, href: `/etalase/${e.slug}` })),
     ...[
       ["Pilih jadwal bimbingan", "/jadwal"],
-      ["Cek Turnitin / AI / Parafrase", "/layanan"],
+      ["Cek Plagiarisme (Turnitin / AI / Parafrase)", "/cek-plagiarisme"],
       ["Paket hemat", "/paket-hemat"],
       ["Merchandise", "/merchandise"],
     ].map(([label, href]) => ({ grup: "Halaman lain", label, href })),

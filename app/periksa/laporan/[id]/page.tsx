@@ -57,7 +57,7 @@ export default async function HalamanLaporan({
       <div className="mx-auto max-w-3xl px-4 print:max-w-none print:px-0">
         <div className="mb-5 flex items-center justify-between gap-3 print:hidden">
           <Link
-            href="/#periksa"
+            href="/cek-plagiarisme"
             className="inline-flex items-center gap-2 text-sm font-bold text-slate-600 hover:text-brand"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />

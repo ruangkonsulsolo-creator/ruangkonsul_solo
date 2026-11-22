@@ -17,8 +17,6 @@ import { HeroBackground } from "@/components/landing/HeroBackground";
 import { BannerStrip } from "@/components/landing/BannerStrip";
 import { LogoKampus } from "@/components/landing/LogoKampus";
 import { KartuTool, TOOLS } from "@/components/landing/KartuTool";
-import { KotakPeriksa } from "@/components/periksa/KotakPeriksa";
-import { ambilTarifPeriksa } from "@/lib/periksa/tarif";
 import { TestimoniWhatsApp } from "@/components/landing/TestimoniWhatsApp";
 import { BRAND, waLink } from "@/lib/brand";
 import type { Metadata } from "next";
@@ -90,7 +88,6 @@ function SectionLabel({ children }: { children: string }) {
 export const revalidate = 300;
 
 export default async function LandingPage() {
-  const tarifPeriksa = await ambilTarifPeriksa();
   const [MENTOR, bimbingan, heroSlides, paketPromo] = await Promise.all([
     ambilMentorPublik({ limit: 8 }),
     ambilEtalase(ETALASE.bimbinganOnline),
@@ -318,26 +315,22 @@ export default async function LandingPage() {
         </ul>
       </section>
 
-      {/* ── Periksa naskah ── */}
-      <section id="periksa" className="bg-slate-50 px-4 py-16">
-        <div className="mx-auto max-w-6xl">
-          <div className="mb-3 flex items-center justify-center gap-2">
-            <span className="h-0.5 w-8 rounded-full bg-brand" />
-            <span className="text-xs font-bold uppercase tracking-widest text-brand">
-              AI Checking Proposal
-            </span>
-            <span className="h-0.5 w-8 rounded-full bg-brand" />
+      {/* ── Ajakan cek naskah (pemeriksanya ada di /cek-plagiarisme) ── */}
+      <section id="periksa" className="bg-slate-50 px-4 py-12">
+        <div className="mx-auto flex max-w-6xl flex-col items-start gap-5 rounded-3xl border border-brand-100 bg-white p-6 shadow-card sm:flex-row sm:items-center sm:justify-between sm:p-8">
+          <div>
+            <span className="text-xs font-bold uppercase tracking-widest text-brand">Cek Plagiarisme</span>
+            <h2 className="mt-1 text-xl font-extrabold text-slate-900 lg:text-2xl">Cek tulisanmu sebelum diserahkan</h2>
+            <p className="mt-1 max-w-xl text-sm text-slate-600">
+              Turnitin, DrillBit, deteksi AI, dan parafrase — bayar per kata lewat QRIS, laporan tersimpan di akunmu.
+            </p>
           </div>
-          <h2 className="text-center text-2xl font-extrabold text-slate-900 lg:text-3xl">
-            Cek tulisanmu sebelum diserahkan
-          </h2>
-          <p className="mx-auto mt-3 mb-10 max-w-2xl text-center font-medium text-slate-600">
-            Tempel naskahmu, lihat bagian mana yang perlu sitasi atau perlu
-            ditulis ulang dengan kalimatmu sendiri. Tujuannya memperbaiki cara
-            mengutip — bukan mengakali pemeriksaan kampus.
-          </p>
-
-          <KotakPeriksa tarif={tarifPeriksa.tarif} aktif={tarifPeriksa.aktif} manual={tarifPeriksa.manual} minimum={tarifPeriksa.minimum} />
+          <Link
+            href="/cek-plagiarisme"
+            className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-brand px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-brand-light"
+          >
+            Mulai cek naskah <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          </Link>
         </div>
       </section>
 

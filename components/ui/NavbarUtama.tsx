@@ -30,6 +30,7 @@ type Tautan = { label: string; href: string };
 
 const UTAMA: Tautan[] = [
   { label: "Layanan", href: "/layanan" },
+  { label: "Cek Plagiarisme", href: "/cek-plagiarisme" },
   { label: "Bimbingan", href: "/jadwal" },
   { label: "Merchandise", href: "/merchandise" },
   { label: "Mentor", href: "/mentor-kami" },

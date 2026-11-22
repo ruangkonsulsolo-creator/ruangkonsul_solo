@@ -26,7 +26,7 @@ export default function manifest(): MetadataRoute.Manifest {
       { src: "/pwa/maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
     ],
     shortcuts: [
-      { name: "Cek Naskah", short_name: "Cek", url: "/#periksa", icons: [{ src: "/pwa/icon-192.png", sizes: "192x192" }] },
+      { name: "Cek Naskah", short_name: "Cek", url: "/cek-plagiarisme", icons: [{ src: "/pwa/icon-192.png", sizes: "192x192" }] },
       { name: "Riwayat Pesanan", short_name: "Riwayat", url: "/dashboard/riwayat-pesanan", icons: [{ src: "/pwa/icon-192.png", sizes: "192x192" }] },
       { name: "Pesan Bimbingan", short_name: "Bimbingan", url: "/booking", icons: [{ src: "/pwa/icon-192.png", sizes: "192x192" }] },
     ],

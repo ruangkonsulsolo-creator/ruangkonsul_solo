@@ -45,7 +45,7 @@ export default async function IsiSaldoPage() {
       <BeliSaldo paket={paket ?? []} />
 
       <div className="flex justify-end">
-        <Link href="/#periksa" className="text-sm font-semibold text-brand hover:underline">Mulai cek naskah →</Link>
+        <Link href="/cek-plagiarisme" className="text-sm font-semibold text-brand hover:underline">Mulai cek naskah →</Link>
       </div>
 
       <section>

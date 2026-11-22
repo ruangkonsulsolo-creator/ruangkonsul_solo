@@ -389,16 +389,24 @@ export function KotakPeriksa({
         setAksi(json.action ?? null);
         throw new Error(json.error ?? "Gagal membuka pembayaran.");
       }
+      if (json.data?.sudah_lunas) {
+        // Pembayaran sebelumnya ternyata sudah lunas → saldo sudah ditambahkan.
+        setMemproses(false);
+        await kirim(false);
+        return;
+      }
       const { openSnap, syncPaymentStatus } = await import("@/lib/payment/use-snap");
       const hasilBayar = await openSnap(json.data.snap_token);
-      if (hasilBayar === "closed") throw new Error("Pembayaran dibatalkan. Naskahmu belum diperiksa.");
-      // Tunggu konfirmasi lunas (QRIS biasanya beberapa detik).
-      let lunas = hasilBayar === "success";
-      for (let i = 0; i < 10 && !lunas; i++) {
+      // Popup ditutup tetap dicek: bisa saja customer sudah membayar sebelum menutupnya.
+      // "success" dari Snap belum berarti saldo tercatat — saldo baru masuk setelah
+      // server mengonfirmasi ke Midtrans. Karena itu selalu tunggu sinkron "paid".
+      let lunas = false;
+      for (let i = 0; i < (hasilBayar === "closed" ? 1 : 12) && !lunas; i++) {
         const st = await syncPaymentStatus({ paymentId: json.data.payment_id });
         lunas = st === "paid";
-        if (!lunas) await new Promise((r) => setTimeout(r, 3000));
+        if (!lunas) await new Promise((r) => setTimeout(r, 2500));
       }
+      if (!lunas && hasilBayar === "closed") throw new Error("Pembayaran dibatalkan. Naskahmu belum diperiksa.");
       if (!lunas) {
         throw new Error(
           "Pembayaran belum terkonfirmasi. Kalau sudah membayar, tunggu sebentar lalu klik tombol bayar lagi — saldo yang masuk akan dipakai."
@@ -829,7 +837,7 @@ export function KotakPeriksa({
             <div className="rounded-3xl border border-slate-200 bg-white p-6"><PanelMemproses /></div>
           ) : galat ? (
             <div className="rounded-3xl border border-slate-200 bg-white p-6">
-              <PanelGalat pesan={galat} aksi={aksi} kurang={kurang} onBayar={() => void bayarLaluPeriksa()} />
+              <PanelGalat pesan={galat} aksi={aksi} kurang={kurang} onBayar={() => void kirim(true)} />
             </div>
           ) : pesananManual ? (
             <StatusPesanan
