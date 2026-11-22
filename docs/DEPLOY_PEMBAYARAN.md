@@ -18,6 +18,8 @@ Migration 018–032 sudah ada di branch katalog Anda. Yang baru hanya:
 - `supabase/migrations/042_cek_plagiarisme_manual.sql` (cek plagiarisme manual: layanan per berkas, kolom laporan, bucket documents & reports; jalankan **setelah** 041)
 - `supabase/migrations/043_mesin_laporan.sql` (nama mesin pemeriksa pada laporan manual; jalankan **setelah** 042)
 - `supabase/migrations/044_harga_minimum_drillbit.sql` (biaya minimum per cek; cek AI Rp1.000/1.000 kata min Rp5.000; layanan DrillBit manual; jalankan **setelah** 043)
+- `supabase/migrations/045_referral_aktif.sql` (program referral: catat pengajak + komisi 10% pembayaran pertama ke saldo)
+- `supabase/migrations/046_ringkasan_omzet.sql` (ringkasan revenue admin dari semua pembayaran lunas, tanggal WIB)
 
 Cara menjalankan (pilih satu):
 - **SQL Editor**: Supabase Dashboard → SQL Editor → tempel isi file 033 → Run, lalu file 034 → Run.
@@ -49,6 +51,9 @@ dibatalkan otomatis dan slot muncul lagi. Daftar sesi customer: `/dashboard/sesi
 | `NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION` | sama dengan di atas | |
 | `NEXT_PUBLIC_ONGKIR_FLAT` | `15000` | hanya untuk produk ber-`berat_gram` |
 | `RESEND_API_KEY`, `RESEND_FROM_EMAIL` | opsional | email receipt |
+| `FONNTE_API_KEY` | token device di fonnte.com | WhatsApp ke customer (pesanan masuk, laporan siap, komisi referral). Kosong = WA tidak dikirim, sistem tetap jalan |
+| `CRON_SECRET` | string acak panjang (mis. `openssl rand -hex 32`) | wajib agar cron harian (`vercel.json`, 00:00 WIB) bisa jalan |
+| `REFERRAL_COMMISSION_PERCENT` | `10` | opsional; persen komisi referral (maks 50) |
 
 Setelah mengisi, **Redeploy** agar variabel `NEXT_PUBLIC_*` ikut ter-build.
 

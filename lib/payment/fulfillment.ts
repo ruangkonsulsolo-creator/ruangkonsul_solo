@@ -1,7 +1,9 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { runDetectionPipeline } from "@/lib/detection/pipeline";
-import { sendWhatsApp } from "@/lib/notification/whatsapp";
+import { sendWhatsApp, waTemplates } from "@/lib/notification/whatsapp";
+import { SEMUA_SLUG_MANUAL } from "@/lib/periksa/manual";
+import { kreditReferral } from "@/lib/referral";
 import { sendEmail } from "@/lib/notification/email";
 import { formatRupiah } from "@/lib/utils/format-currency";
 import { BRAND } from "@/lib/brand";
@@ -108,10 +110,12 @@ async function adoptLegacyOrder(admin: Admin, n: MidtransNotification): Promise<
 }
 
 async function fulfil(admin: Admin, p: PaymentRow) {
-  if (p.purpose === "produk") return fulfilProduk(admin, p);
-  if (p.purpose === "booking") return fulfilBooking(admin, p);
-  if (p.purpose === "saldo") return fulfilSaldo(admin, p);
-  return fulfilOrder(admin, p);
+  if (p.purpose === "produk") await fulfilProduk(admin, p);
+  else if (p.purpose === "booking") await fulfilBooking(admin, p);
+  else if (p.purpose === "saldo") await fulfilSaldo(admin, p);
+  else await fulfilOrder(admin, p);
+  // Komisi referral dari pembayaran lunas pertama (idempoten di database).
+  await kreditReferral(p.user_id, p.amount_idr).catch((e) => console.error("[payment] referral:", e));
 }
 
 // ── Isi saldo (paket_saldo) ────────────────────────────────────────────────
@@ -287,6 +291,13 @@ async function fulfilOrder(admin: Admin, p: PaymentRow) {
     body: `Pesanan ${order.order_number} (${order.services?.name ?? "Layanan"}) sedang diproses.`,
   });
   await sendReceipt(admin, p, `${order.services?.name ?? "Layanan"} — ${order.order_number}`);
+  // Laporan manual (Turnitin/DrillBit): kabari customer bahwa pesanan masuk antrean.
+  if ((SEMUA_SLUG_MANUAL as readonly string[]).includes(order.services?.slug ?? "")) {
+    void sendWhatsApp({
+      to: order.profiles?.whatsapp,
+      message: waTemplates.orderReceived(order.order_number, order.services?.name ?? "Pesanan"),
+    });
+  }
   runDetectionPipeline(order.id, order).catch((e) => console.error("[payment] detection pipeline:", e));
 }
 

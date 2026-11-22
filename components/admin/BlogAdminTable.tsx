@@ -38,6 +38,15 @@ export function BlogAdminTable({ posts: initial }: { posts: Post[] }) {
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  /** Segarkan cache halaman blog publik (ISR) setelah perubahan. */
+  function segarkan(slug?: string) {
+    void fetch("/api/admin/blog/revalidate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ slug }),
+    }).catch(() => undefined);
+  }
+
   function openAdd() { setEditId(null); setForm({ ...EMPTY_FORM }); setShowForm(true); }
 
   async function openEdit(id: string) {
@@ -49,6 +58,7 @@ export function BlogAdminTable({ posts: initial }: { posts: Post[] }) {
     setTogglingId(p.id);
     const newState = !p.is_published;
     await supabase.from("blog_posts").update({ is_published: newState, published_at: newState ? new Date().toISOString() : null }).eq("id", p.id);
+    segarkan(p.slug);
     setPosts((prev) => prev.map((x) => x.id === p.id ? { ...x, is_published: newState, published_at: newState ? new Date().toISOString() : null } : x));
     showToast(newState ? "Artikel dipublish!" : "Artikel disembunyikan.", "success");
     setTogglingId(null);
@@ -58,6 +68,7 @@ export function BlogAdminTable({ posts: initial }: { posts: Post[] }) {
     if (!confirm(`Hapus artikel "${p.title}"?`)) return;
     setDeletingId(p.id);
     await supabase.from("blog_posts").delete().eq("id", p.id);
+    segarkan(p.slug);
     setPosts((prev) => prev.filter((x) => x.id !== p.id));
     showToast("Artikel dihapus.", "success");
     setDeletingId(null);
@@ -71,11 +82,11 @@ export function BlogAdminTable({ posts: initial }: { posts: Post[] }) {
     if (editId) {
       const { error } = await supabase.from("blog_posts").update(payload).eq("id", editId);
       if (error) showToast("Gagal update artikel.", "error");
-      else { showToast("Artikel berhasil diupdate!", "success"); router.refresh(); setShowForm(false); }
+      else { segarkan(slug); showToast("Artikel berhasil diupdate!", "success"); router.refresh(); setShowForm(false); }
     } else {
       const { data, error } = await supabase.from("blog_posts").insert(payload).select().single();
       if (error || !data) showToast("Gagal tambah artikel.", "error");
-      else { setPosts((prev) => [data, ...prev]); showToast("Artikel berhasil ditambahkan!", "success"); setShowForm(false); }
+      else { segarkan(slug); setPosts((prev) => [data, ...prev]); showToast("Artikel berhasil ditambahkan!", "success"); setShowForm(false); }
     }
     setSaving(false);
   }

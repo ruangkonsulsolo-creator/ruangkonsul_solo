@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { awalHariWIB } from "@/lib/admin/omzet";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
@@ -20,16 +21,17 @@ const STATUS_BADGE: Record<string, { label: string; variant: "success"|"warning"
 
 export default async function AdminDashboardPage() {
   const supabase = createClient();
-  const today = new Date().toISOString().slice(0, 10);
+  const awalHari = awalHariWIB().toISOString();
   const [{ count: totalOrders }, { count: pendingOrders }, { count: todayOrders }, { count: totalUsers }, revenueResult, recentOrders] = await Promise.all([
     supabase.from("orders").select("*", { count: "exact", head: true }),
     supabase.from("orders").select("*", { count: "exact", head: true }).eq("status", "diproses"),
-    supabase.from("orders").select("*", { count: "exact", head: true }).gte("created_at", `${today}T00:00:00Z`),
+    supabase.from("orders").select("*", { count: "exact", head: true }).gte("created_at", awalHari),
     supabase.from("profiles").select("*", { count: "exact", head: true }).eq("role", "user"),
-    supabase.from("transactions").select("amount_idr").eq("type", "order_payment").gte("created_at", `${today}T00:00:00Z`),
+    supabase.rpc("omzet_harian", { p_dari: awalHari }),
     supabase.from("orders").select("id, order_number, status, created_at, services(name), profiles:profiles!orders_user_id_fkey(full_name)").order("created_at", { ascending: false }).limit(8),
   ]);
-  const todayRevenue = (revenueResult.data ?? []).reduce((s, t) => s + (t.amount_idr ?? 0), 0);
+  // Semua pembayaran lunas hari ini (WIB): cek naskah, bimbingan, produk, isi saldo.
+  const todayRevenue = ((revenueResult.data ?? []) as { jumlah: number }[]).reduce((s, t) => s + Number(t.jumlah ?? 0), 0);
   const stats = [
     { label: "Pesanan Hari Ini", value: todayOrders ?? 0, icon: ClipboardList, color: "text-brand bg-brand-50" },
     { label: "Perlu Diproses",   value: pendingOrders ?? 0, icon: Clock, color: "text-amber-600 bg-amber-50" },

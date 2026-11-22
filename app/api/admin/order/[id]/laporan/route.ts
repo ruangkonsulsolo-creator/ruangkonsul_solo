@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { wajibStaf } from "@/lib/auth/wajib-staf";
 import { MESIN_LAPORAN } from "@/lib/periksa/manual";
+import { sendWhatsApp, waTemplates } from "@/lib/notification/whatsapp";
 
 export const dynamic = "force-dynamic";
 
@@ -66,6 +67,12 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       channel: "in_app",
       title: "Laporan Cek Plagiarisme Siap",
       body: `Laporan ${order.order_number} sudah siap: kemiripan ${parsed.data.persen_kemiripan}%${parsed.data.mesin_laporan && parsed.data.mesin_laporan !== "Lainnya" ? ` (${parsed.data.mesin_laporan})` : ""}. Lihat & unduh di Riwayat Pesanan.`,
+    });
+    // WhatsApp ke customer (tidak menggagalkan respons bila gagal / token belum diisi).
+    const { data: prof } = await admin.from("profiles").select("whatsapp").eq("id", order.user_id).maybeSingle();
+    await sendWhatsApp({
+      to: prof?.whatsapp,
+      message: waTemplates.orderCompleted(order.order_number, order.id, parsed.data.persen_kemiripan ?? null),
     });
   }
   return NextResponse.json({ ok: true });

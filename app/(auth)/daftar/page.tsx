@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,17 @@ import { BRAND } from "@/lib/brand";
 export default function DaftarPage() {
   const supabase = createClient();
   const { toast, showToast, hideToast } = useToast();
+
+  // Simpan kode referral (dari /daftar?ref=…) di cookie 30 hari, supaya tetap
+  // tercatat walau temannya mendaftar lewat Google atau kembali lain waktu.
+  const [kodeRef, setKodeRef] = useState<string | null>(null);
+  useEffect(() => {
+    const ref = new URLSearchParams(window.location.search).get("ref")?.trim().toUpperCase();
+    if (ref && /^RKS-[A-Z0-9]{5}$/.test(ref)) {
+      document.cookie = `rk_ref=${ref}; path=/; max-age=${60 * 60 * 24 * 30}; samesite=lax`;
+      setKodeRef(ref);
+    }
+  }, []);
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -80,6 +91,11 @@ export default function DaftarPage() {
       <div>
         <div className="mb-8">
           <h2 className="text-2xl font-extrabold text-slate-900">Buat akun gratis 🎓</h2>
+          {kodeRef && (
+            <p className="mt-2 inline-block rounded-lg bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand">
+              Kode referral {kodeRef} terpasang
+            </p>
+          )}
           <p className="mt-1.5 text-sm text-muted-foreground">
             Sudah punya akun?{" "}
             <Link href="/login" className="font-semibold text-[#8B0000] hover:text-brand-light">

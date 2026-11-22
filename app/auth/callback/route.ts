@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { safeRedirectPath } from "@/lib/utils/safe-redirect";
 import { ambilStatusProfil, HALAMAN_LENGKAPI } from "@/lib/auth/status-profil";
+import { pasangReferral } from "@/lib/referral";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -29,6 +30,7 @@ export async function GET(request: Request) {
       // Akun baru dari Google: wajib lengkapi pendaftaran dulu.
       const { data: { user: baru } } = await supabase.auth.getUser();
       if (baru) {
+        await pasangReferral(baru.id, baru.user_metadata?.referral_code_used);
         const status = await ambilStatusProfil(supabase, baru.id);
         if (status && !status.registrasi_selesai) {
           return NextResponse.redirect(

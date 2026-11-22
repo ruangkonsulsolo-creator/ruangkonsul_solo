@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import type { Metadata } from "next";
 import { NavbarUtama } from "@/components/ui/NavbarUtama";
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient as createClient } from "@/lib/supabase/publik";
 import { BRAND, waLink } from "@/lib/brand";
 
 export const revalidate = 120;
