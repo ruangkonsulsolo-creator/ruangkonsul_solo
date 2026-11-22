@@ -10,11 +10,20 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: {
   const supabase = createClient();
   const pageSize = 20;
   const page = Math.max(1, parseInt(searchParams.page ?? "1", 10));
-  const { data: users, count } = await supabase
-    .from("profiles")
-    .select("id, full_name, whatsapp, referral_code, role, is_active, created_at, credit_balance", { count: "exact" })
-    .order("created_at", { ascending: false })
-    .range((page - 1) * pageSize, page * pageSize - 1);
+  // Sesi tamu (pemeriksa naskah tanpa daftar) disaring; sebelum migration 049
+  // kolom is_tamu belum ada → tampilkan semua.
+  const ambil = (saring: boolean) => {
+    let q = supabase
+      .from("profiles")
+      .select("id, full_name, whatsapp, referral_code, role, is_active, created_at, credit_balance", { count: "exact" })
+      .order("created_at", { ascending: false })
+      .range((page - 1) * pageSize, page * pageSize - 1);
+    if (saring) q = q.eq("is_tamu", false);
+    return q;
+  };
+  let hasil = await ambil(true);
+  if (hasil.error) hasil = await ambil(false);
+  const { data: users, count } = hasil;
   const totalPages = Math.ceil((count ?? 0) / pageSize);
   return (
     <div className="space-y-5">

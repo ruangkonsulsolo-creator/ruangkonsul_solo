@@ -1,11 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { tokenPesananValid } from "@/lib/periksa/tautan-aman";
+
+/** Kirim ke signed URL laporan (bucket reports privat, berlaku 1 jam). */
+async function arahkanKeLaporan(path: string) {
+  const { data, error } = await createAdminClient().storage.from("reports").createSignedUrl(path, 3600);
+  if (error || !data?.signedUrl) return NextResponse.json({ error: "Gagal membuat link download." }, { status: 500 });
+  return NextResponse.redirect(data.signedUrl);
+}
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const supabase = createClient();
+  // Tautan WhatsApp bertoken: unduh tanpa sesi (tamu di perangkat lain).
+  const t = request.nextUrl.searchParams.get("t");
+  if (/^[0-9a-f-]{36}$/i.test(params.id) && tokenPesananValid(params.id, t)) {
+    const { data: o } = await createAdminClient()
+      .from("orders").select("status, report_storage_path").eq("id", params.id).maybeSingle();
+    if (!o || o.status !== "selesai" || !o.report_storage_path) {
+      return NextResponse.json({ error: "Laporan belum tersedia." }, { status: 404 });
+    }
+    return arahkanKeLaporan(o.report_storage_path);
+  }
+
+  const supabase = createClient({ tamu: true });
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
@@ -54,7 +74,6 @@ export async function GET(
   // Generate signed URL (1 jam)
   // Kepemilikan sudah dicek di atas; tanda tangan URL memakai service role
   // karena bucket "reports" tidak bisa dibaca customer secara langsung.
-  const { createAdminClient } = await import("@/lib/supabase/admin");
   const { data: signedData, error: signedError } = await createAdminClient().storage
     .from("reports")
     .createSignedUrl(order.report_storage_path, 3600);

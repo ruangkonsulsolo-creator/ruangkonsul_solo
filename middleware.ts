@@ -67,7 +67,8 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
+  // Sesi tamu (anonymous, khusus pemeriksa naskah) tidak boleh masuk area login.
+  if (!user || user.is_anonymous) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("next", pathname);
     return NextResponse.redirect(loginUrl);

@@ -45,7 +45,8 @@ const Body = z.union([
  * status setelah lunas (fulfilSaldo), bukan di sini.
  */
 export async function POST(req: NextRequest) {
-  const auth = await requireUser();
+  // Tamu boleh membayar kekurangan saldo cek naskah.
+  const auth = await requireUser(undefined, { tamu: true });
   if (!auth.ok) return NextResponse.json({ error: auth.error, action: "login" }, { status: auth.status });
   const { user } = auth.ctx;
 

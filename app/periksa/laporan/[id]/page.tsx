@@ -35,7 +35,7 @@ export default async function HalamanLaporan({
 }: {
   params: { id: string };
 }) {
-  const supabase = createClient();
+  const supabase = createClient({ tamu: true });
 
   // RLS membatasi baris ke pemiliknya, jadi tidak perlu memeriksa user_id
   // lagi di sini: pengguna lain tidak akan mendapat baris apa pun.

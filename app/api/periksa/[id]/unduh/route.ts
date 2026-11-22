@@ -17,7 +17,7 @@ export const runtime = "nodejs";
  */
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   if (!/^[0-9a-f-]{36}$/i.test(params.id)) return NextResponse.json({ error: "Tidak ditemukan." }, { status: 404 });
-  const supabase = createClient();
+  const supabase = createClient({ tamu: true });
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Masuk dulu." }, { status: 401 });
 

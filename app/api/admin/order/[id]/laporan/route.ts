@@ -4,7 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { wajibStaf } from "@/lib/auth/wajib-staf";
 import { MESIN_LAPORAN } from "@/lib/periksa/manual";
-import { sendWhatsApp, waTemplates } from "@/lib/notification/whatsapp";
+import { appUrl, sendWhatsApp, waTemplates } from "@/lib/notification/whatsapp";
+import { tautanPesanan } from "@/lib/periksa/tautan-aman";
 
 export const dynamic = "force-dynamic";
 
@@ -72,7 +73,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     const { data: prof } = await admin.from("profiles").select("whatsapp").eq("id", order.user_id).maybeSingle();
     await sendWhatsApp({
       to: prof?.whatsapp,
-      message: waTemplates.orderCompleted(order.order_number, order.id, parsed.data.persen_kemiripan ?? null),
+      message: waTemplates.orderCompleted(order.order_number, tautanPesanan(appUrl(), order.id), parsed.data.persen_kemiripan ?? null),
     });
   }
   return NextResponse.json({ ok: true });

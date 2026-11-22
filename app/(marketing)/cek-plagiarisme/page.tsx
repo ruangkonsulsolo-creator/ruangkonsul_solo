@@ -11,14 +11,15 @@ export const metadata: Metadata = {
     "Bayar per kata lewat QRIS, laporan tersimpan di akunmu.",
 };
 
-export const revalidate = 300;
+// Dinamis: ?tab=riwayat membuka sub tab Riwayat Pesanan.
+export const dynamic = "force-dynamic";
 
 /**
  * Halaman khusus pemeriksa naskah. Sebelumnya ditanam di beranda; hasil dan
  * pesan galatnya menggulirkan layar beranda sendiri, jadi dipindah ke tab
  * "Cek Plagiarisme" di navbar.
  */
-export default async function CekPlagiarismePage() {
+export default async function CekPlagiarismePage({ searchParams }: { searchParams: { tab?: string } }) {
   const tarif = await ambilTarifPeriksa();
   return (
     <div className="min-h-screen bg-slate-50">
@@ -36,9 +37,15 @@ export default async function CekPlagiarismePage() {
           <p className="mx-auto mb-10 mt-3 max-w-2xl text-center font-medium text-slate-600">
             Plagiasi (Turnitin/DrillBit), deteksi AI, dan parafrase. Lihat bagian mana yang perlu sitasi
             atau ditulis ulang dengan kalimatmu sendiri — tujuannya memperbaiki cara mengutip, bukan
-            mengakali pemeriksaan kampus.
+            mengakali pemeriksaan kampus. <b className="text-slate-800">Tidak perlu daftar akun.</b>
           </p>
-          <KotakPeriksa tarif={tarif.tarif} aktif={tarif.aktif} manual={tarif.manual} minimum={tarif.minimum} />
+          <KotakPeriksa
+            tarif={tarif.tarif}
+            aktif={tarif.aktif}
+            manual={tarif.manual}
+            minimum={tarif.minimum}
+            awalRiwayat={searchParams.tab === "riwayat"}
+          />
         </div>
       </main>
     </div>

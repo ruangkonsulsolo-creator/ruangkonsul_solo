@@ -71,7 +71,8 @@ export async function POST(request: NextRequest) {
     );
   }
   const biaya = hitungBiaya(jumlahKata, jenis, tarif, minimum);
-  const supabase = createClient();
+  // Tamu (sesi anonymous) boleh memakai layanan pemeriksa.
+  const supabase = createClient({ tamu: true });
 
   const {
     data: { user },

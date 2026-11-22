@@ -28,7 +28,7 @@ const schema = z
  * Midtrans, jadi tidak bisa dipalsukan client.
  */
 export async function POST(request: NextRequest) {
-  const auth = await requireUser();
+  const auth = await requireUser(undefined, { tamu: true });
   if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status });
   const { user, role } = auth.ctx;
 

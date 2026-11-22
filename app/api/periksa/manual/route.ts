@@ -43,7 +43,8 @@ const skema = z
  * mengunggah laporan PDF + persentase.
  */
 export async function POST(request: NextRequest) {
-  const supabase = createClient();
+  // Tamu (sesi anonymous) boleh memesan laporan.
+  const supabase = createClient({ tamu: true });
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Masuk dulu untuk memesan laporan." }, { status: 401 });
 
@@ -160,7 +161,7 @@ export async function POST(request: NextRequest) {
       items: dibuat.map((x, i) => ({ id: `${x.slug}-${i + 1}`, name: label(x).slice(0, 50), price: x.harga, quantity: 1 })),
       itemSnapshot: dibuat.map((x, i) => ({ id: x.slug, name: label(x), price: x.harga, quantity: 1, berkas: daftar[i].nama_berkas, order_number: x.order_number })),
       customer: { firstName: prof?.full_name || "Customer", email: user.email, phone: wa.whatsapp },
-      finishPath: "/dashboard/riwayat-pesanan",
+      finishPath: dibuat.length > 1 ? "/cek-plagiarisme?tab=riwayat" : `/cek-plagiarisme/pesanan/${dibuat[0].id}`,
       expiryMinutes: 24 * 60,
     });
     // midtrans_order_id unik per baris → hanya di pesanan utama; anggota grup

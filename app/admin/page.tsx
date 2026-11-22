@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { hitungPengguna } from "@/lib/admin/saring-tamu";
 import { awalHariWIB } from "@/lib/admin/omzet";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -22,11 +23,11 @@ const STATUS_BADGE: Record<string, { label: string; variant: "success"|"warning"
 export default async function AdminDashboardPage() {
   const supabase = createClient();
   const awalHari = awalHariWIB().toISOString();
-  const [{ count: totalOrders }, { count: pendingOrders }, { count: todayOrders }, { count: totalUsers }, revenueResult, recentOrders] = await Promise.all([
+  const [{ count: totalOrders }, { count: pendingOrders }, { count: todayOrders }, totalUsers, revenueResult, recentOrders] = await Promise.all([
     supabase.from("orders").select("*", { count: "exact", head: true }),
     supabase.from("orders").select("*", { count: "exact", head: true }).eq("status", "diproses"),
     supabase.from("orders").select("*", { count: "exact", head: true }).gte("created_at", awalHari),
-    supabase.from("profiles").select("*", { count: "exact", head: true }).eq("role", "user"),
+    hitungPengguna(supabase),
     supabase.rpc("omzet_harian", { p_dari: awalHari }),
     supabase.from("orders").select("id, order_number, status, created_at, services(name), profiles:profiles!orders_user_id_fkey(full_name)").order("created_at", { ascending: false }).limit(8),
   ]);

@@ -22,6 +22,7 @@ Migration 018–032 sudah ada di branch katalog Anda. Yang baru hanya:
 - `supabase/migrations/046_ringkasan_omzet.sql` (ringkasan revenue admin dari semua pembayaran lunas, tanggal WIB)
 - `supabase/migrations/047_pesanan_multi_berkas.sql` (Cek Plagiasi/DrillBit hingga 5 file dalam satu QRIS)
 - `supabase/migrations/048_jasa_berkas.sql` (jasa dengan file hasil: unggah naskah, status diproses, admin unggah hasil; bucket `hasil-jasa`)
+- `supabase/migrations/049_sesi_tamu.sql` (cek naskah tanpa login: penanda profil tamu). **Wajib juga**: Supabase → Authentication → Sign In / Providers → aktifkan *Allow anonymous sign-ins*. Opsional: env `LINK_SECRET` (string acak) untuk token link WhatsApp laporan; bila kosong dipakai `SUPABASE_SERVICE_ROLE_KEY`.
 
 Cara menjalankan (pilih satu):
 - **SQL Editor**: Supabase Dashboard → SQL Editor → tempel isi file 033 → Run, lalu file 034 → Run.

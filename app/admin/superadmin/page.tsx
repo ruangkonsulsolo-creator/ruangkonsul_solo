@@ -9,6 +9,7 @@ export const metadata: Metadata = { title: `Superadmin Panel | ${BRAND.name}` };
 async function getData() {
   try {
     const { createClient } = await import("@/lib/supabase/server");
+    const { hitungPengguna } = await import("@/lib/admin/saring-tamu");
     const supabase = createClient();
 
     const [servicesRes, packagesRes, bannersRes, kelasRes, txRes, ordersRes, usersRes, bookingsRes] = await Promise.all([
@@ -18,7 +19,7 @@ async function getData() {
       supabase.from("kelas_bimbingan").select("id, tab, title, harga, is_active, sort_order").order("sort_order", { ascending: true }),
       supabase.from("transactions").select("amount_idr").eq("type", "order_payment"),
       supabase.from("orders").select("*", { count: "exact", head: true }),
-      supabase.from("profiles").select("*", { count: "exact", head: true }).eq("role", "user"),
+      hitungPengguna(supabase).then((count) => ({ count })),
       supabase.from("bookings").select("*", { count: "exact", head: true }),
     ]);
 

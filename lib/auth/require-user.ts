@@ -10,8 +10,9 @@ export type AuthResult =
   | { ok: false; status: 401 | 403; error: string };
 
 /** Pastikan request berasal dari user yang login (opsional: dengan role tertentu). */
-export async function requireUser(allowed?: DbRole[]): Promise<AuthResult> {
-  const supabase = createClient();
+export async function requireUser(allowed?: DbRole[], opsi: { tamu?: boolean } = {}): Promise<AuthResult> {
+  // Bawaan: sesi tamu dianggap belum login. { tamu: true } khusus rute pemeriksa.
+  const supabase = createClient({ tamu: opsi.tamu });
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { ok: false, status: 401, error: "Silakan login terlebih dahulu." };
 

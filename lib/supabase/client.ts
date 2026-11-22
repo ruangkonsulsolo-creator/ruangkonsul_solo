@@ -1,4 +1,5 @@
 import { createBrowserClient } from "@supabase/ssr";
+import { sembunyikanTamu } from "@/lib/supabase/tamu";
 
 /**
  * Klien Supabase untuk peramban — satu saja, dipakai bersama.
@@ -26,9 +27,13 @@ type Klien = ReturnType<typeof createBrowserClient<any>>;
 let klienPeramban: Klien | undefined;
 
 function buat(): Klien {
-  return createBrowserClient<any>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  // Sesi tamu (khusus pemeriksa naskah) disembunyikan dari getUser();
+  // komponen pemeriksa memakai getUserTermasukTamu() dari lib/supabase/tamu.
+  return sembunyikanTamu(
+    createBrowserClient<any>(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
   );
 }
 

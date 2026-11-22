@@ -51,7 +51,7 @@ export const waTemplates = {
   orderCompleted: (orderNumber: string, linkOrId: string, persen?: number | null) =>
     `🎉 *${BRAND.name}*\n\nLaporan pesanan *${orderNumber}* sudah siap` +
     (persen != null ? ` — similarity *${persen}%*` : "") +
-    `.\n\nLihat & unduh di sini (login dulu):\n${linkOrId.startsWith("http") ? linkOrId : `${appUrl()}/dashboard/laporan/${linkOrId}`}\n\n` +
+    `.\n\nLihat & unduh di sini:\n${linkOrId.startsWith("http") ? linkOrId : `${appUrl()}/cek-plagiarisme/pesanan/${linkOrId}`}\n\n` +
     `Laporan tersimpan di Riwayat Pesanan dan bisa diunduh lagi kapan saja.`,
 
   referralCredited: (jumlah: string) =>

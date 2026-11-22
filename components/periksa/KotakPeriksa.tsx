@@ -6,6 +6,7 @@ import {
   AlertTriangle, CheckCircle2,
   ArrowRight, Loader2, FileText, Upload, Copy, Check, X, FileDown,
   Clock, ShieldCheck,
+  History,
 } from "lucide-react";
 import {
   hitungBiaya,
@@ -25,6 +26,7 @@ import {
 import { formatRupiah } from "@/lib/utils/format-currency";
 import { labelAi, labelKemiripan } from "@/lib/periksa/persen-berubah";
 import { BATAS_KATA_BESAR, FORMAT_LAPORAN } from "@/lib/periksa/manual";
+import { RiwayatPeriksa } from "@/components/periksa/RiwayatPeriksa";
 import { StatusPesanan } from "@/components/periksa/StatusPesanan";
 import { AjakSimpanWa } from "@/components/periksa/AjakSimpanWa";
 
@@ -76,7 +78,10 @@ export function KotakPeriksa({
   aktif = { kemiripan: true, ai: true, parafrase: true },
   manual = { kecil: 15000, besar: 20000, aktif: false, drillbit: 10000, drillbitAktif: false },
   minimum = { kemiripan: 0, ai: 0, parafrase: 0 },
+  awalRiwayat = false,
 }: {
+  /** Buka sub tab Riwayat Pesanan lebih dulu (?tab=riwayat). */
+  awalRiwayat?: boolean;
   /** Tarif per 1.000 kata dari Admin > Tarif Pemeriksaan. */
   tarif?: Record<JenisPeriksa, number>;
   aktif?: Record<JenisPeriksa, boolean>;
@@ -98,6 +103,7 @@ export function KotakPeriksa({
   );
 
   const [tab, setTab] = useState<Tab>(TABS[0]?.id ?? "ai");
+  const [riwayat, setRiwayat] = useState(awalRiwayat);
   const [teks, setTeks] = useState("");
   const [tempel, setTempel] = useState(false);
   const [memproses, setMemproses] = useState(false);
@@ -151,6 +157,7 @@ export function KotakPeriksa({
   }, [hasil, pesananManual, galat]);
 
   function gantiTab(t: Tab) {
+    setRiwayat(false);
     setTab(t);
     setHasil(null);
     setGalat(null);
@@ -279,13 +286,7 @@ export function KotakPeriksa({
     setHasil(null);
     setPesananManual(null);
     try {
-      const { createClient } = await import("@/lib/supabase/client");
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        setAksi("login");
-        throw new Error("Masuk dulu untuk memesan laporan.");
-      }
+      const { supabase, user } = await pastikanSesi();
       const unggahan = [];
       for (const [i, it] of daftar.entries()) {
         const ext = ekstensi(it.file.name);
@@ -337,6 +338,25 @@ export function KotakPeriksa({
   }
 
   /**
+   * Layanan pemeriksa tidak wajib login: tanpa sesi, dibuat sesi tamu
+   * (Supabase anonymous sign-in) yang tersimpan di browser ini. Riwayatnya
+   * tampil di tab Riwayat Pesanan.
+   */
+  async function pastikanSesi() {
+    const { createClient } = await import("@/lib/supabase/client");
+    const { getUserTermasukTamu } = await import("@/lib/supabase/tamu");
+    const supabase = createClient();
+    const ada = await getUserTermasukTamu(supabase);
+    if (ada) return { supabase, user: ada };
+    const { data, error } = await supabase.auth.signInAnonymously();
+    if (error || !data.user) {
+      setAksi("login");
+      throw new Error("Tidak bisa memulai sesi tamu. Silakan masuk atau daftar untuk melanjutkan.");
+    }
+    return { supabase, user: data.user };
+  }
+
+  /**
    * Pemeriksaan instan. Saldo dipakai lebih dulu; kalau kurang, QRIS untuk
    * kekurangannya langsung dibuka (satu klik), lalu pemeriksaan diulang.
    */
@@ -347,6 +367,7 @@ export function KotakPeriksa({
     setHasil(null);
     let butuhBayar = 0;
     try {
+      await pastikanSesi();
       const res = await fetch("/api/periksa", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -521,17 +542,33 @@ export function KotakPeriksa({
               key={t.id}
               type="button"
               role="tab"
-              aria-selected={tab === t.id}
+              aria-selected={!riwayat && tab === t.id}
               onClick={() => gantiTab(t.id)}
               className={`whitespace-nowrap rounded-xl px-3 py-2.5 text-sm font-bold transition-colors sm:px-5 ${
-                tab === t.id ? "bg-brand text-white shadow-brand-sm" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                !riwayat && tab === t.id ? "bg-brand text-white shadow-brand-sm" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
               }`}
             >
               {t.label}
             </button>
           ))}
+          <button
+            type="button"
+            role="tab"
+            aria-selected={riwayat}
+            onClick={() => setRiwayat(true)}
+            className={`col-span-2 inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-xl px-3 py-2.5 text-sm font-bold transition-colors sm:col-span-1 sm:ml-1 sm:border-l sm:border-slate-200 sm:px-5 ${
+              riwayat ? "bg-brand text-white shadow-brand-sm" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+            }`}
+          >
+            <History className="h-4 w-4" aria-hidden="true" /> Riwayat Pesanan
+          </button>
         </div>
       </div>
+
+      {riwayat ? (
+        <RiwayatPeriksa />
+      ) : (
+      <>
 
       {/* ── Judul layanan ── */}
       <div className="mt-6">
@@ -860,7 +897,7 @@ export function KotakPeriksa({
               }
               ajakSimpanWa
               lanjut={{
-                href: pesananManual.jumlah > 1 ? "/dashboard/riwayat-pesanan" : `/dashboard/laporan/${pesananManual.id}`,
+                href: pesananManual.jumlah > 1 ? "/cek-plagiarisme?tab=riwayat" : `/cek-plagiarisme/pesanan/${pesananManual.id}`,
                 label: pesananManual.lunas ? "Pantau Status Pesanan" : "Bayar Sekarang",
               }}
               onOrderBaru={orderBaru}
@@ -893,6 +930,8 @@ export function KotakPeriksa({
             </>
           ) : null}
         </div>
+      )}
+      </>
       )}
     </div>
   );
