@@ -141,6 +141,33 @@ export default async function RiwayatPesananPage({
     }
   }
 
+  // Pesanan multi-file: satu pembayaran, beberapa file (orders.grup_bayar).
+  type Anggota = { id: string; nomor: string; berkas: string | null; persen: number | null; adaLaporan: boolean };
+  const infoGrup = new Map<string, Anggota[]>();
+  if (idOrder.length) {
+    const { data: grup, error: eGrup } = await supabase
+      .from("orders")
+      .select("id, order_number, grup_bayar, status, persen_kemiripan, report_storage_path, uploaded_files ( original_name )")
+      .in("grup_bayar", idOrder)
+      .order("order_number");
+    if (!eGrup) {
+      for (const o of (grup ?? []) as unknown as Array<{
+        id: string; order_number: string; grup_bayar: string; status: string; persen_kemiripan: number | null;
+        report_storage_path: string | null; uploaded_files: { original_name: string } | null;
+      }>) {
+        const daftar = infoGrup.get(o.grup_bayar) ?? [];
+        daftar.push({
+          id: o.id,
+          nomor: o.order_number,
+          berkas: o.uploaded_files?.original_name ?? null,
+          persen: o.persen_kemiripan != null ? Number(o.persen_kemiripan) : null,
+          adaLaporan: o.status === "selesai" && !!o.report_storage_path,
+        });
+        infoGrup.set(o.grup_bayar, daftar);
+      }
+    }
+  }
+
   const href = (k: string, p = 1) => `/dashboard/riwayat-pesanan?status=${k}&page=${p}`;
 
   return (
@@ -192,6 +219,7 @@ export default async function RiwayatPesananPage({
               const bk = r.purpose === "booking" ? infoBooking.get(r.reference_id) : undefined;
               const nama = (r.item_snapshot?.[0]?.name ?? j.label).replace(/\s*\(per jam\)\s*$/i, "");
               const od = r.purpose === "order" ? infoOrder.get(r.reference_id) : undefined;
+              const grup = r.purpose === "order" ? infoGrup.get(r.reference_id) ?? [] : [];
               const bisaBayar = r.status === "pending" && !!r.snap_token && (r.purpose === "booking" || r.purpose === "produk" || r.purpose === "order");
               return (
                 <li key={r.id} className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center">
@@ -206,10 +234,26 @@ export default async function RiwayatPesananPage({
                       </div>
                       <p className="truncate font-semibold text-slate-800">{nama}</p>
                       <p className="text-xs text-muted-foreground">
-                        {[bk?.mentor && `Mentor ${bk.mentor}`, bk?.jadwal, od?.berkas, od?.format && `tampilan ${od.format}`, formatTanggal(r.created_at)]
+                        {[bk?.mentor && `Mentor ${bk.mentor}`, bk?.jadwal, grup.length > 1 ? `${grup.length} file` : od?.berkas, od?.format && `tampilan ${od.format}`, formatTanggal(r.created_at)]
                           .filter(Boolean).join(" · ")}
                       </p>
-                      {od && r.status === "paid" && (
+                      {grup.length > 1 && (
+                        <ul className="mt-2 space-y-1">
+                          {grup.map((g) => (
+                            <li key={g.id} className="flex flex-wrap items-center gap-x-2 text-xs">
+                              <span className="max-w-[14rem] truncate text-slate-700">{g.berkas ?? g.nomor}</span>
+                              {r.status === "paid" && (g.adaLaporan ? (
+                                <Link href={`/dashboard/laporan/${g.id}`} className="font-semibold text-brand hover:underline">
+                                  {g.persen ?? "-"}% · lihat laporan
+                                </Link>
+                              ) : (
+                                <span className="text-amber-700">diperiksa tim</span>
+                              ))}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                      {od && r.status === "paid" && grup.length <= 1 && (
                         <p className="mt-1 text-xs font-semibold">
                           {od.adaLaporan ? (
                             <span className="text-brand">Kemiripan {od.persen ?? "-"}% · laporan siap</span>
@@ -230,7 +274,7 @@ export default async function RiwayatPesananPage({
                       {r.status === "paid" && (
                         <Link href={`/receipt/${r.id}`} className="text-xs font-semibold text-brand hover:underline">Receipt</Link>
                       )}
-                      {od?.adaLaporan && (
+                      {od?.adaLaporan && grup.length <= 1 && (
                         <Link href={`/dashboard/laporan/${r.reference_id}`} className="inline-flex items-center gap-1 rounded-lg bg-brand px-2.5 py-1 text-xs font-bold text-white hover:bg-brand-light">
                           Lihat laporan
                         </Link>

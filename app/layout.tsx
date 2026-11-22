@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { BRAND } from "@/lib/brand";
@@ -28,6 +28,12 @@ export const metadata: Metadata = {
     "ruang konsul solo",
     "bimbingan metodologi penelitian",
   ],
+  applicationName: BRAND.name,
+  appleWebApp: { capable: true, title: "Ruang Konsul", statusBarStyle: "default" },
+  icons: {
+    icon: [{ url: "/pwa/icon-192.png", sizes: "192x192", type: "image/png" }],
+    apple: [{ url: "/pwa/apple-180.png", sizes: "180x180", type: "image/png" }],
+  },
   openGraph: {
     title: BRAND.name,
     description: BRAND.tagline,
@@ -36,6 +42,10 @@ export const metadata: Metadata = {
     locale: "id_ID",
     type: "website",
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#8B0000",
 };
 
 export default function RootLayout({

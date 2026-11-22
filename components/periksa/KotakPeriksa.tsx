@@ -41,6 +41,18 @@ const MIME_MANUAL: Record<string, string> = {
   ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 };
 const MAKS_UKURAN = 50 * 1024 * 1024;
+/** Maksimal file per transaksi laporan manual. */
+const MAKS_FILE = 5;
+
+/** Satu file di antrean pesanan laporan manual. */
+type ItemBerkas = {
+  kunci: string;
+  file: File;
+  /** null = kata tak terhitung (PDF/DOC) — ukuran dipilih customer lewat `besar`. */
+  kata: number | null;
+  besar: boolean;
+  membaca: boolean;
+};
 
 function ekstensi(nama: string) {
   const i = nama.lastIndexOf(".");
@@ -97,9 +109,9 @@ export function KotakPeriksa({
   const [membaca, setMembaca] = useState(false);
   const [seret, setSeret] = useState(false);
   const [formatLaporan, setFormatLaporan] = useState<"baru" | "lama">("baru");
-  const [lebih100Hal, setLebih100Hal] = useState(false);
   const [wa, setWa] = useState("");
-  const [pesananManual, setPesananManual] = useState<{ id: string; nomor: string; lunas: boolean; waktu: string } | null>(null);
+  const [pesananManual, setPesananManual] = useState<{ id: string; nomor: string; lunas: boolean; waktu: string; jumlah: number; namaPertama: string } | null>(null);
+  const [daftar, setDaftar] = useState<ItemBerkas[]>([]);
   const inputBerkas = useRef<HTMLInputElement>(null);
   const panelHasil = useRef<HTMLDivElement>(null);
   const akar = useRef<HTMLDivElement>(null);
@@ -114,16 +126,21 @@ export function KotakPeriksa({
   const kataDiketahui = jumlahKata > 0;
 
   const biayaInstan = jumlahKata > 0 ? hitungBiaya(jumlahKata, jenis, tarif, minimum) : 0;
-  const besar = kataDiketahui ? jumlahKata > BATAS_KATA_BESAR : lebih100Hal;
-  const hargaManual = jenisManual === "drillbit" ? manual.drillbit : besar ? manual.besar : manual.kecil;
-  const total = instan ? biayaInstan : berkas ? hargaManual : 0;
+  const hargaItem = (it: ItemBerkas) =>
+    jenisManual === "drillbit"
+      ? manual.drillbit
+      : (it.kata != null ? it.kata > BATAS_KATA_BESAR : it.besar) ? manual.besar : manual.kecil;
+  const totalManual = daftar.reduce((s, it) => s + hargaItem(it), 0);
+  const kataManual = daftar.reduce((s, it) => s + (it.kata ?? 0), 0);
+  const adaMembaca = daftar.some((it) => it.membaca);
+  const total = instan ? biayaInstan : totalManual;
 
   const terlaluPendek = jumlahKata > 0 && jumlahKata < MIN_KATA;
   const terlaluPanjang = instan && jumlahKata > MAKS_KATA;
   const waValid = wa.replace(/\D/g, "").length >= 9;
   const siap = instan
     ? jumlahKata >= MIN_KATA && !terlaluPanjang && !memproses && !membaca
-    : !!berkas && waValid && !memproses && !membaca;
+    : daftar.length > 0 && waValid && !memproses && !adaMembaca;
 
   const adaPanel = memproses || !!galat || !!hasil || !!pesananManual;
 
@@ -152,13 +169,13 @@ export function KotakPeriksa({
     setPesananManual(null);
     setTempel(false);
     hapusBerkas();
+    setDaftar([]);
     akar.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function hapusBerkas() {
     setBerkas(null);
     setTeks("");
-    setLebih100Hal(false);
   }
 
   async function pilihBerkas(f: File) {
@@ -187,7 +204,6 @@ export function KotakPeriksa({
 
     setBerkas(f);
     setTeks("");
-    setLebih100Hal(false);
     if (!bisaDibaca) return; // PDF/DOC: cukup berkasnya, tanpa hitung kata.
 
     setMembaca(true);
@@ -208,16 +224,55 @@ export function KotakPeriksa({
     }
   }
 
+  /** Tambah satu/lebih file ke antrean laporan manual (maks MAKS_FILE). */
+  function tambahBerkasManual(files: File[]) {
+    setGalat(null);
+    setPesananManual(null);
+    const sisa = MAKS_FILE - daftar.length;
+    if (sisa <= 0) {
+      setGalat(`Maksimal ${MAKS_FILE} file per pesanan.`);
+      return;
+    }
+    const diterima: ItemBerkas[] = [];
+    const ditolak: string[] = [];
+    for (const f of files) {
+      const ext = ekstensi(f.name);
+      if (!EKSTENSI_MANUAL.includes(ext)) { ditolak.push(`${f.name} (format)`); continue; }
+      if (f.size > MAKS_UKURAN) { ditolak.push(`${f.name} (>50 MB)`); continue; }
+      if (daftar.some((d) => d.file.name === f.name && d.file.size === f.size)) continue;
+      if (diterima.length >= sisa) { ditolak.push(`${f.name} (lebih dari ${MAKS_FILE} file)`); continue; }
+      const bisaDibaca = (EKSTENSI_DIDUKUNG as readonly string[]).includes(ext);
+      diterima.push({ kunci: `${Date.now()}-${Math.random()}`, file: f, kata: null, besar: false, membaca: bisaDibaca });
+    }
+    if (ditolak.length) setGalat(`Tidak ditambahkan: ${ditolak.join(", ")}. Format yang diterima PDF, DOCX, DOC, maks 50 MB.`);
+    if (!diterima.length) return;
+    setDaftar((d) => [...d, ...diterima]);
+    // Hitung kata untuk DOCX/TXT di latar; PDF/DOC memakai pilihan ukuran.
+    for (const it of diterima.filter((x) => x.membaca)) {
+      void (async () => {
+        let kata: number | null = null;
+        try {
+          kata = hitungKata(await ekstrakTeks(it.file.name, await it.file.arrayBuffer())) || null;
+        } catch {
+          kata = null;
+        }
+        setDaftar((d) => d.map((x) => (x.kunci === it.kunci ? { ...x, kata, membaca: false } : x)));
+      })();
+    }
+  }
+
   function onDrop(e: DragEvent<HTMLLabelElement>) {
     e.preventDefault();
     setSeret(false);
-    const f = e.dataTransfer.files?.[0];
-    if (f) void pilihBerkas(f);
+    const files = Array.from(e.dataTransfer.files ?? []);
+    if (!files.length) return;
+    if (instan) void pilihBerkas(files[0]);
+    else tambahBerkasManual(files);
   }
 
-  /** Laporan manual: unggah berkas asli ke penyimpanan privat, buat pesanan, bayar QRIS. */
+  /** Laporan manual: unggah semua berkas ke penyimpanan privat, buat pesanan, satu QRIS. */
   async function kirimManual() {
-    if (!berkas) return;
+    if (!daftar.length) return;
     setMemproses(true);
     setGalat(null);
     setAksi(null);
@@ -231,25 +286,31 @@ export function KotakPeriksa({
         setAksi("login");
         throw new Error("Masuk dulu untuk memesan laporan.");
       }
-      const ext = ekstensi(berkas.name);
-      const mime = MIME_MANUAL[ext] ?? berkas.type;
-      const aman = berkas.name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-120);
-      const path = `${user.id}/${Date.now()}_${aman}`;
-      const { error: eUp } = await supabase.storage
-        .from("documents")
-        .upload(path, berkas, { contentType: mime, upsert: false });
-      if (eUp) throw new Error(`Gagal mengunggah berkas: ${eUp.message}`);
+      const unggahan = [];
+      for (const [i, it] of daftar.entries()) {
+        const ext = ekstensi(it.file.name);
+        const mime = MIME_MANUAL[ext] ?? it.file.type;
+        const aman = it.file.name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-120);
+        const path = `${user.id}/${Date.now()}_${i}_${aman}`;
+        const { error: eUp } = await supabase.storage
+          .from("documents")
+          .upload(path, it.file, { contentType: mime, upsert: false });
+        if (eUp) throw new Error(`Gagal mengunggah ${it.file.name}: ${eUp.message}`);
+        unggahan.push({
+          storage_path: path,
+          nama_berkas: it.file.name,
+          ukuran: it.file.size,
+          mime,
+          // PDF/DOC: kata tak terhitung — pakai pilihan ukuran dari customer.
+          jumlah_kata: it.kata ?? (it.besar ? BATAS_KATA_BESAR + 1 : 0),
+        });
+      }
 
       const res = await fetch("/api/periksa/manual", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          storage_path: path,
-          nama_berkas: berkas.name,
-          ukuran: berkas.size,
-          mime,
-          // PDF/DOC: kata tak terhitung — pakai pilihan ukuran dari customer.
-          jumlah_kata: kataDiketahui ? jumlahKata : lebih100Hal ? BATAS_KATA_BESAR + 1 : 0,
+          berkas: unggahan,
           jenis_manual: jenisManual,
           format_laporan: jenisManual === "turnitin" ? formatLaporan : undefined,
           whatsapp: wa,
@@ -260,7 +321,14 @@ export function KotakPeriksa({
       const { openSnap, syncPaymentStatus } = await import("@/lib/payment/use-snap");
       const hasilBayar = await openSnap(json.data.snapToken);
       const status = hasilBayar === "closed" ? null : await syncPaymentStatus({ paymentId: json.data.paymentId });
-      setPesananManual({ id: json.data.orderId, nomor: json.data.orderNumber, lunas: hasilBayar === "success" || status === "paid", waktu: new Date().toISOString() });
+      setPesananManual({
+        id: json.data.orderId,
+        nomor: json.data.orderNumber,
+        lunas: hasilBayar === "success" || status === "paid",
+        waktu: new Date().toISOString(),
+        jumlah: daftar.length,
+        namaPertama: daftar[0].file.name,
+      });
     } catch (e) {
       setGalat(e instanceof Error ? e.message : "Gagal membuat pesanan.");
     } finally {
@@ -496,16 +564,66 @@ export function KotakPeriksa({
               ref={inputBerkas}
               id="berkas-periksa"
               type="file"
+              multiple={!instan}
               accept={(instan ? [...EKSTENSI_DIDUKUNG] : EKSTENSI_MANUAL).join(",")}
               className="sr-only"
               onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) void pilihBerkas(f);
+                const files = Array.from(e.target.files ?? []);
+                if (files.length) {
+                  if (instan) void pilihBerkas(files[0]);
+                  else tambahBerkasManual(files);
+                }
                 e.target.value = "";
               }}
             />
 
-            {berkas ? (
+            {!instan && daftar.length > 0 && (
+              <ul className="mt-4 space-y-2" aria-label="File yang akan diperiksa">
+                {daftar.map((it) => (
+                  <li key={it.kunci} className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-white text-brand">
+                        {it.membaca ? <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" /> : <FileText className="h-5 w-5" aria-hidden="true" />}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-sm font-bold text-slate-900">{it.file.name}</span>
+                        <span className="block text-xs text-slate-500">
+                          {(it.file.size / 1024 / 1024).toFixed(2)} MB
+                          {it.membaca ? " · menghitung kata…" : it.kata != null ? ` · ${angka(it.kata)} kata` : ""}
+                        </span>
+                      </span>
+                      <span className="text-sm font-bold text-slate-900">{rupiah(hargaItem(it))}</span>
+                      <button type="button" onClick={() => setDaftar((d) => d.filter((x) => x.kunci !== it.kunci))} aria-label={`Hapus ${it.file.name}`}
+                        className="rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-white hover:text-brand">
+                        <X className="h-4 w-4" aria-hidden="true" />
+                      </button>
+                    </div>
+                    {tab === "plagiasi" && !it.membaca && it.kata == null && (
+                      <label className="mt-2 flex items-start gap-2 pl-[3.25rem] text-xs text-slate-700">
+                        <input type="checkbox" checked={it.besar}
+                          onChange={(e) => setDaftar((d) => d.map((x) => (x.kunci === it.kunci ? { ...x, besar: e.target.checked } : x)))}
+                          className="mt-0.5 h-3.5 w-3.5 accent-[#8B0000]" />
+                        <span>Lebih dari ±100 halaman ({angka(BATAS_KATA_BESAR)} kata)</span>
+                      </label>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {!instan && daftar.length > 0 && daftar.length < MAKS_FILE ? (
+              <label htmlFor="berkas-periksa"
+                onDragOver={(e) => { e.preventDefault(); setSeret(true); }}
+                onDragLeave={() => setSeret(false)}
+                onDrop={onDrop}
+                className={`mt-3 flex cursor-pointer items-center justify-center gap-2 rounded-2xl border-2 border-dashed px-4 py-3 text-sm font-bold text-brand transition-colors ${
+                  seret ? "border-brand bg-brand-50" : "border-brand-200 hover:border-brand hover:bg-brand-50/40"
+                }`}>
+                <Upload className="h-4 w-4" aria-hidden="true" /> Tambah file ({daftar.length}/{MAKS_FILE})
+              </label>
+            ) : !instan && daftar.length >= MAKS_FILE ? (
+              <p className="mt-3 text-center text-xs font-semibold text-slate-500">Maksimal {MAKS_FILE} file per pesanan.</p>
+            ) : instan && berkas ? (
               <div className="mt-4 flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
                 <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-white text-brand">
                   {membaca ? <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" /> : <FileText className="h-5 w-5" aria-hidden="true" />}
@@ -522,7 +640,7 @@ export function KotakPeriksa({
                   <X className="h-4 w-4" aria-hidden="true" />
                 </button>
               </div>
-            ) : !(instan && tempel) ? (
+            ) : !(instan && tempel) && !(!instan && daftar.length > 0) ? (
               <label
                 htmlFor="berkas-periksa"
                 onDragOver={(e) => { e.preventDefault(); setSeret(true); }}
@@ -543,7 +661,7 @@ export function KotakPeriksa({
                     </span>
                   ))}
                 </span>
-                <span className="mt-3 text-xs text-slate-500">{instan ? "Satu file per pemeriksaan" : "Maksimal 50 MB, satu file per pesanan"}</span>
+                <span className="mt-3 text-xs text-slate-500">{instan ? "Satu file per pemeriksaan" : `Maksimal 50 MB per file · hingga ${MAKS_FILE} file sekaligus`}</span>
               </label>
             ) : null}
 
@@ -575,12 +693,6 @@ export function KotakPeriksa({
               </p>
             )}
 
-            {!instan && berkas && !kataDiketahui && tab === "plagiasi" && (
-              <label className="mt-3 flex items-start gap-2 text-sm text-slate-700">
-                <input type="checkbox" checked={lebih100Hal} onChange={(e) => setLebih100Hal(e.target.checked)} className="mt-0.5 h-4 w-4 accent-[#8B0000]" />
-                <span>Naskahku lebih dari ±100 halaman ({angka(BATAS_KATA_BESAR)} kata)</span>
-              </label>
-            )}
           </section>
 
           {tab === "plagiasi" && (
@@ -653,12 +765,14 @@ export function KotakPeriksa({
               )}
               <div className="flex justify-between gap-3">
                 <dt className="text-slate-500">Jumlah kata</dt>
-                <dd className="font-semibold text-slate-900">{kataDiketahui ? angka(jumlahKata) : "—"}</dd>
+                <dd className="font-semibold text-slate-900">{instan ? (kataDiketahui ? angka(jumlahKata) : "—") : kataManual > 0 ? angka(kataManual) : "—"}</dd>
               </div>
               <div className="flex justify-between gap-3">
                 <dt className="text-slate-500">File</dt>
                 <dd className="min-w-0 truncate font-semibold text-slate-900">
-                  {berkas ? berkas.name : instan && tempel && teks ? "Teks ditempel" : "Belum ada file"}
+                  {instan
+                    ? berkas ? berkas.name : tempel && teks ? "Teks ditempel" : "Belum ada file"
+                    : daftar.length === 0 ? "Belum ada file" : daftar.length === 1 ? daftar[0].file.name : `${daftar.length} file`}
                 </dd>
               </div>
               {tab === "plagiasi" && (
@@ -694,7 +808,7 @@ export function KotakPeriksa({
                 ? "Pembayaran QRIS dikonfirmasi otomatis. Kalau saldomu cukup, dipotong dari saldo tanpa QRIS."
                 : "Pembayaran QRIS dikonfirmasi otomatis, lalu pesanan langsung masuk antrean tim."}
             </p>
-            {!instan && !waValid && berkas && (
+            {!instan && !waValid && daftar.length > 0 && (
               <p className="mt-2 text-center text-xs font-semibold text-amber-700">Isi nomor WhatsApp dulu.</p>
             )}
           </section>
@@ -723,8 +837,12 @@ export function KotakPeriksa({
               waktu={pesananManual.waktu}
               tahap={pesananManual.lunas ? "dibayar" : "menunggu"}
               judul={pesananManual.lunas ? "Sedang diperiksa tim" : "Menunggu pembayaran"}
-              namaBerkas={berkas?.name ?? "Naskah"}
-              keterangan="Laporan dikirim maks. 1×24 jam setelah dibayar."
+              namaBerkas={pesananManual.jumlah > 1 ? `${pesananManual.jumlah} file` : pesananManual.namaPertama}
+              keterangan={
+                pesananManual.jumlah > 1
+                  ? "Tiap file diperiksa terpisah; laporan dikirim maks. 1×24 jam setelah dibayar."
+                  : "Laporan dikirim maks. 1×24 jam setelah dibayar."
+              }
               kode={pesananManual.nomor}
               skor={{ label: "Similarity Score", persen: null, vonis: "Skor muncul setelah laporan selesai", jenis: "kemiripan" }}
               info={
@@ -733,7 +851,10 @@ export function KotakPeriksa({
                   : { judul: "Belum dibayar", teks: "Pesanan tersimpan. Selesaikan pembayaran QRIS agar naskahmu diproses." }
               }
               ajakSimpanWa
-              lanjut={{ href: `/dashboard/laporan/${pesananManual.id}`, label: pesananManual.lunas ? "Pantau Status Pesanan" : "Bayar Sekarang" }}
+              lanjut={{
+                href: pesananManual.jumlah > 1 ? "/dashboard/riwayat-pesanan" : `/dashboard/laporan/${pesananManual.id}`,
+                label: pesananManual.lunas ? "Pantau Status Pesanan" : "Bayar Sekarang",
+              }}
               onOrderBaru={orderBaru}
             />
           ) : hasil ? (

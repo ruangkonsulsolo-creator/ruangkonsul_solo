@@ -266,39 +266,58 @@ async function fulfilProduk(admin: Admin, p: PaymentRow) {
 
 // ── Pesanan dokumen lama (/api/order) ──────────────────────────────────────
 async function fulfilOrder(admin: Admin, p: PaymentRow) {
+  const kolom =
+    "id, user_id, order_number, file_id, services ( name, slug ), profiles:profiles!orders_user_id_fkey ( whatsapp, full_name )";
+  const now = new Date().toISOString();
   const { data: updated, error } = await admin
     .from("orders")
-    .update({ status: "diproses", paid_at: new Date().toISOString() })
+    .update({ status: "diproses", paid_at: now })
     .eq("id", p.reference_id)
     .eq("status", "menunggu_pembayaran")
-    .select("id, user_id, order_number, file_id, services ( name, slug ), profiles:profiles!orders_user_id_fkey ( whatsapp, full_name )");
+    .select(kolom);
   if (error) throw new Error(`Gagal update order: ${error.message}`);
-  const raw = updated?.[0];
-  if (!raw) return;
-  const order = {
+  if (!updated?.[0]) return;
+
+  // Pesanan multi-file: anggota grup ikut lunas dengan pembayaran yang sama.
+  const { data: anggota, error: eGrup } = await admin
+    .from("orders")
+    .update({ status: "diproses", paid_at: now })
+    .eq("grup_bayar", p.reference_id)
+    .neq("id", p.reference_id)
+    .eq("status", "menunggu_pembayaran")
+    .select(kolom);
+  if (eGrup && !eGrup.message.includes("grup_bayar")) console.error("[payment] grup order:", eGrup.message);
+
+  const semua = [...updated, ...(anggota ?? [])].map((raw) => ({
     ...raw,
     services: one(raw.services) as { name: string; slug: string } | null,
     profiles: one(raw.profiles) as { whatsapp: string | null; full_name: string | null } | null,
-  };
+  }));
+  const order = semua[0];
+  const tambahan = semua.length > 1 ? ` (+${semua.length - 1} file)` : "";
 
   await admin.from("transactions").insert({
     user_id: p.user_id, type: "order_payment", amount_idr: p.amount_idr,
     reference_id: order.id, reference_type: "order", gateway_ref: p.midtrans_order_id,
-    notes: `Pembayaran ${order.order_number} berhasil`,
+    notes: `Pembayaran ${order.order_number}${tambahan} berhasil`,
   });
-  await admin.from("notifications").insert({
-    user_id: p.user_id, order_id: order.id, channel: "in_app", title: "Pembayaran Berhasil",
-    body: `Pesanan ${order.order_number} (${order.services?.name ?? "Layanan"}) sedang diproses.`,
-  });
-  await sendReceipt(admin, p, `${order.services?.name ?? "Layanan"} — ${order.order_number}`);
-  // Laporan manual (Turnitin/DrillBit): kabari customer bahwa pesanan masuk antrean.
+  await admin.from("notifications").insert(
+    semua.map((o) => ({
+      user_id: p.user_id, order_id: o.id, channel: "in_app", title: "Pembayaran Berhasil",
+      body: `Pesanan ${o.order_number} (${o.services?.name ?? "Layanan"}) sedang diproses.`,
+    }))
+  );
+  await sendReceipt(admin, p, `${order.services?.name ?? "Layanan"} — ${order.order_number}${tambahan}`);
+  // Laporan manual (Turnitin/DrillBit): kabari customer sekali untuk satu pembayaran.
   if ((SEMUA_SLUG_MANUAL as readonly string[]).includes(order.services?.slug ?? "")) {
     void sendWhatsApp({
       to: order.profiles?.whatsapp,
-      message: waTemplates.orderReceived(order.order_number, order.services?.name ?? "Pesanan"),
+      message: waTemplates.orderReceived(`${order.order_number}${tambahan}`, order.services?.name ?? "Pesanan"),
     });
   }
-  runDetectionPipeline(order.id, order).catch((e) => console.error("[payment] detection pipeline:", e));
+  for (const o of semua) {
+    runDetectionPipeline(o.id, o).catch((e) => console.error("[payment] detection pipeline:", e));
+  }
 }
 
 // ── Gagal / expire / batal ─────────────────────────────────────────────────
@@ -328,12 +347,21 @@ async function handleFailure(admin: Admin, p: PaymentRow, outcome: PaymentOutcom
       .eq("midtrans_order_id", p.midtrans_order_id);
     return;
   }
-  await admin
+  const { data: batal } = await admin
     .from("orders")
     .update({ status: "dibatalkan", cancelled_at: now, cancel_reason: reason })
     .eq("id", p.reference_id)
     .eq("status", "menunggu_pembayaran")
-    .eq("midtrans_order_id", p.midtrans_order_id);
+    .eq("midtrans_order_id", p.midtrans_order_id)
+    .select("id");
+  if (batal?.length) {
+    // Anggota pesanan multi-file ikut dibatalkan (abaikan bila kolom belum ada).
+    await admin
+      .from("orders")
+      .update({ status: "dibatalkan", cancelled_at: now, cancel_reason: reason })
+      .eq("grup_bayar", p.reference_id)
+      .eq("status", "menunggu_pembayaran");
+  }
 }
 
 function one<T>(v: T | T[] | null | undefined): T | null {

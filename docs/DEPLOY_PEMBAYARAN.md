@@ -20,6 +20,7 @@ Migration 018–032 sudah ada di branch katalog Anda. Yang baru hanya:
 - `supabase/migrations/044_harga_minimum_drillbit.sql` (biaya minimum per cek; cek AI Rp1.000/1.000 kata min Rp5.000; layanan DrillBit manual; jalankan **setelah** 043)
 - `supabase/migrations/045_referral_aktif.sql` (program referral: catat pengajak + komisi 10% pembayaran pertama ke saldo)
 - `supabase/migrations/046_ringkasan_omzet.sql` (ringkasan revenue admin dari semua pembayaran lunas, tanggal WIB)
+- `supabase/migrations/047_pesanan_multi_berkas.sql` (Cek Plagiasi/DrillBit hingga 5 file dalam satu QRIS)
 
 Cara menjalankan (pilih satu):
 - **SQL Editor**: Supabase Dashboard → SQL Editor → tempel isi file 033 → Run, lalu file 034 → Run.
@@ -82,6 +83,8 @@ Vercel otomatis membuat Preview untuk Pull Request. Di URL preview:
 Jika langkah 4 lolos: merge Pull Request ke `main` → Vercel deploy production.
 
 ## 6. Go-live (uang sungguhan)
+Checklist lengkap: **docs/GO_LIVE_MIDTRANS.md**.
+
 - Selesaikan aktivasi akun Midtrans Production (KTP/NPWP atau dokumen badan usaha).
 - Ganti key ke **Production**, set `MIDTRANS_IS_PRODUCTION=true` dan `NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION=true`, redeploy.
 - Notification URL di dashboard **Production** juga harus diisi (sandbox & production terpisah).
