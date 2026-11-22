@@ -111,7 +111,7 @@ export function gabungPotongan(potongan: Potongan[]): HasilAI {
   };
 }
 
-function headerAuth(kunci: string): Record<string, string> {
+export function headerAuth(kunci: string): Record<string, string> {
   return { [process.env.ZEROGPT_AUTH_HEADER || "ApiKey"]: kunci };
 }
 
@@ -159,8 +159,9 @@ export async function periksaAIZeroGpt(teks: string): Promise<HasilAI> {
  */
 export async function ambilPdfResmiZeroGpt(id: string): Promise<Uint8Array> {
   const kunci = process.env.ZEROGPT_API_KEY;
-  const userId = process.env.ZEROGPT_USER_ID;
-  if (!kunci || !userId) throw new Error("ZEROGPT_API_KEY / ZEROGPT_USER_ID belum disetel.");
+  if (!kunci) throw new Error("ZEROGPT_API_KEY belum disetel.");
+  const { userId } = await cariUserIdZeroGpt();
+  if (!userId) throw new Error("user_id ZeroGPT belum ditemukan (isi ZEROGPT_USER_ID atau jalankan satu deteksi dulu).");
   const dasar = (process.env.ZEROGPT_API_BASE || "https://api.zerogpt.com").replace(/\/$/, "");
   const url = `${dasar}/api/dashboard/exportToPdf?id=${encodeURIComponent(id)}&user_id=${encodeURIComponent(userId)}`;
   const res = await fetch(url, { headers: headerAuth(kunci), signal: AbortSignal.timeout(60_000) });
@@ -188,4 +189,62 @@ export async function ambilPdfResmiZeroGpt(id: string): Promise<Uint8Array> {
     }
   }
   throw new Error(`ZeroGPT exportToPdf: bentuk tanggapan tidak dikenal. ${JSON.stringify(json).slice(0, 300)}`);
+}
+
+/** Sembunyikan nilai rahasia (apiKey, token, dsb.) secara rekursif sebelum ditampilkan. */
+export function sensor(nilai: unknown): unknown {
+  if (Array.isArray(nilai)) return nilai.map(sensor);
+  if (nilai && typeof nilai === "object") {
+    return Object.fromEntries(
+      Object.entries(nilai as Record<string, unknown>).map(([k, v]) =>
+        /api_?key|token|secret|password|authorization/i.test(k) ? [k, "[disembunyikan]"] : [k, sensor(v)]
+      )
+    );
+  }
+  return nilai;
+}
+
+/** Cari medan user_id/userId di mana pun dalam objek. */
+function temukanUserId(nilai: unknown): string | null {
+  if (Array.isArray(nilai)) {
+    for (const x of nilai) { const r = temukanUserId(x); if (r) return r; }
+    return null;
+  }
+  if (nilai && typeof nilai === "object") {
+    for (const [k, v] of Object.entries(nilai as Record<string, unknown>)) {
+      if (/^(user_id|userId|userid)$/.test(k) && v != null && String(v).trim() !== "") return String(v);
+    }
+    for (const v of Object.values(nilai as Record<string, unknown>)) { const r = temukanUserId(v); if (r) return r; }
+  }
+  return null;
+}
+
+let userIdTersimpan: string | null = null;
+
+/**
+ * user_id akun ZeroGPT untuk exportToPdf. Pakai ZEROGPT_USER_ID bila diisi;
+ * kalau tidak, dicari otomatis dari riwayat deteksi akun (detectionResults),
+ * yang memuat user_id pada tiap entri. Perlu minimal satu deteksi pernah jalan.
+ */
+export async function cariUserIdZeroGpt(): Promise<{ userId: string | null; riwayat?: unknown; galat?: string }> {
+  if (process.env.ZEROGPT_USER_ID) return { userId: process.env.ZEROGPT_USER_ID };
+  if (userIdTersimpan) return { userId: userIdTersimpan };
+  const kunci = process.env.ZEROGPT_API_KEY;
+  if (!kunci) return { userId: null, galat: "ZEROGPT_API_KEY belum disetel." };
+  const dasar = (process.env.ZEROGPT_API_BASE || "https://api.zerogpt.com").replace(/\/$/, "");
+  try {
+    const res = await fetch(`${dasar}/api/dashboard/detectionResults?limit=5&page=1`, {
+      headers: headerAuth(kunci),
+      signal: AbortSignal.timeout(20_000),
+      cache: "no-store",
+    });
+    const teks = await res.text();
+    let json: unknown = teks.slice(0, 1500);
+    try { json = JSON.parse(teks); } catch { /* bukan JSON */ }
+    const id = temukanUserId(json);
+    if (id) userIdTersimpan = id;
+    return { userId: id, riwayat: sensor(json), ...(res.ok ? {} : { galat: `detectionResults ${res.status}` }) };
+  } catch (e) {
+    return { userId: null, galat: e instanceof Error ? e.message : String(e) };
+  }
 }

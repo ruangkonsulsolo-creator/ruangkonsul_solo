@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { wajibStaf } from "@/lib/auth/wajib-staf";
+import { cariUserIdZeroGpt, headerAuth, sensor } from "@/lib/periksa/penyedia-zerogpt";
 
 export const dynamic = "force-dynamic";
 
 /**
- * Cek koneksi ZeroGPT (khusus staf): memanggil api/dashboard/myStats dengan
- * API key server, untuk memastikan key & IP diterima dan menemukan user_id
- * akun (dibutuhkan ZEROGPT_USER_ID agar laporan PDF resmi bisa diambil).
- * API key tidak pernah ikut dikembalikan.
+ * Cek koneksi ZeroGPT (khusus staf): saldo/paket dari myStats dan user_id
+ * akun (dicari otomatis dari riwayat deteksi) untuk laporan PDF resmi.
+ * Semua nilai rahasia (apiKey, token, …) DISENSOR sebelum ditampilkan.
  */
 export async function GET() {
   const supabase = createClient();
@@ -22,18 +22,25 @@ export async function GET() {
   const dasar = (process.env.ZEROGPT_API_BASE || "https://api.zerogpt.com").replace(/\/$/, "");
   try {
     const res = await fetch(`${dasar}/api/dashboard/myStats`, {
-      headers: { [process.env.ZEROGPT_AUTH_HEADER || "ApiKey"]: kunci },
+      headers: headerAuth(kunci),
       signal: AbortSignal.timeout(20_000),
       cache: "no-store",
     });
-    const teks = await res.text();
-    let isi: unknown = teks.slice(0, 2000);
-    try { isi = JSON.parse(teks); } catch { /* bukan JSON */ }
+    const json = (await res.json().catch(() => null)) as { data?: Record<string, unknown> } | null;
+    const d = json?.data ?? {};
+    const paket = (d.balancePackage ?? {}) as Record<string, unknown>;
+    const uid = await cariUserIdZeroGpt();
     return NextResponse.json({
       status_zerogpt: res.status,
-      user_id_terpasang: process.env.ZEROGPT_USER_ID ? "sudah" : "belum",
-      petunjuk: "Cari medan id / user_id / _id di 'tanggapan' lalu isi ke ZEROGPT_USER_ID di Vercel.",
-      tanggapan: isi,
+      saldo_usd: d.balance ?? null,
+      paket_api: paket.description ?? null,
+      biaya_per_1000_kata_usd: paket.costPerThousand ?? null,
+      ip_whitelist: d.ipWhitelist || "(kosong — semua IP diizinkan)",
+      user_id: uid.userId ?? "belum ditemukan — jalankan satu Cek AI dulu, lalu buka halaman ini lagi",
+      sumber_user_id: process.env.ZEROGPT_USER_ID ? "env ZEROGPT_USER_ID" : "otomatis dari riwayat deteksi",
+      ...(uid.galat ? { catatan: uid.galat } : {}),
+      riwayat_terbaru: uid.userId ? undefined : uid.riwayat,
+      mystats_disensor: res.ok ? undefined : sensor(json),
     });
   } catch (e) {
     return NextResponse.json({ error: `Gagal menghubungi ZeroGPT: ${e instanceof Error ? e.message : e}` }, { status: 502 });
