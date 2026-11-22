@@ -6,6 +6,7 @@ import { labelKemiripan } from "@/lib/periksa/persen-berubah";
 import { FORMAT_LAPORAN } from "@/lib/periksa/manual";
 import { StatusPesanan, type TahapPesanan } from "@/components/periksa/StatusPesanan";
 import { BayarUlangPesanan } from "@/components/katalog/BayarUlangPesanan";
+import { PantauPembayaran } from "@/components/payment/PantauPembayaran";
 import { tokenPesananValid } from "@/lib/periksa/tautan-aman";
 
 /**
@@ -137,7 +138,8 @@ export async function HalamanLaporanManual({
 
       {bayar && (
         <div className="mx-auto flex max-w-3xl justify-center">
-          <BayarUlangPesanan pesananId={bayar.referensi} snapToken={bayar.snapToken} paymentId={bayar.paymentId} />
+          <PantauPembayaran paymentId={bayar.paymentId} />
+          <BayarUlangPesanan pesananId={bayar.referensi} snapToken={bayar.snapToken} paymentId={bayar.paymentId} purpose="order" setelahLunas="refresh" />
         </div>
       )}
 

@@ -11,11 +11,14 @@ export function BayarUlangPesanan({
   snapToken,
   paymentId,
   purpose = "produk",
+  setelahLunas = "receipt",
 }: {
   pesananId: string;
   snapToken: string;
   paymentId: string | null;
   purpose?: "produk" | "booking" | "order";
+  /** "receipt" = buka receipt; "refresh" = muat ulang halaman ini (mis. halaman status tamu). */
+  setelahLunas?: "receipt" | "refresh";
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -26,9 +29,15 @@ export function BayarUlangPesanan({
       onClick={async () => {
         setBusy(true);
         try {
-          const outcome = await openSnap(snapToken);
-          const s = outcome === "closed" ? null : await syncPaymentStatus({ purpose, referenceId: pesananId });
-          if (paymentId && (outcome === "success" || s === "paid")) router.push(`/receipt/${paymentId}`);
+          await openSnap(snapToken);
+          // Selalu cek ke server (popup bisa ditutup setelah membayar).
+          const args = paymentId ? { paymentId } : { purpose, referenceId: pesananId };
+          let st = await syncPaymentStatus(args);
+          for (let i = 0; i < 3 && st === "pending"; i++) {
+            await new Promise((r) => setTimeout(r, 2000));
+            st = await syncPaymentStatus(args);
+          }
+          if (st === "paid" && paymentId && setelahLunas === "receipt") router.push(`/receipt/${paymentId}`);
           else router.refresh();
         } finally {
           setBusy(false);

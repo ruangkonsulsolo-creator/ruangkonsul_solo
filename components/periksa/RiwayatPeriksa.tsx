@@ -44,7 +44,14 @@ function waktuWIB(iso: string) {
  * Sub tab "Riwayat Pesanan" di halaman Cek Plagiarisme. Berlaku untuk akun
  * biasa maupun tamu (sesi tanpa daftar yang tersimpan di browser ini).
  */
-export function RiwayatPeriksa() {
+export function RiwayatPeriksa({
+  tertunda = null,
+  onLanjut,
+}: {
+  /** Cek AI/Parafrase yang sedang menunggu pembayaran (belum tercatat di server). */
+  tertunda?: { layanan: string; nominal: number; nama: string; waktu: number } | null;
+  onLanjut?: () => void;
+} = {}) {
   const [data, setData] = useState<{ item: ItemRiwayat[]; sesi: boolean; tamu: boolean } | null>(null);
   const [galat, setGalat] = useState(false);
   const [muat, setMuat] = useState(0);
@@ -85,13 +92,31 @@ export function RiwayatPeriksa() {
         </div>
       )}
 
+      {tertunda && (
+        <button type="button" onClick={onLanjut}
+          className="flex w-full items-center gap-3 rounded-2xl border-2 border-amber-300 bg-amber-50/60 p-4 text-left transition-colors hover:border-amber-400">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-bold uppercase tracking-wide text-brand">{tertunda.layanan}</span>
+              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-bold text-amber-800">Menunggu bayar</span>
+            </div>
+            <p className="mt-1 truncate font-semibold text-slate-900">{tertunda.nama}</p>
+            <p className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500">
+              <Clock className="h-3 w-3" aria-hidden="true" /> {waktuWIB(new Date(tertunda.waktu).toISOString())} WIB ·
+              Rp{tertunda.nominal.toLocaleString("id-ID")} · ketuk untuk lanjut bayar / batalkan
+            </p>
+          </div>
+          <ChevronRight className="h-5 w-5 shrink-0 text-amber-500" aria-hidden="true" />
+        </button>
+      )}
+
       {galat ? (
         <p className="rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700">Gagal memuat riwayat. Coba muat ulang.</p>
       ) : !data ? (
         <div className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white py-12 text-sm text-slate-500">
           <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> Memuat riwayat…
         </div>
-      ) : data.item.length === 0 ? (
+      ) : data.item.length === 0 && tertunda ? null : data.item.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
           <FileSearch className="mx-auto h-10 w-10 text-slate-300" aria-hidden="true" />
           <p className="mt-3 font-bold text-slate-800">Belum ada pesanan</p>

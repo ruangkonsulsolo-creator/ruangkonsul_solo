@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
         items: [{ id: "saldo-cek", price: nominal, quantity: 1, name: "Saldo cek naskah" }],
         itemSnapshot: [{ id: "saldo-cek", price: nominal, quantity: 1, name: "Saldo cek naskah (bayar langsung)", saldo_idr: nominal }],
         customer: await getCustomerDetails(user.id, user.email),
-        finishPath: "/",
+        finishPath: "/cek-plagiarisme",
         expiryMinutes: 30,
       });
       return NextResponse.json({ data: { payment_id: payment.paymentId, snap_token: payment.snapToken, nominal } });

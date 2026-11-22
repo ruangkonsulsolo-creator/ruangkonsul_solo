@@ -69,7 +69,7 @@ export async function GET() {
       waktu: r.dibuat_pada as string,
       tahap,
       skor: typeof skor === "number" ? Math.round(skor) : null,
-      href: tahap === "selesai" ? `/periksa/laporan/${r.id}` : null,
+      href: tahap === "selesai" ? `/cek-plagiarisme/hasil/${r.id}` : null,
     });
   }
 

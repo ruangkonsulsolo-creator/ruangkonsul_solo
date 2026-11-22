@@ -116,7 +116,12 @@ export function KotakPeriksa({
   const [seret, setSeret] = useState(false);
   const [formatLaporan, setFormatLaporan] = useState<"baru" | "lama">("baru");
   const [wa, setWa] = useState("");
-  const [pesananManual, setPesananManual] = useState<{ id: string; nomor: string; lunas: boolean; waktu: string; jumlah: number; namaPertama: string } | null>(null);
+  const [pesananManual, setPesananManual] = useState<{ id: string; nomor: string; lunas: boolean; waktu: string; jumlah: number; namaPertama: string; paymentId?: string } | null>(null);
+  // Pembayaran QRIS yang sedang ditunggu (Cek AI / Parafrase). Disimpan juga di
+  // localStorage supaya pindah tab / muat ulang halaman tidak menghilangkannya.
+  const [tunggu, setTunggu] = useState<Tertunda | null>(null);
+  const [pemicu, setPemicu] = useState(0);
+  const [pesanProses, setPesanProses] = useState(PESAN_PERIKSA);
   const [daftar, setDaftar] = useState<ItemBerkas[]>([]);
   const inputBerkas = useRef<HTMLInputElement>(null);
   const panelHasil = useRef<HTMLDivElement>(null);
@@ -145,16 +150,16 @@ export function KotakPeriksa({
   const terlaluPanjang = instan && jumlahKata > MAKS_KATA;
   const waValid = wa.replace(/\D/g, "").length >= 9;
   const siap = instan
-    ? jumlahKata >= MIN_KATA && !terlaluPanjang && !memproses && !membaca
+    ? jumlahKata >= MIN_KATA && !terlaluPanjang && !memproses && !membaca && !tunggu
     : daftar.length > 0 && waValid && !memproses && !adaMembaca;
 
-  const adaPanel = memproses || !!galat || !!hasil || !!pesananManual;
+  const adaPanel = memproses || !!tunggu || !!galat || !!hasil || !!pesananManual;
 
   useEffect(() => {
-    if (hasil || pesananManual || galat) {
+    if (hasil || pesananManual || galat || tunggu) {
       panelHasil.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
-  }, [hasil, pesananManual, galat]);
+  }, [hasil, pesananManual, galat, tunggu]);
 
   function gantiTab(t: Tab) {
     setRiwayat(false);
@@ -170,6 +175,7 @@ export function KotakPeriksa({
   }
 
   function orderBaru() {
+    batalTunggu();
     setHasil(null);
     setGalat(null);
     setAksi(null);
@@ -281,6 +287,7 @@ export function KotakPeriksa({
   async function kirimManual() {
     if (!daftar.length) return;
     setMemproses(true);
+    setPesanProses("Mengunggah berkas & membuat pesanan…");
     setGalat(null);
     setAksi(null);
     setHasil(null);
@@ -319,17 +326,19 @@ export function KotakPeriksa({
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Gagal membuat pesanan.");
-      const { openSnap, syncPaymentStatus } = await import("@/lib/payment/use-snap");
-      const hasilBayar = await openSnap(json.data.snapToken);
-      const status = hasilBayar === "closed" ? null : await syncPaymentStatus({ paymentId: json.data.paymentId });
+      // Pesanan sudah tersimpan (muncul di Riwayat). Tampilkan statusnya dulu,
+      // lalu buka QR; status dipantau otomatis sampai lunas.
       setPesananManual({
         id: json.data.orderId,
         nomor: json.data.orderNumber,
-        lunas: hasilBayar === "success" || status === "paid",
+        lunas: false,
         waktu: new Date().toISOString(),
         jumlah: daftar.length,
         namaPertama: daftar[0].file.name,
+        paymentId: json.data.paymentId,
       });
+      setMemproses(false);
+      void bukaQr(json.data.snapToken);
     } catch (e) {
       setGalat(e instanceof Error ? e.message : "Gagal membuat pesanan.");
     } finally {
@@ -360,8 +369,9 @@ export function KotakPeriksa({
    * Pemeriksaan instan. Saldo dipakai lebih dulu; kalau kurang, QRIS untuk
    * kekurangannya langsung dibuka (satu klik), lalu pemeriksaan diulang.
    */
-  async function kirim(bolehBayar = true) {
+  async function kirim(bolehBayar = true, teksPakai = teks, jenisPakai: JenisPeriksa = jenis, namaPakai?: string) {
     setMemproses(true);
+    setPesanProses(PESAN_PERIKSA);
     setGalat(null);
     setAksi(null);
     setHasil(null);
@@ -371,7 +381,7 @@ export function KotakPeriksa({
       const res = await fetch("/api/periksa", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ teks, jenis }),
+        body: JSON.stringify({ teks: teksPakai, jenis: jenisPakai }),
       });
       const json = await res.json();
       if (!res.ok) {
@@ -384,7 +394,8 @@ export function KotakPeriksa({
           throw new Error(json.error ?? "Pemeriksaan gagal.");
         }
       } else {
-        setNamaHasil(berkas?.name ?? "Teks ditempel");
+        hapusTertunda();
+        setNamaHasil(namaPakai ?? berkas?.name ?? "Teks ditempel");
         setHasil(json.data);
       }
     } catch (e) {
@@ -395,11 +406,19 @@ export function KotakPeriksa({
     if (butuhBayar > 0) await bayarLaluPeriksa(butuhBayar);
   }
 
-  /** Bayar kekurangan saldo via QRIS, lalu pemeriksaan dijalankan otomatis. */
+  /**
+   * Bayar kekurangan saldo via QRIS. Popup Midtrans dibuka, lalu halaman
+   * menunggu (panel "Menunggu pembayaran") dan mengecek status berulang —
+   * juga saat pengguna kembali dari tab lain. Begitu lunas, pemeriksaan
+   * berjalan otomatis dengan naskah yang sama.
+   */
   async function bayarLaluPeriksa(nominal = kurang) {
     setMemproses(true);
+    setPesanProses("Membuka pembayaran QRIS…");
     setGalat(null);
+    setAksi(null);
     try {
+      await pastikanSesi();
       const res = await fetch("/api/payment/saldo", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -416,32 +435,130 @@ export function KotakPeriksa({
         await kirim(false);
         return;
       }
-      const { openSnap, syncPaymentStatus } = await import("@/lib/payment/use-snap");
-      const hasilBayar = await openSnap(json.data.snap_token);
-      // Popup ditutup tetap dicek: bisa saja customer sudah membayar sebelum menutupnya.
-      // "success" dari Snap belum berarti saldo tercatat — saldo baru masuk setelah
-      // server mengonfirmasi ke Midtrans. Karena itu selalu tunggu sinkron "paid".
-      let lunas = false;
-      for (let i = 0; i < (hasilBayar === "closed" ? 1 : 12) && !lunas; i++) {
-        const st = await syncPaymentStatus({ paymentId: json.data.payment_id });
-        lunas = st === "paid";
-        if (!lunas) await new Promise((r) => setTimeout(r, 2500));
-      }
-      if (!lunas && hasilBayar === "closed") throw new Error("Pembayaran dibatalkan. Naskahmu belum diperiksa.");
-      if (!lunas) {
-        throw new Error(
-          "Pembayaran belum terkonfirmasi. Kalau sudah membayar, tunggu sebentar lalu klik tombol bayar lagi — saldo yang masuk akan dipakai."
-        );
-      }
+      const job: Tertunda = {
+        paymentId: json.data.payment_id,
+        snapToken: json.data.snap_token,
+        nominal: json.data.nominal ?? nominal,
+        jenis,
+        teks,
+        nama: berkas?.name ?? "Teks ditempel",
+        waktu: Date.now(),
+      };
+      simpanTertunda(job);
+      setMemproses(false);
+      setTunggu(job);
+      void bukaQr(job.snapToken);
     } catch (e) {
       setKurang(nominal);
       setGalat(e instanceof Error ? e.message : "Gagal membuka pembayaran.");
       setMemproses(false);
-      return;
     }
-    setMemproses(false);
-    await kirim(false);
   }
+
+  async function bukaQr(token: string) {
+    try {
+      const { openSnap } = await import("@/lib/payment/use-snap");
+      await openSnap(token);
+    } catch {
+      /* popup gagal dimuat: panel tunggu tetap menyediakan tombol buka lagi */
+    }
+    // Apa pun hasil popup (sukses, ditutup, pending), cek status sekarang.
+    setPemicu((n) => n + 1);
+  }
+
+  function batalTunggu() {
+    hapusTertunda();
+    setTunggu(null);
+    try { window.snap?.hide(); } catch { /* popup sudah tertutup */ }
+  }
+
+  // Lanjutkan pembayaran yang tertunda setelah pindah tab / muat ulang halaman.
+  useEffect(() => {
+    const job = bacaTertunda();
+    if (!job) return;
+    setTab(job.jenis === "parafrase" ? "parafrase" : "ai");
+    setRiwayat(false);
+    setBerkas(null);
+    setTeks(job.teks);
+    setTempel(true);
+    setNamaHasil(job.nama);
+    setTunggu(job);
+  }, []);
+
+  // Cek status pembayaran yang ditunggu: tiap 3 detik selama tab aktif,
+  // langsung saat tab kembali aktif, dan saat popup Midtrans selesai.
+  useEffect(() => {
+    if (!tunggu) return;
+    let selesai = false;
+    let jalan = false;
+    const job = tunggu;
+    const cek = async () => {
+      if (selesai || jalan) return;
+      jalan = true;
+      const { syncPaymentStatus } = await import("@/lib/payment/use-snap");
+      const st = await syncPaymentStatus({ paymentId: job.paymentId });
+      jalan = false;
+      if (selesai) return;
+      if (st === "paid") {
+        selesai = true;
+        hapusTertunda();
+        setTunggu(null);
+        try { window.snap?.hide(); } catch { /* sudah tertutup */ }
+        await kirim(false, job.teks, job.jenis, job.nama);
+      } else if (st && st !== "pending") {
+        selesai = true;
+        hapusTertunda();
+        setTunggu(null);
+        setKurang(job.nominal);
+        setAksi("isi_saldo");
+        setGalat("Pembayaran kedaluwarsa atau dibatalkan. Naskahmu belum diperiksa — klik bayar untuk mencoba lagi.");
+      }
+    };
+    void cek();
+    const t = window.setInterval(() => { if (document.visibilityState === "visible") void cek(); }, 3000);
+    const saatKembali = () => { if (document.visibilityState === "visible") void cek(); };
+    document.addEventListener("visibilitychange", saatKembali);
+    window.addEventListener("focus", saatKembali);
+    return () => {
+      selesai = true;
+      window.clearInterval(t);
+      document.removeEventListener("visibilitychange", saatKembali);
+      window.removeEventListener("focus", saatKembali);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tunggu, pemicu]);
+
+  // Laporan manual yang belum lunas: pantau sampai pembayaran terkonfirmasi.
+  useEffect(() => {
+    const p = pesananManual;
+    if (!p || p.lunas || !p.paymentId) return;
+    let selesai = false;
+    const cek = async () => {
+      if (selesai) return;
+      const { syncPaymentStatus } = await import("@/lib/payment/use-snap");
+      const st = await syncPaymentStatus({ paymentId: p.paymentId! });
+      if (selesai) return;
+      if (st === "paid") {
+        selesai = true;
+        setPesananManual((x) => (x && x.id === p.id ? { ...x, lunas: true } : x));
+      } else if (st && st !== "pending") {
+        selesai = true;
+      }
+    };
+    void cek();
+    const t = window.setInterval(() => { if (document.visibilityState === "visible") void cek(); }, 4000);
+    const saatKembali = () => { if (document.visibilityState === "visible") void cek(); };
+    document.addEventListener("visibilitychange", saatKembali);
+    window.addEventListener("focus", saatKembali);
+    const henti = window.setTimeout(() => { selesai = true; }, 35 * 60 * 1000);
+    return () => {
+      selesai = true;
+      window.clearInterval(t);
+      window.clearTimeout(henti);
+      document.removeEventListener("visibilitychange", saatKembali);
+      window.removeEventListener("focus", saatKembali);
+    };
+  }, [pesananManual, pemicu]);
 
   // ── Isi tiap tab ──────────────────────────────────────────────────────────
   function rumusInstan(j: JenisPeriksa): string[] {
@@ -566,7 +683,10 @@ export function KotakPeriksa({
       </div>
 
       {riwayat ? (
-        <RiwayatPeriksa />
+        <RiwayatPeriksa
+          tertunda={tunggu ? { layanan: tunggu.jenis === "parafrase" ? "Jasa Parafrase" : "Cek AI", nominal: tunggu.nominal, nama: tunggu.nama, waktu: tunggu.waktu } : null}
+          onLanjut={() => setRiwayat(false)}
+        />
       ) : (
       <>
 
@@ -871,7 +991,15 @@ export function KotakPeriksa({
       {adaPanel && (
         <div ref={panelHasil} className="mt-8 scroll-mt-24" aria-live="polite">
           {memproses ? (
-            <div className="rounded-3xl border border-slate-200 bg-white p-6"><PanelMemproses /></div>
+            <div className="rounded-3xl border border-slate-200 bg-white p-6"><PanelMemproses pesan={pesanProses} /></div>
+          ) : tunggu ? (
+            <PanelTunggu
+              nominal={tunggu.nominal}
+              layanan={tunggu.jenis === "parafrase" ? "Jasa Parafrase" : "Cek AI"}
+              onBukaQr={() => void bukaQr(tunggu.snapToken)}
+              onCek={() => setPemicu((n) => n + 1)}
+              onBatal={batalTunggu}
+            />
           ) : galat ? (
             <div className="rounded-3xl border border-slate-200 bg-white p-6">
               <PanelGalat pesan={galat} aksi={aksi} kurang={kurang} onBayar={() => void kirim(true)} />
@@ -903,31 +1031,7 @@ export function KotakPeriksa({
               onOrderBaru={orderBaru}
             />
           ) : hasil ? (
-            <>
-              <StatusPesanan
-                layanan={hasil.jenis === "parafrase" ? "Jasa Parafrase" : "Cek AI"}
-                waktu={hasil.diperiksaPada}
-                tahap="selesai"
-                judul={hasil.jenis === "parafrase" ? "Parafrase selesai" : "Hasil Cek AI siap"}
-                namaBerkas={namaHasil}
-                keterangan={`${angka(hasil.jumlahKata)} kata diperiksa${hasil.jenis === "ai" && pAI ? ` · ${pAI.nama}` : ""}`}
-                kode={`RK-${hasil.id.replace(/-/g, "").slice(0, 10).toUpperCase()}`}
-                skor={
-                  hasil.jenis === "parafrase"
-                    ? { label: "Kalimat Berubah", persen: hasil.parafrase?.persenBerubah ?? null, vonis: "Makna & sitasi dipertahankan — baca ulang sebelum dipakai", jenis: "parafrase" }
-                    : { label: "AI Score", persen: hasil.ai?.skor ?? null, vonis: hasil.ai ? labelAi(hasil.ai.skor) : "", jenis: "ai" }
-                }
-                unduh={{
-                  href: `/api/periksa/${hasil.id}/unduh`,
-                  label: hasil.jenis === "parafrase" ? "Unduh Hasil Parafrase (Word)" : hasil.ai?.rujukan?.penyedia === "zerogpt" ? "Unduh Laporan ZeroGPT (PDF)" : "Unduh AI Report (PDF)",
-                }}
-                onOrderBaru={orderBaru}
-              />
-              <section className="mx-auto mt-6 max-w-3xl rounded-3xl border border-slate-200 bg-white p-5 sm:p-6">
-                <h3 className="mb-4 text-lg font-extrabold text-slate-900">Detail hasil</h3>
-                <IsiHasil h={hasil} />
-              </section>
-            </>
+            <HasilInstan hasil={hasil} nama={namaHasil} onOrderBaru={orderBaru} />
           ) : null}
         </div>
       )}
@@ -937,15 +1041,135 @@ export function KotakPeriksa({
   );
 }
 
-function PanelMemproses() {
+/**
+ * Tampilan hasil Cek AI / Parafrase: kartu status (skor + unduh laporan asli
+ * penyedia) dan detail. Dipakai langsung setelah bayar dan di halaman
+ * /cek-plagiarisme/hasil/[id] (dari Riwayat Pesanan).
+ */
+export function HasilInstan({
+  hasil, nama, onOrderBaru, orderBaru, kembali,
+}: {
+  hasil: HasilPeriksa;
+  nama: string;
+  onOrderBaru?: () => void;
+  orderBaru?: string;
+  kembali?: { href: string; label: string };
+}) {
+  const pAI = penyediaAktif("ai");
+  return (
+    <>
+      <StatusPesanan
+        layanan={hasil.jenis === "parafrase" ? "Jasa Parafrase" : "Cek AI"}
+        waktu={hasil.diperiksaPada}
+        tahap="selesai"
+        judul={hasil.jenis === "parafrase" ? "Parafrase selesai" : "Hasil Cek AI siap"}
+        namaBerkas={nama}
+        keterangan={`${angka(hasil.jumlahKata)} kata diperiksa${hasil.jenis === "ai" && pAI ? ` · ${pAI.nama}` : ""}`}
+        kode={`RK-${hasil.id.replace(/-/g, "").slice(0, 10).toUpperCase()}`}
+        skor={
+          hasil.jenis === "parafrase"
+            ? { label: "Kalimat Berubah", persen: hasil.parafrase?.persenBerubah ?? null, vonis: "Makna & sitasi dipertahankan — baca ulang sebelum dipakai", jenis: "parafrase" }
+            : { label: "AI Score", persen: hasil.ai?.skor ?? null, vonis: hasil.ai ? labelAi(hasil.ai.skor) : "", jenis: "ai" }
+        }
+        unduh={{ href: `/api/periksa/${hasil.id}/unduh`, label: labelUnduh(hasil) }}
+        info={{ judul: "Tersimpan di Riwayat Pesanan", teks: "Hasil & laporan ini bisa dibuka dan diunduh lagi kapan saja dari tab Riwayat Pesanan." }}
+        onOrderBaru={onOrderBaru}
+        orderBaru={orderBaru}
+        kembali={kembali}
+      />
+      <section className="mx-auto mt-6 max-w-3xl rounded-3xl border border-slate-200 bg-white p-5 sm:p-6">
+        <h3 className="mb-4 text-lg font-extrabold text-slate-900">Detail hasil</h3>
+        <IsiHasil h={hasil} />
+      </section>
+    </>
+  );
+}
+
+function labelUnduh(h: HasilPeriksa): string {
+  if (h.jenis === "parafrase") return "Unduh Hasil Parafrase (Word)";
+  return h.ai?.rujukan?.penyedia === "zerogpt" ? "Unduh Laporan ZeroGPT (PDF)" : "Unduh AI Report (PDF)";
+}
+
+function PanelMemproses({ pesan = PESAN_PERIKSA }: { pesan?: string }) {
   return (
     <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
       <Loader2 className="h-8 w-8 animate-spin text-brand" aria-hidden="true" />
-      <p className="text-sm font-medium text-slate-600">
-        Sedang diperiksa. Naskah panjang bisa sampai satu menit.
+      <p className="text-sm font-medium text-slate-600">{pesan}</p>
+    </div>
+  );
+}
+
+/** Menunggu pembayaran QRIS: status dicek otomatis; bisa buka QR lagi atau batal. */
+function PanelTunggu({
+  nominal, layanan, onBukaQr, onCek, onBatal,
+}: { nominal: number; layanan: string; onBukaQr: () => void; onCek: () => void; onBatal: () => void }) {
+  return (
+    <div className="rounded-3xl border border-amber-200 bg-white p-6 text-center sm:p-8">
+      <Clock className="mx-auto h-10 w-10 text-amber-500" aria-hidden="true" />
+      <p className="mt-3 text-xs font-bold uppercase tracking-[0.12em] text-slate-500">{layanan}</p>
+      <h3 className="mt-1 text-2xl font-extrabold text-slate-900">Menunggu pembayaran {rupiah(nominal)}</h3>
+      <p className="mx-auto mt-2 max-w-md text-sm text-slate-600">
+        Scan QR di jendela Midtrans. Setelah dibayar, pemeriksaan berjalan otomatis. Kamu boleh pindah tab;
+        status dicek lagi begitu kamu kembali.
+      </p>
+      <p className="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-slate-500">
+        <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" /> Mengecek status pembayaran…
+      </p>
+      <div className="mt-5 flex flex-wrap justify-center gap-2">
+        <button type="button" onClick={onBukaQr}
+          className="rounded-xl bg-brand px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-brand-light">
+          Buka QR lagi
+        </button>
+        <button type="button" onClick={onCek}
+          className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50">
+          Sudah bayar? Cek sekarang
+        </button>
+        <button type="button" onClick={onBatal}
+          className="rounded-xl px-4 py-2.5 text-sm font-bold text-slate-500 hover:text-red-600">
+          Batalkan
+        </button>
+      </div>
+      <p className="mx-auto mt-4 max-w-md text-[11px] leading-relaxed text-slate-400">
+        Kalau dibatalkan padahal sudah terlanjur membayar, saldonya tetap tersimpan dan otomatis dipakai saat kamu klik bayar lagi.
       </p>
     </div>
   );
+}
+
+const PESAN_PERIKSA = "Sedang diperiksa. Naskah panjang bisa sampai satu menit.";
+
+/** Pembayaran Cek AI/Parafrase yang sedang ditunggu (disimpan di browser ini saja). */
+type Tertunda = {
+  paymentId: string;
+  snapToken: string;
+  nominal: number;
+  jenis: JenisPeriksa;
+  teks: string;
+  nama: string;
+  waktu: number;
+};
+const KUNCI_TERTUNDA = "rk_periksa_tertunda";
+const UMUR_TERTUNDA = 60 * 60 * 1000;
+
+function simpanTertunda(job: Tertunda) {
+  try { localStorage.setItem(KUNCI_TERTUNDA, JSON.stringify(job)); } catch { /* storage diblokir */ }
+}
+function hapusTertunda() {
+  try { localStorage.removeItem(KUNCI_TERTUNDA); } catch { /* storage diblokir */ }
+}
+function bacaTertunda(): Tertunda | null {
+  try {
+    const raw = localStorage.getItem(KUNCI_TERTUNDA);
+    if (!raw) return null;
+    const j = JSON.parse(raw) as Tertunda;
+    if (!j.paymentId || !j.snapToken || !j.teks || Date.now() - j.waktu > UMUR_TERTUNDA) {
+      localStorage.removeItem(KUNCI_TERTUNDA);
+      return null;
+    }
+    return j;
+  } catch {
+    return null;
+  }
 }
 
 function PanelGalat({ pesan, aksi, kurang = 0, onBayar }: { pesan: string; aksi: string | null; kurang?: number; onBayar?: () => void }) {
@@ -1100,13 +1324,13 @@ function IsiHasil({ h }: { h: HasilPeriksa }) {
           >
             Bedah bersama mentor <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
           </Link>
-          <Link
-            href={`/periksa/laporan/${h.id}`}
+          <a
+            href={`/api/periksa/${h.id}/unduh`}
             className="inline-flex items-center gap-2 rounded-xl border-2 border-brand px-4 py-2 text-xs font-bold text-brand transition-colors hover:bg-brand-50"
           >
             <FileDown className="h-3.5 w-3.5" aria-hidden="true" />
-            Laporan PDF
-          </Link>
+            {labelUnduh(h)}
+          </a>
         </div>
       </section>
     </div>
