@@ -1,3 +1,4 @@
+import { bersihkanKodeSitasi } from "./bersihkan";
 /**
  * Mengambil teks dari berkas yang diunggah.
  *
@@ -113,8 +114,14 @@ function lepasEntitas(s: string): string {
 }
 
 function docxXmlKeTeks(xml: string): string {
-  return lepasEntitas(
+  return bersihkanKodeSitasi(lepasEntitas(
     xml
+      // Instruksi field Word (sitasi Mendeley/Zotero/EndNote, TOC, dll.) bukan
+      // teks yang tampil; begitu juga teks yang dihapus lewat track changes.
+      .replace(/<w:(?:instrText|delText|del)\b[^>]*\/>/g, "")
+      .replace(/<w:instrText\b[^>]*>[\s\S]*?<\/w:instrText>/g, "")
+      .replace(/<w:delText\b[^>]*>[\s\S]*?<\/w:delText>/g, "")
+      .replace(/<w:del\b[^>]*>[\s\S]*?<\/w:del>/g, "")
       // Akhir paragraf dan baris jadi baris baru, supaya paragraf tidak
       // menyatu dan jumlah katanya tetap benar.
       .replace(/<w:p[ >]/g, "\n<w:p ")
@@ -122,7 +129,7 @@ function docxXmlKeTeks(xml: string): string {
       .replace(/<w:br\s*\/>/g, "\n")
       .replace(/<w:tab\s*\/>/g, " ")
       .replace(/<[^>]+>/g, "")
-  )
+  ))
     .replace(/[ \t]+/g, " ")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
@@ -144,7 +151,7 @@ export async function ekstrakTeks(
   const ext = ekstensiDari(namaBerkas);
 
   if (ext === ".txt" || ext === ".md") {
-    return new TextDecoder().decode(buf).trim();
+    return bersihkanKodeSitasi(new TextDecoder().decode(buf).trim());
   }
 
   if (ext === ".docx") {

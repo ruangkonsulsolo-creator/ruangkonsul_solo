@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { bersihkanKodeSitasi } from "@/lib/periksa/bersihkan";
 import { createHash } from "node:crypto";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
@@ -38,7 +39,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Data belum lengkap." }, { status: 422 });
   }
 
-  const { teks, jenis } = parsed.data;
+  const { jenis } = parsed.data;
+  // Kode field sitasi (Mendeley/Zotero/EndNote) bukan tulisan customer:
+  // dibuang sebelum dihitung, ditagih, dan dikirim ke penyedia.
+  const teks = bersihkanKodeSitasi(parsed.data.teks);
 
   // Jumlah kata dan biaya dihitung ULANG di server. Angka dari klien tidak
   // dipercaya: kalau biaya dikirim dari browser, siapa pun bisa memeriksa

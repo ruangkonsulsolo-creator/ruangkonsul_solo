@@ -107,6 +107,7 @@ export function gabungPotongan(potongan: Potongan[]): HasilAI {
     skor,
     bagianDitandai,
     peringatan: PERINGATAN_AI,
+    bagian: potongan.map((p) => ({ persen: Math.round(p.persen * 10) / 10, kata: p.kata })),
     ...(ids.length === potongan.length && ids.length > 0 ? { rujukan: { penyedia: "zerogpt" as const, ids } } : {}),
   };
 }

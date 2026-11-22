@@ -27,6 +27,7 @@ import { formatRupiah } from "@/lib/utils/format-currency";
 import { labelAi, labelKemiripan } from "@/lib/periksa/persen-berubah";
 import { BATAS_KATA_BESAR, FORMAT_LAPORAN } from "@/lib/periksa/manual";
 import { RiwayatPeriksa } from "@/components/periksa/RiwayatPeriksa";
+import { bersihkanKodeSitasi } from "@/lib/periksa/bersihkan";
 import { StatusPesanan } from "@/components/periksa/StatusPesanan";
 import { AjakSimpanWa } from "@/components/periksa/AjakSimpanWa";
 
@@ -132,7 +133,8 @@ export function KotakPeriksa({
   const jenis: JenisPeriksa = tab === "parafrase" ? "parafrase" : "ai";
   const jenisManual = tab === "drillbit" ? "drillbit" : "turnitin";
 
-  const jumlahKata = useMemo(() => hitungKata(teks), [teks]);
+  // Sama dengan server: kode sitasi Mendeley/Zotero tidak dihitung & tidak ditagih.
+  const jumlahKata = useMemo(() => hitungKata(bersihkanKodeSitasi(teks)), [teks]);
   // Kata tidak bisa dihitung dari PDF/DOC lama; customer memilih sendiri ukurannya.
   const kataDiketahui = jumlahKata > 0;
 

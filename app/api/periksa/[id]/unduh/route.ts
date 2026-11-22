@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { renderLaporanPdf } from "@/lib/periksa/laporan-pdf";
+import { renderSampulAi } from "@/lib/periksa/sampul-ai";
 import { renderParafraseDocx } from "@/lib/periksa/parafrase-docx";
 import type { HasilPeriksa } from "@/lib/periksa/types";
 import { ambilPdfResmiZeroGpt } from "@/lib/periksa/penyedia-zerogpt";
@@ -50,17 +51,20 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   if (row.jenis === "ai" && ruj?.penyedia === "zerogpt" && ruj.ids.length > 0) {
     try {
       const berkas = [];
-      for (const id of ruj.ids) berkas.push(await ambilPdfResmiZeroGpt(id));
-      let pdf = berkas[0];
-      if (berkas.length > 1) {
-        const gabung = await PDFDocument.create();
-        for (const b of berkas) {
-          const doc = await PDFDocument.load(b);
-          const hal = await gabung.copyPages(doc, doc.getPageIndices());
-          hal.forEach((p) => gabung.addPage(p));
-        }
-        pdf = await gabung.save();
+      for (const id of ruj.ids) berkas.push(await PDFDocument.load(await ambilPdfResmiZeroGpt(id)));
+      const jumlahLampiran = berkas.reduce((n, d) => n + d.getPageCount(), 0);
+      // Halaman 1: ringkasan rapi; sesudahnya laporan asli ZeroGPT tanpa diubah.
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin;
+      const sampul = await PDFDocument.load(
+        await renderSampulAi(h, { kode, appUrl, jumlahHalamanLampiran: jumlahLampiran })
+      );
+      const gabung = await PDFDocument.create();
+      gabung.setTitle(`Laporan Deteksi AI ${kode}`);
+      for (const d of [sampul, ...berkas]) {
+        const hal = await gabung.copyPages(d, d.getPageIndices());
+        hal.forEach((p) => gabung.addPage(p));
       }
+      const pdf = await gabung.save();
       return new NextResponse(new Uint8Array(pdf), {
         headers: {
           "Content-Type": "application/pdf",

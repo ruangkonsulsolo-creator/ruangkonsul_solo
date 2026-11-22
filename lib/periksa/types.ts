@@ -118,6 +118,8 @@ export type HasilAI = {
    * mengambil laporan PDF resmi penyedia. Satu id per potongan naskah.
    */
   rujukan?: { penyedia: "zerogpt"; ids: string[] };
+  /** Skor tiap bagian bila naskah melebihi batas satu deteksi (urut sesuai ids). */
+  bagian?: { persen: number; kata: number }[];
 };
 
 export type HasilParafrase = {
