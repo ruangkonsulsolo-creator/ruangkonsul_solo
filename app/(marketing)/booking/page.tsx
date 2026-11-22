@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
-import { ArrowLeft, Star, CalendarDays } from "lucide-react";
+import { ArrowLeft, ArrowRight, Star, CalendarDays } from "lucide-react";
+import { KartuMentor } from "@/components/mentor/KartuMentor";
+import { ambilMentorPublik } from "@/lib/mentor/publik";
 import KalenderBooking from "@/components/booking/KalenderBooking";
 import { createClient } from "@/lib/supabase/server";
 import { BRAND } from "@/lib/brand";
@@ -30,15 +31,6 @@ type MentorRow = {
   rating_avg: number;
 };
 
-
-function inisial(nama: string) {
-  return nama
-    .split(" ")
-    .slice(0, 2)
-    .map((w) => w[0])
-    .join("")
-    .toUpperCase();
-}
 
 export default async function BookingPage({
   searchParams,
@@ -87,6 +79,25 @@ export default async function BookingPage({
   if (error) console.error("[booking] gagal memuat mentor:", error.message);
 
   const mentors = (data ?? []) as MentorRow[];
+
+  // Data kartu yang sama dengan beranda (foto, gelar, headline, pendidikan).
+  const kartu = new Map((await ambilMentorPublik()).map((k) => [k.id, k]));
+  const dataKartu = (m: MentorRow) =>
+    kartu.get(m.id) ?? {
+      id: m.id,
+      nama: m.display_name ?? "Mentor",
+      gelar: "",
+      headline: "",
+      kampus: "",
+      pendidikanTerakhir: "",
+      bidang: m.specializations ?? [],
+      foto: m.avatar_url,
+      rating: Number(m.rating_avg ?? 0),
+      sesi: m.session_count,
+      pengalamanTahun: m.experience_years,
+      tersedia: true,
+      inisial: (m.display_name ?? "M").split(/\s+/).slice(0, 2).map((x) => x[0]).join("").toUpperCase(),
+    };
 
   // Kalau datang dari halaman jadwal dengan ?mentor=..., halaman menyempit ke
   // satu mentor saja supaya pilihannya tidak membingungkan.
@@ -154,67 +165,53 @@ export default async function BookingPage({
           </div>
         )}
 
-        {/* ── Profil mentor terpilih ── */}
+        {/* ── Profil mentor terpilih: kartu berfoto seperti di beranda + bio ── */}
         {terpilih && (
-          <section className="mb-12 rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
-            <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
-              {terpilih.avatar_url ? (
-                <Image
-                  src={terpilih.avatar_url}
-                  alt={`Foto ${terpilih.display_name}`}
-                  width={80}
-                  height={80}
-                  className="h-20 w-20 flex-shrink-0 rounded-full object-cover ring-2 ring-brand-100"
-                />
-              ) : (
-                <div className="flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-full bg-brand-50 text-2xl font-extrabold text-brand ring-2 ring-brand-100">
-                  {inisial(terpilih.display_name ?? "Mentor")}
+          <section className="mb-12 grid gap-6 sm:grid-cols-[minmax(0,240px)_1fr] sm:items-start">
+            <div className="mx-auto w-full max-w-[240px] sm:mx-0">
+              <KartuMentor m={dataKartu(terpilih)} aksi="profil" />
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card sm:p-6">
+              <p className="text-xs font-bold uppercase tracking-wider text-brand">Mentor dipilih</p>
+              <h2 className="mt-1 text-xl font-extrabold text-slate-900 sm:text-2xl">
+                {(() => {
+                  const k = dataKartu(terpilih);
+                  return k.gelar ? `${k.nama}, ${k.gelar}` : k.nama;
+                })()}
+              </h2>
+              {terpilih.specializations && terpilih.specializations.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {terpilih.specializations.map((b) => (
+                    <span key={b} className="rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand">
+                      {b}
+                    </span>
+                  ))}
                 </div>
               )}
-              <div className="min-w-0 flex-1">
-                <h2 className="text-xl font-extrabold text-slate-900">
-                  {terpilih.display_name ?? "Mentor Ruang Konsul"}
-                </h2>
-                {terpilih.specializations &&
-                  terpilih.specializations.length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-1.5">
-                      {terpilih.specializations.map((b) => (
-                        <span
-                          key={b}
-                          className="rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand"
-                        >
-                          {b}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                {terpilih.bio && (
-                  <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-600">
-                    {terpilih.bio}
-                  </p>
+              {terpilih.bio && (
+                <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-slate-600">{terpilih.bio}</p>
+              )}
+              <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-slate-100 pt-4 text-sm">
+                <span className="flex items-center gap-1.5 font-semibold text-slate-900">
+                  <Star className="h-4 w-4 fill-amber-400 text-amber-400" aria-hidden="true" />
+                  {terpilih.rating_avg > 0 ? terpilih.rating_avg.toFixed(1) : "Baru"}
+                </span>
+                <span className="font-medium text-slate-600">{terpilih.session_count} sesi selesai</span>
+                {terpilih.experience_years > 0 && (
+                  <span className="font-medium text-slate-600">{terpilih.experience_years}+ tahun pengalaman</span>
                 )}
-                <div className="mt-4 flex flex-wrap items-center gap-5 border-t border-slate-100 pt-3 text-sm">
-                  <span className="flex items-center gap-1.5 font-semibold text-slate-900">
-                    <Star
-                      className="h-4 w-4 fill-brand text-brand"
-                      aria-hidden="true"
-                    />
-                    {terpilih.rating_avg > 0 ? terpilih.rating_avg : "Baru"}
-                  </span>
-                  <span className="font-medium text-slate-600">
-                    {terpilih.session_count} sesi selesai
-                  </span>
-                  <span className="font-medium text-slate-600">
-                    {terpilih.experience_years} tahun pengalaman
-                  </span>
-                  <span className="ml-auto text-lg font-extrabold text-brand">
-                    {formatRupiah(paket?.harga ?? terpilih.price_per_hour)}
-                    <span className="text-xs font-normal text-slate-400">
-                      {" "}
-                      / sesi
-                    </span>
-                  </span>
-                </div>
+                <span className="text-lg font-extrabold text-brand sm:ml-auto">
+                  {formatRupiah(paket?.harga ?? terpilih.price_per_hour)}
+                  <span className="text-xs font-normal text-slate-400"> / sesi</span>
+                </span>
+              </div>
+              <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold">
+                <a href="#jadwal" className="inline-flex items-center gap-1 text-brand hover:underline">
+                  Pilih jam di bawah <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </a>
+                <Link href={`/booking${paket ? `?produk=${encodeURIComponent(paket.slug)}` : ""}`} className="text-slate-500 hover:text-brand">
+                  Ganti mentor
+                </Link>
               </div>
             </div>
           </section>
@@ -223,58 +220,23 @@ export default async function BookingPage({
         {/* ── Daftar mentor (saat tidak menyaring satu mentor) ── */}
         {!terpilih && mentors.length > 0 && (
           <section className="mb-12" aria-labelledby="mentor">
-            <h2
-              id="mentor"
-              className="mb-5 text-2xl font-extrabold text-slate-900"
-            >
+            <h2 id="mentor" className="mb-5 text-2xl font-extrabold text-slate-900">
               Mentor tersedia
             </h2>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
               {mentors.map((m) => (
-                <Link
+                <KartuMentor
                   key={m.id}
-                  href={`/booking?mentor=${m.id}${qProduk}`}
-                  className="flex items-start gap-4 rounded-2xl border border-slate-200 bg-white p-5 transition-colors hover:border-brand hover:bg-brand-50"
-                >
-                  {m.avatar_url ? (
-                    <Image
-                      src={m.avatar_url}
-                      alt={`Foto ${m.display_name}`}
-                      width={56}
-                      height={56}
-                      className="h-14 w-14 flex-shrink-0 rounded-full object-cover ring-2 ring-brand-100"
-                    />
-                  ) : (
-                    <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-brand-50 text-lg font-extrabold text-brand ring-2 ring-brand-100">
-                      {inisial(m.display_name ?? "Mentor")}
-                    </div>
-                  )}
-                  <div className="min-w-0">
-                    <h3 className="font-bold text-slate-900">
-                      {m.display_name ?? "Mentor Ruang Konsul"}
-                    </h3>
-                    <p className="mt-0.5 text-sm font-semibold text-brand">
-                      {formatRupiah(paket?.harga ?? m.price_per_hour)}
-                      <span className="text-xs font-normal text-slate-400">
-                        {" "}
-                        / sesi
-                      </span>
-                    </p>
-                    {m.specializations && m.specializations.length > 0 && (
-                      <p className="mt-1 truncate text-xs font-medium text-slate-500">
-                        {m.specializations.join(" · ")}
-                      </p>
-                    )}
-                  </div>
-                </Link>
+                  m={{ ...dataKartu(m), tersedia: true }}
+                  hrefPesan={`/booking?mentor=${m.id}${qProduk}#jadwal`}
+                  harga={paket?.harga ?? m.price_per_hour}
+                  teksPesan="Pilih mentor ini"
+                />
               ))}
             </div>
             <p className="mt-4 text-sm font-medium text-slate-500">
               Atau lihat{" "}
-              <Link
-                href="/jadwal"
-                className="font-semibold text-brand hover:underline"
-              >
+              <Link href="/jadwal" className="font-semibold text-brand hover:underline">
                 seluruh jadwal dalam satu halaman
               </Link>
               .
@@ -286,7 +248,7 @@ export default async function BookingPage({
         <section aria-labelledby="jadwal">
           <h2
             id="jadwal"
-            className="mb-5 flex items-center gap-2 text-2xl font-extrabold text-slate-900"
+            className="mb-5 flex scroll-mt-24 items-center gap-2 text-2xl font-extrabold text-slate-900"
           >
             <CalendarDays className="h-6 w-6 text-brand" aria-hidden="true" />
             {terpilih ? "Jadwal tersedia" : "Semua jadwal tersedia"}

@@ -24,7 +24,21 @@ export type DataKartuMentor = {
  * Mentor yang belum mengunggah foto tetap tampil dengan ilustrasi inisial,
  * supaya grid tidak bolong — panel mentor mewajibkan unggah foto.
  */
-export function KartuMentor({ m, aksi = "booking" }: { m: DataKartuMentor; aksi?: "booking" | "profil" }) {
+export function KartuMentor({
+  m,
+  aksi = "booking",
+  hrefPesan,
+  harga,
+  teksPesan = "Pesan jadwal",
+}: {
+  m: DataKartuMentor;
+  aksi?: "booking" | "profil";
+  /** Link tombol pesan (mis. membawa ?produk=). Bawaan /booking?mentor=<id>. */
+  hrefPesan?: string;
+  /** Tampilkan harga per sesi di atas tombol (halaman booking). */
+  harga?: number;
+  teksPesan?: string;
+}) {
   const namaLengkap = m.gelar ? `${m.nama}, ${m.gelar}` : m.nama;
   const pendidikan = m.pendidikanTerakhir || m.kampus;
   return (
@@ -79,13 +93,19 @@ export function KartuMentor({ m, aksi = "booking" }: { m: DataKartuMentor; aksi?
                 : `${m.sesi} sesi bimbingan selesai`}
             </p>
           )}
+          {harga !== undefined && harga > 0 && (
+            <p className="pt-2 text-sm font-extrabold text-brand sm:text-base">
+              Rp{harga.toLocaleString("id-ID")}
+              <span className="text-xs font-normal text-slate-400"> / sesi</span>
+            </p>
+          )}
           {aksi === "booking" ? (
             m.tersedia ? (
               <Link
-                href={`/booking?mentor=${m.id}`}
+                href={hrefPesan ?? `/booking?mentor=${m.id}`}
                 className="mt-2 inline-flex w-full items-center justify-center gap-1 rounded-xl bg-brand py-2 text-xs font-bold text-white sm:mt-3 sm:gap-1.5 sm:py-2.5 sm:text-sm transition-colors hover:bg-brand-light"
               >
-                Pesan jadwal <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                {teksPesan} <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>
             ) : (
               <span className="mt-2 inline-flex w-full items-center justify-center rounded-xl border border-slate-200 py-2 text-xs font-bold text-slate-400 sm:mt-3 sm:py-2.5 sm:text-sm">
