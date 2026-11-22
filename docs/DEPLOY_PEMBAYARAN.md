@@ -58,6 +58,7 @@ dibatalkan otomatis dan slot muncul lagi. Daftar sesi customer: `/dashboard/sesi
 | `NEXT_PUBLIC_PERIKSA_PENYEDIA_AI` | sama dengan di atas | supaya nama mesin tampil di halaman (jujur ke customer) |
 | `GPTZERO_API_KEY` | dasbor API GPTZero | bila memakai GPTZero |
 | `ZEROGPT_API_KEY` | dasbor API Business zerogpt.com | bila memakai ZeroGPT. Opsional: `ZEROGPT_API_URL`, `ZEROGPT_AUTH_HEADER` (bawaan `ApiKey`) bila dokumentasinya berbeda |
+| `ZEROGPT_USER_ID` | id akun ZeroGPT — buka `/api/admin/zerogpt` saat login sebagai admin untuk melihatnya | agar tombol unduh memberikan **PDF resmi ZeroGPT** (tanpa ini: laporan cadangan buatan situs) |
 
 Setelah mengisi, **Redeploy** agar variabel `NEXT_PUBLIC_*` ikut ter-build.
 

@@ -113,6 +113,11 @@ export type HasilAI = {
   /** Kalimat-kalimat yang paling memicu skor, untuk ditinjau manusia. */
   bagianDitandai: { teks: string; skor: number }[];
   peringatan: string;
+  /**
+   * Rujukan pemeriksaan di sisi penyedia (mis. id deteksi ZeroGPT), untuk
+   * mengambil laporan PDF resmi penyedia. Satu id per potongan naskah.
+   */
+  rujukan?: { penyedia: "zerogpt"; ids: string[] };
 };
 
 export type HasilParafrase = {

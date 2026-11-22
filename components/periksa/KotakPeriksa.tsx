@@ -753,7 +753,7 @@ export function KotakPeriksa({
                 }
                 unduh={{
                   href: `/api/periksa/${hasil.id}/unduh`,
-                  label: hasil.jenis === "parafrase" ? "Unduh Hasil Parafrase (Word)" : "Unduh AI Report (PDF)",
+                  label: hasil.jenis === "parafrase" ? "Unduh Hasil Parafrase (Word)" : hasil.ai?.rujukan?.penyedia === "zerogpt" ? "Unduh Laporan ZeroGPT (PDF)" : "Unduh AI Report (PDF)",
                 }}
                 onOrderBaru={orderBaru}
               />

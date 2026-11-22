@@ -24,7 +24,7 @@ import { PERINGATAN_AI } from "./types";
  * tanggapannya lain, kita melempar galat berisi potongan tanggapan asli
  * alih-alih diam-diam menghasilkan skor keliru.
  *
- * Teks panjang dipecah per ±14.000 karakter (batas aman per permintaan),
+ * Teks panjang dipecah per ±45.000 karakter (paket Beginner: 50.000/deteksi),
  * lalu skornya digabung dengan bobot jumlah kata tiap potongan.
  *
  * Catatan: ZeroGPT meminta "IP whitelist" di dasbor. Vercel (paket Hobby)
@@ -40,7 +40,8 @@ import { PERINGATAN_AI } from "./types";
  */
 
 const URL_BAWAAN = "https://api.zerogpt.com/api/detect/detectText";
-const MAKS_KARAKTER = 14_000;
+// Paket Beginner: 50.000 karakter per deteksi. Sisakan ruang aman.
+const MAKS_KARAKTER = 45_000;
 
 function hitungKata(s: string) {
   return s.trim() ? s.trim().split(/\s+/).length : 0;
@@ -69,7 +70,9 @@ export function pecahTeks(teks: string, maks = MAKS_KARAKTER): string[] {
   return hasil;
 }
 
-type Potongan = { persen: number; kata: number; ditandai: string[] };
+type Potongan = { persen: number; kata: number; ditandai: string[]; id: string | null };
+
+const angka = (v: unknown) => (typeof v === "string" && v.trim() !== "" ? Number(v) : v);
 
 /** Petakan satu tanggapan ZeroGPT; lempar galat bila bentuknya tidak dikenal. */
 export function petakanPotonganZeroGpt(mentah: unknown, kataCadangan: number): Potongan {
@@ -84,9 +87,11 @@ export function petakanPotonganZeroGpt(mentah: unknown, kataCadangan: number): P
         `periksa dokumentasi terbaru. Tanggapan: ${JSON.stringify(mentah).slice(0, 400)}`
     );
   }
-  const kata = typeof data?.textWords === "number" && data.textWords > 0 ? data.textWords : kataCadangan;
+  const tw = angka(data?.textWords);
+  const kata = typeof tw === "number" && tw > 0 ? tw : kataCadangan;
   const ditandai = Array.isArray(data?.h) ? data.h.filter((x): x is string => typeof x === "string" && x.trim().length > 0) : [];
-  return { persen: Math.min(100, Math.max(0, persen)), kata, ditandai };
+  const id = data?.id != null && String(data.id).trim() !== "" ? String(data.id) : null;
+  return { persen: Math.min(100, Math.max(0, persen)), kata, ditandai, id };
 }
 
 /** Gabungkan potongan menjadi HasilAI (rata-rata berbobot jumlah kata). */
@@ -97,15 +102,24 @@ export function gabungPotongan(potongan: Potongan[]): HasilAI {
     .flatMap((p) => p.ditandai.map((teks) => ({ teks: teks.trim(), skor: Math.round(p.persen) })))
     .filter((b, i, arr) => arr.findIndex((x) => x.teks === b.teks) === i)
     .slice(0, 10);
-  return { skor, bagianDitandai, peringatan: PERINGATAN_AI };
+  const ids = potongan.map((p) => p.id).filter((x): x is string => !!x);
+  return {
+    skor,
+    bagianDitandai,
+    peringatan: PERINGATAN_AI,
+    ...(ids.length === potongan.length && ids.length > 0 ? { rujukan: { penyedia: "zerogpt" as const, ids } } : {}),
+  };
+}
+
+function headerAuth(kunci: string): Record<string, string> {
+  return { [process.env.ZEROGPT_AUTH_HEADER || "ApiKey"]: kunci };
 }
 
 async function satuPermintaan(teks: string, kunci: string): Promise<Potongan> {
   const url = process.env.ZEROGPT_API_URL || URL_BAWAAN;
-  const header = process.env.ZEROGPT_AUTH_HEADER || "ApiKey";
   const res = await fetch(url, {
     method: "POST",
-    headers: { "Content-Type": "application/json", [header]: kunci },
+    headers: { "Content-Type": "application/json", ...headerAuth(kunci) },
     body: JSON.stringify({ input_text: teks }),
     signal: AbortSignal.timeout(90_000),
   });
@@ -132,4 +146,46 @@ export async function periksaAIZeroGpt(teks: string): Promise<HasilAI> {
   // untuk naskah satu bab (1–3 potongan).
   for (const p of pecahTeks(teks)) potongan.push(await satuPermintaan(p, kunci));
   return gabungPotongan(potongan);
+}
+
+/**
+ * Laporan PDF RESMI ZeroGPT untuk satu id deteksi:
+ *   GET https://api.zerogpt.com/api/dashboard/exportToPdf?id=<id>&user_id=<user_id>
+ * user_id adalah id akun ZeroGPT pemilik API key (ZEROGPT_USER_ID).
+ *
+ * Bentuk tanggapan tidak terdokumentasi lengkap, jadi tiga kemungkinan
+ * ditangani: berkas PDF langsung, JSON berisi URL PDF, atau JSON berisi
+ * PDF base64. Selain itu dianggap gagal (pemanggil memakai cadangan).
+ */
+export async function ambilPdfResmiZeroGpt(id: string): Promise<Uint8Array> {
+  const kunci = process.env.ZEROGPT_API_KEY;
+  const userId = process.env.ZEROGPT_USER_ID;
+  if (!kunci || !userId) throw new Error("ZEROGPT_API_KEY / ZEROGPT_USER_ID belum disetel.");
+  const dasar = (process.env.ZEROGPT_API_BASE || "https://api.zerogpt.com").replace(/\/$/, "");
+  const url = `${dasar}/api/dashboard/exportToPdf?id=${encodeURIComponent(id)}&user_id=${encodeURIComponent(userId)}`;
+  const res = await fetch(url, { headers: headerAuth(kunci), signal: AbortSignal.timeout(60_000) });
+  if (!res.ok) throw new Error(`ZeroGPT exportToPdf ${res.status}: ${(await res.text().catch(() => "")).slice(0, 200)}`);
+
+  const pdfAsli = (b: Uint8Array) => b.length > 4 && String.fromCharCode(...b.slice(0, 4)) === "%PDF";
+  const jenis = res.headers.get("content-type") ?? "";
+  if (!jenis.includes("json")) {
+    const buf = new Uint8Array(await res.arrayBuffer());
+    if (pdfAsli(buf)) return buf;
+    throw new Error("ZeroGPT exportToPdf tidak mengembalikan PDF.");
+  }
+
+  const json = (await res.json()) as Record<string, unknown>;
+  const data = (json.data ?? json) as Record<string, unknown> | string;
+  const kandidat = typeof data === "string" ? [data] : Object.values(data).filter((v): v is string => typeof v === "string");
+  for (const v of kandidat) {
+    if (/^https?:\/\//.test(v)) {
+      const r = await fetch(v, { signal: AbortSignal.timeout(60_000) });
+      const b = new Uint8Array(await r.arrayBuffer());
+      if (r.ok && pdfAsli(b)) return b;
+    } else if (v.length > 100) {
+      const b = Uint8Array.from(Buffer.from(v.replace(/^data:application\/pdf;base64,/, ""), "base64"));
+      if (pdfAsli(b)) return b;
+    }
+  }
+  throw new Error(`ZeroGPT exportToPdf: bentuk tanggapan tidak dikenal. ${JSON.stringify(json).slice(0, 300)}`);
 }

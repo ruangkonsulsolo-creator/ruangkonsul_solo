@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { renderLaporanPdf } from "@/lib/periksa/laporan-pdf";
 import { renderParafraseDocx } from "@/lib/periksa/parafrase-docx";
 import type { HasilPeriksa } from "@/lib/periksa/types";
+import { ambilPdfResmiZeroGpt } from "@/lib/periksa/penyedia-zerogpt";
+import { PDFDocument } from "pdf-lib";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -39,6 +41,36 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
         "Cache-Control": "private, no-store",
       },
     });
+  }
+
+  // Cek AI lewat ZeroGPT: berikan laporan PDF RESMI ZeroGPT (digabung bila
+  // naskah dipecah menjadi beberapa deteksi). Kalau gagal diambil, jatuh ke
+  // laporan ringkas buatan situs agar customer tetap bisa mengunduh.
+  const ruj = h.ai?.rujukan;
+  if (row.jenis === "ai" && ruj?.penyedia === "zerogpt" && ruj.ids.length > 0) {
+    try {
+      const berkas = [];
+      for (const id of ruj.ids) berkas.push(await ambilPdfResmiZeroGpt(id));
+      let pdf = berkas[0];
+      if (berkas.length > 1) {
+        const gabung = await PDFDocument.create();
+        for (const b of berkas) {
+          const doc = await PDFDocument.load(b);
+          const hal = await gabung.copyPages(doc, doc.getPageIndices());
+          hal.forEach((p) => gabung.addPage(p));
+        }
+        pdf = await gabung.save();
+      }
+      return new NextResponse(new Uint8Array(pdf), {
+        headers: {
+          "Content-Type": "application/pdf",
+          "Content-Disposition": `attachment; filename="Laporan-ZeroGPT-${kode}.pdf"`,
+          "Cache-Control": "private, no-store",
+        },
+      });
+    } catch (e) {
+      console.error("[unduh] PDF resmi ZeroGPT gagal, pakai laporan cadangan:", e);
+    }
   }
 
   const { data: prof } = await supabase.from("profiles").select("full_name").eq("id", row.user_id).maybeSingle();
