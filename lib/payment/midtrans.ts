@@ -35,6 +35,11 @@ function authHeader(): string {
   return `Basic ${Buffer.from(`${serverKey()}:`).toString("base64")}`;
 }
 
+/** Alasan singkat untuk ditampilkan ke pengguna (hanya galat validasi Midtrans). */
+export function alasanMidtrans(e: unknown): string {
+  return e instanceof MidtransError ? ` (${e.message.slice(0, 160)})` : "";
+}
+
 export class MidtransError extends Error {
   constructor(message: string, public readonly httpStatus?: number, public readonly body?: unknown) {
     super(message);
@@ -74,6 +79,11 @@ function enabledPayments(): string[] | undefined {
   return list.length ? list : undefined;
 }
 
+function emailSah(e: string | null | undefined): string | undefined {
+  const v = (e ?? "").trim();
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? v : undefined;
+}
+
 export async function createSnapTransaction(
   params: CreateSnapParams
 ): Promise<{ token: string; redirectUrl: string }> {
@@ -95,8 +105,10 @@ export async function createSnapTransaction(
     item_details: params.items.map((i) => ({ ...i, name: i.name.slice(0, 50) })),
     customer_details: {
       first_name: params.customer.firstName.slice(0, 255) || "Customer",
-      email: params.customer.email ?? undefined,
-      phone: params.customer.phone ?? undefined,
+      // Tamu (anonymous sign-in) punya email "" — Midtrans menolak format email
+      // kosong/tidak valid, jadi kirim hanya bila formatnya benar.
+      email: emailSah(params.customer.email),
+      phone: params.customer.phone?.trim() || undefined,
     },
     expiry: params.expiryMinutes
       ? { unit: "minutes", duration: params.expiryMinutes }

@@ -4,7 +4,7 @@ import { requireUser } from "@/lib/auth/require-user";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { startPayment, getCustomerDetails, findReusablePayment } from "@/lib/payment/checkout";
 import { rateLimit } from "@/lib/security/rate-limit";
-import { getTransactionStatus } from "@/lib/payment/midtrans";
+import { alasanMidtrans, getTransactionStatus } from "@/lib/payment/midtrans";
 import { applyMidtransStatus } from "@/lib/payment/fulfillment";
 
 /**
@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ data: { payment_id: payment.paymentId, snap_token: payment.snapToken, nominal } });
     } catch (err) {
       console.error("[payment/saldo] Midtrans error:", err);
-      return NextResponse.json({ error: "Gagal membuat transaksi pembayaran. Coba lagi." }, { status: 502 });
+      return NextResponse.json({ error: `Gagal membuat transaksi pembayaran${alasanMidtrans(err)}. Coba lagi.` }, { status: 502 });
     }
   }
 
@@ -115,6 +115,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ data: { payment_id: payment.paymentId, snap_token: payment.snapToken } });
   } catch (err) {
     console.error("[payment/saldo] Midtrans error:", err);
-    return NextResponse.json({ error: "Gagal membuat transaksi pembayaran. Coba lagi." }, { status: 502 });
+    return NextResponse.json({ error: `Gagal membuat transaksi pembayaran${alasanMidtrans(err)}. Coba lagi.` }, { status: 502 });
   }
 }

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { alasanMidtrans } from "@/lib/payment/midtrans";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -182,6 +183,6 @@ export async function POST(request: NextRequest) {
   } catch (e) {
     console.error("[plagiasi-manual] pembayaran:", e);
     await batalkanSemua("Gagal membuka pembayaran");
-    return NextResponse.json({ error: "Gagal membuka pembayaran. Coba lagi." }, { status: 502 });
+    return NextResponse.json({ error: `Gagal membuka pembayaran${alasanMidtrans(e)}. Coba lagi.` }, { status: 502 });
   }
 }

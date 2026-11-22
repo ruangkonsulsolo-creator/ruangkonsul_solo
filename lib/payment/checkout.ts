@@ -62,8 +62,8 @@ export async function startPayment(p: StartPaymentParams): Promise<StartedPaymen
       // Snapshot untuk receipt — tidak berubah walau profil/harga diubah kemudian
       customer_snapshot: {
         name: p.customer.firstName,
-        email: p.customer.email ?? null,
-        whatsapp: p.customer.phone ?? null,
+        email: p.customer.email || null,
+        whatsapp: p.customer.phone || null,
       },
       item_snapshot: p.itemSnapshot ?? p.items,
     })
@@ -112,8 +112,8 @@ export async function getCustomerDetails(userId: string, email?: string | null) 
 
   return {
     firstName: profile?.full_name || email?.split("@")[0] || "Customer",
-    email: email ?? null,
-    phone: profile?.whatsapp ?? null,
+    email: email || null,
+    phone: profile?.whatsapp || null,
   };
 }
 
