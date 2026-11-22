@@ -26,6 +26,7 @@ import { formatRupiah } from "@/lib/utils/format-currency";
 import { labelAi, labelKemiripan } from "@/lib/periksa/persen-berubah";
 import { BATAS_KATA_BESAR, FORMAT_LAPORAN } from "@/lib/periksa/manual";
 import { StatusPesanan } from "@/components/periksa/StatusPesanan";
+import { AjakSimpanWa } from "@/components/periksa/AjakSimpanWa";
 
 const rupiah = (n: number) => formatRupiah(n);
 const angka = (n: number) => n.toLocaleString("id-ID");
@@ -625,6 +626,7 @@ export function KotakPeriksa({
                   placeholder="0812xxxxxxxx" className="min-w-0 flex-1 px-3 py-2.5 text-sm focus:outline-none" />
               </div>
               {wa && !waValid && <p className="mt-1.5 text-xs font-semibold text-amber-700">Nomor WhatsApp belum lengkap.</p>}
+              <AjakSimpanWa className="mt-4" />
             </section>
           )}
 
@@ -730,6 +732,7 @@ export function KotakPeriksa({
                   ? { judul: "Pembayaran diterima", teks: "Naskahmu masuk antrean tim. Kami kabari lewat notifikasi & WhatsApp begitu laporan siap." }
                   : { judul: "Belum dibayar", teks: "Pesanan tersimpan. Selesaikan pembayaran QRIS agar naskahmu diproses." }
               }
+              ajakSimpanWa
               lanjut={{ href: `/dashboard/laporan/${pesananManual.id}`, label: pesananManual.lunas ? "Pantau Status Pesanan" : "Bayar Sekarang" }}
               onOrderBaru={orderBaru}
             />

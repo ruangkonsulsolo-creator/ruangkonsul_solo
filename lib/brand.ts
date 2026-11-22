@@ -13,6 +13,9 @@ export const BRAND = {
   email:            "ruangkonsulsolo@gmail.com",
   whatsapp:         "62882007483223",           // format internasional tanpa +
   whatsappDisplay:  "0882007483223",
+  // Nomor pengirim notifikasi otomatis (Fonnte) — terpisah dari nomor admin.
+  whatsappNotif:        "6289531069965",
+  whatsappNotifDisplay: "0895-3106-9965",
   instagram:        "@ruangkonsull_solo",
   instagramUrl:     "https://instagram.com/ruangkonsull_solo",
   tiktok:           "@ruangkonsull_solo",

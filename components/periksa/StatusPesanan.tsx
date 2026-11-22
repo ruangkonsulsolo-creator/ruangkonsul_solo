@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { AjakSimpanWa } from "@/components/periksa/AjakSimpanWa";
 import { Check, Copy, Download, ExternalLink, MessageCircle, Plus, Clock } from "lucide-react";
 
 const WA_ADMIN = "62882007483223";
@@ -66,6 +67,7 @@ export function StatusPesanan({
   orderBaru,
   onOrderBaru,
   kembali,
+  ajakSimpanWa = false,
 }: {
   layanan: string;
   /** ISO timestamp pesanan dibuat. */
@@ -85,6 +87,8 @@ export function StatusPesanan({
   orderBaru?: string;
   onOrderBaru?: () => void;
   kembali?: { href: string; label: string };
+  /** Tampilkan ajakan menyimpan nomor notifikasi (pesanan yang masih menunggu laporan). */
+  ajakSimpanWa?: boolean;
 }) {
   const [tersalin, setTersalin] = useState(false);
   const posisi = URUTAN[tahap];
@@ -194,6 +198,8 @@ export function StatusPesanan({
             <p className="mt-0.5 text-brand-dark/90">{info.teks}</p>
           </div>
         )}
+
+        {ajakSimpanWa && <AjakSimpanWa kode={kode} />}
 
         {unduh && (
           <a

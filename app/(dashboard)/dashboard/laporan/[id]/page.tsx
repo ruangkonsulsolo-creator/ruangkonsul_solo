@@ -95,6 +95,7 @@ export default async function LaporanPage({ params }: { params: { id: string } }
         lanjut={tahap === "menunggu" ? { href: "/dashboard/riwayat-pesanan?status=menunggu", label: "Bayar Sekarang" } : undefined}
         bukaTab={url ? { href: url, label: "Buka laporan di tab baru" } : undefined}
         orderBaru="/#periksa"
+        ajakSimpanWa={tahap === "menunggu" || tahap === "dibayar" || tahap === "diproses"}
       />
 
       {siap && (
