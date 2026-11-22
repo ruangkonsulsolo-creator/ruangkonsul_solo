@@ -60,7 +60,7 @@ export default async function AdminDashboardPage() {
           <Link href="/admin/pesanan" className="text-xs text-brand hover:underline">Lihat semua →</Link>
         </CardHeader>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full min-w-[680px] text-sm">
             <thead><tr className="border-b bg-slate-50 text-left text-xs font-bold uppercase tracking-wide text-muted-foreground">
               <th className="px-4 py-2.5">No. Pesanan</th><th className="px-4 py-2.5">User</th><th className="px-4 py-2.5">Layanan</th><th className="px-4 py-2.5">Status</th><th className="px-4 py-2.5">Waktu</th><th className="px-4 py-2.5">Aksi</th>
             </tr></thead>

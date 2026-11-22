@@ -24,7 +24,7 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: {
       </div>
       <Card>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full min-w-[680px] text-sm">
             <thead><tr className="border-b bg-slate-50 text-left text-xs font-bold uppercase tracking-wide text-muted-foreground">
               <th className="px-4 py-3">Nama</th><th className="px-4 py-3">WhatsApp</th><th className="px-4 py-3">Kode Referral</th><th className="px-4 py-3">Kredit</th><th className="px-4 py-3">Role</th><th className="px-4 py-3">Status</th><th className="px-4 py-3">Daftar</th>
             </tr></thead>

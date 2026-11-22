@@ -40,7 +40,7 @@ const bagian: BagianLegal[] = [
       <p className="flex items-start gap-2">
         <Clock className="mt-0.5 h-4 w-4 flex-shrink-0" aria-hidden="true" />
         <span>
-          Admin membalas chat setiap hari pukul 08.00–21.00 WIB. Pembayaran QRIS dan layanan otomatis (Cek AI, parafrase)
+          Admin membalas chat Senin–Minggu pukul 09.00–21.00 WIB. Pembayaran QRIS dan layanan otomatis (Cek AI, parafrase)
           berjalan 24 jam.
         </span>
       </p>

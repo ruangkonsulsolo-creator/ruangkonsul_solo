@@ -6,7 +6,7 @@ import { formatRupiah } from "@/lib/utils/format-currency";
 import { formatWhatsApp } from "@/lib/validators/whatsapp";
 import { BRAND } from "@/lib/brand";
 import { PrintButton } from "@/components/payment/PrintButton";
-import { ConfirmWhatsAppButton } from "@/components/payment/ConfirmWhatsAppButton";
+import { KonfirmasiWhatsApp } from "@/components/payment/KonfirmasiWhatsApp";
 import { ReceiptPendingSync } from "@/components/payment/ReceiptPendingSync";
 import type { Metadata } from "next";
 
@@ -21,6 +21,8 @@ export default async function ReceiptPage({ params }: { params: { id: string } }
   }
   const r = res.receipt;
   const paid = r.status === "paid" || r.status === "refunded";
+  const itemTampil = r.items.filter((i) => i.id !== "ongkir");
+  const perluKonfirmasi = r.status === "paid" && !!r.receiptNumber && r.purpose !== "saldo" && !res.viewerStaff;
 
   const info: [string, string, boolean?][] = [
     ["Nama Customer", r.customer.name],
@@ -34,9 +36,9 @@ export default async function ReceiptPage({ params }: { params: { id: string } }
   ];
 
   return (
-    <main className="min-h-screen bg-slate-100 py-8 px-4 print:bg-white print:py-0">
-      <div className="mx-auto max-w-2xl">
-        <div className="mb-4 flex items-center justify-between print:hidden">
+    <main className="min-h-screen bg-slate-100 px-3 py-6 sm:px-4 sm:py-8 print:bg-white print:py-0">
+      <div className="mx-auto max-w-2xl space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-2 print:hidden">
           {res.viewerStaff ? (
             <Link href="/admin/pesanan-produk" className="text-sm font-semibold text-slate-600 hover:underline">← Panel admin</Link>
           ) : (
@@ -46,14 +48,23 @@ export default async function ReceiptPage({ params }: { params: { id: string } }
             <PrintButton />
             {paid && (
               <a href={`/api/receipt/${r.paymentId}/pdf`} className="rounded-lg bg-[#8B0000] px-3 py-1.5 text-sm font-semibold text-white hover:opacity-90">
-                Unduh PDF
+                Unduh Receipt (PDF)
               </a>
             )}
           </div>
         </div>
 
+        {perluKonfirmasi && (
+          <KonfirmasiWhatsApp
+            jenis={r.perluKirim ? "kirim" : "layanan"}
+            nama={r.customer.name}
+            produk={itemTampil.map((i) => i.name)}
+            kode={r.receiptNumber!}
+          />
+        )}
+
         <article className="overflow-hidden rounded-2xl bg-white shadow-sm print:shadow-none print:rounded-none">
-          <header className="flex items-start justify-between bg-[#8B0000] px-6 py-5 text-white">
+          <header className="flex items-start justify-between gap-3 bg-[#8B0000] px-4 py-5 text-white sm:px-6">
             <div>
               <p className="text-lg font-extrabold">{BRAND.name}</p>
               <p className="text-xs text-white/70">{BRAND.domain}</p>
@@ -66,13 +77,13 @@ export default async function ReceiptPage({ params }: { params: { id: string } }
             </div>
           </header>
 
-          <div className="space-y-6 p-6">
+          <div className="space-y-6 p-4 sm:p-6">
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
                 <p className="text-[11px] uppercase tracking-wide text-slate-500">No. Receipt</p>
                 <p className="font-mono text-xl font-bold text-slate-900">{r.receiptNumber ?? "— menunggu pembayaran —"}</p>
               </div>
-              <div className="text-right">
+              <div className="sm:text-right">
                 <p className="text-[11px] uppercase tracking-wide text-slate-500">Tanggal Bayar</p>
                 <p className="text-sm font-semibold text-slate-900">{formatDateTimeWIB(r.paidAt)}</p>
               </div>
@@ -91,43 +102,34 @@ export default async function ReceiptPage({ params }: { params: { id: string } }
               <thead>
                 <tr className="border-b text-left text-[11px] uppercase tracking-wide text-slate-500">
                   <th className="py-2">Item</th>
-                  <th className="py-2 text-right">Qty</th>
-                  <th className="py-2 text-right">Harga</th>
+                  <th className="hidden py-2 text-right sm:table-cell">Qty</th>
+                  <th className="hidden py-2 text-right sm:table-cell">Harga</th>
                   <th className="py-2 text-right">Subtotal</th>
                 </tr>
               </thead>
               <tbody>
                 {r.items.map((it, i) => (
                   <tr key={`${it.id}-${i}`} className="border-b border-slate-100">
-                    <td className="py-2.5 pr-3">{it.name}</td>
-                    <td className="py-2.5 text-right">{it.quantity}</td>
-                    <td className="py-2.5 text-right">{formatRupiah(it.price)}</td>
-                    <td className="py-2.5 text-right font-medium">{formatRupiah(it.price * it.quantity)}</td>
+                    <td className="py-2.5 pr-3">
+                      {it.name}
+                      <span className="block text-xs text-slate-500 sm:hidden">{it.quantity} × {formatRupiah(it.price)}</span>
+                    </td>
+                    <td className="hidden py-2.5 text-right sm:table-cell">{it.quantity}</td>
+                    <td className="hidden py-2.5 text-right sm:table-cell">{formatRupiah(it.price)}</td>
+                    <td className="whitespace-nowrap py-2.5 text-right font-medium">{formatRupiah(it.price * it.quantity)}</td>
                   </tr>
                 ))}
               </tbody>
               <tfoot>
                 <tr>
-                  <td colSpan={3} className="pt-4 text-right text-xs font-bold uppercase tracking-wide text-slate-500">Total Dibayar</td>
-                  <td className="pt-4 text-right text-lg font-extrabold text-[#8B0000]">{formatRupiah(r.amountIdr)}</td>
+                  <td colSpan={3} className="hidden pt-4 text-right text-xs font-bold uppercase tracking-wide text-slate-500 sm:table-cell">Total Dibayar</td>
+                  <td className="pt-4 text-left text-xs font-bold uppercase tracking-wide text-slate-500 sm:hidden">Total Dibayar</td>
+                  <td className="whitespace-nowrap pt-4 text-right text-lg font-extrabold text-[#8B0000]">{formatRupiah(r.amountIdr)}</td>
                 </tr>
               </tfoot>
             </table>
 
             {r.status === "pending" && <ReceiptPendingSync paymentId={r.paymentId} />}
-
-            {paid && r.receiptNumber && r.status === "paid" && (
-              <div className="flex flex-col items-start gap-2 rounded-xl border border-green-200 bg-green-50 p-4 print:hidden sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-sm text-green-800">Pembayaran lunas. Konfirmasi ke admin untuk penjadwalan / tindak lanjut.</p>
-                <ConfirmWhatsAppButton
-                  receiptNumber={r.receiptNumber}
-                  purposeLabel={r.purposeLabel}
-                  items={r.items.filter((i) => i.id !== "ongkir")}
-                  amountIdr={r.amountIdr}
-                  customerName={r.customer.name}
-                />
-              </div>
-            )}
 
             {r.receiptNumber && (
               <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs text-slate-600">

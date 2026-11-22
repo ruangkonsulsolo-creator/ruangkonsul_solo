@@ -353,7 +353,7 @@ export default async function LandingPage() {
             Semua mentor pernah melewati proses yang sedang kamu jalani, dan terbiasa
             membaca draf yang belum rapi tanpa menghakimi.
           </p>
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
             {MENTOR.map((m) => (
               <KartuMentor key={m.id} m={m} aksi="booking" />
             ))}

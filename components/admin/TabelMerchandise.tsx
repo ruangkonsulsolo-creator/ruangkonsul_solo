@@ -193,7 +193,7 @@ export function TabelMerchandise({ awal }: { awal: Produk[] }) {
         </div>
       ) : (
         <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
-          <table className="w-full text-sm">
+          <table className="w-full min-w-[680px] text-sm">
             <thead className="border-b border-slate-100 bg-slate-50">
               <tr>
                 {["Produk", "Kategori", "Harga", "Stok", "Status", "Aksi"].map((h) => (

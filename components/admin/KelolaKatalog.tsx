@@ -261,7 +261,7 @@ export function KelolaKatalog({ etalase, kategori, produk }: Props) {
               <p className="text-sm text-slate-500">Belum ada produk di etalase ini.</p>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="w-full min-w-[680px] text-sm">
                   <thead>
                     <tr className="border-b border-slate-100 text-left text-xs uppercase tracking-wide text-slate-500">
                       <th className="py-2 pr-3 font-bold">Nama</th>

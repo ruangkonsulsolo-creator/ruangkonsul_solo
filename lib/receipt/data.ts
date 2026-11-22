@@ -14,6 +14,8 @@ export interface ReceiptData {
   status: string;
   purpose: "order" | "produk" | "booking" | "saldo";
   purposeLabel: string;
+  /** Produk fisik yang perlu dikirim (ada alamat pengiriman). */
+  perluKirim: boolean;
   referenceLabel: string | null; // order_number / booking_number / nama paket
   midtransOrderId: string;
   transactionId: string | null;
@@ -73,13 +75,15 @@ export async function getReceipt(paymentId: string): Promise<ReceiptData | null>
   }
 
   let referenceLabel: string | null = null;
+  let perluKirim = false;
   const purpose = p.purpose as ReceiptData["purpose"];
   if (purpose === "order") {
     const { data } = await admin.from("orders").select("order_number").eq("id", p.reference_id).maybeSingle();
     referenceLabel = data?.order_number ?? null;
   } else if (purpose === "produk") {
-    const { data } = await admin.from("pesanan_produk").select("nomor").eq("id", p.reference_id).maybeSingle();
+    const { data } = await admin.from("pesanan_produk").select("nomor, alamat").eq("id", p.reference_id).maybeSingle();
     referenceLabel = data?.nomor ?? null;
+    perluKirim = !!data?.alamat;
   } else if (purpose === "booking") {
     const { data } = await admin.from("bookings").select("booking_number").eq("id", p.reference_id).maybeSingle();
     referenceLabel = data?.booking_number ?? null;
@@ -96,6 +100,7 @@ export async function getReceipt(paymentId: string): Promise<ReceiptData | null>
     status: p.status,
     purpose,
     purposeLabel: PURPOSE_LABEL[purpose],
+    perluKirim,
     referenceLabel,
     midtransOrderId: p.midtrans_order_id,
     transactionId: p.transaction_id,

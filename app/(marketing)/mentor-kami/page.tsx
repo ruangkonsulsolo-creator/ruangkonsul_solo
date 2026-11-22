@@ -47,7 +47,7 @@ export default async function DaftarMentorPage() {
             </p>
           </div>
         ) : (
-          <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <ul className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
             {mentor.map((m) => (
               <li key={m.id}>
                 <KartuMentor m={m} aksi="profil" />

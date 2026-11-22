@@ -50,19 +50,19 @@ export function KartuProduk({ produk }: { produk: Produk }) {
         )}
 
         {p.badge && (
-          <span className="absolute left-3 top-3 rounded-md bg-brand px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wide text-white">
+          <span className="absolute left-2 top-2 rounded-md bg-brand px-2 py-0.5 text-[10px] sm:left-3 sm:top-3 sm:px-2.5 sm:py-1 sm:text-[11px] font-extrabold uppercase tracking-wide text-white">
             {p.badge}
           </span>
         )}
         {diskon !== null && (
-          <span className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-red-500 text-xs font-extrabold text-white shadow">
+          <span className="absolute right-2 top-2 flex h-9 w-9 sm:right-3 sm:top-3 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-red-500 text-xs font-extrabold text-white shadow">
             -{diskon}%
           </span>
         )}
       </div>
 
-      <div className="flex flex-1 flex-col p-4">
-        <h3 className="font-bold leading-snug text-slate-900 transition-colors group-hover:text-brand">
+      <div className="flex flex-1 flex-col p-3 sm:p-4">
+        <h3 className="text-sm font-bold leading-snug text-slate-900 sm:text-base transition-colors group-hover:text-brand">
           {p.nama}
         </h3>
         {p.subjudul && (
@@ -91,14 +91,14 @@ export function KartuProduk({ produk }: { produk: Produk }) {
           </p>
         )}
 
-        <div className="mt-auto pt-4">
+        <div className="mt-auto pt-3 sm:pt-4">
           {p.harga_mulai && (
             <span className="block text-[11px] font-medium text-slate-400">
               mulai dari
             </span>
           )}
           <span className="flex flex-wrap items-baseline gap-2">
-            <span className="text-lg font-extrabold text-brand">
+            <span className="text-base font-extrabold text-brand sm:text-lg">
               {formatRupiah(p.harga)}
             </span>
             {p.harga_coret && (

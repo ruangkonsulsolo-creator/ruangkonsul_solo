@@ -92,7 +92,10 @@ export function IsiEtalase({
                     {g.isi.length}
                   </span>
                 </h2>
-                <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                {/* Produk bergambar tanpa daftar fitur (merchandise) → 2 kolom di HP. */}
+                <ul className={`grid gap-3 sm:gap-5 sm:grid-cols-2 lg:grid-cols-4 ${
+                  g.isi.every((p) => p.gambar.length > 0 && p.fitur.length === 0) ? "grid-cols-2" : "grid-cols-1"
+                }`}>
                   {g.isi.map((p) => (
                     <li key={p.id}>
                       <KartuProduk produk={p} />

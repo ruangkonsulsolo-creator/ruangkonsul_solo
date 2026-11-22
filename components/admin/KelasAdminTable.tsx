@@ -207,7 +207,7 @@ export function KelasAdminTable({ kelas: initial }: { kelas: Kelas[] }) {
 
       <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-card">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm" aria-label="Daftar kelas bimbingan">
+          <table className="w-full min-w-[680px] text-sm" aria-label="Daftar kelas bimbingan">
             <thead>
               <tr className="border-b bg-slate-50 text-left text-xs font-bold uppercase tracking-wide text-muted-foreground">
                 <th className="px-4 py-3">Kelas</th><th className="px-4 py-3">Tab</th><th className="px-4 py-3">Harga</th><th className="px-4 py-3">Rating</th><th className="px-4 py-3">Status</th><th className="px-4 py-3">Urutan</th><th className="px-4 py-3">Aksi</th>

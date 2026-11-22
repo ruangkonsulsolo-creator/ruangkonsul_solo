@@ -506,8 +506,8 @@ export function KotakPeriksa({
   return (
     <div ref={akar} className="scroll-mt-24">
       {/* ── Tab layanan ── */}
-      <div className="-mx-4 overflow-x-auto px-4 pb-1">
-        <div role="tablist" aria-label="Layanan cek naskah" className="inline-flex gap-1 rounded-2xl border border-slate-200 bg-white p-1.5 shadow-sm">
+      <div className="pb-1">
+        <div role="tablist" aria-label="Layanan cek naskah" className="grid grid-cols-2 gap-1 rounded-2xl border border-slate-200 bg-white p-1.5 shadow-sm sm:inline-flex">
           {TABS.map((t) => (
             <button
               key={t.id}
@@ -515,7 +515,7 @@ export function KotakPeriksa({
               role="tab"
               aria-selected={tab === t.id}
               onClick={() => gantiTab(t.id)}
-              className={`whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-bold transition-colors sm:px-5 ${
+              className={`whitespace-nowrap rounded-xl px-3 py-2.5 text-sm font-bold transition-colors sm:px-5 ${
                 tab === t.id ? "bg-brand text-white shadow-brand-sm" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
               }`}
             >
