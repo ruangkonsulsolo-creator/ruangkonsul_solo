@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { bersihkanKodeSitasi } from "@/lib/periksa/bersihkan";
+import { parafraseSiap } from "@/lib/periksa/penyedia-parafrase";
 import { createHash } from "node:crypto";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
@@ -48,6 +49,13 @@ export async function POST(request: NextRequest) {
   // dipercaya: kalau biaya dikirim dari browser, siapa pun bisa memeriksa
   // naskah 20.000 kata dengan tarif satu rupiah lewat curl.
   const jumlahKata = hitungKata(teks);
+
+  if (jenis === "parafrase" && !parafraseSiap()) {
+    return NextResponse.json(
+      { error: "Layanan parafrase sedang tidak tersedia. Tidak ada biaya yang dipotong." },
+      { status: 503 }
+    );
+  }
 
   if (jumlahKata < MIN_KATA) {
     return NextResponse.json(
@@ -199,11 +207,14 @@ export async function POST(request: NextRequest) {
       p_galat: pesan.slice(0, 500),
     });
 
+    // Alasan teknis hanya untuk staf (admin menguji layanan); customer cukup tahu saldonya aman.
+    const { data: staf } = await supabase.rpc("is_staff");
     return NextResponse.json(
       {
         error:
           "Pemeriksaan gagal di sisi penyedia. Saldomu sudah dikembalikan " +
-          "sepenuhnya — tidak ada yang terpotong.",
+          "sepenuhnya — tidak ada yang terpotong." +
+          (staf === true ? ` [Admin: ${pesan.slice(0, 300)}]` : ""),
       },
       { status: 502 }
     );

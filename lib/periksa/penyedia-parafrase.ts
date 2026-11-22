@@ -46,16 +46,80 @@ function bersihkan(s: string): string {
   return (pagar ? pagar[1] : t).trim();
 }
 
-export async function parafraseLlm(teks: string): Promise<HasilParafrase> {
-  const url = process.env.PARAFRASE_API_URL;
-  const kunci = process.env.PARAFRASE_API_KEY;
-  const model = process.env.PARAFRASE_MODEL;
+/** Pengaturan parafrase lengkap? Tanpa ini layanan tidak ditawarkan/ditagih. */
+export function parafraseSiap(): boolean {
+  return !!(process.env.PARAFRASE_API_URL && process.env.PARAFRASE_API_KEY && process.env.PARAFRASE_MODEL);
+}
 
-  if (!url || !kunci || !model) {
-    throw new Error(
-      "PARAFRASE_API_URL, PARAFRASE_API_KEY, atau PARAFRASE_MODEL belum disetel."
-    );
+// Naskah panjang dipecah per kelompok paragraf: satu permintaan raksasa rawan
+// melewati batas waktu fungsi dan batas panjang jawaban model.
+const KATA_PER_BAGIAN = 1200;
+const PARALEL = 3;
+
+function hitung(s: string) {
+  return s.trim() ? s.trim().split(/\s+/).length : 0;
+}
+
+/** Kelompokkan paragraf menjadi bagian ≤ KATA_PER_BAGIAN kata (paragraf tidak dipotong bila muat). */
+export function bagiParagraf(teks: string, maks = KATA_PER_BAGIAN): string[] {
+  const paragraf = teks.split(/\n{2,}|\n/).map((p) => p.trim()).filter(Boolean);
+  const hasil: string[] = [];
+  let kini: string[] = [];
+  let kata = 0;
+  const dorong = () => {
+    if (kini.length) hasil.push(kini.join("\n\n"));
+    kini = [];
+    kata = 0;
+  };
+  for (const p of paragraf) {
+    const k = hitung(p);
+    if (k > maks) {
+      // Paragraf sangat panjang: potong per kalimat.
+      dorong();
+      let buf: string[] = [];
+      let n = 0;
+      for (const kal of p.split(/(?<=[.!?…])\s+/)) {
+        const kk = hitung(kal);
+        if (n + kk > maks && buf.length) {
+          hasil.push(buf.join(" "));
+          buf = [];
+          n = 0;
+        }
+        buf.push(kal);
+        n += kk;
+      }
+      if (buf.length) hasil.push(buf.join(" "));
+      continue;
+    }
+    if (kata + k > maks) dorong();
+    kini.push(p);
+    kata += k;
   }
+  dorong();
+  return hasil.length ? hasil : [teks.trim()];
+}
+
+export async function parafraseLlm(teks: string): Promise<HasilParafrase> {
+  if (!parafraseSiap()) {
+    throw new Error("PARAFRASE_API_URL, PARAFRASE_API_KEY, atau PARAFRASE_MODEL belum disetel.");
+  }
+  const bagian = bagiParagraf(teks);
+  const keluar: string[] = new Array(bagian.length);
+  let berikut = 0;
+  const pekerja = async () => {
+    while (berikut < bagian.length) {
+      const i = berikut++;
+      keluar[i] = await parafraseSatu(bagian[i]);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(PARALEL, bagian.length) }, pekerja));
+  return { teks: keluar.join("\n\n"), catatan: CATATAN_PARAFRASE };
+}
+
+async function parafraseSatu(teks: string): Promise<string> {
+  const url = process.env.PARAFRASE_API_URL!;
+  const kunci = process.env.PARAFRASE_API_KEY!;
+  const model = process.env.PARAFRASE_MODEL!;
 
   const res = await fetch(url, {
     method: "POST",
@@ -73,7 +137,7 @@ export async function parafraseLlm(teks: string): Promise<HasilParafrase> {
       // akademik tidak butuh variasi kreatif.
       temperature: 0.3,
     }),
-    signal: AbortSignal.timeout(120_000),
+    signal: AbortSignal.timeout(100_000),
   });
 
   if (!res.ok) {
@@ -115,5 +179,5 @@ export async function parafraseLlm(teks: string): Promise<HasilParafrase> {
     );
   }
 
-  return { teks: hasil, catatan: CATATAN_PARAFRASE };
+  return hasil;
 }

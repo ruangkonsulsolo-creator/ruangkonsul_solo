@@ -1,3 +1,4 @@
+import { parafraseSiap } from "./penyedia-parafrase";
 import "server-only";
 import { unstable_noStore as noStore } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -36,7 +37,10 @@ export async function ambilTarifPeriksa(): Promise<StatusPeriksa> {
   const manual: TarifManual = { kecil: 15000, besar: 20000, aktif: false, drillbit: 10000, drillbitAktif: false };
   const minimum: Record<JenisPeriksa, number> = { kemiripan: 0, ai: 0, parafrase: 0 };
   try {
-    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return { tarif, aktif, manual, minimum };
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      if (!parafraseSiap()) aktif.parafrase = false;
+      return { tarif, aktif, manual, minimum };
+    }
     const { data } = await createAdminClient()
       .from("services")
       .select("*")
@@ -64,5 +68,7 @@ export async function ambilTarifPeriksa(): Promise<StatusPeriksa> {
   } catch (err) {
     console.warn("[periksa] tarif dari DB gagal dibaca, pakai bawaan:", err);
   }
+  // Parafrase butuh kunci model bahasa; tanpa itu jangan ditawarkan (apalagi ditagih).
+  if (!parafraseSiap()) aktif.parafrase = false;
   return { tarif, aktif, manual, minimum };
 }

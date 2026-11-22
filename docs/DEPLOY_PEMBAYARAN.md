@@ -23,6 +23,7 @@ Migration 018–032 sudah ada di branch katalog Anda. Yang baru hanya:
 - `supabase/migrations/047_pesanan_multi_berkas.sql` (Cek Plagiasi/DrillBit hingga 5 file dalam satu QRIS)
 - `supabase/migrations/048_jasa_berkas.sql` (jasa dengan file hasil: unggah naskah, status diproses, admin unggah hasil; bucket `hasil-jasa`)
 - `supabase/migrations/049_sesi_tamu.sql` (cek naskah tanpa login: penanda profil tamu). **Wajib juga**: Supabase → Authentication → Sign In / Providers → aktifkan *Allow anonymous sign-ins*. Opsional: env `LINK_SECRET` (string acak) untuk token link WhatsApp laporan; bila kosong dipakai `SUPABASE_SERVICE_ROLE_KEY`.
+- Parafrase butuh env `PARAFRASE_API_URL`, `PARAFRASE_API_KEY`, `PARAFRASE_MODEL` (lihat .env.example). Tanpa ketiganya tab Jasa Parafrase disembunyikan dan tidak bisa dibayar.
 - `supabase/migrations/050_kunci_tamu_rls.sql` (wajib bila anonymous sign-ins aktif: tamu tidak boleh membuat booking, chat, ulasan, pesanan langsung lewat database)
 
 Cara menjalankan (pilih satu):
