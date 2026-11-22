@@ -1,64 +1,128 @@
-import Link from "next/link";
-import { BRAND, waLink } from "@/lib/brand";
 import type { Metadata } from "next";
-import { NavbarUtama } from "@/components/ui/NavbarUtama";
+import { BRAND } from "@/lib/brand";
+import { HalamanLegal, type BagianLegal } from "@/components/legal/HalamanLegal";
 
 export const metadata: Metadata = {
   title: `Kebijakan Privasi | ${BRAND.name}`,
-  description: `Kebijakan privasi ${BRAND.name} — bagaimana kami mengumpulkan, menggunakan, dan melindungi data pribadimu.`,
+  description: `Bagaimana ${BRAND.name} mengumpulkan, memakai, dan melindungi data pribadimu.`,
 };
 
-const sections = [
-  { title: "1. Data yang Kami Kumpulkan", content: `Kami mengumpulkan informasi yang kamu berikan saat mendaftar (nama, email, nomor WhatsApp), data transaksi (pesanan, pembayaran), dokumen yang kamu upload untuk diproses, serta data penggunaan platform secara anonim (halaman yang dikunjungi, durasi sesi).` },
-  { title: "2. Cara Kami Menggunakan Data", content: `Data pribadimu digunakan untuk: memproses pesanan dan pembayaran, mengirim notifikasi status pesanan, meningkatkan kualitas layanan, berkomunikasi tentang promo dan update layanan (hanya jika kamu mengizinkan), dan memenuhi kewajiban hukum.` },
-  { title: "3. Penyimpanan Dokumen", content: `Dokumen yang kamu upload disimpan di server terenkripsi (Supabase Storage, region Asia Tenggara). Dokumen hanya dapat diakses oleh tim pemrosesan ${BRAND.name} dan dihapus otomatis setelah pesanan selesai dalam 30 hari.` },
-  { title: "4. Berbagi Data dengan Pihak Ketiga", content: `Kami tidak menjual data pribadimu. Data hanya dibagikan kepada: (a) penyedia pembayaran (Midtrans) untuk memproses transaksi, (b) penyedia infrastruktur (Supabase, Vercel) untuk operasional platform, (c) otoritas hukum jika diwajibkan oleh peraturan.` },
-  { title: "5. Cookie dan Teknologi Pelacakan", content: `${BRAND.name} menggunakan cookie sesi untuk autentikasi dan cookie analitik anonim untuk memahami pola penggunaan. Kamu dapat menonaktifkan cookie di pengaturan browser, namun beberapa fitur platform mungkin tidak berfungsi optimal.` },
-  { title: "6. Hak-Hak Pengguna", content: `Kamu berhak untuk: mengakses data pribadi yang kami simpan, memperbarui atau mengoreksi data yang tidak akurat, meminta penghapusan akun dan seluruh data terkait, dan menarik persetujuan pemrosesan data kapan saja.` },
-  { title: "7. Keamanan Data", content: `Kami menerapkan enkripsi TLS untuk semua komunikasi, enkripsi data at-rest untuk penyimpanan dokumen, autentikasi dua faktor untuk akses admin, dan pemantauan akses secara berkala.` },
-  { title: "8. Retensi Data", content: `Data akun disimpan selama akun aktif. Setelah penghapusan akun, data dihapus permanen dalam 30 hari. Data transaksi disimpan selama 5 tahun untuk keperluan pajak dan audit sesuai ketentuan hukum Indonesia.` },
-  { title: "9. Data Anak-Anak", content: `Layanan ${BRAND.name} tidak ditujukan untuk pengguna di bawah 17 tahun. Kami tidak dengan sengaja mengumpulkan data dari anak-anak. Jika kamu yakin kami memiliki data anak di bawah umur, hubungi kami segera.` },
-  { title: "10. Perubahan Kebijakan", content: `Kebijakan Privasi ini dapat diperbarui sewaktu-waktu. Perubahan material akan diberitahukan via email atau notifikasi platform minimal 14 hari sebelum berlaku. Penggunaan layanan setelah perubahan berarti kamu menyetujui kebijakan baru.` },
+const bagian: BagianLegal[] = [
+  {
+    judul: "Data yang kami kumpulkan",
+    isi: (
+      <ul>
+        <li><b>Data akun:</b> nama, email, nomor WhatsApp, foto profil (bila masuk lewat Google), dan kata sandi dalam bentuk terenkripsi.</li>
+        <li><b>Data transaksi:</b> pesanan, pembayaran, receipt, saldo, dan riwayat referral. Kami tidak menyimpan data kartu atau rekeningmu; pembayaran diproses Midtrans.</li>
+        <li><b>Dokumen dan teks</b> yang kamu unggah atau tempel untuk diperiksa.</li>
+        <li><b>Percakapan</b> dengan mentor di fitur chat, dan alamat pengiriman untuk produk fisik.</li>
+      </ul>
+    ),
+  },
+  {
+    judul: "Untuk apa data dipakai",
+    isi: (
+      <p>
+        Untuk memproses pesanan dan pembayaran, mengirim notifikasi status pesanan (di situs, email, dan WhatsApp),
+        menjadwalkan bimbingan, memberikan komisi referral, menangani keluhan, dan menjaga keamanan layanan. Kami tidak
+        mengirim promosi ke WhatsApp-mu tanpa persetujuan.
+      </p>
+    ),
+  },
+  {
+    judul: "Dokumen dan naskah",
+    isi: (
+      <ul>
+        <li>
+          <b>Cek AI dan parafrase:</b> teks naskah dikirim ke penyedia teknologi untuk diperiksa. Yang kami simpan hanya
+          jumlah kata, cuplikan 200 karakter pertama, dan hasil pemeriksaan, supaya laporannya bisa kamu unduh lagi.
+        </li>
+        <li>
+          <b>Laporan Turnitin dan DrillBit:</b> berkas aslimu dan berkas laporan disimpan di penyimpanan privat. Berkas hanya
+          bisa dibuka olehmu dan tim pemeriksa, melalui tautan sementara yang dibuat setelah kepemilikan dicek.
+        </li>
+        <li>Berkas disimpan selama akunmu aktif agar laporan bisa diunduh ulang. Kamu bisa meminta berkas tertentu dihapus kapan saja.</li>
+      </ul>
+    ),
+  },
+  {
+    judul: "Pihak ketiga yang membantu kami",
+    isi: (
+      <>
+        <p>Kami tidak menjual data pribadimu. Data dibagikan seperlunya kepada penyedia berikut:</p>
+        <ul>
+          <li><b>Supabase</b> (basis data dan penyimpanan berkas) dan <b>Vercel</b> (hosting situs).</li>
+          <li><b>Midtrans</b> untuk memproses pembayaran.</li>
+          <li><b>Google</b> untuk masuk dengan akun Google, dan model AI Google untuk layanan parafrase.</li>
+          <li><b>Penyedia deteksi AI</b> (misalnya GPTZero) untuk layanan Cek AI.</li>
+          <li><b>Fonnte</b> untuk mengirim notifikasi WhatsApp (nomor dan isi notifikasi), dan penyedia email untuk receipt.</li>
+        </ul>
+        <p>Kami juga dapat membuka data bila diwajibkan hukum.</p>
+      </>
+    ),
+  },
+  {
+    judul: "Chat dengan mentor",
+    isi: (
+      <p>
+        Pesan di fitur chat tersimpan agar percakapan bisa dilanjutkan. Admin dapat membuka percakapan bila ada laporan
+        masalah, sengketa, atau dugaan penyalahgunaan. Jangan kirim kata sandi atau data sensitif lewat chat.
+      </p>
+    ),
+  },
+  {
+    judul: "Cookie",
+    isi: (
+      <p>
+        Kami memakai cookie yang diperlukan agar kamu tetap masuk ke akun, dan satu cookie referral (30 hari) untuk
+        mencatat kode referral saat kamu mendaftar. Kami tidak memasang cookie iklan atau pelacak pihak ketiga.
+      </p>
+    ),
+  },
+  {
+    judul: "Keamanan",
+    isi: (
+      <p>
+        Semua koneksi memakai enkripsi HTTPS. Akses data dibatasi per peran (pengguna, mentor, admin) di tingkat basis data,
+        berkas disimpan di penyimpanan privat, dan kunci rahasia layanan hanya ada di server. Tidak ada sistem yang
+        sepenuhnya kebal; kalau terjadi insiden yang memengaruhi datamu, kami memberi tahu kamu.
+      </p>
+    ),
+  },
+  {
+    judul: "Hak kamu",
+    isi: (
+      <p>
+        Kamu dapat melihat dan memperbarui data akun di halaman Profil, meminta salinan data, meminta berkas atau akunmu
+        dihapus, serta menolak pesan selain notifikasi pesanan. Kirim permintaan ke {BRAND.email}; kami memprosesnya paling
+        lambat 30 hari.
+      </p>
+    ),
+  },
+  {
+    judul: "Masa simpan",
+    isi: (
+      <p>
+        Data akun dan berkas disimpan selama akun aktif. Setelah akun dihapus, data dan berkas dihapus dalam 30 hari,
+        kecuali catatan transaksi yang wajib disimpan untuk keperluan pajak dan pembukuan sesuai peraturan yang berlaku.
+      </p>
+    ),
+  },
+  {
+    judul: "Pengguna di bawah umur",
+    isi: (
+      <p>
+        Layanan ini ditujukan untuk mahasiswa dan pengguna berusia 17 tahun ke atas. Kalau kamu mengetahui ada data anak di
+        bawah umur di layanan kami, hubungi kami agar segera kami hapus.
+      </p>
+    ),
+  },
+  {
+    judul: "Perubahan kebijakan",
+    isi: <p>Kebijakan ini dapat diperbarui. Perubahan penting diumumkan di situs atau lewat notifikasi sebelum berlaku.</p>,
+  },
 ];
 
 export default function KebijakanPrivasiPage() {
-  return (
-    <div className="min-h-screen bg-white">
-      <NavbarUtama />
-      <div className="mx-auto max-w-2xl px-4 py-14">
-        <div className="mb-8">
-          <h1 className="text-3xl font-extrabold text-slate-900 mb-2">Kebijakan Privasi</h1>
-          <p className="text-sm text-muted-foreground">
-            Terakhir diperbarui: 15 Agustus {BRAND.year} · Berlaku untuk semua pengguna {BRAND.domain}
-          </p>
-        </div>
-        <p className="text-sm text-slate-600 leading-relaxed mb-8">
-          {BRAND.name} berkomitmen melindungi privasi dan keamanan data pribadimu. Kebijakan ini menjelaskan bagaimana kami mengumpulkan, menggunakan, dan melindungi informasimu saat menggunakan layanan {BRAND.name}.
-        </p>
-        <div className="space-y-8">
-          {sections.map((s) => (
-            <div key={s.title}>
-              <h2 className="text-base font-extrabold text-slate-900 mb-2">{s.title}</h2>
-              <p className="text-sm text-slate-600 leading-relaxed">{s.content}</p>
-            </div>
-          ))}
-        </div>
-        <div className="mt-10 rounded-2xl border border-brand-200 bg-brand-50 p-5 text-sm text-[#8B0000]">
-          <p className="font-semibold mb-1">Pertanyaan tentang privasi datamu?</p>
-          <p>
-            Hubungi kami di{" "}
-            <a href={`mailto:${BRAND.email}`} className="font-semibold underline">{BRAND.email}</a>
-            {" "}atau via{" "}
-            <a href={waLink()} target="_blank" rel="noopener noreferrer" className="font-semibold underline">WhatsApp</a>.
-          </p>
-        </div>
-      </div>
-      <footer className="border-t py-6 text-center text-xs text-muted-foreground">
-        © {BRAND.year} {BRAND.name} ·{" "}
-        <Link href="/syarat" className="hover:text-[#8B0000]">Syarat &amp; Ketentuan</Link>
-        {" · "}
-        <Link href="/kebijakan-privasi" className="text-[#8B0000]">Kebijakan Privasi</Link>
-      </footer>
-    </div>
-  );
+  return <HalamanLegal judul="Kebijakan Privasi" diperbarui="22 November 2026" bagian={bagian} aktif="/kebijakan-privasi" />;
 }

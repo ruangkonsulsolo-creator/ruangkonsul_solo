@@ -1,62 +1,142 @@
 import Link from "next/link";
-import { BRAND, waLink } from "@/lib/brand";
 import type { Metadata } from "next";
-import { NavbarUtama } from "@/components/ui/NavbarUtama";
+import { BRAND } from "@/lib/brand";
+import { HalamanLegal, type BagianLegal } from "@/components/legal/HalamanLegal";
 
 export const metadata: Metadata = {
   title: `Syarat & Ketentuan | ${BRAND.name}`,
   description: `Syarat dan ketentuan penggunaan layanan ${BRAND.name}.`,
 };
 
-const sections = [
-  { title: "1. Definisi", content: `Dalam Syarat & Ketentuan ini, "${BRAND.name}", "kami", atau "platform" merujuk pada layanan yang dioperasikan oleh tim ${BRAND.name}. "Pengguna" atau "kamu" merujuk pada individu yang mengakses atau menggunakan layanan ${BRAND.name}.` },
-  { title: "2. Layanan yang Disediakan", content: `${BRAND.name} menyediakan layanan cek plagiasi, AI detector, DrillBit checker, jasa parafrase, dan program bimbingan akademik. Semua layanan bersifat bayar per penggunaan (pay-per-use) atau melalui paket hemat (bundle).` },
-  { title: "3. Pendaftaran Akun", content: `Untuk menggunakan layanan berbayar, kamu perlu membuat akun dengan email aktif. Kamu bertanggung jawab menjaga kerahasiaan kredensial akun dan seluruh aktivitas yang terjadi di bawah akunmu.` },
-  { title: "4. Pembayaran", content: `Pembayaran diproses melalui Midtrans dengan metode transfer bank, QRIS, dan dompet digital. Setelah pembayaran dikonfirmasi, pesanan tidak dapat dibatalkan kecuali file yang dikirim terbukti corrupt atau tidak dapat diproses.` },
-  { title: "5. Kebijakan Refund", content: `${BRAND.name} tidak menyediakan refund setelah proses dimulai. Jika file kamu corrupt atau tidak dapat dibaca oleh sistem kami, pesanan akan dibatalkan dan pembayaran dikembalikan sepenuhnya dalam 3–7 hari kerja.` },
-  { title: "6. Kerahasiaan Dokumen", content: `Semua dokumen yang kamu upload disimpan di server terenkripsi dan hanya dapat diakses oleh tim ${BRAND.name} untuk keperluan pemrosesan. Kami tidak akan membagikan, menjual, atau menggunakan dokumenmu untuk tujuan lain tanpa izin eksplisit.` },
-  { title: "7. Kekayaan Intelektual", content: `Seluruh konten platform ${BRAND.name} — termasuk logo, desain, teks, dan kode — adalah milik ${BRAND.name} dan dilindungi hukum hak cipta Indonesia. Kamu tidak diizinkan menyalin, mendistribusikan, atau mereproduksi konten tanpa izin tertulis.` },
-  { title: "8. Larangan Penggunaan", content: `Pengguna dilarang menggunakan layanan ${BRAND.name} untuk: (a) melanggar hak kekayaan intelektual pihak lain, (b) menyebarkan konten ilegal, (c) melakukan penipuan atau aktivitas yang merugikan pihak lain, (d) mencoba meretas atau merusak sistem ${BRAND.name}.` },
-  { title: "9. Program Referral", content: `Komisi referral diberikan sebesar 10% dari nilai transaksi pertama teman yang mendaftar via link referralmu. Komisi dikreditkan ke saldo akun dan dapat digunakan untuk pembelian layanan. ${BRAND.name} berhak mengubah ketentuan referral sewaktu-waktu.` },
-  { title: "10. Perubahan Layanan", content: `${BRAND.name} berhak mengubah, menangguhkan, atau menghentikan layanan kapan saja dengan pemberitahuan minimal 7 hari melalui email atau notifikasi platform.` },
-  { title: "11. Batasan Tanggung Jawab", content: `${BRAND.name} tidak bertanggung jawab atas kerugian tidak langsung, konsekuensial, atau insidensi yang timbul dari penggunaan layanan. Tanggung jawab maksimal kami dibatasi pada nilai transaksi yang terkait.` },
-  { title: "12. Hukum yang Berlaku", content: `Syarat & Ketentuan ini diatur oleh hukum Republik Indonesia. Setiap sengketa diselesaikan melalui musyawarah atau, jika perlu, melalui Badan Arbitrase Nasional Indonesia (BANI).` },
+const bagian: BagianLegal[] = [
+  {
+    judul: "Definisi",
+    isi: (
+      <p>
+        &ldquo;{BRAND.name}&rdquo;, &ldquo;kami&rdquo;, atau &ldquo;platform&rdquo; adalah layanan yang dioperasikan
+        tim {BRAND.name} melalui situs {BRAND.domain}. &ldquo;Pengguna&rdquo; atau &ldquo;kamu&rdquo; adalah setiap
+        orang yang mengakses atau memakai layanan kami.
+      </p>
+    ),
+  },
+  {
+    judul: "Layanan",
+    isi: (
+      <>
+        <p>{BRAND.name} menyediakan:</p>
+        <ul>
+          <li><b>Bimbingan akademik</b> bersama mentor (sesi terjadwal dan paket pendampingan).</li>
+          <li><b>Cek AI dan parafrase</b> otomatis, diproses penyedia teknologi pihak ketiga; hasil keluar dalam hitungan menit.</li>
+          <li><b>Laporan cek plagiasi (Turnitin) dan DrillBit</b> yang dikerjakan tim kami; laporan dikirim maksimal 1×24 jam setelah pembayaran terkonfirmasi.</li>
+          <li><b>Produk</b> fisik maupun digital di katalog, serta <b>saldo</b> prabayar untuk layanan cek naskah.</li>
+        </ul>
+      </>
+    ),
+  },
+  {
+    judul: "Sifat hasil pemeriksaan",
+    isi: (
+      <p>
+        Skor AI, persentase kemiripan, dan hasil parafrase bersifat <b>indikatif</b> sebagai bahan perbaikan naskah,
+        bukan putusan akhir. Mesin pendeteksi dapat keliru, dan setiap kampus dapat memakai pengaturan berbeda. Keputusan
+        akademik tetap menjadi kewenangan dosen atau institusimu, dan tanggung jawab atas naskah tetap ada pada penulisnya.
+      </p>
+    ),
+  },
+  {
+    judul: "Akun",
+    isi: (
+      <p>
+        Layanan berbayar memerlukan akun dengan email aktif dan nomor WhatsApp yang benar. Kamu bertanggung jawab menjaga
+        kerahasiaan kata sandi dan atas aktivitas di akunmu. Satu orang sebaiknya memakai satu akun.
+      </p>
+    ),
+  },
+  {
+    judul: "Harga dan pembayaran",
+    isi: (
+      <>
+        <p>
+          Harga tercantum di halaman layanan dalam Rupiah dan dapat berubah sewaktu-waktu; harga yang berlaku adalah yang
+          tampil saat kamu membayar. Pembayaran diproses oleh Midtrans melalui QRIS (dan metode lain bila ditampilkan di
+          halaman pembayaran). Pesanan diproses setelah pembayaran terkonfirmasi otomatis.
+        </p>
+        <p>
+          Saldo dipakai untuk layanan cek naskah, tidak dapat dicairkan menjadi uang, dan tidak dapat dipindahkan ke akun lain.
+        </p>
+      </>
+    ),
+  },
+  {
+    judul: "Pembatalan dan refund",
+    isi: (
+      <p>
+        Ketentuan pembatalan dan pengembalian dana untuk setiap layanan diatur di{" "}
+        <Link href="/kebijakan-refund" className="font-semibold text-brand underline">Kebijakan Refund</Link>.
+      </p>
+    ),
+  },
+  {
+    judul: "Dokumen dan kerahasiaan",
+    isi: (
+      <p>
+        Dokumenmu hanya dipakai untuk memproses pesananmu dan tidak kami jual atau terbitkan. Cara kami menyimpan dan
+        melindungi data dijelaskan di{" "}
+        <Link href="/kebijakan-privasi" className="font-semibold text-brand underline">Kebijakan Privasi</Link>.
+        Kamu menjamin berhak atas dokumen yang kamu unggah.
+      </p>
+    ),
+  },
+  {
+    judul: "Program referral",
+    isi: (
+      <p>
+        Pengajak mendapat komisi 10% dari pembayaran lunas pertama teman yang mendaftar lewat link referralnya. Komisi
+        masuk otomatis ke saldo pengajak. Akun ganda, mendaftarkan diri sendiri, atau cara curang lain membuat komisi
+        dibatalkan. {BRAND.name} dapat mengubah ketentuan referral dengan pemberitahuan di situs.
+      </p>
+    ),
+  },
+  {
+    judul: "Larangan",
+    isi: (
+      <p>
+        Pengguna dilarang: (a) mengunggah konten yang melanggar hukum atau hak pihak lain, (b) menyalahgunakan pembayaran,
+        promo, atau referral, (c) mencoba meretas, membebani, atau merusak sistem, dan (d) memakai layanan untuk merugikan
+        pihak lain. Kami dapat menangguhkan akun yang melanggar.
+      </p>
+    ),
+  },
+  {
+    judul: "Kekayaan intelektual",
+    isi: (
+      <p>
+        Logo, desain, teks, dan kode situs ini milik {BRAND.name}. Naskah dan dokumen yang kamu unggah tetap milikmu.
+        Nama merek pihak ketiga (misalnya Turnitin, DrillBit, GPTZero) adalah milik pemiliknya masing-masing.
+      </p>
+    ),
+  },
+  {
+    judul: "Batas tanggung jawab",
+    isi: (
+      <p>
+        Kami berupaya layanan berjalan baik, tetapi tidak menjamin bebas gangguan. Tanggung jawab kami atas suatu pesanan
+        paling besar sebesar nilai pesanan tersebut. Kami tidak bertanggung jawab atas kerugian tidak langsung, termasuk
+        keputusan akademik yang diambil pihak lain.
+      </p>
+    ),
+  },
+  {
+    judul: "Perubahan dan hukum yang berlaku",
+    isi: (
+      <p>
+        Syarat ini dapat diperbarui; perubahan penting diumumkan di situs atau lewat notifikasi. Syarat ini tunduk pada
+        hukum Republik Indonesia, dan sengketa diselesaikan lebih dulu secara musyawarah.
+      </p>
+    ),
+  },
 ];
 
 export default function SyaratPage() {
-  return (
-    <div className="min-h-screen bg-white">
-      <NavbarUtama />
-      <div className="mx-auto max-w-2xl px-4 py-14">
-        <div className="mb-8">
-          <h1 className="text-3xl font-extrabold text-slate-900 mb-2">Syarat &amp; Ketentuan</h1>
-          <p className="text-sm text-muted-foreground">
-            Terakhir diperbarui: 15 Agustus {BRAND.year} · Berlaku untuk semua pengguna {BRAND.domain}
-          </p>
-        </div>
-        <div className="space-y-8">
-          {sections.map((s) => (
-            <div key={s.title}>
-              <h2 className="text-base font-extrabold text-slate-900 mb-2">{s.title}</h2>
-              <p className="text-sm text-slate-600 leading-relaxed">{s.content}</p>
-            </div>
-          ))}
-        </div>
-        <div className="mt-10 rounded-2xl border border-brand-200 bg-brand-50 p-5 text-sm text-[#8B0000]">
-          <p className="font-semibold mb-1">Ada pertanyaan tentang Syarat &amp; Ketentuan ini?</p>
-          <p>
-            Hubungi kami di{" "}
-            <a href={`mailto:${BRAND.email}`} className="font-semibold underline">{BRAND.email}</a>{" "}atau via{" "}
-            <a href={waLink()} target="_blank" rel="noopener noreferrer" className="font-semibold underline">WhatsApp</a>.
-          </p>
-        </div>
-      </div>
-      <footer className="border-t py-6 text-center text-xs text-muted-foreground">
-        © {BRAND.year} {BRAND.name} ·{" "}
-        <Link href="/syarat" className="text-[#8B0000]">Syarat &amp; Ketentuan</Link>
-        {" · "}
-        <Link href="/kebijakan-privasi" className="hover:text-[#8B0000]">Kebijakan Privasi</Link>
-      </footer>
-    </div>
-  );
+  return <HalamanLegal judul="Syarat & Ketentuan" diperbarui="22 November 2026" bagian={bagian} aktif="/syarat" />;
 }

@@ -776,7 +776,9 @@ export default async function LandingPage() {
               <ul className="space-y-2.5 mb-5">
                 {[
                   { label: "Syarat & Ketentuan",  href: "/syarat" },
+                  { label: "Kebijakan Refund",     href: "/kebijakan-refund" },
                   { label: "Kebijakan Privasi",    href: "/kebijakan-privasi" },
+                  { label: "Kontak",               href: "/kontak" },
                   { label: "Daftar Akun",          href: "/daftar" },
                   { label: "Masuk / Login",        href: "/login" },
                 ].map((l) => (
@@ -804,9 +806,11 @@ export default async function LandingPage() {
             <p className="text-xs text-slate-400">
               © {BRAND.year} <span className="font-semibold text-brand">{BRAND.name}</span>. Semua hak dilindungi.
             </p>
-            <div className="flex items-center gap-5 text-xs text-slate-400">
+            <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-xs text-slate-400">
               <Link href="/syarat" className="hover:text-brand transition-colors">Syarat &amp; Ketentuan</Link>
+              <Link href="/kebijakan-refund" className="hover:text-brand transition-colors">Kebijakan Refund</Link>
               <Link href="/kebijakan-privasi" className="hover:text-brand transition-colors">Kebijakan Privasi</Link>
+              <Link href="/kontak" className="hover:text-brand transition-colors">Kontak</Link>
             </div>
           </div>
         </div>
